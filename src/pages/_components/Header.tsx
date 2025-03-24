@@ -27,11 +27,10 @@ const Logo = (): React.ReactElement => {
   const handleLogoClick = () => {
     if (isAuthenticated) {
       navigate('/dashboard');
-    }
-    else {
+    } else {
       navigate('/login');
     }
-  }
+  };
   return (
     <div
       className={clsx(
@@ -44,7 +43,7 @@ const Logo = (): React.ReactElement => {
         src={`/img/common/logo/oqtopus.png`}
         width={320}
         height={32}
-        alt={"OQTOPUS"}
+        alt={'OQTOPUS'}
         onClick={handleLogoClick}
       />
     </div>
@@ -52,31 +51,26 @@ const Logo = (): React.ReactElement => {
 };
 
 const GithubLink = (): React.ReactElement => {
-  const handleGithubLink = () => {
-
-  }
-
+  const handleGithubLink = () => {};
 
   return (
     <a
       className={clsx(['cursor-pointer', 'flex', 'items-center', 'gap-2'])}
       href="https://github.com/oqtopus-team/oqtopus-frontend.git"
       target="_blank"
-      rel='noopener'
+      rel="noopener"
     >
-      <img 
-        src={"/img/common/github-mark.svg"}
+      <img
+        src={'/img/common/github-mark.svg'}
         width={32}
         height={32}
-        alt={"Github"}
+        alt={'Github'}
         onClick={handleGithubLink}
       />
-      <p className={clsx(['text-sm', "font-sans"])}>
-        v1.0.0
-      </p>
+      <p className={clsx(['text-sm', 'font-sans'])}>v1.0.0</p>
     </a>
-  )
-}
+  );
+};
 
 const LanguageSelector = (): React.ReactElement => {
   const { t } = useTranslation();
@@ -88,8 +82,7 @@ const LanguageSelector = (): React.ReactElement => {
           i18next.changeLanguage(e.target.value);
         }
       }}
-      defaultValue={i18next.language}
-      value={''}
+      value={i18next.language}
     >
       {languages.map((lang: string) => {
         return (

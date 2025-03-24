@@ -22,7 +22,7 @@ export default {
     },
     operation: {
       delete: 'Delete',
-      cancel: 'Calcel',
+      cancel: 'Cancel',
     },
     modal: {
       title: 'Confirm',
@@ -94,6 +94,7 @@ export default {
     simulator_placeholder: 'Example) {}',
     mitigation_placeholder: 'Example) {}',
     shots_placeholder: 'Example) ○○○',
+    upload_file_button: 'Load file',
     button: 'Send',
     error_message: {
       name: 'Please enter job name',

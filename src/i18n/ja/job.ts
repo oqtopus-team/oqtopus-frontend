@@ -94,6 +94,7 @@ export default {
     simulator_placeholder: '例）{}',
     mitigation_placeholder: '例）{}',
     shots_placeholder: '例）4',
+    upload_file_button: 'Load file',
     button: '送信する',
     error_message: {
       name: 'Job名を入力してください',

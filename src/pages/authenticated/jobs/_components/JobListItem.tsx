@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Job } from '@/domain/types/Job';
+import { Job, JobFileData, JobFileDataInfo, JobTypeType } from '@/domain/types/Job';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 import { JobStatus } from './JobStatus';
@@ -7,6 +7,7 @@ import { ConfirmModal } from '@/pages/_components/ConfirmModal';
 import { Button } from '@/pages/_components/Button';
 import { NavLink } from 'react-router';
 import { useJobAPI } from '@/backend/hook';
+import { BsDownload } from 'react-icons/bs';
 
 interface JobProps {
   job: Job;
@@ -86,9 +87,44 @@ const OperationButtons = ({ job, onClickCancel, onClickDelete }: ButtonProps) =>
 
   const [cancelModalShow, setCancelModalShow] = useState(false);
   const [deleteModalShow, setDeleteModalShow] = useState(false);
+  const [downloadInProgress, setDownloadInProgress] = useState(false);
 
   function canCancel(status: string): boolean {
     return status === 'created' || status === 'transpiling' || status === 'queued';
+  }
+
+  function downloadJob() {
+    setDownloadInProgress(true);
+
+    const jobData: JobFileData = {
+      name: job.name,
+      description: job.description,
+      shots: job.shots,
+      deviceId: job.deviceId ?? '',
+      jobType: job.jobType as JobTypeType,
+      jobInfo: job.jobInfo as JobFileDataInfo,
+      transpilerInfo: job.transpilerInfo,
+      simulatorInfo: job.simulatorInfo,
+      mitigationInfo: job.mitigationInfo,
+    };
+
+    try {
+      const valuesBlob = new Blob([JSON.stringify(jobData, null, 2)], { type: 'application/json' });
+      const blobURL = URL.createObjectURL(valuesBlob);
+
+      const a = document.createElement('a');
+      a.href = blobURL;
+      a.download = 'job.json';
+      document.body.appendChild(a);
+      a.click();
+
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobURL);
+    } catch (error: any) {
+      console.error('failed to download file due to following error:', error);
+    } finally {
+      setDownloadInProgress(false);
+    }
   }
 
   return (
@@ -117,6 +153,9 @@ const OperationButtons = ({ job, onClickCancel, onClickDelete }: ButtonProps) =>
           />
         </>
       )}
+      <Button color="secondary" onClick={downloadJob} disabled={downloadInProgress}>
+        <BsDownload />
+      </Button>
     </div>
   );
 };

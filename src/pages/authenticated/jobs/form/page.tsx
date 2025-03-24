@@ -17,7 +17,9 @@ import {
   JOB_FORM_TRANSPILER_INFO_DEFAULTS,
   JOB_TYPE_DEFAULT,
   JOB_TYPES,
+  JobFileData,
   JobTypeType,
+  OperatorItem,
   SHOTS_DEFAULT,
   TRANSPILER_TYPE_DEFAULT,
   TRANSPILER_TYPES,
@@ -25,6 +27,7 @@ import {
 } from '@/domain/types/Job';
 import { JobsSubmitJobInfo } from '@/api/generated';
 import { Toggle } from '@/pages/_components/Toggle';
+import JobFileUpload from './_components/JobFileUpload';
 
 export default function Page() {
   const { t } = useTranslation();
@@ -99,6 +102,34 @@ export default function Page() {
       setMitigationInfo(JOB_FORM_MITIGATION_INFO_DEFAULTS.None);
     }
   }, [mitigationEnabled]);
+
+  const [jobFileData, setJobFileData] = useState<JobFileData | undefined>(undefined);
+  useEffect(() => {
+    if (!jobFileData) return;
+
+    setName(jobFileData.name);
+    setDescription(jobFileData.description ?? '');
+    setShots(jobFileData.shots);
+    setJobType(jobFileData.jobType);
+    setJobInfo(jobFileData.jobInfo);
+    setProgram(jobFileData.jobInfo.program);
+    setOperator(jobFileData.jobInfo.operator ?? [{ pauli: '', coeff: ['0', '0'] }]);
+    setTranspilerInfo(JSON.stringify(jobFileData.transpilerInfo ?? ''));
+    setSimulatorInfo(JSON.stringify(jobFileData.simulatorInfo ?? ''));
+
+    if (devices.some((d) => d.id === jobFileData.deviceId)) {
+      setDeviceId(jobFileData.deviceId);
+    }
+
+    if (jobFileData.mitigationInfo) {
+      setMitigationInfo(JSON.stringify(jobFileData.mitigationInfo));
+      setMitigationEnabled(true);
+    } else {
+      setMitigationEnabled(false);
+    }
+
+    setJobFileData(undefined);
+  }, [jobFileData]);
 
   const [error, setError] = useState<{
     name?: string;
@@ -320,7 +351,6 @@ export default function Page() {
               </Select>
               <Select
                 label="type"
-                defaultValue={JOB_TYPE_DEFAULT}
                 value={jobType}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                   if (!JOB_TYPES.includes(e.target.value as JobTypeType)) {
@@ -370,8 +400,7 @@ export default function Page() {
                 <p className={clsx('font-bold', 'text-primary')}>transpiler</p>
                 <Select
                   labelLeft="type"
-                  defaultValue={TRANSPILER_TYPE_DEFAULT}
-                  value={jobType}
+                  value={transpilerType}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                     if (!TRANSPILER_TYPES.includes(e.target.value as TranspilerTypeType)) {
                       return;
@@ -446,9 +475,12 @@ export default function Page() {
         </div>
         <Spacer className="h-4" />
         <div className={clsx('flex', 'flex-wrap', 'gap-2', 'justify-between', 'items-end')}>
-          <Button color="secondary" onClick={handleSubmit} loading={processing}>
-            {t('job.form.button')}
-          </Button>
+          <div className={clsx('flex', 'flex-wrap', 'gap-2', 'justify-between')}>
+            <JobFileUpload setJobFileData={setJobFileData} devices={devices} />
+            <Button color="secondary" onClick={handleSubmit} loading={processing}>
+              {t('job.form.button')}
+            </Button>
+          </div>
           <CheckReferenceCTA />
         </div>
       </Card>
@@ -479,7 +511,6 @@ const CheckReferenceCTA = () => {
   );
 };
 
-type OperatorItem = { pauli: string; coeff: [string, string] };
 const OperatorForm = ({
   current,
   set,

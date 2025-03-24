@@ -32,10 +32,11 @@ export const JOB_FORM_TRANSPILER_INFO_DEFAULTS: { [key in TranspilerTypeType]: s
 } as const;
 
 export const JOB_FORM_MITIGATION_INFO_DEFAULTS: { [key in 'PseudoInv' | 'None']: string } = {
-  PseudoInv: JSON.stringify({
-    readout: 'pseudo_inverse',
-  },
-  null,
+  PseudoInv: JSON.stringify(
+    {
+      readout: 'pseudo_inverse',
+    },
+    null
   ),
   None: JSON.stringify({}, null, 2),
 } as const;
@@ -45,9 +46,9 @@ export interface Job {
   name: string;
   description?: string;
   jobInfo: JobsJobInfo;
-  transpilerInfo?:{ [key: string]: any; };
-  simulatorInfo?: { [key: string]: any; };
-  mitigationInfo?: { [key: string]: any; };
+  transpilerInfo?: { [key: string]: any };
+  simulatorInfo?: { [key: string]: any };
+  mitigationInfo?: { [key: string]: any };
   jobType: string;
   shots: number;
   status: JobStatusType;
@@ -76,3 +77,22 @@ export interface JobOperationResult {
   success: boolean;
   message?: string;
 }
+
+export interface JobFileData {
+  name: string;
+  description?: string;
+  shots: number;
+  deviceId: string;
+  jobType: JobTypeType;
+  jobInfo: JobFileDataInfo;
+  transpilerInfo?: { [key: string]: any };
+  simulatorInfo?: { [key: string]: any };
+  mitigationInfo?: { [key: string]: any };
+}
+
+export interface JobFileDataInfo {
+  program: string[];
+  operator?: OperatorItem[];
+}
+
+export type OperatorItem = { pauli: string; coeff: [string, string] };

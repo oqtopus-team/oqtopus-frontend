@@ -1,9 +1,8 @@
 import clsx from 'clsx';
-import { HTMLAttributes } from 'react';
+import { HTMLProps } from 'react';
 
 export const Select = ({
   children,
-  value,
   label,
   labelLeft,
   className,
@@ -11,12 +10,11 @@ export const Select = ({
   size = 'md',
   ...props
 }: React.PropsWithChildren & {
-  value: string;
   label?: string;
   labelLeft?: string;
   errorMessage?: string;
   size?: 'xs' | 'md';
-} & HTMLAttributes<HTMLSelectElement>) => {
+} & Omit<HTMLProps<HTMLSelectElement>, 'size'>) => {
   return (
     <div className={clsx('flex', 'items-center', 'gap-2')}>
       {labelLeft && <p className="text-xs">{labelLeft}</p>}
