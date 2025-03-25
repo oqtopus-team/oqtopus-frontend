@@ -14,7 +14,7 @@ type JobFileUploadProps = {
 
 const jobFileDataSchema = yup.object<JobFileData>({
   name: yup.string().required('name is required'),
-  description: yup.string(),
+  description: yup.string().nullable().optional(),
   shots: yup.number().integer().required(),
   deviceId: yup
     .string()
@@ -31,12 +31,16 @@ const jobFileDataSchema = yup.object<JobFileData>({
   jobType: yup.string().oneOf(['estimation', 'sampling']).required(),
   jobInfo: yup.object({
     program: yup.array().of(yup.string()).required(),
-    operator: yup.array().of(
-      yup.object({
-        pauli: yup.string().required(),
-        coeff: yup.array().of(yup.string()).length(2),
-      })
-    ),
+    operator: yup
+      .array()
+      .of(
+        yup.object({
+          pauli: yup.string().required(),
+          coeff: yup.array().of(yup.string()).length(2),
+        })
+      )
+      .nullable()
+      .optional(),
   }),
 });
 
