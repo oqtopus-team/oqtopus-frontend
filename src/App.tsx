@@ -16,6 +16,8 @@ import ResetMFAPage from '@/pages/auth/reset-mfa/page';
 import AuthenticatedLayout from '@/pages/authenticated/layout';
 import AuthenticatedDefaultLayout from '@/pages/authenticated/layout_default';
 import DashboardLayout from '@/pages/authenticated/layout_dashboard';
+import JobFormLayout from '@/pages/authenticated/jobs/form/layout';
+import Home from '@/pages/page';
 
 // ログイン後の画面はlazyload
 const JobList = lazy(async () => await import('@/pages/authenticated/jobs/page'));
@@ -69,7 +71,9 @@ export const App: React.FunctionComponent = () => {
                 <Route path="jobs">
                   <Route index element={<JobList />} />
                   <Route path=":id" element={<JobDetail />} />
-                  <Route path="form" element={<JobForm />} />
+                  <Route element={<JobFormLayout />}>
+                    <Route path="form" element={<JobForm />} />
+                  </Route>
                 </Route>
                 <Route path="howto" element={<HowTo />} />
                 <Route path="*" element={<p>Page Not Found</p>} />
