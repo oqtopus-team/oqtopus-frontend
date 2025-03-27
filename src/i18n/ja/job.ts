@@ -96,6 +96,7 @@ export default {
     shots_placeholder: '例）4',
     upload_file_button: 'ファイル読み込み',
     button: '送信する',
+    success_message: 'ジョブを登録しました',
     error_message: {
       name: 'Job名を入力してください',
       shots: '正のショット数を入力してください',
@@ -107,6 +108,11 @@ export default {
         coeff: '演算子の係数を入力してください',
       },
       invalid_json: '正しいJSON形式で入力してください',
+    },
+    log: {
+      title: 'ログ',
+      empty: 'まだログがありません。',
+      copytouse: '入力をコピーして使用',
     },
   },
 };

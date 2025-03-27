@@ -96,6 +96,7 @@ export default {
     shots_placeholder: 'Example) ○○○',
     upload_file_button: 'Load file',
     button: 'Send',
+    success_message: 'Job registered',
     error_message: {
       name: 'Please enter job name',
       shots: 'Please enter the positive number as shots',
@@ -107,6 +108,11 @@ export default {
         coeff: 'Please enter the coefficient of the operator',
       },
       invalid_json: 'Please enter correct JSON',
+    },
+    log: {
+      title: 'Logs',
+      empty: 'No logs yet.',
+      copytouse: 'Copy input and use',
     },
   },
 };

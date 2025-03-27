@@ -10,11 +10,17 @@ export const useJobAPI = () => {
   /**
    * @returns Promise job id
    */
-  const submitJob = async (
-    // TODO: fix invalid oas schema (invalid fields: status, created_at, updated_at)
-    job: JobsSubmitJobRequest
-  ): Promise<string /* job id */> => {
-    return api.job.submitJob(job).then((res) => res.data.job_id);
+  const submitJob = async (job: JobsSubmitJobRequest): Promise<string /* job id */> => {
+    return api.job
+      .submitJob({
+        ...job,
+        // TODO: fix invalid oas schema (generated types)
+        // `transpiler_info`, `simulator_info` and `mitigation_info` expect JSON formatted string
+        transpiler_info: JSON.stringify(job.transpiler_info) as any,
+        simulator_info: JSON.stringify(job.simulator_info) as any,
+        mitigation_info: JSON.stringify(job.mitigation_info) as any,
+      })
+      .then((res) => res.data.job_id);
   };
 
   const getLatestJobs = async (page: number, pageSize: number): Promise<Job[]> => {
