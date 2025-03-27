@@ -152,6 +152,7 @@ export default function Page() {
   });
 
   const [processing, setProcessing] = useState(false);
+  const [postError, setPostError] = useState<string | null>(null);
   const handleSubmit = async () => {
     if (name.trim() === '') {
       setError((error) => ({ ...error, name: t('job.form.error_message.name') }));
@@ -267,7 +268,8 @@ export default function Page() {
     }
 
     setProcessing(true);
-    await submitJob({
+    setPostError(null);
+    submitJob({
       name: name.trim(),
       description,
       device_id: deviceId,
@@ -278,8 +280,13 @@ export default function Page() {
       mitigation_info: JSON.parse(mitigationInfo),
       shots,
     })
-      .catch((e) => {
-        console.error(e);
+      .then((jobId) => {})
+      .catch((e: unknown) => {
+        if (e instanceof Error) {
+          setPostError(e.message);
+        } else {
+          console.error(e);
+        }
       })
       .finally(() => {
         setProcessing(false);
@@ -483,6 +490,7 @@ export default function Page() {
           </div>
           <CheckReferenceCTA />
         </div>
+        {postError && <p className={clsx('text-error', 'mt-2')}>{postError}</p>}
       </Card>
     </div>
   );
