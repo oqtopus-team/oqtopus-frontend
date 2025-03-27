@@ -2,13 +2,11 @@ import { useTranslation } from 'react-i18next';
 import { Card } from '@/pages/_components/Card';
 import clsx from 'clsx';
 import { Divider } from '@/pages/_components/Divider';
-import i18next from 'i18next';
 import { Button } from '@/pages/_components/Button';
 import { Input } from '@/pages/_components/Input';
 import { Select } from '@/pages/_components/Select';
 import { TextArea } from '@/pages/_components/TextArea';
 import { Spacer } from '@/pages/_components/Spacer';
-import { NavLink } from 'react-router';
 import { useDeviceAPI, useJobAPI } from '@/backend/hook';
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { Device } from '@/domain/types/Device';
@@ -28,6 +26,8 @@ import {
 import { JobsSubmitJobInfo } from '@/api/generated';
 import { Toggle } from '@/pages/_components/Toggle';
 import JobFileUpload from './_components/JobFileUpload';
+import { OperatorForm } from './_components/OperatorForm';
+import { CheckReferenceCTA } from './_components/CheckReferenceCTA';
 
 export default function Page() {
   const { t } = useTranslation();
@@ -487,132 +487,3 @@ export default function Page() {
     </div>
   );
 }
-
-const CheckReferenceCTA = () => {
-  return (
-    <p className={clsx('text-xs')}>
-      {i18next.language === 'ja' ? (
-        <>
-          各入力値については
-          <NavLink to="#" className="text-link">
-            こちら
-          </NavLink>
-          の説明を参照してください
-        </>
-      ) : (
-        <>
-          For each input value, please refer to the explanation{' '}
-          <NavLink to="#" className="text-link">
-            here.
-          </NavLink>
-        </>
-      )}
-    </p>
-  );
-};
-
-const OperatorForm = ({
-  current,
-  set,
-  error,
-}: {
-  current: OperatorItem[];
-  set: (_: OperatorItem[]) => void;
-  error: {
-    pauli: { [index: number]: string };
-    coeff: { [index: number]: [string | undefined, string | undefined] };
-  };
-}) => {
-  const { t } = useTranslation();
-
-  return (
-    <div className={clsx('grid', 'gap-2')}>
-      <Divider />
-      <Spacer className="h-2" />
-      <p className={clsx('font-bold', 'text-primary')}>operator</p>
-      <div className={clsx('grid', 'gap-4')}>
-        {current.map((item, index) => (
-          <div key={index} className={clsx('flex', 'gap-1', 'items-center')}>
-            <div className={clsx('grid', 'gap-1', 'w-full')}>
-              <Input
-                label="pauli"
-                placeholder={t('job.form.info_pauli_placeholder')}
-                value={item.pauli}
-                onChange={(e) => {
-                  set(current.map((o, i) => (i === index ? { ...o, pauli: e.target.value } : o)));
-                }}
-                errorMessage={error.pauli[index]}
-              />
-              <ComplexForm
-                label="coeff"
-                curr={item.coeff}
-                set={(coeff) => {
-                  set(current.map((o, i) => (i === index ? { ...o, coeff } : o)));
-                }}
-                error={error.coeff[index] ?? [undefined, undefined]}
-              />
-            </div>
-            <Button
-              color="error"
-              size="small"
-              className={clsx('w-8', 'h-16', 'flex', 'justify-center', 'items-center')}
-              onClick={() => {
-                set(current.filter((_, i) => i !== index));
-              }}
-            >
-              x
-            </Button>
-          </div>
-        ))}
-      </div>
-      <div className={clsx('w-min')}>
-        <Button
-          color="secondary"
-          size="small"
-          onClick={() => set([...current, { pauli: '', coeff: ['', '0'] }])}
-        >
-          +
-        </Button>
-      </div>
-    </div>
-  );
-};
-
-const ComplexForm = ({
-  label,
-  curr,
-  set,
-  error,
-}: {
-  label?: string;
-  curr: [string, string];
-  set: (_: [string, string]) => void;
-  error: [string | undefined, string | undefined];
-}) => {
-  return (
-    <div className={clsx('grid', 'gap-1')}>
-      {label && <p className="text-xs">{label}</p>}
-      <div className={clsx('flex', 'gap-1', 'items-start')}>
-        <Input
-          value={curr[0]}
-          type="number"
-          onChange={(e) => {
-            set([e.target.value, curr[1]]);
-          }}
-          errorMessage={error[0]}
-        />
-        <p className={clsx('whitespace-nowrap', 'h-8', 'flex', 'items-center')}>
-          <span>+ i</span>
-        </p>
-        <Input
-          value={curr[1]}
-          type="number"
-          onChange={(e) => {
-            set([curr[0], e.target.value]);
-          }}
-          errorMessage={error[1]}
-        />
-      </div>
-    </div>
-  );
-};
