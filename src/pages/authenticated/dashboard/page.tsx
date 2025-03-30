@@ -17,7 +17,6 @@ export default function Page() {
   const { t } = useTranslation();
   useDocumentTitle(t('dashboard.title'));
 
-  const auth = useAuth();
   const [loadingJobs, setLoadingJobs] = useState(true);
   const [jobs, setJobs] = useState<Job[]>([]);
   const { getLatestJobs } = useJobAPI();
@@ -28,7 +27,7 @@ export default function Page() {
       .then((jobs) => setJobs(jobs))
       .catch((e) => console.error(e))
       .finally(() => setLoadingJobs(false));
-  }, [auth.idToken]);
+  }, []);
 
   return (
     <>

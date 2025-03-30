@@ -11,7 +11,7 @@ export default function AuthenticatedLayout() {
   const auth = useAuth();
   return (
     <RequestLogin>
-      <UserAPIProvider basePath={ENV.API_ENDPOINT} accessToken={auth.idToken}>
+      <UserAPIProvider basePath={ENV.API_ENDPOINT} accessToken={auth.getCurrentIdToken}>
         <div className={clsx('min-h-screen', 'flex', 'flex-col')}>
           <Header />
           <div className={clsx('flex', 'flex-auto', 'bg-base-100')}>
