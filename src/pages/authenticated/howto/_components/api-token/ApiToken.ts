@@ -45,11 +45,11 @@ export async function createApiToken(api: ApiTokenApi): Promise<CreateApiTokenRe
     };
   })
   .catch((error) => {
-    console.log(error)
     const message = ((): string => {
       if (error.response.status === 403) {
         return API_TOKEN_API_MESSAGE(currentLang).unavailable;
       }
+      console.log(error)
       return API_TOKEN_API_MESSAGE(currentLang).create.fail;
     })();
     return {
@@ -77,11 +77,11 @@ export async function deleteApiToken(api: ApiTokenApi): Promise<DeleteApiTokenRe
     };
   })
   .catch((error) => {
-    console.log(error)
     const message = ((): string => {
       if (error.response.status === 403) {
         return API_TOKEN_API_MESSAGE(currentLang).unavailable;
       }
+      console.log(error)
       return API_TOKEN_API_MESSAGE(currentLang).remove.fail;
     })();
 
@@ -114,7 +114,6 @@ export async function getApiToken(api: ApiTokenApi): Promise<GetApiTokenResponse
     };
   })
   .catch((error) => {
-    console.log(error)
     const message = ((): string => {
       if (error.response.status === 403) {
         return API_TOKEN_API_MESSAGE(currentLang).unavailable;
@@ -122,6 +121,7 @@ export async function getApiToken(api: ApiTokenApi): Promise<GetApiTokenResponse
       if (error.response.status === 404) {
         return API_TOKEN_API_MESSAGE(currentLang).get.success.not_found;
       }
+      console.log(error)
       return API_TOKEN_API_MESSAGE(currentLang).get.fail;
     })();
 
