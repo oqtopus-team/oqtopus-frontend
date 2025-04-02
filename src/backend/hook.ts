@@ -48,21 +48,24 @@ export const useJobAPI = () => {
     return api.job.deleteJob(job.id).then((res) => res.data.message);
   };
 
-  const getSselog = async (job_id: string): Promise<{ file: string | null, file_name: string | null, status: number }> => {
-    return api.job.getSselog(job_id)
+  const getSselog = async (
+    job_id: string
+  ): Promise<{ file: string | null; file_name: string | null; status: number }> => {
+    return api.job
+      .getSselog(job_id)
       .then((res) => {
         return {
-                file: res.data.file ?? null,
-                file_name: res.data.file_name ?? null,
-                status: res.status
-              };
+          file: res.data.file ?? null,
+          file_name: res.data.file_name ?? null,
+          status: res.status,
+        };
       })
       .catch((error) => {
         console.log(error);
         return {
           file: null,
           file_name: null,
-          status: error.response.status
+          status: error.response.status,
         };
       });
   };

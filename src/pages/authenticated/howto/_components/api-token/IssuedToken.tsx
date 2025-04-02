@@ -22,7 +22,7 @@ export const IssuedToken = ({
   const { t } = useTranslation();
   const [showIssueModal, setShowIssueModal] = useState(false);
   const [showExpireModal, setShowExpireModal] = useState(false);
-  const { apiToken }  = useContext(userApiContext);
+  const { apiToken } = useContext(userApiContext);
 
   const openIssueModal = (): void => {
     setShowIssueModal(true);

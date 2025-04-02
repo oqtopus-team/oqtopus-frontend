@@ -71,13 +71,13 @@ const useProvideAuth = (): UseAuth => {
 
   const getCurrentIdToken = async function (): Promise<string> {
     return await Auth.currentSession()
-        .then((data: any) => {
-          return data.idToken.jwtToken
-        })
-        .catch((error) => {
-          console.log(error);
-          return '';
-        });
+      .then((data: any) => {
+        return data.idToken.jwtToken;
+      })
+      .catch((error) => {
+        console.log(error);
+        return '';
+      });
   };
 
   const signIn = async (username: string, password: string): Promise<Result> => {

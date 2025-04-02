@@ -17,7 +17,7 @@ export const useDownloadLog = () => {
         }
       }
 
-      const binaryStr = atob(res.file??'');
+      const binaryStr = atob(res.file ?? '');
       const len = binaryStr.length;
       const bytes = new Uint8Array(len);
       for (let i = 0; i < len; i++) {
@@ -27,7 +27,7 @@ export const useDownloadLog = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = res.file_name??'sselog.zip';
+      a.download = res.file_name ?? 'sselog.zip';
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);

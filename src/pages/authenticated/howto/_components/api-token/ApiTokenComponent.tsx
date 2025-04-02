@@ -24,7 +24,7 @@ const ApiTokenComponent = (): React.ReactElement => {
   const [message, setMessageState] = useState<message>({ kind: 'empty' });
   const [apiTokenSecret, setApiTokenSecret] = useState<string>('');
   const [apiTokenExpiration, setApiTokenExpiration] = useState<string>('');
-  const { apiToken }  = useContext(userApiContext);
+  const { apiToken } = useContext(userApiContext);
 
   useLayoutEffect(() => {
     setCallingApi(true);
@@ -55,7 +55,7 @@ const ApiTokenComponent = (): React.ReactElement => {
         setCallingApi(false);
         console.error(e);
       });
-    }, []);
+  }, []);
 
   if (callingApi) {
     return (
