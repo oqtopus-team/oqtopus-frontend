@@ -20,6 +20,7 @@ export default {
     button: '一覧へ',
     table: {
       id: 'ジョブID',
+      device: 'デバイス名',
       status: 'ステータス',
       date: '登録日時',
       shots: 'ショット数',

@@ -20,6 +20,7 @@ export default {
     button: 'View Jobs',
     table: {
       id: 'Job ID',
+      device: 'Device Name',
       status: 'Status',
       date: 'Created',
       shots: 'Shots',

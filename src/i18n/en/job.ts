@@ -14,6 +14,7 @@ export default {
     },
     table: {
       id: 'Job ID',
+      device: 'Device Name',
       status: 'Status',
       date: 'Created',
       description: 'Description',
