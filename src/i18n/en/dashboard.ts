@@ -9,7 +9,7 @@ export default {
     title: 'Device',
     button: 'View Devices',
     table: {
-      name: 'Name',
+      name: 'Device ID',
       status: 'Status',
       qubits: 'Number of qubits',
       type: 'Type',
@@ -20,7 +20,7 @@ export default {
     button: 'View Jobs',
     table: {
       id: 'Job ID',
-      device: 'Device Name',
+      device: 'Device ID',
       status: 'Status',
       date: 'Created',
       shots: 'Shots',
