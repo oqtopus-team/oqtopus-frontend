@@ -83,7 +83,7 @@ const NotFoundView = () => {
     <>
       <Title />
       <Spacer className="h-3" />
-      <p className={clsx('text-error', 'text-xs')}>{t('job.detail.not_found')}</p>
+      <p className={clsx('text-error', 'text-xs')}>{t('device.detail.not_found')}</p>
     </>
   );
 };
