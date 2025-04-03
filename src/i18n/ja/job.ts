@@ -32,7 +32,7 @@ export default {
     nodata: '表示するジョブがありません。',
   },
   detail: {
-    title: 'ジョブ結果詳細',
+    title: 'ジョブ詳細',
     description:
       '実行日時、終了日時、実行時間、Transpiled Program、Result等の欄はジョブ処理時に反映されます。',
     not_found: '対象のジョブが存在しません。',

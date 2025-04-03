@@ -40,7 +40,6 @@ export const JobDetailBasicInfo: React.FC<JobDetailBasicInfoProps> = (
 
   return (
     <>
-      <h3 className={clsx('text-primary', 'font-bold')}>{t('job.detail.info.head')}</h3>
       <Spacer className="h-2" />
       <table className={clsx('w-full')}>
         <thead>

@@ -37,7 +37,6 @@ export const SuccessViewSSELog: React.FC<Job> = (job: Job) => {
         <Card className={clsx(['col-start-1', 'col-end-3'])}>
           <JobDetailResult
             result={job.jobInfo.result?.sampling}
-            mitigationInfo={JSON.stringify(job.mitigationInfo, null, 2)}
             maxHeight={nonHistogramPanelHeight}
           />
         </Card>

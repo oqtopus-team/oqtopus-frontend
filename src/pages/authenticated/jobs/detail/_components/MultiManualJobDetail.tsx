@@ -107,7 +107,6 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
         <Card className={clsx(['col-start-1', 'col-end-2'])}>
           <JobDetailResult
             result={job.jobInfo.result?.sampling}
-            mitigationInfo={JSON.stringify(job.mitigationInfo, null, 2)}
             maxHeight={nonHistogramPanelHeight}
           />
         </Card>

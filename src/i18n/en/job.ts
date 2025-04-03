@@ -32,7 +32,7 @@ export default {
     nodata: 'Data does not exist.',
   },
   detail: {
-    title: 'Job result details',
+    title: 'Job details',
     description:
       '*Running at, Ended at, Execution time, Transpiled Program, Result and some other fields will be reflected during job processing.',
     not_found: 'Job not found',
