@@ -8,7 +8,7 @@ import { Input } from '@/pages/_components/Input';
 import { Select } from '@/pages/_components/Select';
 import { TextArea } from '@/pages/_components/TextArea';
 import { Spacer } from '@/pages/_components/Spacer';
-import { NavLink } from 'react-router';
+import { NavLink, useNavigate } from 'react-router';
 import { useDeviceAPI, useJobAPI } from '@/backend/hook';
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { Device } from '@/domain/types/Device';
@@ -31,6 +31,7 @@ import JobFileUpload from './_components/JobFileUpload';
 
 export default function Page() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { getDevices } = useDeviceAPI();
   const { submitJob } = useJobAPI();
 
@@ -153,11 +154,6 @@ export default function Page() {
 
   const [processing, setProcessing] = useState(false);
   const handleSubmit = async () => {
-    if (name.trim() === '') {
-      setError((error) => ({ ...error, name: t('job.form.error_message.name') }));
-      return;
-    }
-
     if (shots <= 0) {
       setError((error) => ({ ...error, shots: t('job.form.error_message.shots') }));
       return;
@@ -267,7 +263,7 @@ export default function Page() {
     }
 
     setProcessing(true);
-    await submitJob({
+    const res = await submitJob({
       name: name.trim(),
       description,
       device_id: deviceId,
@@ -284,6 +280,13 @@ export default function Page() {
       .finally(() => {
         setProcessing(false);
       });
+    return res;
+  };
+
+  const handleSubmitAndViewJob = async () => {
+    const jobId = await handleSubmit();
+    if (processing) return;
+    navigate('/jobs/' + jobId);
   };
 
   return (
@@ -479,6 +482,9 @@ export default function Page() {
             <JobFileUpload setJobFileData={setJobFileData} devices={devices} />
             <Button color="secondary" onClick={handleSubmit} loading={processing}>
               {t('job.form.button')}
+            </Button>
+            <Button color="secondary" onClick={handleSubmitAndViewJob} loading={processing}>
+              {t('job.form.submit_and_view_job_button')}
             </Button>
           </div>
           <CheckReferenceCTA />
