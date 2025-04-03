@@ -83,7 +83,7 @@ export default {
     },
   },
   form: {
-    title: 'QASM input form',
+    title: 'Job input form',
     description: 'Submit jobs to be executed on quantum devives.',
     name_placeholder: 'Example) ○○○',
     description_placeholder: 'Example) ○○○',
@@ -95,7 +95,8 @@ export default {
     mitigation_placeholder: 'Example) {}',
     shots_placeholder: 'Example) ○○○',
     upload_file_button: 'Load file',
-    button: 'Send',
+    button: 'Submit',
+    submit_and_view_job_button: 'Submit and view job',
     error_message: {
       name: 'Please enter job name',
       shots: 'Please enter the positive number as shots',

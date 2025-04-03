@@ -83,7 +83,7 @@ export default {
     },
   },
   form: {
-    title: 'QASM入力フォーム',
+    title: 'Job入力フォーム',
     description: '量子デバイスで実行するジョブを登録できます',
     name_placeholder: '例）〇〇〇',
     description_placeholder: '例）〇〇〇',
@@ -96,6 +96,7 @@ export default {
     shots_placeholder: '例）4',
     upload_file_button: 'ファイル読み込み',
     button: '送信する',
+    submit_and_view_job_button: '送信 → ジョブ結果詳細画面へ',
     error_message: {
       name: 'Job名を入力してください',
       shots: '正のショット数を入力してください',
