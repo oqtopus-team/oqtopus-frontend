@@ -18,11 +18,11 @@ export const JobDetailTranspiledProgram: React.FC<JobDetailTranspiledProgramProp
       <h3 className={clsx('text-primary', 'font-bold')}>Transpiled Program</h3>
       <Spacer className="h-2" />
       {jobInfo.transpiledProgram === undefined ||
-      jobInfo.transpiledProgram === null ||
-      jobInfo.transpiledProgram === '' ? (
+        jobInfo.transpiledProgram === null ||
+        jobInfo.transpiledProgram === '' ? (
         <div className={clsx('text-xs')}>{t('job.detail.transpiled_program.nodata')}</div>
       ) : (
-        <div className={clsx(['p-3', 'rounded', 'bg-cmd-bg'], ['text-xs', 'whitespace-pre-wrap'])}>
+        <div className={clsx(['p-3', 'rounded', 'bg-cmd-bg'], ['text-xs'])}>
           <SimpleBar style={{ maxHeight: jobInfo.maxHeight }}>
             {jobInfo.transpiledProgram}
           </SimpleBar>

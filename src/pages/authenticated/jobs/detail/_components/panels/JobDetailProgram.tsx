@@ -20,7 +20,7 @@ export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
       {jobInfo.program === undefined || jobInfo.program === null || jobInfo.program.length === 0 ? (
         <div className={clsx('text-xs')}>{t('job.detail.program.nodata')}</div>
       ) : (
-        <div className={clsx(['p-3', 'rounded', 'bg-cmd-bg'], ['text-xs', 'whitespace-pre-wrap'])}>
+        <div className={clsx(['p-3', 'rounded', 'bg-cmd-bg'], ['text-xs'])}>
           <SimpleBar style={{ maxHeight: jobInfo.maxHeight }}>
             {jobInfo.program.join('\n')}
           </SimpleBar>
