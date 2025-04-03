@@ -8,7 +8,6 @@ import { JobsEstimationResult, JobsSamplingResult } from '@/api/generated';
 
 export interface JobDetailResultProps {
   result?: JobsSamplingResult | JobsEstimationResult;
-  mitigationInfo?: string;
   maxHeight: number;
 }
 
@@ -16,13 +15,12 @@ export const JobDetailResult: React.FC<JobDetailResultProps> = (job: JobDetailRe
   const { t } = useTranslation();
 
   const json = (() => {
-    const retVal: { [key: string]: any } = {};
-    if (job.result != null) {
-      retVal['result'] = { ...job.result };
-    }
-    if (job.mitigationInfo != null && job.mitigationInfo !== '') {
-      retVal['mitigation_info'] = job.mitigationInfo;
-    }
+    const retVal: { [key: string]: any } = (() => {
+      if (job.result != null) {
+        return job.result;
+      }
+      return {};
+    })();
     return retVal;
   })();
 
