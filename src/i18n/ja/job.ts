@@ -36,6 +36,7 @@ export default {
     description:
       '実行日時、終了日時、実行時間、Transpiled Program、Result等の欄はジョブ処理時に反映されます。',
     not_found: '対象のジョブが存在しません。',
+    reload: '再読み込み',
     info: {
       head: '基本情報',
       item: '項目',
