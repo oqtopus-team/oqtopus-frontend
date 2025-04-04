@@ -5,6 +5,7 @@ import { Spacer } from '@/pages/_components/Spacer';
 import SimpleBar from 'simplebar-react';
 import 'simplebar-react/dist/simplebar.min.css';
 import { JobsEstimationResult, JobsSamplingResult } from '@/api/generated';
+import CopyButton from './utils/copyButton'
 
 export interface JobDetailResultProps {
   result?: JobsSamplingResult | JobsEstimationResult;
@@ -25,16 +26,20 @@ export const JobDetailResult: React.FC<JobDetailResultProps> = (job: JobDetailRe
     }
     return retVal;
   })();
+  const text = JSON.stringify(json);
 
   return (
     <>
-      <h3 className={clsx('text-primary', 'font-bold')}>Result</h3>
+      <div className="flex justify-between items-center">
+        <h3 className={clsx('text-primary', 'font-bold')}>Result</h3>
+        <CopyButton text={text} />
+      </div>
       <Spacer className="h-2" />
       {job.result === undefined || job.result === null ? (
         <div className={clsx('text-xs')}>{t('job.detail.result.nodata')}</div>
       ) : (
         <SimpleBar style={{ maxHeight: job.maxHeight }}>
-          <JSONCodeBlock json={JSON.stringify(json)} />
+          <JSONCodeBlock json={text} />
         </SimpleBar>
       )}
     </>

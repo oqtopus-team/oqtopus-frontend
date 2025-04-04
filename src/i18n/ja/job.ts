@@ -81,6 +81,10 @@ export default {
       head: 'SSE ログ',
       button: 'Log ダウンロード',
     },
+    text: {
+      copied: 'コピーしました',
+      copy_button: 'コピー',
+    },
   },
   form: {
     title: 'QASM入力フォーム',
