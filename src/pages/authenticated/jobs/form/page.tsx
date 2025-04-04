@@ -28,6 +28,7 @@ import {
 import { JobsSubmitJobInfo } from '@/api/generated';
 import { Toggle } from '@/pages/_components/Toggle';
 import JobFileUpload from './_components/JobFileUpload';
+import { clearConfigCache } from 'prettier';
 
 export default function Page() {
   const { t } = useTranslation();
@@ -46,7 +47,7 @@ export default function Page() {
 
   const [jobInfo, setJobInfo] = useState<JobsSubmitJobInfo>({ program: [''], operator: [] });
   const [program, setProgram] = useState<string[]>(['']);
-  const [operator, setOperator] = useState<OperatorItem[]>([{ pauli: '', coeff: ['0', '0'] }]);
+  const [operator, setOperator] = useState<OperatorItem[]>([{ pauli: '', coeff: '0' }]);
   useEffect(() => {
     setJobInfo((jobInfo) => ({ ...jobInfo, program }));
     setError((error) => ({ ...error, jobInfo: { ...error.jobInfo, program: {} } }));
@@ -56,7 +57,7 @@ export default function Page() {
       ...jobInfo,
       operator: operator.map((op) => ({
         ...op,
-        coeff: op.coeff.map((c) => (c === '' ? NaN : Number(c))),
+        coeff: op.coeff,
       })),
     }));
     setError((error) => ({
@@ -113,7 +114,7 @@ export default function Page() {
     setJobType(jobFileData.jobType);
     setJobInfo(jobFileData.jobInfo);
     setProgram(jobFileData.jobInfo.program);
-    setOperator(jobFileData.jobInfo.operator ?? [{ pauli: '', coeff: ['0', '0'] }]);
+    setOperator(jobFileData.jobInfo.operator ?? [{ pauli: '', coeff: '0' }]);
     setTranspilerInfo(JSON.stringify(jobFileData.transpilerInfo ?? ''));
     setSimulatorInfo(JSON.stringify(jobFileData.simulatorInfo ?? ''));
 
@@ -140,7 +141,7 @@ export default function Page() {
       program: { [index: number]: string };
       operator: {
         pauli: { [index: number]: string };
-        coeff: { [index: number]: [string | undefined, string | undefined] };
+        coeff: { [index: number]: string };
       };
     };
     transpilerInfo?: string;
@@ -212,14 +213,8 @@ export default function Page() {
             }));
             return false;
           }
-          if (operatorItem.coeff) {
-            const errors = [undefined, undefined] as [string | undefined, string | undefined];
-            operatorItem.coeff.forEach((c: number, j: number) => {
-              if (isNaN(c)) {
-                errors[j] = t('job.form.error_message.operator.coeff');
-              }
-            });
-            if (errors.some((e) => e !== undefined)) {
+          if (operatorItem.coeff !== undefined && operatorItem.coeff !== null) {
+            if (isNaN(operatorItem.coeff)) {
               setError((error) => ({
                 ...error,
                 jobInfo: {
@@ -228,7 +223,7 @@ export default function Page() {
                     ...error.jobInfo.operator,
                     coeff: {
                       ...error.jobInfo.operator.coeff,
-                      [i]: errors,
+                      [i]: t('job.form.error_message.operator.coeff'),
                     },
                   },
                 },
@@ -520,7 +515,7 @@ const OperatorForm = ({
   set: (_: OperatorItem[]) => void;
   error: {
     pauli: { [index: number]: string };
-    coeff: { [index: number]: [string | undefined, string | undefined] };
+    coeff: { [index: number]: string };
   };
 }) => {
   const { t } = useTranslation();
@@ -549,7 +544,7 @@ const OperatorForm = ({
                 set={(coeff) => {
                   set(current.map((o, i) => (i === index ? { ...o, coeff } : o)));
                 }}
-                error={error.coeff[index] ?? [undefined, undefined]}
+                error={error.coeff[index]}
               />
             </div>
             <Button
@@ -569,7 +564,7 @@ const OperatorForm = ({
         <Button
           color="secondary"
           size="small"
-          onClick={() => set([...current, { pauli: '', coeff: ['', '0'] }])}
+          onClick={() => set([...current, { pauli: '', coeff: '0' }])}
         >
           +
         </Button>
@@ -585,32 +580,21 @@ const ComplexForm = ({
   error,
 }: {
   label?: string;
-  curr: [string, string];
-  set: (_: [string, string]) => void;
-  error: [string | undefined, string | undefined];
+  curr: string;
+  set: (_: string) => void;
+  error: string | undefined;
 }) => {
   return (
     <div className={clsx('grid', 'gap-1')}>
       {label && <p className="text-xs">{label}</p>}
       <div className={clsx('flex', 'gap-1', 'items-start')}>
         <Input
-          value={curr[0]}
+          value={curr}
           type="number"
           onChange={(e) => {
-            set([e.target.value, curr[1]]);
+            set(e.target.value);
           }}
-          errorMessage={error[0]}
-        />
-        <p className={clsx('whitespace-nowrap', 'h-8', 'flex', 'items-center')}>
-          <span>+ i</span>
-        </p>
-        <Input
-          value={curr[1]}
-          type="number"
-          onChange={(e) => {
-            set([curr[0], e.target.value]);
-          }}
-          errorMessage={error[1]}
+          errorMessage={error}
         />
       </div>
     </div>
