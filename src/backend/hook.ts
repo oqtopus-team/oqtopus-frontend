@@ -20,7 +20,7 @@ export const useJobAPI = () => {
   const getLatestJobs = async (page: number, pageSize: number): Promise<Job[]> => {
     return api.job
       .listJobs(
-        'job_id,name,description,device_id,job_info,transpiler_info,simulator_info,mitigation_info,job_type,shots,status',
+        'job_id,name,description,device_id,job_info,transpiler_info,simulator_info,mitigation_info,job_type,shots,status,submitted_at',
         undefined,
         undefined,
         undefined,
