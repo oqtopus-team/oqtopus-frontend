@@ -3,7 +3,7 @@ import { Spacer } from '@/pages/_components/Spacer';
 import { JobsTranspileResult } from '@/api/generated';
 import { JSONCodeBlock } from '@/pages/_components/JSONCodeBlock';
 import { useTranslation } from 'react-i18next';
-import CopyButton from './utils/copyButton'
+import CopyButton from './utils/copyButton';
 
 interface Props {
   transpileResult?: JobsTranspileResult;

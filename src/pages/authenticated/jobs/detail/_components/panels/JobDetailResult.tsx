@@ -5,7 +5,7 @@ import { Spacer } from '@/pages/_components/Spacer';
 import SimpleBar from 'simplebar-react';
 import 'simplebar-react/dist/simplebar.min.css';
 import { JobsEstimationResult, JobsSamplingResult } from '@/api/generated';
-import CopyButton from './utils/copyButton'
+import CopyButton from './utils/copyButton';
 
 export interface JobDetailResultProps {
   result?: JobsSamplingResult | JobsEstimationResult;

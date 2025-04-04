@@ -4,7 +4,7 @@ import { JSONCodeBlock } from '@/pages/_components/JSONCodeBlock';
 import { Spacer } from '@/pages/_components/Spacer';
 import SimpleBar from 'simplebar-react';
 import 'simplebar-react/dist/simplebar.min.css';
-import CopyButton from './utils/copyButton'
+import CopyButton from './utils/copyButton';
 
 export interface JobDetailMitigationInfoProps {
   mitigationInfo?: { [key: string]: any };

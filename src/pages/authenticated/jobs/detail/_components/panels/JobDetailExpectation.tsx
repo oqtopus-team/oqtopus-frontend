@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Spacer } from '@/pages/_components/Spacer';
 import 'simplebar-react/dist/simplebar.min.css';
 import { MathJaxContext, MathJax } from 'better-react-mathjax';
-import CopyButton from './utils/copyButton'
+import CopyButton from './utils/copyButton';
 
 export interface ExpectationProps {
   expectationValue?: number;

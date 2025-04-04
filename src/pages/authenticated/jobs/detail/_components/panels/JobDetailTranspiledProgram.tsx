@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Spacer } from '@/pages/_components/Spacer';
 import SimpleBar from 'simplebar-react';
 import 'simplebar-react/dist/simplebar.min.css';
-import CopyButton from './utils/copyButton'
+import CopyButton from './utils/copyButton';
 
 export interface JobDetailTranspiledProgramProps {
   transpiledProgram?: string;
@@ -23,14 +23,12 @@ export const JobDetailTranspiledProgram: React.FC<JobDetailTranspiledProgramProp
       </div>
       <Spacer className="h-2" />
       {jobInfo.transpiledProgram === undefined ||
-        jobInfo.transpiledProgram === null ||
-        jobInfo.transpiledProgram === '' ? (
+      jobInfo.transpiledProgram === null ||
+      jobInfo.transpiledProgram === '' ? (
         <div className={clsx('text-xs')}>{t('job.detail.transpiled_program.nodata')}</div>
       ) : (
         <div className={clsx(['p-3', 'rounded', 'bg-cmd-bg'], ['text-xs', 'whitespace-pre-wrap'])}>
-          <SimpleBar style={{ maxHeight: jobInfo.maxHeight }}>
-            {text}
-          </SimpleBar>
+          <SimpleBar style={{ maxHeight: jobInfo.maxHeight }}>{text}</SimpleBar>
         </div>
       )}
     </>

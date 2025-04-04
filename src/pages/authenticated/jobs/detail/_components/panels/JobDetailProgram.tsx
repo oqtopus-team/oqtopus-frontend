@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Spacer } from '@/pages/_components/Spacer';
 import SimpleBar from 'simplebar-react';
 import 'simplebar-react/dist/simplebar.min.css';
-import CopyButton from './utils/copyButton'
+import CopyButton from './utils/copyButton';
 
 export interface JobDetailProgramProps {
   program: string[];
@@ -26,9 +26,7 @@ export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
         <div className={clsx('text-xs')}>{t('job.detail.program.nodata')}</div>
       ) : (
         <div className={clsx(['p-3', 'rounded', 'bg-cmd-bg'], ['text-xs', 'whitespace-pre-wrap'])}>
-          <SimpleBar style={{ maxHeight: jobInfo.maxHeight }}>
-            {text}
-          </SimpleBar>
+          <SimpleBar style={{ maxHeight: jobInfo.maxHeight }}>{text}</SimpleBar>
         </div>
       )}
     </>
