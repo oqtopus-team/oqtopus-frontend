@@ -5,6 +5,7 @@ import {
 } from '@/domain/types/ApiToken';
 import i18next from 'i18next';
 import { ApiTokenApi } from '@/api/generated';
+import { DateTimeFormatter } from '@/backend/DateTimeFormatter';
 
 export const API_TOKEN_API_MESSAGE = (currentLang: string) => ({
   unavailable: currentLang === 'ja' ? '現在利用できません' : 'This is currently unavailable.',
@@ -41,7 +42,7 @@ export async function createApiToken(api: ApiTokenApi): Promise<CreateApiTokenRe
         },
         token: {
           secret: data.api_token_secret ?? '',
-          expiration: data.api_token_expiration ?? '',
+          expiration: DateTimeFormatter(data.api_token_expiration) ?? '',
         },
       };
     })
@@ -112,7 +113,7 @@ export async function getApiToken(api: ApiTokenApi): Promise<GetApiTokenResponse
         },
         token: {
           secret: data.api_token_secret,
-          expiration: data.api_token_expiration,
+          expiration: DateTimeFormatter(data.api_token_expiration),
         },
       };
     })
