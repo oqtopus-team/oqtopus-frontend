@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createApiToken, deleteApiToken } from './ApiToken';
 import { Setter } from './ApiTokenComponent';
 import clsx from 'clsx';
-import { useAuth } from '@/auth/hook';
 import { Card } from '@/pages/_components/Card';
 import { ConfirmModal } from '@/pages/_components/ConfirmModal';
 import { Button } from '@/pages/_components/Button';
 import { Spacer } from '@/pages/_components/Spacer';
+import { userApiContext } from '@/backend/Provider';
 
 export const IssuedToken = ({
   state,
@@ -22,7 +22,7 @@ export const IssuedToken = ({
   const { t } = useTranslation();
   const [showIssueModal, setShowIssueModal] = useState(false);
   const [showExpireModal, setShowExpireModal] = useState(false);
-  const auth = useAuth();
+  const { apiToken } = useContext(userApiContext);
 
   const openIssueModal = (): void => {
     setShowIssueModal(true);
@@ -47,7 +47,7 @@ export const IssuedToken = ({
     if (state.processing) return; // ダブルクリック防止
     state.set.isProcessing(true);
 
-    const result = await createApiToken(auth.idToken);
+    const result = await createApiToken(apiToken);
     if (result.operationResult.success) {
       // @memo: amplify-jsのrefreshSessionの実装のために、
       // Cognitoでの再発行処理が終わる前にここに到達する可能性がある
@@ -68,7 +68,7 @@ export const IssuedToken = ({
     if (state.processing) return; // ダブルクリック防止
     state.set.isProcessing(true);
 
-    const result = await deleteApiToken(auth.idToken);
+    const result = await deleteApiToken(apiToken);
     if (result.operationResult.success) {
       state.set.message({ kind: 'success', text: result.operationResult.message });
       state.set.apiTokenSecret('');

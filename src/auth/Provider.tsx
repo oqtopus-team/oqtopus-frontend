@@ -11,7 +11,7 @@ export interface UseAuth {
   username: string;
   qrcode: string;
   email: string;
-  idToken: string;
+  getCurrentIdToken: () => Promise<string>;
   signIn: (username: string, password: string) => Promise<Result>;
   signOut: () => void;
   signUp: (username: string, password: string) => Promise<Result>;
@@ -44,7 +44,6 @@ const useProvideAuth = (): UseAuth => {
   const [qrcode, setQRCode] = useState('');
   const [resultUser, setResultUser] = useState({});
   const [email, setEmail] = useState('');
-  const [idToken, setIdToken] = useState('');
 
   useEffect(() => {
     Auth.currentAuthenticatedUser()
@@ -68,15 +67,18 @@ const useProvideAuth = (): UseAuth => {
         // TODO: Loader
         // setLoading(false);
       });
-    Auth.currentSession()
-      // `CognitoUserSessionにidTokenは含まれない`というエラーになってしまうのでanyにキャスト
-      .then((data: any) => {
-        setIdToken(data.idToken.jwtToken);
-      })
-      .catch(() => {
-        setIdToken('');
-      });
   }, []);
+
+  const getCurrentIdToken = async function (): Promise<string> {
+    return await Auth.currentSession()
+      .then((data: any) => {
+        return data.idToken.jwtToken;
+      })
+      .catch((error) => {
+        console.log(error);
+        return '';
+      });
+  };
 
   const signIn = async (username: string, password: string): Promise<Result> => {
     try {
@@ -248,7 +250,6 @@ const useProvideAuth = (): UseAuth => {
   const confirmMfa = async (totpCode: string): Promise<Result> => {
     try {
       const user = await Auth.currentAuthenticatedUser();
-      setIdToken(user.signInUserSession.idToken.jwtToken);
       setUsername(user.username);
       await Auth.verifyTotpToken(user, totpCode);
       await Auth.setPreferredMFA(user, 'TOTP');
@@ -269,7 +270,6 @@ const useProvideAuth = (): UseAuth => {
       const result = await Auth.confirmSignIn(resultUser, totpCode, 'SOFTWARE_TOKEN_MFA');
       setIsAuthenticated(true);
       setInitialized(true);
-      setIdToken(result.signInUserSession.idToken.jwtToken);
       return { success: true, message: '' };
     } catch (error) {
       console.log(error);
@@ -291,8 +291,6 @@ const useProvideAuth = (): UseAuth => {
           if (err !== null) {
             return; // callback内で例外が扱えないので諦めて中断する
           }
-          const { idToken } = session;
-          setIdToken(idToken.jwtToken);
         }
       );
 
@@ -315,7 +313,7 @@ const useProvideAuth = (): UseAuth => {
     username,
     qrcode,
     email,
-    idToken,
+    getCurrentIdToken,
     signIn,
     signOut,
     signUp,

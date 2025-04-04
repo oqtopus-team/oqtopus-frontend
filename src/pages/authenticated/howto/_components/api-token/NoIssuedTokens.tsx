@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createApiToken } from './ApiToken';
 import { Setter } from './ApiTokenComponent';
 import clsx from 'clsx';
-import { useAuth } from '@/auth/hook';
 import { Card } from '@/pages/_components/Card';
 import { Button } from '@/pages/_components/Button';
 import { ConfirmModal } from '@/pages/_components/ConfirmModal';
 import { Spacer } from '@/pages/_components/Spacer';
+import { userApiContext } from '@/backend/Provider';
 
 export const NoIssuedTokens = ({
   state,
@@ -16,7 +16,7 @@ export const NoIssuedTokens = ({
 }): React.ReactElement => {
   const { t } = useTranslation();
   const [showIssueModal, setShowIssueModal] = useState(false);
-  const auth = useAuth();
+  const { apiToken } = useContext(userApiContext);
 
   const openIssueModal = (): void => {
     setShowIssueModal(true);
@@ -30,7 +30,7 @@ export const NoIssuedTokens = ({
     if (state.processing) return; // ダブルクリック防止
     state.set.isProcessing(true);
 
-    const result = await createApiToken(auth.idToken);
+    const result = await createApiToken(apiToken);
     if (result.operationResult.success) {
       // @memo: amplify-jsのrefreshSessionの実装のために、
       // Cognitoでの再発行処理が終わる前にここに到達する可能性がある

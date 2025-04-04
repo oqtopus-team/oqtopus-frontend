@@ -2,7 +2,7 @@ import { Loader } from '@/pages/_components/Loader';
 import { useAuth } from '@/auth/hook';
 import { Job } from '@/domain/types/Job';
 import clsx from 'clsx';
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Spacer } from '@/pages/_components/Spacer';
 import { useParams } from 'react-router';

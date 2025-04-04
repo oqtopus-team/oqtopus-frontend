@@ -3,8 +3,8 @@ import {
   DeleteApiTokenResponse,
   GetApiTokenResponse,
 } from '@/domain/types/ApiToken';
-import ENV from '@/env';
 import i18next from 'i18next';
+import { ApiTokenApi } from '@/api/generated';
 
 export const API_TOKEN_API_MESSAGE = (currentLang: string) => ({
   unavailable: currentLang === 'ja' ? '現在利用できません' : 'This is currently unavailable.',
@@ -25,155 +25,118 @@ export const API_TOKEN_API_MESSAGE = (currentLang: string) => ({
   },
 });
 
-export async function createApiToken(idToken: string): Promise<CreateApiTokenResponse> {
+export async function createApiToken(api: ApiTokenApi): Promise<CreateApiTokenResponse> {
   const currentLang = i18next.language;
-  const res = await fetch(`${ENV.API_ENDPOINT}/api-token`, {
-    method: 'POST',
-    mode: 'cors',
-    headers: {
-      'Content-type': 'application/json; charset=UTF-8',
-      Accept: 'application/json',
-      Authorization: 'Bearer ' + idToken,
-    },
-  });
 
-  if (res.status === 403) {
-    return {
-      operationResult: {
-        success: false,
-        message: API_TOKEN_API_MESSAGE(currentLang).unavailable,
-      },
-      token: {
-        secret: '',
-        expiration: '',
-      },
-    };
-  }
-
-  if (!res.ok) {
-    return {
-      operationResult: {
-        success: false,
-        message: API_TOKEN_API_MESSAGE(currentLang).create.fail,
-      },
-      token: {
-        secret: '',
-        expiration: '',
-      },
-    };
-  }
-
-  const token = await res.json();
-  return {
-    operationResult: {
-      success: true,
-      message: API_TOKEN_API_MESSAGE(currentLang).create.success,
-    },
-    token: {
-      secret: token.api_token_secret,
-      expiration: token.api_token_expiration,
-    },
-  };
+  return api
+    .createApiToken()
+    .then((res) => {
+      // cast to any because the response type is cannot access
+      // the properties api_token_secret and api_token_expiration
+      const data: any = res.data;
+      return {
+        operationResult: {
+          success: true,
+          message: API_TOKEN_API_MESSAGE(currentLang).create.success,
+        },
+        token: {
+          secret: data.api_token_secret ?? '',
+          expiration: data.api_token_expiration ?? '',
+        },
+      };
+    })
+    .catch((error) => {
+      const message = ((): string => {
+        if (error.response.status === 403) {
+          return API_TOKEN_API_MESSAGE(currentLang).unavailable;
+        }
+        console.log(error);
+        return API_TOKEN_API_MESSAGE(currentLang).create.fail;
+      })();
+      return {
+        operationResult: {
+          success: false,
+          message: message,
+        },
+        token: {
+          secret: '',
+          expiration: '',
+        },
+      };
+    });
 }
 
-export async function deleteApiToken(idToken: string): Promise<DeleteApiTokenResponse> {
+export async function deleteApiToken(api: ApiTokenApi): Promise<DeleteApiTokenResponse> {
   const currentLang = i18next.language;
-  const res = await fetch(`${ENV.API_ENDPOINT}/api-token`, {
-    method: 'DELETE',
-    mode: 'cors',
-    headers: {
-      'Content-type': 'application/json; charset=UTF-8',
-      Accept: 'application/json',
-      Authorization: 'Bearer ' + idToken,
-    },
-  });
+  return api
+    .deleteApiToken()
+    .then(() => {
+      return {
+        operationResult: {
+          success: true,
+          message: API_TOKEN_API_MESSAGE(currentLang).remove.success,
+        },
+      };
+    })
+    .catch((error) => {
+      const message = ((): string => {
+        if (error.response.status === 403) {
+          return API_TOKEN_API_MESSAGE(currentLang).unavailable;
+        }
+        console.log(error);
+        return API_TOKEN_API_MESSAGE(currentLang).remove.fail;
+      })();
 
-  if (res.status === 403) {
-    return {
-      operationResult: {
-        success: false,
-        message: API_TOKEN_API_MESSAGE(currentLang).unavailable,
-      },
-    };
-  }
-
-  if (!res.ok) {
-    return {
-      operationResult: {
-        success: false,
-        message: API_TOKEN_API_MESSAGE(currentLang).remove.fail,
-      },
-    };
-  }
-
-  return {
-    operationResult: {
-      success: true,
-      message: API_TOKEN_API_MESSAGE(currentLang).remove.success,
-    },
-  };
+      return {
+        operationResult: {
+          success: false,
+          message: message,
+        },
+      };
+    });
 }
 
-export async function getApiToken(idToken: string): Promise<GetApiTokenResponse> {
+export async function getApiToken(api: ApiTokenApi): Promise<GetApiTokenResponse> {
   const currentLang = i18next.language;
-  const res = await fetch(`${ENV.API_ENDPOINT}/api-token`, {
-    method: 'GET',
-    mode: 'cors',
-    headers: {
-      'Content-type': 'application/json; charset=UTF-8',
-      Accept: 'application/json',
-      Authorization: 'Bearer ' + idToken,
-    },
-  });
 
-  if (res.status === 403) {
-    return {
-      operationResult: {
-        success: false,
-        message: API_TOKEN_API_MESSAGE(currentLang).unavailable,
-      },
-      token: {
-        secret: '',
-        expiration: '',
-      },
-    };
-  }
+  return api
+    .getApiToken()
+    .then((res) => {
+      // cast to any because the response type is cannot access
+      // the properties api_token_secret and api_token_expiration
+      const data: any = res.data;
+      return {
+        operationResult: {
+          success: true,
+          message: API_TOKEN_API_MESSAGE(currentLang).get.success.found,
+        },
+        token: {
+          secret: data.api_token_secret,
+          expiration: data.api_token_expiration,
+        },
+      };
+    })
+    .catch((error) => {
+      const message = ((): string => {
+        if (error.response.status === 403) {
+          return API_TOKEN_API_MESSAGE(currentLang).unavailable;
+        }
+        if (error.response.status === 404) {
+          return API_TOKEN_API_MESSAGE(currentLang).get.success.not_found;
+        }
+        console.log(error);
+        return API_TOKEN_API_MESSAGE(currentLang).get.fail;
+      })();
 
-  if (res.status === 404) {
-    return {
-      operationResult: {
-        success: true,
-        message: API_TOKEN_API_MESSAGE(currentLang).get.success.not_found,
-      },
-      token: {
-        secret: '',
-        expiration: '',
-      },
-    };
-  }
-
-  if (!res.ok) {
-    return {
-      operationResult: {
-        success: false,
-        message: API_TOKEN_API_MESSAGE(currentLang).get.fail,
-      },
-      token: {
-        secret: '',
-        expiration: '',
-      },
-    };
-  }
-
-  const token = await res.json();
-  return {
-    operationResult: {
-      success: true,
-      message: API_TOKEN_API_MESSAGE(currentLang).get.success.found,
-    },
-    token: {
-      secret: token.api_token_secret,
-      expiration: token.api_token_expiration,
-    },
-  };
+      return {
+        operationResult: {
+          success: false,
+          message: message,
+        },
+        token: {
+          secret: '',
+          expiration: '',
+        },
+      };
+    });
 }

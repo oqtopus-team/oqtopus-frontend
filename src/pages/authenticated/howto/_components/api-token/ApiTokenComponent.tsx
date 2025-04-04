@@ -1,15 +1,15 @@
-import { useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NoIssuedTokens } from './NoIssuedTokens';
 import { IssuedToken } from './IssuedToken';
 import clsx from 'clsx';
 import { API_TOKEN_API_MESSAGE, getApiToken } from './ApiToken';
-import { useAuth } from '@/auth/hook';
 import { Card } from '@/pages/_components/Card';
 import { Loader } from '@/pages/_components/Loader';
 import { Alert } from '@/pages/_components/Alert';
 import i18next from 'i18next';
 import { Spacer } from '@/pages/_components/Spacer';
+import { userApiContext } from '@/backend/Provider';
 
 type message =
   | { kind: 'empty' }
@@ -20,19 +20,19 @@ type message =
 
 const ApiTokenComponent = (): React.ReactElement => {
   const [callingApi, setCallingApi] = useState(false);
-  const auth = useAuth();
 
   const [message, setMessageState] = useState<message>({ kind: 'empty' });
   const [apiTokenSecret, setApiTokenSecret] = useState<string>('');
   const [apiTokenExpiration, setApiTokenExpiration] = useState<string>('');
+  const { apiToken } = useContext(userApiContext);
 
   useLayoutEffect(() => {
     setCallingApi(true);
-
-    getApiToken(auth.idToken)
+    getApiToken(apiToken)
       .then((result) => {
         if (!result.operationResult.success) {
           setMessageState({ kind: 'alert', text: result.operationResult.message });
+          setCallingApi(false);
           return;
         }
         if (
@@ -55,7 +55,7 @@ const ApiTokenComponent = (): React.ReactElement => {
         setCallingApi(false);
         console.error(e);
       });
-  }, [auth.idToken]);
+  }, []);
 
   if (callingApi) {
     return (

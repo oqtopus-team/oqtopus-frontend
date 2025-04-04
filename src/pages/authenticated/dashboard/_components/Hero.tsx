@@ -13,9 +13,7 @@ export const Hero = (): React.ReactElement => {
           'text-primary-content'
         )}
       >
-        <h2 className={clsx('text-3xl', 'font-bold', 'leading-normal')}>
-          OQTOPUS Dasboard
-        </h2>
+        <h2 className={clsx('text-3xl', 'font-bold', 'leading-normal')}>OQTOPUS Dasboard</h2>
       </div>
     </div>
   );
