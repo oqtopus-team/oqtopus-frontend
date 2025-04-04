@@ -3,6 +3,7 @@ import { userApiContext } from './Provider';
 import { DevicesDeviceInfo, JobsGetJobsResponse, JobsSubmitJobRequest } from '@/api/generated';
 import { Job } from '@/domain/types/Job';
 import { Device } from '@/domain/types/Device';
+import { DateTimeFormatter } from './DateTimeFormatter';
 
 export const useJobAPI = () => {
   const api = useContext(userApiContext);
@@ -86,11 +87,10 @@ const convertJobResult = (job: JobsGetJobsResponse): Job => ({
   simulatorInfo: job.simulator_info,
   mitigationInfo: job.mitigation_info,
 
-  // TODO: locale (UTC -> browser locale)
-  submittedAt: job.submitted_at ?? '', // TODO: fix invalid oas schema (nullable: should be false)
-  readyAt: job.ready_at ?? '', // TODO: fix invalid oas schema (nullable: should be false)
-  runningAt: job.running_at ?? '', // TODO: fix invalid oas schema (nullable: should be false)
-  endedAt: job.ended_at ?? '', // TODO: fix invalid oas schema (nullable: should be false)
+  submittedAt: DateTimeFormatter(job.submitted_at) ?? '', // TODO: fix invalid oas schema (nullable: should be false)
+  readyAt: DateTimeFormatter(job.ready_at) ?? '', // TODO: fix invalid oas schema (nullable: should be false)
+  runningAt: DateTimeFormatter(job.running_at) ?? '', // TODO: fix invalid oas schema (nullable: should be false)
+  endedAt: DateTimeFormatter(job.ended_at) ?? '', // TODO: fix invalid oas schema (nullable: should be false)
 
   executionTime: job.execution_time ?? 0, // TODO: fix invalid oas schema (nullable: should be false)
 });
@@ -118,12 +118,12 @@ const convertDeviceResult = (device: DevicesDeviceInfo): Device => ({
   id: device.device_id,
   deviceType: device.device_type,
   status: device.status,
-  availableAt: device.available_at,
+  availableAt: DateTimeFormatter(device.available_at),
   nPendingJobs: device.n_pending_jobs,
   nQubits: device.n_qubits ?? 0, // TODO: fix invalid oas schema (nullable: should be false)
   basisGates: device.basis_gates,
   supportedInstructions: device.supported_instructions,
   deviceInfo: device.device_info ?? '', // TODO: fix invalid oas schema (nullable: should be false)
-  calibratedAt: device.calibrated_at ?? '', // TODO: fix invalid oas schema (nullable: should be false)
+  calibratedAt: DateTimeFormatter(device.calibrated_at) ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   description: device.description,
 });
