@@ -28,6 +28,13 @@ import {
 import { JobsSubmitJobInfo } from '@/api/generated';
 import { Toggle } from '@/pages/_components/Toggle';
 import JobFileUpload from './_components/JobFileUpload';
+import Notification from './_components/Notification';
+
+interface NotificationItem {
+  id: number;
+  message: string;
+  type: 'success' | 'error';
+}
 
 export default function Page() {
   const { t } = useTranslation();
@@ -35,6 +42,8 @@ export default function Page() {
   const { submitJob } = useJobAPI();
 
   const [devices, setDevices] = useState<Device[]>([]);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+
   useLayoutEffect(() => {
     getDevices().then((devices) => setDevices(devices));
   }, []);
@@ -153,6 +162,10 @@ export default function Page() {
 
   const [processing, setProcessing] = useState(false);
   const handleSubmit = async () => {
+    if (processing) {
+      console.warn('Already processing');
+      return;
+    }
     if (name.trim() === '') {
       setError((error) => ({ ...error, name: t('job.form.error_message.name') }));
       return;
@@ -267,27 +280,51 @@ export default function Page() {
     }
 
     setProcessing(true);
-    await submitJob({
-      name: name.trim(),
-      description,
-      device_id: deviceId,
-      job_type: jobType,
-      job_info: sanitizedJobInfo,
-      transpiler_info: JSON.parse(transpilerInfo),
-      simulator_info: JSON.parse(simulatorInfo),
-      mitigation_info: JSON.parse(mitigationInfo),
-      shots,
-    })
-      .catch((e) => {
-        console.error(e);
-      })
-      .finally(() => {
-        setProcessing(false);
+    try {
+      await submitJob({
+        name: name.trim(),
+        description,
+        device_id: deviceId,
+        job_type: jobType,
+        job_info: sanitizedJobInfo,
+        transpiler_info: JSON.parse(transpilerInfo),
+        simulator_info: JSON.parse(simulatorInfo),
+        mitigation_info: JSON.parse(mitigationInfo),
+        shots,
       });
+      const newNotification: NotificationItem = {
+        id: Date.now(),
+        message: 'Submission successful!',
+        type: 'success',
+      };
+      setNotifications((prev) => [...prev, newNotification]);
+    } catch (e) {
+      console.error(e);
+      const newNotification: NotificationItem = {
+        id: Date.now(),
+        message: 'Submission failed',
+        type: 'error',
+      };
+      setNotifications((prev) => [...prev, newNotification]);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const removeNotification = (id: number) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
 
   return (
     <div>
+      {notifications.map((notification) => (
+        <Notification
+          key={notification.id}
+          message={notification.message}
+          type={notification.type}
+          onClose={() => removeNotification(notification.id)}
+        />
+      ))}
       <h2 className={clsx('text-primary', 'text-2xl', 'font-bold')}>{t('job.form.title')}</h2>
       <Spacer className="h-3" />
       <p className={clsx('text-sm')}>{t('job.form.description')}</p>
