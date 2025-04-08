@@ -96,7 +96,7 @@ export default {
     shots_placeholder: '例）4',
     upload_file_button: 'ファイル読み込み',
     button: '送信する',
-    submit_and_view_job_button: '送信 → ジョブ結果詳細画面へ',
+    submit_and_view_job_button: '送信して詳細を確認',
     error_message: {
       name: 'Job名を入力してください',
       shots: '正のショット数を入力してください',

@@ -500,7 +500,7 @@ const CheckReferenceCTA = () => {
       {i18next.language === 'ja' ? (
         <>
           各入力値については
-          <NavLink to="#" className="text-link">
+          <NavLink to="/howto#/job/submit_job" className="text-link">
             こちら
           </NavLink>
           の説明を参照してください
@@ -508,7 +508,7 @@ const CheckReferenceCTA = () => {
       ) : (
         <>
           For each input value, please refer to the explanation{' '}
-          <NavLink to="#" className="text-link">
+          <NavLink to="/howto#/job/submit_job" className="text-link">
             here.
           </NavLink>
         </>
