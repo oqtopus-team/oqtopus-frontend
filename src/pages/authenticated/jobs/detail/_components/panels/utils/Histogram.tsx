@@ -1,10 +1,13 @@
 import ReactApexChart from 'react-apexcharts';
 import { Spacer } from '@/pages/_components/Spacer';
+import downloadIcon from './icon/download_icon.png';
+import './histogram.css';
 
 interface HistogramInfoProps {
   categories: string[];
   data: number[];
   height: number;
+  filename: string;
 }
 
 export const Histogram: React.FC<HistogramInfoProps> = (histogramInfo: HistogramInfoProps) => {
@@ -16,6 +19,32 @@ export const Histogram: React.FC<HistogramInfoProps> = (histogramInfo: Histogram
       },
     ],
     options: {
+      chart: {
+        toolbar: {
+          show: true,
+          offsetY: histogramInfo.height * -0.05,
+          tools: {
+            download: `<img src="${downloadIcon}">`,
+          },
+          export: {
+            csv: {
+              filename: histogramInfo.filename,
+            },
+            svg: {
+              filename: histogramInfo.filename,
+            },
+            png: {
+              filename: histogramInfo.filename,
+            },
+          },
+        },
+      },
+      tooltip: {
+        enabled: true,
+        marker: {
+          show: false,
+        },
+      },
       plotOptions: {},
       dataLabels: {
         enabled: false,
@@ -28,21 +57,6 @@ export const Histogram: React.FC<HistogramInfoProps> = (histogramInfo: Histogram
         },
         axisTicks: {
           show: false,
-        },
-        crosshairs: {
-          fill: {
-            type: 'gradient',
-            gradient: {
-              colorFrom: '#D8E3F0',
-              colorTo: '#BED1E6',
-              stops: [0, 100],
-              opacityFrom: 0.4,
-              opacityTo: 0.5,
-            },
-          },
-        },
-        tooltip: {
-          enabled: true,
         },
       },
       yaxis: {

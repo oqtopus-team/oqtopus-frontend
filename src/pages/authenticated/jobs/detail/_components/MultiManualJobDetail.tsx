@@ -83,6 +83,7 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
               2
             )}
             height={histogramHeight}
+            jobId={job.id}
           />
         </Card>
         {/* TranspilerInfo */}

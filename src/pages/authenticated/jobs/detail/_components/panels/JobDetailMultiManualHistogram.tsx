@@ -11,6 +11,7 @@ interface countsProps {
   combinedCircuitCountsJson: string;
   dividedCircuitCountsJson: string;
   height: number;
+  jobId: string;
 }
 
 interface HistogramInfo {
@@ -18,6 +19,7 @@ interface HistogramInfo {
   data: number[];
   height: number;
   countsJson?: string;
+  circuitTitle?: string;
 }
 
 export const JobDetailMultiManualHistogram: React.FC<countsProps> = ({
@@ -26,6 +28,7 @@ export const JobDetailMultiManualHistogram: React.FC<countsProps> = ({
   combinedCircuitCountsJson,
   dividedCircuitCountsJson,
   height,
+  jobId,
 }) => {
   const { t } = useTranslation();
 
@@ -57,6 +60,7 @@ export const JobDetailMultiManualHistogram: React.FC<countsProps> = ({
       return {
         countsJson: countsJsonValue,
         ...reshapeToHistogramInfo(countsForHistogram),
+        circuitTitle: pullDownKey === combinedCircuitKey ? 'combined' : `index_${pullDownKey}`,
       };
     } catch (error) {
       console.error('Failed to get histogram data:', error);
@@ -70,6 +74,7 @@ export const JobDetailMultiManualHistogram: React.FC<countsProps> = ({
   };
 
   const histogramInfo = useMemo(() => getHistogramData(), [pullDownKey]);
+  console.log('histogramInfo', histogramInfo);
 
   return (
     <>
@@ -85,6 +90,7 @@ export const JobDetailMultiManualHistogram: React.FC<countsProps> = ({
           categories={histogramInfo.categories}
           data={histogramInfo.data}
           height={histogramInfo.height}
+          filename={`${jobId}_${histogramInfo.circuitTitle}`}
         />
       )}
     </>
