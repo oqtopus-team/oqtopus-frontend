@@ -88,7 +88,7 @@ export default {
     name_placeholder: '例）〇〇〇',
     description_placeholder: '例）〇〇〇',
     program_placeholder:
-      '例）OPENQASM 3; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;',
+      '例) OPENQASM 3; include "stdgates.inc"; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;',
     info_pauli_placeholder: '例）X 0 X 1',
     transpiler_placeholder: '例）{}',
     simulator_placeholder: '例）{}',
