@@ -28,7 +28,6 @@ import {
 import { JobsSubmitJobInfo } from '@/api/generated';
 import { Toggle } from '@/pages/_components/Toggle';
 import JobFileUpload from './_components/JobFileUpload';
-import { clearConfigCache } from 'prettier';
 
 export default function Page() {
   const { t } = useTranslation();
