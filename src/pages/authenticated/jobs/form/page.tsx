@@ -205,60 +205,61 @@ export default function Page() {
       return;
     }
 
-    let sanitizedJobInfo: JobsSubmitJobInfo;
-    if (jobType === 'estimation') {
-      const invalidOperator = (jobInfo.operator ?? [])
-        .map((operatorItem, i) => {
-          if (operatorItem.pauli.trim() === '') {
-            setError((error) => ({
-              ...error,
-              jobInfo: {
-                ...error.jobInfo,
-                operator: {
-                  ...error.jobInfo.operator,
-                  pauli: {
-                    ...error.jobInfo.operator.pauli,
-                    [i]: t('job.form.error_message.operator.pauli'),
-                  },
-                },
-              },
-            }));
-            return false;
-          }
-          if (operatorItem.coeff) {
-            const errors = [undefined, undefined] as [string | undefined, string | undefined];
-            operatorItem.coeff.forEach((c: number, j: number) => {
-              if (isNaN(c)) {
-                errors[j] = t('job.form.error_message.operator.coeff');
-              }
-            });
-            if (errors.some((e) => e !== undefined)) {
-              setError((error) => ({
-                ...error,
-                jobInfo: {
-                  ...error.jobInfo,
-                  operator: {
-                    ...error.jobInfo.operator,
-                    coeff: {
-                      ...error.jobInfo.operator.coeff,
-                      [i]: errors,
+    const sanitizedJobInfo: JobsSubmitJobInfo =
+      jobType === 'estimation'
+        ? (() => {
+            const invalidOperator = (jobInfo.operator ?? [])
+              .map((operatorItem, i) => {
+                if (operatorItem.pauli.trim() === '') {
+                  setError((error) => ({
+                    ...error,
+                    jobInfo: {
+                      ...error.jobInfo,
+                      operator: {
+                        ...error.jobInfo.operator,
+                        pauli: {
+                          ...error.jobInfo.operator.pauli,
+                          [i]: t('job.form.error_message.operator.pauli'),
+                        },
+                      },
                     },
-                  },
-                },
-              }));
-              return false;
+                  }));
+                  return false;
+                }
+                if (operatorItem.coeff) {
+                  const errors = [undefined, undefined] as [string | undefined, string | undefined];
+                  operatorItem.coeff.forEach((c: number, j: number) => {
+                    if (isNaN(c)) {
+                      errors[j] = t('job.form.error_message.operator.coeff');
+                    }
+                  });
+                  if (errors.some((e) => e !== undefined)) {
+                    setError((error) => ({
+                      ...error,
+                      jobInfo: {
+                        ...error.jobInfo,
+                        operator: {
+                          ...error.jobInfo.operator,
+                          coeff: {
+                            ...error.jobInfo.operator.coeff,
+                            [i]: errors,
+                          },
+                        },
+                      },
+                    }));
+                    return false;
+                  }
+                }
+                return true;
+              })
+              .some((valid) => !valid);
+            if (invalidOperator) {
+              console.error('Invalid operator');
+              throw new Error('Invalid operator');
             }
-          }
-          return true;
-        })
-        .some((valid) => !valid);
-      if (invalidOperator) {
-        return;
-      }
-      sanitizedJobInfo = { ...jobInfo };
-    } else {
-      sanitizedJobInfo = { ...jobInfo, operator: undefined };
-    }
+            return { ...jobInfo };
+          })()
+        : { ...jobInfo, operator: undefined };
 
     try {
       JSON.parse(transpilerInfo);

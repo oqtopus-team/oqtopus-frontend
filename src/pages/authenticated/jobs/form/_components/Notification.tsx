@@ -8,20 +8,29 @@ interface NotificationProps {
   onClose?: () => void;
 }
 
-const Notification: React.FC<NotificationProps> = ({ message, type, duration = 3000, onClose }) => {
+const ANIMATION_DURATION: number = 300;
+const ANIMATION_DELAY: number = 50;
+const NOTIFICATION_DURATION: number = 3000;
+
+const Notification: React.FC<NotificationProps> = ({
+  message,
+  type,
+  duration = NOTIFICATION_DURATION,
+  onClose,
+}) => {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const appearTimer = setTimeout(() => {
       setVisible(true);
-    }, 50);
+    }, ANIMATION_DELAY);
 
     const hideTimer = setTimeout(() => {
       setVisible(false);
       setTimeout(() => {
         onClose?.();
-      }, 300);
-    }, duration + 50);
+      }, ANIMATION_DURATION);
+    }, duration + ANIMATION_DELAY);
 
     return () => {
       clearTimeout(appearTimer);
@@ -36,7 +45,6 @@ const Notification: React.FC<NotificationProps> = ({ message, type, duration = 3
         {
           'translate-x-0': visible,
           'translate-x-full': !visible,
-          'right-5': visible,
           'bg-success': type === 'success',
           'bg-error': type === 'error',
         }
