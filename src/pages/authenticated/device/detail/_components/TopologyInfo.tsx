@@ -59,7 +59,7 @@ const createNodeData = (qubits: any[]): { nodeData: any[]; tempNodeMap: Map<stri
       tempNodeMap.set(qubit.id.toString(), qubit);
       return {
         id: qubit.id.toString(),
-        label: `Q${qubit.physical_id}`,
+        label: `Q${qubit.id}`,
         fx: scalePosition(qubit.position.x),
         fy: scalePosition(qubit.position.y * -1), // multiply by -1 to flip the y-axis
       };
