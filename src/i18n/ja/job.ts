@@ -14,6 +14,7 @@ export default {
     },
     table: {
       id: 'ジョブID',
+      device: 'デバイスID',
       status: 'ステータス',
       date: '登録日時',
       description: '説明',
