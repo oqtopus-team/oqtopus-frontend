@@ -2,13 +2,11 @@ import { useTranslation } from 'react-i18next';
 import { Card } from '@/pages/_components/Card';
 import clsx from 'clsx';
 import { Divider } from '@/pages/_components/Divider';
-import i18next from 'i18next';
 import { Button } from '@/pages/_components/Button';
 import { Input } from '@/pages/_components/Input';
 import { Select } from '@/pages/_components/Select';
 import { TextArea } from '@/pages/_components/TextArea';
 import { Spacer } from '@/pages/_components/Spacer';
-import { NavLink } from 'react-router';
 import { useDeviceAPI, useJobAPI } from '@/backend/hook';
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { Device } from '@/domain/types/Device';
@@ -25,18 +23,92 @@ import {
   TRANSPILER_TYPES,
   TranspilerTypeType,
 } from '@/domain/types/Job';
-import { JobsSubmitJobInfo } from '@/api/generated';
+import { JobsSubmitJobInfo, JobsSubmitJobRequest } from '@/api/generated';
 import { Toggle } from '@/pages/_components/Toggle';
 import JobFileUpload from './_components/JobFileUpload';
+import { OperatorForm } from './_components/OperatorForm';
+import { CheckReferenceCTA } from './_components/CheckReferenceCTA';
+import { useJobFormLog } from './_hooks/useJobFormLog';
+import { NavLink, useLocation } from 'react-router';
+import { BsArrowClockwise } from 'react-icons/bs';
+
+const defaultValues = (query: URLSearchParams, availableDeviceIds: string[]) => {
+  let shots = SHOTS_DEFAULT;
+  let shotsStr = query.get('shots');
+  if (shotsStr !== null) {
+    const shotsNum = Number(shotsStr);
+    if (!isNaN(shotsNum) && shotsNum > 0) {
+      shots = shotsNum;
+    }
+  }
+
+  let device_id = query.get('device_id');
+  console.log(availableDeviceIds);
+  if (device_id !== null && !availableDeviceIds.includes(device_id)) {
+    device_id = null;
+  }
+
+  let type = query.get('type') ?? JOB_TYPE_DEFAULT;
+  if (type !== null && !JOB_TYPES.includes(type as JobTypeType)) {
+    type = JOB_TYPE_DEFAULT;
+  }
+
+  let operator: OperatorItem[] = [];
+  if (type === 'estimation') {
+    [...query.getAll('operator')].forEach((op, i) => {
+      const [pauli, coeff1, coeff2] = op.split(',');
+      operator.push({
+        pauli,
+        coeff: [coeff1, coeff2],
+      });
+    });
+  }
+
+  return {
+    name: query.get('name') ?? '',
+    description: query.get('description') ?? '',
+    shots,
+    device_id,
+    type: type as JobTypeType,
+    program: query.get('program') ?? '',
+    operator,
+    transpiler_info: query.get('transpiler_info') ?? JOB_FORM_TRANSPILER_INFO_DEFAULTS.Default,
+    simulator_info: query.get('simulator_info') ?? '{}',
+    mitigation_info: query.get('mitigation_info') ?? JOB_FORM_MITIGATION_INFO_DEFAULTS.PseudoInv,
+  };
+};
 
 export default function Page() {
   const { t } = useTranslation();
   const { getDevices } = useDeviceAPI();
   const { submitJob } = useJobAPI();
+  const { search } = useLocation();
 
   const [devices, setDevices] = useState<Device[]>([]);
   useLayoutEffect(() => {
-    getDevices().then((devices) => setDevices(devices));
+    getDevices().then((devices) => {
+      setDevices(devices);
+
+      const availableDeviceIds = devices
+        .filter((device) => device.status === 'available')
+        .map((device) => device.id);
+
+      if (search === '') {
+        return;
+      }
+      const query = new URLSearchParams(search);
+      const values = defaultValues(query, availableDeviceIds);
+      setName(values.name);
+      setDescription(values.description);
+      setDeviceId(values.device_id);
+      setJobType(values.type);
+      setShots(values.shots);
+      setProgram(values.program ? [values.program] : ['']);
+      setOperator(values.operator);
+      setTranspilerInfo(values.transpiler_info);
+      setSimulatorInfo(values.simulator_info);
+      setMitigationInfo(values.mitigation_info);
+    });
   }, []);
 
   const [name, setName] = useState('');
@@ -152,6 +224,9 @@ export default function Page() {
   });
 
   const [processing, setProcessing] = useState(false);
+  const [postError, setPostError] = useState<string | null>(null);
+  const [postSuccessJobId, setPostSuccessJobId] = useState<string | null>(null);
+  const { addLog } = useJobFormLog();
   const handleSubmit = async () => {
     if (name.trim() === '') {
       setError((error) => ({ ...error, name: t('job.form.error_message.name') }));
@@ -267,7 +342,10 @@ export default function Page() {
     }
 
     setProcessing(true);
-    await submitJob({
+    setPostError(null);
+    setPostSuccessJobId(null);
+
+    const payload: JobsSubmitJobRequest = {
       name: name.trim(),
       description,
       device_id: deviceId,
@@ -277,9 +355,20 @@ export default function Page() {
       simulator_info: JSON.parse(simulatorInfo),
       mitigation_info: JSON.parse(mitigationInfo),
       shots,
-    })
-      .catch((e) => {
-        console.error(e);
+    };
+    submitJob(payload)
+      .then((jobId) => {
+        setPostSuccessJobId(jobId);
+        addLog({ kind: 'success', jobId, input: payload });
+      })
+      .catch((e: unknown) => {
+        if (e instanceof Error) {
+          setPostError(e.message);
+          addLog({ kind: 'error', erorr: e.message, input: payload });
+        } else {
+          console.error(e);
+          addLog({ kind: 'error', erorr: `${e}`, input: payload });
+        }
       })
       .finally(() => {
         setProcessing(false);
@@ -333,22 +422,43 @@ export default function Page() {
                 }}
                 errorMessage={error.shots}
               />
-              <Select
-                label="device"
-                value={deviceId === null ? '' : deviceId}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                  setDeviceId(e.target.value);
-                  setError((error) => ({ ...error, deviceId: undefined }));
-                }}
-                errorMessage={error.deviceId}
-              >
-                <option value=""></option>
-                {devices.map((device) => (
-                  <option disabled={device.status === 'unavailable'} key={device.id}>
-                    {device.id}
-                  </option>
-                ))}
-              </Select>
+              <div className={clsx('flex', 'items-center', 'gap-4')}>
+                <Select
+                  label="device"
+                  value={deviceId === null ? '' : deviceId}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                    setDeviceId(e.target.value);
+                    setError((error) => ({ ...error, deviceId: undefined }));
+                  }}
+                  errorMessage={error.deviceId}
+                >
+                  <option value=""></option>
+                  {devices.map((device) => (
+                    <option disabled={device.status === 'unavailable'} key={device.id}>
+                      {device.id}
+                    </option>
+                  ))}
+                </Select>
+                {/* Reload button */}
+                <button
+                  id="reload-button"
+                  className={clsx(
+                    ['text-xs', 'text-link', 'no-underline'],
+                    ['flex', 'gap-1', 'items-center']
+                  )}
+                  onClick={async (e) => {
+                    document.getElementById('reload-icon')!.setAttribute('class', 'animate-spin');
+                    e.currentTarget.disabled = true;
+                    await getDevices().then((devices) => setDevices(devices));
+                    await new Promise((resolve) => setTimeout(resolve, 930));
+                    document.getElementById('reload-icon')!.removeAttribute('class');
+                    document.getElementById('reload-button')!.removeAttribute('disabled');
+                  }}
+                >
+                  <BsArrowClockwise id="reload-icon" />
+                  <span>reload</span>
+                </button>
+              </div>
               <Select
                 label="type"
                 value={jobType}
@@ -483,136 +593,16 @@ export default function Page() {
           </div>
           <CheckReferenceCTA />
         </div>
+        {postError && <p className={clsx('text-error', 'mt-2')}>{postError}</p>}
+        {postSuccessJobId && (
+          <p className={clsx('text-primary', 'mt-2', 'flex', 'gap-4')}>
+            {t('job.form.success_message')}:
+            <NavLink to={`/jobs/${postSuccessJobId}`} className="text-link">
+              {postSuccessJobId}
+            </NavLink>
+          </p>
+        )}
       </Card>
     </div>
   );
 }
-
-const CheckReferenceCTA = () => {
-  return (
-    <p className={clsx('text-xs')}>
-      {i18next.language === 'ja' ? (
-        <>
-          各入力値については
-          <NavLink to="#" className="text-link">
-            こちら
-          </NavLink>
-          の説明を参照してください
-        </>
-      ) : (
-        <>
-          For each input value, please refer to the explanation{' '}
-          <NavLink to="#" className="text-link">
-            here.
-          </NavLink>
-        </>
-      )}
-    </p>
-  );
-};
-
-const OperatorForm = ({
-  current,
-  set,
-  error,
-}: {
-  current: OperatorItem[];
-  set: (_: OperatorItem[]) => void;
-  error: {
-    pauli: { [index: number]: string };
-    coeff: { [index: number]: [string | undefined, string | undefined] };
-  };
-}) => {
-  const { t } = useTranslation();
-
-  return (
-    <div className={clsx('grid', 'gap-2')}>
-      <Divider />
-      <Spacer className="h-2" />
-      <p className={clsx('font-bold', 'text-primary')}>operator</p>
-      <div className={clsx('grid', 'gap-4')}>
-        {current.map((item, index) => (
-          <div key={index} className={clsx('flex', 'gap-1', 'items-center')}>
-            <div className={clsx('grid', 'gap-1', 'w-full')}>
-              <Input
-                label="pauli"
-                placeholder={t('job.form.info_pauli_placeholder')}
-                value={item.pauli}
-                onChange={(e) => {
-                  set(current.map((o, i) => (i === index ? { ...o, pauli: e.target.value } : o)));
-                }}
-                errorMessage={error.pauli[index]}
-              />
-              <ComplexForm
-                label="coeff"
-                curr={item.coeff}
-                set={(coeff) => {
-                  set(current.map((o, i) => (i === index ? { ...o, coeff } : o)));
-                }}
-                error={error.coeff[index] ?? [undefined, undefined]}
-              />
-            </div>
-            <Button
-              color="error"
-              size="small"
-              className={clsx('w-8', 'h-16', 'flex', 'justify-center', 'items-center')}
-              onClick={() => {
-                set(current.filter((_, i) => i !== index));
-              }}
-            >
-              x
-            </Button>
-          </div>
-        ))}
-      </div>
-      <div className={clsx('w-min')}>
-        <Button
-          color="secondary"
-          size="small"
-          onClick={() => set([...current, { pauli: '', coeff: ['', '0'] }])}
-        >
-          +
-        </Button>
-      </div>
-    </div>
-  );
-};
-
-const ComplexForm = ({
-  label,
-  curr,
-  set,
-  error,
-}: {
-  label?: string;
-  curr: [string, string];
-  set: (_: [string, string]) => void;
-  error: [string | undefined, string | undefined];
-}) => {
-  return (
-    <div className={clsx('grid', 'gap-1')}>
-      {label && <p className="text-xs">{label}</p>}
-      <div className={clsx('flex', 'gap-1', 'items-start')}>
-        <Input
-          value={curr[0]}
-          type="number"
-          onChange={(e) => {
-            set([e.target.value, curr[1]]);
-          }}
-          errorMessage={error[0]}
-        />
-        <p className={clsx('whitespace-nowrap', 'h-8', 'flex', 'items-center')}>
-          <span>+ i</span>
-        </p>
-        <Input
-          value={curr[1]}
-          type="number"
-          onChange={(e) => {
-            set([curr[0], e.target.value]);
-          }}
-          errorMessage={error[1]}
-        />
-      </div>
-    </div>
-  );
-};
