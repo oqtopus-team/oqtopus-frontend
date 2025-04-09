@@ -285,7 +285,6 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
               ctx: CanvasRenderingContext2D,
               globalScale: number
             ) => {
-              console.log(hoveredLinkId);
               const { source, target } = link;
               const startX = (source as NodeObject).x;
               const startY = (source as NodeObject).y;
