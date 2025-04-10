@@ -55,7 +55,6 @@ export default {
         error: 'read allocation error',
       },
     },
-    not_found: 'Device not found.',
   },
   status: {
     available: 'Available',

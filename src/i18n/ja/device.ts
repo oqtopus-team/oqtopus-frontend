@@ -55,7 +55,6 @@ export default {
         error: '読み出し割り当てエラー',
       },
     },
-    not_found: '対象のデバイスが存在しません',
   },
   status: {
     available: '利用可',
