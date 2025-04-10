@@ -96,6 +96,10 @@ export default {
     shots_placeholder: 'Example) ○○○',
     upload_file_button: 'Load file',
     button: 'Send',
+    operator: {
+      pauli: 'Operator (Pauli string)',
+      coeff: 'Coefficient'
+    },
     error_message: {
       name: 'Please enter job name',
       shots: 'Please enter the positive number as shots',
@@ -103,7 +107,7 @@ export default {
       type: 'Please select a job type',
       program: 'Please enter the program',
       operator: {
-        pauli: 'Please enter the operator to esitmate in the Pauli string form',
+        pauli: 'Please enter the operator to esitmate in the Pauli string form (eg: X 0 X 1)',
         coeff: 'Please enter the coefficient of the operator',
       },
       invalid_json: 'Please enter correct JSON',

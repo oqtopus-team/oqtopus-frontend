@@ -103,7 +103,7 @@ export default {
       type: 'ジョブタイプを選択してください',
       program: 'プログラムを入力してください',
       operator: {
-        pauli: '演算子をPauli string形式で入力してください',
+        pauli: '演算子をPauli string形式で入力してください (例: X 0 Y 1)',
         coeff: '演算子の係数を入力してください',
       },
       invalid_json: '正しいJSON形式で入力してください',
