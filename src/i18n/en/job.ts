@@ -83,7 +83,7 @@ export default {
     },
     text: {
       copied: 'Copied',
-      copy_button: 'Copy',
+      copy_tooltip: 'Copy to clipboard',
     },
   },
   form: {

@@ -83,7 +83,7 @@ export default {
     },
     text: {
       copied: 'コピーしました',
-      copy_button: 'コピー',
+      copy_tooltip: 'クリップボードにコピー',
     },
   },
   form: {

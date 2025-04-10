@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Spacer } from '@/pages/_components/Spacer';
 import SimpleBar from 'simplebar-react';
 import 'simplebar-react/dist/simplebar.min.css';
-import CopyButton from './utils/copyButton';
+import ClipboardCopy from './utils/ClipboardCopy';
 
 export interface JobDetailTranspiledProgramProps {
   transpiledProgram?: string;
@@ -17,18 +17,18 @@ export const JobDetailTranspiledProgram: React.FC<JobDetailTranspiledProgramProp
   const text = jobInfo.transpiledProgram ?? '';
   return (
     <>
-      <div className="flex justify-between items-center">
-        <h3 className={clsx('text-primary', 'font-bold')}>Transpiled Program</h3>
-        <CopyButton text={text} />
-      </div>
+      <h3 className={clsx('text-primary', 'font-bold')}>Transpiled Program</h3>
       <Spacer className="h-2" />
       {jobInfo.transpiledProgram === undefined ||
       jobInfo.transpiledProgram === null ||
       jobInfo.transpiledProgram === '' ? (
         <div className={clsx('text-xs')}>{t('job.detail.transpiled_program.nodata')}</div>
       ) : (
-        <div className={clsx(['p-3', 'rounded', 'bg-cmd-bg'], ['text-xs', 'whitespace-pre-wrap'])}>
-          <SimpleBar style={{ maxHeight: jobInfo.maxHeight }}>{text}</SimpleBar>
+        <div className={clsx('relative')}>
+          <div className={clsx('p-3', 'rounded', 'bg-cmd-bg', 'text-sm')}>
+            <SimpleBar style={{ maxHeight: jobInfo.maxHeight }}>{text}</SimpleBar>
+          </div>
+          <ClipboardCopy text={text} />
         </div>
       )}
     </>
