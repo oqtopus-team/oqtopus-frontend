@@ -213,7 +213,6 @@ export default function Page() {
             }));
             return false;
           }
-          console.log(operatorItem)
           const coeffError = `{${operatorItem.coeff}`.trim() == "" || isNaN(Number(operatorItem.coeff))
               ? t('job.form.error_message.operator.coeff')
               : undefined;
