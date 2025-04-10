@@ -63,6 +63,11 @@ export const JobListItem = ({ job, onJobModified }: JobProps) => {
         </NavLink>
       </td>
       <td>
+        <NavLink to={`/device/${job.deviceId}`} className="text-link">
+          {job.deviceId}
+        </NavLink>
+      </td>
+      <td>
         <JobStatus status={job.status} />
       </td>
       <td>{job.submittedAt}</td>
