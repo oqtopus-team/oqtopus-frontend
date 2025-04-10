@@ -213,7 +213,8 @@ export default function Page() {
             }));
             return false;
           }
-          const coeffError = isNaN(Number(operatorItem.coeff))
+          console.log(operatorItem)
+          const coeffError = `{${operatorItem.coeff}`.trim() == "" || isNaN(Number(operatorItem.coeff))
               ? t('job.form.error_message.operator.coeff')
               : undefined;
               
@@ -230,6 +231,7 @@ export default function Page() {
                 }
               }
             }));
+            return false;
           }
           return true;
         })
@@ -382,7 +384,7 @@ export default function Page() {
             <Spacer className="h-5" />
             {/* operator */}
             {jobType === 'estimation' && (
-              <OperatorForm current={operator.map(toOperatorForm)} set={(v) => setOperator(v.map(fromOperatorForm))} error={error.jobInfo.operator} />
+              <OperatorForm current={operator} set={(v) => setOperator(v)} error={error.jobInfo.operator} />
             )}
             <Spacer className="h-7" />
           </div>
@@ -506,25 +508,6 @@ const CheckReferenceCTA = () => {
   );
 };
 
-interface OperatorFormItem {
-  pauli: string;
-  coeff: string;
-}
-
-const toOperatorForm = (o: OperatorItem) : OperatorFormItem => {
-  return {
-    ...o,
-    coeff: `${o.coeff}`,
-  };
-}
-
-const fromOperatorForm = (o: OperatorFormItem) : OperatorItem => {
-  return {
-    ...o,
-    coeff: Number(o.coeff),
-  };
-}
-
 const OperatorForm = ({
   current,
   set,
@@ -538,13 +521,19 @@ const OperatorForm = ({
   };
 }) => {
   const { t } = useTranslation();
-  const [ formValue, setFormValue ] = useState<OperatorFormItem>({ pauli: "", coeff: "1.0" })
+  const [ formValue, setFormValue ] = useState([{ pauli: "", coeff: "1.0" }])
   const handleCoeffInput = (index: number) => (e: FormEvent<HTMLInputElement>) => {
-    const coeffNumber = Number((e.target as HTMLInputElement).value);
+    const coeffRaw = (e.target as HTMLInputElement).value;
+    const coeffNumber = coeffRaw.trim() === "" ? Number.NaN : Number(coeffRaw);
+
     set(current.map((o, i) => (i === index ? { ...o, coeff: coeffNumber } : o)));
-    setFormValue({ ...formValue, coeff: (e.target as HTMLInputElement).value });
+    setFormValue({ ...formValue, [index]: { ...formValue[index], coeff: coeffRaw } });
   }
 
+  const handlePlusButtonClick = () => {
+    set([...current, { pauli: "", coeff: 1.0 }]);
+    setFormValue([...formValue, { pauli: "", coeff: "1.0" }])
+  }
 
   return (
     <div className={clsx('grid', 'gap-2')}>
@@ -558,15 +547,15 @@ const OperatorForm = ({
               <div className={clsx('flex', 'gap-3')}>
                 <Input
                   label={t('job.form.operator.coeff')}
-                  placeholder={t('job.form.info_coeff_placeholder')}
-                  value={formValue.coeff}
+                  placeholder={t('job.form.operator_coeff_placeholder')}
+                  value={formValue[index].coeff}
                   type='string'
                   onInput={handleCoeffInput(index)}
                   errorMessage={error.coeff[index]}
                 />
                 <Input
                   label={t('job.form.operator.pauli')}
-                  placeholder={t('job.form.info_pauli_placeholder')}
+                  placeholder={t('job.form.operator_pauli_placeholder')}
                   value={item.pauli}
                   onChange={(e) => {
                     set(current.map((o, i) => (i === index ? { ...o, pauli: (e.target as HTMLInputElement)?.value } : o)));
@@ -593,7 +582,7 @@ const OperatorForm = ({
         <Button
           color="secondary"
           size="small"
-          onClick={() => set([...current, { pauli: '', coeff: "1.0" }])}
+          onClick={handlePlusButtonClick}
         >
           +
         </Button>

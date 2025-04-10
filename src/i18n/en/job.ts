@@ -89,7 +89,8 @@ export default {
     description_placeholder: 'Example) ○○○',
     program_placeholder:
       'Example) OPENQASM 3; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;',
-    info_pauli_placeholder: 'Example) X 0 X 1',
+    operator_pauli_placeholder: 'Enter the operator (eq: X 0 X 1)',
+    operator_coeff_placeholder: 'Enter the coefficient (eg: 1.5)',
     transpiler_placeholder: 'Example) {}',
     simulator_placeholder: 'Example) {}',
     mitigation_placeholder: 'Example) {}',
@@ -107,8 +108,8 @@ export default {
       type: 'Please select a job type',
       program: 'Please enter the program',
       operator: {
-        pauli: 'Please enter the operator to esitmate in the Pauli string form (eg: X 0 X 1)',
-        coeff: 'Please enter the coefficient of the operator',
+        pauli: 'Enter operator in the Pauli string format',
+        coeff: 'Enter the coefficient of the operator',
       },
       invalid_json: 'Please enter correct JSON',
     },
