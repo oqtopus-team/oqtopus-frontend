@@ -14,9 +14,9 @@ export default {
     },
     table: {
       id: 'Job ID',
+      name: 'Job name',
       status: 'Status',
-      date: 'Created',
-      description: 'Description',
+      date: 'Submitted at',
       operation: 'Action',
       delete_button: 'Delete',
     },

@@ -102,9 +102,9 @@ export default function JobListPage() {
               <thead>
                 <tr>
                   <th>{t('job.list.table.id')}</th>
+                  <th>{t('job.list.table.name')}</th>
                   <th>{t('job.list.table.status')}</th>
                   <th>{t('job.list.table.date')}</th>
-                  <th className={clsx('w-full')}>{t('job.list.table.description')}</th>
                   <th>{t('job.list.table.operation')}</th>
                 </tr>
               </thead>

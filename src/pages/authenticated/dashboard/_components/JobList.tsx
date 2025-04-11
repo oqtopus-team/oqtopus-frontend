@@ -24,10 +24,10 @@ export const JobList = ({ jobs }: { jobs: Job[] }): React.ReactElement => {
         <thead>
           <tr>
             <th className="!w-[400px]">{t('dashboard.job.table.id')}</th>
+            <th className="!w-[200px]">{t('dashboard.job.table.name')}</th>
             <th className="!w-[50px]">{t('dashboard.job.table.status')}</th>
             <th className="!w-[160px]">{t('dashboard.job.table.date')}</th>
             <th className="!w-[80px]">{t('dashboard.job.table.shots')}</th>
-            <th>{t('dashboard.job.table.description')}</th>
           </tr>
         </thead>
         <tbody>
@@ -39,12 +39,12 @@ export const JobList = ({ jobs }: { jobs: Job[] }): React.ReactElement => {
                     {job.id}
                   </NavLink>
                 </td>
+                <td>{job.name}</td>
                 <td>
                   <JobStatus status={job.status} />
                 </td>
                 <td>{job.submittedAt}</td>
                 <td>{job.shots}</td>
-                <td>{job.description}</td>
               </tr>
             );
           })}
