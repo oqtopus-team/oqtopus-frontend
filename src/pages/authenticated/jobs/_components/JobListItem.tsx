@@ -62,6 +62,7 @@ export const JobListItem = ({ job, onJobModified }: JobProps) => {
           {job.id}
         </NavLink>
       </td>
+      <td>{job.name}</td>
       <td>
         <NavLink to={`/device/${job.deviceId}`} className="text-link">
           {job.deviceId}
@@ -71,9 +72,6 @@ export const JobListItem = ({ job, onJobModified }: JobProps) => {
         <JobStatus status={job.status} />
       </td>
       <td>{job.submittedAt}</td>
-      <td className={clsx('text-wrap', 'break-words', 'whitespace-normal', 'max-w-min')}>
-        {job.description}
-      </td>
       <td className={clsx('py-1')}>
         <OperationButtons job={job} onClickCancel={onClickCancel} onClickDelete={onClickDelete} />
       </td>

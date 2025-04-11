@@ -21,10 +21,10 @@ export default {
     table: {
       id: 'Job ID',
       device: 'Device ID',
+      name: 'Job name',
       status: 'Status',
-      date: 'Created',
+      date: 'Submitted at',
       shots: 'Shots',
-      description: 'Description',
     },
   },
   news: {

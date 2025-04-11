@@ -26,7 +26,7 @@
   }
 
   th {
-    @apply text-xs font-thin text-neutral-content;
+    @apply text-xs;
   }
 }
 

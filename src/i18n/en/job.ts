@@ -15,9 +15,9 @@ export default {
     table: {
       id: 'Job ID',
       device: 'Device ID',
+      name: 'Job name',
       status: 'Status',
-      date: 'Created',
-      description: 'Description',
+      date: 'Submitted at',
       operation: 'Action',
       delete_button: 'Delete',
     },
@@ -100,7 +100,7 @@ export default {
     button: 'Send',
     operator: {
       pauli: 'Operator (Pauli string)',
-      coeff: 'Coefficient'
+      coeff: 'Coefficient',
     },
     error_message: {
       name: 'Please enter job name',
