@@ -19,8 +19,6 @@ export const JobDetailMultiManualTabs: React.FC<countsProps> = ({
     onChange(newValue.toString());
   };
 
-  console.log(options);
-
   return (
     <>
       {/* Tabs */}
