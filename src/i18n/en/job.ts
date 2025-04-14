@@ -89,7 +89,7 @@ export default {
     name_placeholder: 'Example) ○○○',
     description_placeholder: 'Example) ○○○',
     program_placeholder:
-      'Example) OPENQASM 3; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;',
+      'Example) OPENQASM 3; include "stdgates.inc"; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;',
     operator_pauli_placeholder: 'Enter the operator (eq: X 0 X 1)',
     operator_coeff_placeholder: 'Enter the coefficient (eg: 1.5)',
     transpiler_placeholder: 'Example) {}',

@@ -27,7 +27,7 @@ import {
   PROGRAM_TYPES,
   ProgramType,
   PROGRAM_TYPE_DEFAULT,
-  JOB_FORM_PROGRAM_DEFAULTS,
+  initializeJobFormProgramDefaults,
 } from '@/domain/types/Job';
 import { JobsSubmitJobInfo } from '@/api/generated';
 import { Toggle } from '@/pages/_components/Toggle';
@@ -55,6 +55,23 @@ export default function Page() {
   const [pendingProgramType, setPendingProgramType] = useState<ProgramType | null>(null);
   const [deleteModalShow, setDeleteModalShow] = useState(false);
   const [operator, setOperator] = useState([{ pauli: '', coeff: 1.0 }]);
+  const [jobDefaults, setJobDefaults] = useState<{ [key in ProgramType]: string } | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    // Load the default program from /public/sample_program
+    async function fetchDefaults() {
+      try {
+        const defaults = await initializeJobFormProgramDefaults();
+        setJobDefaults(defaults);
+      } catch (error) {
+        console.error('failed to initialize:', error);
+      }
+    }
+    fetchDefaults();
+  }, []);
+
   useEffect(() => {
     setJobInfo((jobInfo) => ({ ...jobInfo, program }));
     setError((error) => ({ ...error, jobInfo: { ...error.jobInfo, program: {} } }));
@@ -296,15 +313,19 @@ export default function Page() {
       setDeleteModalShow(true);
     } else {
       setProgramType(newProgramType);
-      setProgram([JOB_FORM_PROGRAM_DEFAULTS[newProgramType]]);
+      if (jobDefaults) {
+        setProgram([jobDefaults[newProgramType]]);
+      }
     }
   };
 
   const confirmProgramTypeChange = () => {
     if (pendingProgramType) {
       setProgramType(pendingProgramType);
-      setProgram([JOB_FORM_PROGRAM_DEFAULTS[pendingProgramType]]);
       setPendingProgramType(null);
+      if (jobDefaults) {
+        setProgram([jobDefaults[pendingProgramType]]);
+      }
     }
     setDeleteModalShow(false);
   };
