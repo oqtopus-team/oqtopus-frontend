@@ -22,6 +22,7 @@ export default {
       id: 'Job ID',
       name: 'Job name',
       device: 'Device ID',
+      name: 'Job name',
       status: 'Status',
       date: 'Submitted at',
       shots: 'Shots',

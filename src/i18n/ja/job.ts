@@ -16,6 +16,7 @@ export default {
       id: 'ジョブID',
       name: 'ジョブ名',
       device: 'デバイスID',
+      name: 'ジョブ名',
       status: 'ステータス',
       date: 'Submit 日時',
       operation: '操作',
