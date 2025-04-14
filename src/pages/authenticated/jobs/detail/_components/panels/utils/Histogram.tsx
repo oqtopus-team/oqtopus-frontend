@@ -1,7 +1,7 @@
+import { useRef, useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { Spacer } from '@/pages/_components/Spacer';
-import downloadIcon from './icon/download_icon.png';
-import './histogram.css';
+import downloadIcon from './icon/download_icon.svg';
 
 interface HistogramInfoProps {
   categories: string[];
@@ -11,6 +11,26 @@ interface HistogramInfoProps {
 }
 
 export const Histogram: React.FC<HistogramInfoProps> = (histogramInfo: HistogramInfoProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState<number>(0);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      setWidth(containerRef.current.getBoundingClientRect().width);
+    }
+
+    const handleResize = () => {
+      if (containerRef.current) {
+        setWidth(containerRef.current.getBoundingClientRect().width);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   const state = {
     series: [
       {
@@ -22,9 +42,10 @@ export const Histogram: React.FC<HistogramInfoProps> = (histogramInfo: Histogram
       chart: {
         toolbar: {
           show: true,
+          offsetX: width * -0.015,
           offsetY: histogramInfo.height * -0.05,
           tools: {
-            download: `<img src="${downloadIcon}">`,
+            download: `<img src="${downloadIcon}" style="max-width: 5vw; height: 5vh;">`,
           },
           export: {
             csv: {
@@ -83,7 +104,7 @@ export const Histogram: React.FC<HistogramInfoProps> = (histogramInfo: Histogram
 
   return (
     <>
-      <div>
+      <div ref={containerRef}>
         <Spacer className="h-2" />
         <ReactApexChart
           series={state.series}
