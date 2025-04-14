@@ -19,6 +19,7 @@ export default {
   },
   detail: {
     title: 'デバイス',
+    not_found: '対象のデバイスが存在しません',
     id: 'ID',
     status: 'ステータス',
     qubits: '量子ビット数',

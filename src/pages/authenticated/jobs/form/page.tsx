@@ -10,7 +10,7 @@ import { TextArea } from '@/pages/_components/TextArea';
 import { Spacer } from '@/pages/_components/Spacer';
 import { NavLink } from 'react-router';
 import { useDeviceAPI, useJobAPI } from '@/backend/hook';
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { FormEvent, useEffect, useLayoutEffect, useState } from 'react';
 import { Device } from '@/domain/types/Device';
 import {
   JOB_FORM_MITIGATION_INFO_DEFAULTS,
@@ -29,6 +29,7 @@ import { JobsSubmitJobInfo } from '@/api/generated';
 import { Toggle } from '@/pages/_components/Toggle';
 import JobFileUpload from './_components/JobFileUpload';
 
+
 export default function Page() {
   const { t } = useTranslation();
   const { getDevices } = useDeviceAPI();
@@ -46,7 +47,7 @@ export default function Page() {
 
   const [jobInfo, setJobInfo] = useState<JobsSubmitJobInfo>({ program: [''], operator: [] });
   const [program, setProgram] = useState<string[]>(['']);
-  const [operator, setOperator] = useState<OperatorItem[]>([{ pauli: '', coeff: ['0', '0'] }]);
+  const [operator, setOperator] = useState([{ pauli: '', coeff: 1.0 }]);
   useEffect(() => {
     setJobInfo((jobInfo) => ({ ...jobInfo, program }));
     setError((error) => ({ ...error, jobInfo: { ...error.jobInfo, program: {} } }));
@@ -56,7 +57,7 @@ export default function Page() {
       ...jobInfo,
       operator: operator.map((op) => ({
         ...op,
-        coeff: op.coeff.map((c) => (c === '' ? NaN : Number(c))),
+        coeff: Number(op.coeff)
       })),
     }));
     setError((error) => ({
@@ -113,7 +114,7 @@ export default function Page() {
     setJobType(jobFileData.jobType);
     setJobInfo(jobFileData.jobInfo);
     setProgram(jobFileData.jobInfo.program);
-    setOperator(jobFileData.jobInfo.operator ?? [{ pauli: '', coeff: ['0', '0'] }]);
+    setOperator(jobFileData.jobInfo.operator ?? [{ pauli: '', coeff: 1.0 }]);
     setTranspilerInfo(JSON.stringify(jobFileData.transpilerInfo ?? ''));
     setSimulatorInfo(JSON.stringify(jobFileData.simulatorInfo ?? ''));
 
@@ -140,7 +141,7 @@ export default function Page() {
       program: { [index: number]: string };
       operator: {
         pauli: { [index: number]: string };
-        coeff: { [index: number]: [string | undefined, string | undefined] };
+        coeff: { [index: number]: string };
       };
     };
     transpilerInfo?: string;
@@ -212,29 +213,24 @@ export default function Page() {
             }));
             return false;
           }
-          if (operatorItem.coeff) {
-            const errors = [undefined, undefined] as [string | undefined, string | undefined];
-            operatorItem.coeff.forEach((c: number, j: number) => {
-              if (isNaN(c)) {
-                errors[j] = t('job.form.error_message.operator.coeff');
+          const coeffError = `{${operatorItem.coeff}`.trim() == "" || isNaN(Number(operatorItem.coeff))
+              ? t('job.form.error_message.operator.coeff')
+              : undefined;
+              
+          if (coeffError) {
+            setError(errors => ({
+              jobInfo: {
+                ...errors.jobInfo,
+                operator: {
+                  ...errors.jobInfo.operator,
+                  coeff: {
+                    ...errors.jobInfo.operator.coeff,
+                    [i]: coeffError
+                  }
+                }
               }
-            });
-            if (errors.some((e) => e !== undefined)) {
-              setError((error) => ({
-                ...error,
-                jobInfo: {
-                  ...error.jobInfo,
-                  operator: {
-                    ...error.jobInfo.operator,
-                    coeff: {
-                      ...error.jobInfo.operator.coeff,
-                      [i]: errors,
-                    },
-                  },
-                },
-              }));
-              return false;
-            }
+            }));
+            return false;
           }
           return true;
         })
@@ -387,7 +383,7 @@ export default function Page() {
             <Spacer className="h-5" />
             {/* operator */}
             {jobType === 'estimation' && (
-              <OperatorForm current={operator} set={setOperator} error={error.jobInfo.operator} />
+              <OperatorForm current={operator} set={(v) => setOperator(v)} error={error.jobInfo.operator} />
             )}
             <Spacer className="h-7" />
           </div>
@@ -520,10 +516,23 @@ const OperatorForm = ({
   set: (_: OperatorItem[]) => void;
   error: {
     pauli: { [index: number]: string };
-    coeff: { [index: number]: [string | undefined, string | undefined] };
+    coeff: { [index: number]: string };
   };
 }) => {
   const { t } = useTranslation();
+  const [ formValue, setFormValue ] = useState([{ pauli: "", coeff: "1.0" }])
+  const handleCoeffInput = (index: number) => (e: FormEvent<HTMLInputElement>) => {
+    const coeffRaw = (e.target as HTMLInputElement).value;
+    const coeffNumber = coeffRaw.trim() === "" ? Number.NaN : Number(coeffRaw);
+
+    set(current.map((o, i) => (i === index ? { ...o, coeff: coeffNumber } : o)));
+    setFormValue({ ...formValue, [index]: { ...formValue[index], coeff: coeffRaw } });
+  }
+
+  const handlePlusButtonClick = () => {
+    set([...current, { pauli: "", coeff: 1.0 }]);
+    setFormValue([...formValue, { pauli: "", coeff: "1.0" }])
+  }
 
   return (
     <div className={clsx('grid', 'gap-2')}>
@@ -532,30 +541,33 @@ const OperatorForm = ({
       <p className={clsx('font-bold', 'text-primary')}>operator</p>
       <div className={clsx('grid', 'gap-4')}>
         {current.map((item, index) => (
-          <div key={index} className={clsx('flex', 'gap-1', 'items-center')}>
+          <div key={index} className={clsx('flex', 'gap-1', 'items-end')}>
             <div className={clsx('grid', 'gap-1', 'w-full')}>
-              <Input
-                label="pauli"
-                placeholder={t('job.form.info_pauli_placeholder')}
-                value={item.pauli}
-                onChange={(e) => {
-                  set(current.map((o, i) => (i === index ? { ...o, pauli: e.target.value } : o)));
-                }}
-                errorMessage={error.pauli[index]}
-              />
-              <ComplexForm
-                label="coeff"
-                curr={item.coeff}
-                set={(coeff) => {
-                  set(current.map((o, i) => (i === index ? { ...o, coeff } : o)));
-                }}
-                error={error.coeff[index] ?? [undefined, undefined]}
-              />
+              <div className={clsx('flex', 'gap-3')}>
+                <Input
+                  label={t('job.form.operator.coeff')}
+                  placeholder={t('job.form.operator_coeff_placeholder')}
+                  value={formValue[index].coeff}
+                  type='string'
+                  onInput={handleCoeffInput(index)}
+                  errorMessage={error.coeff[index]}
+                />
+                <Input
+                  label={t('job.form.operator.pauli')}
+                  placeholder={t('job.form.operator_pauli_placeholder')}
+                  value={item.pauli}
+                  onChange={(e) => {
+                    set(current.map((o, i) => (i === index ? { ...o, pauli: (e.target as HTMLInputElement)?.value } : o)));
+                  }}
+                  errorMessage={error.pauli[index]}
+                />
+              </div>
+
             </div>
             <Button
               color="error"
               size="small"
-              className={clsx('w-8', 'h-16', 'flex', 'justify-center', 'items-center')}
+              className={clsx('w-8', 'h-8', 'flex', 'justify-center', 'items-center')}
               onClick={() => {
                 set(current.filter((_, i) => i !== index));
               }}
@@ -569,49 +581,10 @@ const OperatorForm = ({
         <Button
           color="secondary"
           size="small"
-          onClick={() => set([...current, { pauli: '', coeff: ['', '0'] }])}
+          onClick={handlePlusButtonClick}
         >
           +
         </Button>
-      </div>
-    </div>
-  );
-};
-
-const ComplexForm = ({
-  label,
-  curr,
-  set,
-  error,
-}: {
-  label?: string;
-  curr: [string, string];
-  set: (_: [string, string]) => void;
-  error: [string | undefined, string | undefined];
-}) => {
-  return (
-    <div className={clsx('grid', 'gap-1')}>
-      {label && <p className="text-xs">{label}</p>}
-      <div className={clsx('flex', 'gap-1', 'items-start')}>
-        <Input
-          value={curr[0]}
-          type="number"
-          onChange={(e) => {
-            set([e.target.value, curr[1]]);
-          }}
-          errorMessage={error[0]}
-        />
-        <p className={clsx('whitespace-nowrap', 'h-8', 'flex', 'items-center')}>
-          <span>+ i</span>
-        </p>
-        <Input
-          value={curr[1]}
-          type="number"
-          onChange={(e) => {
-            set([curr[0], e.target.value]);
-          }}
-          errorMessage={error[1]}
-        />
       </div>
     </div>
   );

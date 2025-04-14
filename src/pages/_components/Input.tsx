@@ -11,12 +11,12 @@ export const Input = forwardRef<
 >(({ label, type, errorMessage, className, ...props }, ref) => {
   const [hidden, setHidden] = useState(true);
 
-  // Input elements must be either controlled or uncontrolled 
+  // Input elements must be either controlled or uncontrolled
   // (specify either the value prop, or the defaultValue prop, but not both)
   if (props.value) {
-    delete props.defaultValue
+    delete props.defaultValue;
   } else if (props.defaultValue) {
-    delete props.value
+    delete props.value;
   }
 
   return (

@@ -100,13 +100,32 @@
     }
   }
 
+  .custom-tabs {
+    @apply py-1 !important;
 
-  .pull-down-wrapper {
-    @apply relative inline-block w-1/3;
+  }
+  .custom-tabs .MuiTabs-indicator {
+    display: none !important;
   }
 
-  .pull-down {
-    @apply block w-full font-bold border rounded-md px-3 py-2 bg-no-repeat bg-right;
-    padding-right: 2.5rem;
+  .custom-tab {
+    @apply text-lg font-bold text-base-content mx-1 !important;
+    text-transform: none !important;
+    font-family: 'Inter', 'Noto Sans JP', sans-serif !important;
+    &:hover {
+      @apply bg-gradient-p-s text-primary-content rounded-2xl !important;
+    }
+
+  }
+  .custom-tab.Mui-selected {
+    @apply bg-gradient-p-s text-primary-content rounded-2xl !important;
+  }
+
+  .transparent-header {
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
   }
 }

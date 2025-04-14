@@ -20,7 +20,7 @@ export const useJobAPI = () => {
   const getLatestJobs = async (page: number, pageSize: number): Promise<Job[]> => {
     return api.job
       .listJobs(
-        'job_id,name,description,device_id,job_info,transpiler_info,simulator_info,mitigation_info,job_type,shots,status',
+        'job_id,name,description,device_id,job_info,transpiler_info,simulator_info,mitigation_info,job_type,shots,status,submitted_at',
         undefined,
         undefined,
         undefined,
@@ -48,7 +48,29 @@ export const useJobAPI = () => {
     return api.job.deleteJob(job.id).then((res) => res.data.message);
   };
 
-  return { submitJob, getLatestJobs, getJob, cancelJob, deleteJob };
+  const getSselog = async (
+    job_id: string
+  ): Promise<{ file: string | null; file_name: string | null; status: number }> => {
+    return api.job
+      .getSselog(job_id)
+      .then((res) => {
+        return {
+          file: res.data.file ?? null,
+          file_name: res.data.file_name ?? null,
+          status: res.status,
+        };
+      })
+      .catch((error) => {
+        console.log(error);
+        return {
+          file: null,
+          file_name: null,
+          status: error.response.status,
+        };
+      });
+  };
+
+  return { submitJob, getLatestJobs, getJob, cancelJob, deleteJob, getSselog };
 };
 
 const convertJobResult = (job: JobsGetJobsResponse): Job => ({

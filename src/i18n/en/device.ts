@@ -19,6 +19,7 @@ export default {
   },
   detail: {
     title: 'Device',
+    not_found: 'Device not found',
     id: 'ID',
     status: 'Status',
     qubits: 'Number of qubits',

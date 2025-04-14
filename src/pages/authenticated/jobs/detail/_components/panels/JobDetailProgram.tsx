@@ -6,6 +6,7 @@ import 'simplebar-react/dist/simplebar.min.css';
 
 export interface JobDetailProgramProps {
   program: string[];
+  heading?: string;
   maxHeight: number;
 }
 
@@ -15,7 +16,9 @@ export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
   const { t } = useTranslation();
   return (
     <>
-      <h3 className={clsx('text-primary', 'font-bold')}>Program</h3>
+      <h3 className={clsx('text-primary', 'font-bold')}>
+        {jobInfo.heading != null ? jobInfo.heading : 'Program'}
+      </h3>
       <Spacer className="h-2" />
       {jobInfo.program === undefined || jobInfo.program === null || jobInfo.program.length === 0 ? (
         <div className={clsx('text-xs')}>{t('job.detail.program.nodata')}</div>
