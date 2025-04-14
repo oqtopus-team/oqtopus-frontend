@@ -10,6 +10,7 @@ interface countsProps {
   pullDownKey: string;
   combinedCircuitCountsJson: string;
   dividedCircuitCountsJson: string;
+  heading?: string;
   height: number;
   jobId: string;
 }
@@ -27,6 +28,7 @@ export const JobDetailMultiManualHistogram: React.FC<countsProps> = ({
   pullDownKey,
   combinedCircuitCountsJson,
   dividedCircuitCountsJson,
+  heading,
   height,
   jobId,
 }) => {
@@ -78,7 +80,9 @@ export const JobDetailMultiManualHistogram: React.FC<countsProps> = ({
 
   return (
     <>
-      <h3 className={clsx('text-primary', 'font-bold')}>Histogram</h3>
+      <h3 className={clsx('text-primary', 'font-bold')}>
+        {heading != null ? heading : 'Histogram'}
+      </h3>
       <Spacer className="h-2" />
       {/* histogram */}
       {histogramInfo.data.length === 0 ||
