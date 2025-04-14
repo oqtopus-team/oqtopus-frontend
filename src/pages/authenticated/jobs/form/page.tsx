@@ -24,11 +24,15 @@ import {
   TRANSPILER_TYPE_DEFAULT,
   TRANSPILER_TYPES,
   TranspilerTypeType,
+  PROGRAM_TYPES,
+  ProgramType,
+  PROGRAM_TYPE_DEFAULT,
+  JOB_FORM_PROGRAM_DEFAULTS,
 } from '@/domain/types/Job';
 import { JobsSubmitJobInfo } from '@/api/generated';
 import { Toggle } from '@/pages/_components/Toggle';
 import JobFileUpload from './_components/JobFileUpload';
-
+import { ConfirmModal } from '@/pages/_components/ConfirmModal';
 
 export default function Page() {
   const { t } = useTranslation();
@@ -47,6 +51,9 @@ export default function Page() {
 
   const [jobInfo, setJobInfo] = useState<JobsSubmitJobInfo>({ program: [''], operator: [] });
   const [program, setProgram] = useState<string[]>(['']);
+  const [programType, setProgramType] = useState<ProgramType>(PROGRAM_TYPE_DEFAULT);
+  const [pendingProgramType, setPendingProgramType] = useState<ProgramType | null>(null);
+  const [deleteModalShow, setDeleteModalShow] = useState(false);
   const [operator, setOperator] = useState([{ pauli: '', coeff: 1.0 }]);
   useEffect(() => {
     setJobInfo((jobInfo) => ({ ...jobInfo, program }));
@@ -57,7 +64,7 @@ export default function Page() {
       ...jobInfo,
       operator: operator.map((op) => ({
         ...op,
-        coeff: Number(op.coeff)
+        coeff: Number(op.coeff),
       })),
     }));
     setError((error) => ({
@@ -213,22 +220,23 @@ export default function Page() {
             }));
             return false;
           }
-          const coeffError = `{${operatorItem.coeff}`.trim() == "" || isNaN(Number(operatorItem.coeff))
+          const coeffError =
+            `{${operatorItem.coeff}`.trim() == '' || isNaN(Number(operatorItem.coeff))
               ? t('job.form.error_message.operator.coeff')
               : undefined;
-              
+
           if (coeffError) {
-            setError(errors => ({
+            setError((errors) => ({
               jobInfo: {
                 ...errors.jobInfo,
                 operator: {
                   ...errors.jobInfo.operator,
                   coeff: {
                     ...errors.jobInfo.operator.coeff,
-                    [i]: coeffError
-                  }
-                }
-              }
+                    [i]: coeffError,
+                  },
+                },
+              },
             }));
             return false;
           }
@@ -280,6 +288,30 @@ export default function Page() {
       .finally(() => {
         setProcessing(false);
       });
+  };
+
+  const handleProgramTypeChange = (newProgramType: ProgramType) => {
+    if (program[0] !== '') {
+      setPendingProgramType(newProgramType);
+      setDeleteModalShow(true);
+    } else {
+      setProgramType(newProgramType);
+      setProgram([JOB_FORM_PROGRAM_DEFAULTS[newProgramType]]);
+    }
+  };
+
+  const confirmProgramTypeChange = () => {
+    if (pendingProgramType) {
+      setProgramType(pendingProgramType);
+      setProgram([JOB_FORM_PROGRAM_DEFAULTS[pendingProgramType]]);
+      setPendingProgramType(null);
+    }
+    setDeleteModalShow(false);
+  };
+
+  const cancelProgramTypeChange = () => {
+    setPendingProgramType(null);
+    setDeleteModalShow(false);
   };
 
   return (
@@ -366,7 +398,24 @@ export default function Page() {
               <Spacer className="h-4" />
               <Divider />
               <Spacer className="h-4" />
-              <p className={clsx('font-bold', 'text-primary')}>program</p>
+              <div className={clsx('flex', 'justify-between')}>
+                <p className={clsx('font-bold', 'text-primary')}>program</p>
+                <Select
+                  labelLeft="sample program"
+                  value={programType}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                    handleProgramTypeChange(e.target.value as ProgramType);
+                  }}
+                  errorMessage={error.jobType}
+                  size="xs"
+                >
+                  {PROGRAM_TYPES.map((oneProgramType) => (
+                    <option key={oneProgramType} value={oneProgramType}>
+                      {oneProgramType}
+                    </option>
+                  ))}
+                </Select>
+              </div>
               <Spacer className="h-2" />
             </>
             {/* programs */}
@@ -380,10 +429,21 @@ export default function Page() {
               }}
               errorMessage={error.jobInfo.program[0]}
             />
+            <ConfirmModal
+              show={deleteModalShow}
+              onHide={cancelProgramTypeChange}
+              title={t('job.list.modal.title')}
+              message={t('job.form.modal.overwrite_program')}
+              onConfirm={confirmProgramTypeChange}
+            />
             <Spacer className="h-5" />
             {/* operator */}
             {jobType === 'estimation' && (
-              <OperatorForm current={operator} set={(v) => setOperator(v)} error={error.jobInfo.operator} />
+              <OperatorForm
+                current={operator}
+                set={(v) => setOperator(v)}
+                error={error.jobInfo.operator}
+              />
             )}
             <Spacer className="h-7" />
           </div>
@@ -520,19 +580,19 @@ const OperatorForm = ({
   };
 }) => {
   const { t } = useTranslation();
-  const [ formValue, setFormValue ] = useState([{ pauli: "", coeff: "1.0" }])
+  const [formValue, setFormValue] = useState([{ pauli: '', coeff: '1.0' }]);
   const handleCoeffInput = (index: number) => (e: FormEvent<HTMLInputElement>) => {
     const coeffRaw = (e.target as HTMLInputElement).value;
-    const coeffNumber = coeffRaw.trim() === "" ? Number.NaN : Number(coeffRaw);
+    const coeffNumber = coeffRaw.trim() === '' ? Number.NaN : Number(coeffRaw);
 
     set(current.map((o, i) => (i === index ? { ...o, coeff: coeffNumber } : o)));
     setFormValue({ ...formValue, [index]: { ...formValue[index], coeff: coeffRaw } });
-  }
+  };
 
   const handlePlusButtonClick = () => {
-    set([...current, { pauli: "", coeff: 1.0 }]);
-    setFormValue([...formValue, { pauli: "", coeff: "1.0" }])
-  }
+    set([...current, { pauli: '', coeff: 1.0 }]);
+    setFormValue([...formValue, { pauli: '', coeff: '1.0' }]);
+  };
 
   return (
     <div className={clsx('grid', 'gap-2')}>
@@ -548,7 +608,7 @@ const OperatorForm = ({
                   label={t('job.form.operator.coeff')}
                   placeholder={t('job.form.operator_coeff_placeholder')}
                   value={formValue[index].coeff}
-                  type='string'
+                  type="string"
                   onInput={handleCoeffInput(index)}
                   errorMessage={error.coeff[index]}
                 />
@@ -557,12 +617,15 @@ const OperatorForm = ({
                   placeholder={t('job.form.operator_pauli_placeholder')}
                   value={item.pauli}
                   onChange={(e) => {
-                    set(current.map((o, i) => (i === index ? { ...o, pauli: (e.target as HTMLInputElement)?.value } : o)));
+                    set(
+                      current.map((o, i) =>
+                        i === index ? { ...o, pauli: (e.target as HTMLInputElement)?.value } : o
+                      )
+                    );
                   }}
                   errorMessage={error.pauli[index]}
                 />
               </div>
-
             </div>
             <Button
               color="error"
@@ -578,11 +641,7 @@ const OperatorForm = ({
         ))}
       </div>
       <div className={clsx('w-min')}>
-        <Button
-          color="secondary"
-          size="small"
-          onClick={handlePlusButtonClick}
-        >
+        <Button color="secondary" size="small" onClick={handlePlusButtonClick}>
           +
         </Button>
       </div>

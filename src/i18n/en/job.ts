@@ -100,7 +100,7 @@ export default {
     button: 'Send',
     operator: {
       pauli: 'Operator (Pauli string)',
-      coeff: 'Coefficient'
+      coeff: 'Coefficient',
     },
     error_message: {
       name: 'Please enter job name',
@@ -113,6 +113,9 @@ export default {
         coeff: 'Enter the coefficient of the operator',
       },
       invalid_json: 'Please enter correct JSON',
+    },
+    modal: {
+      overwrite_program: 'Are you sure you want to overwrite this program?',
     },
   },
 };
