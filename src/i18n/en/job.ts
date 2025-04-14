@@ -100,7 +100,7 @@ export default {
     button: 'Send',
     operator: {
       pauli: 'Operator (Pauli string)',
-      coeff: 'Coefficient'
+      coeff: 'Coefficient',
     },
     error_message: {
       name: 'Please enter job name',
