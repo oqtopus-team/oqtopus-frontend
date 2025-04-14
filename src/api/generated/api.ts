@@ -575,10 +575,10 @@ export interface JobsOperatorItem {
     'pauli': string;
     /**
      * Coefficient number in the Pauli string representation.
-     * @type {any}
+     * @type {number}
      * @memberof JobsOperatorItem
      */
-    'coeff'?: any;
+    'coeff'?: number;
 }
 /**
  * *(Only for sampling jobs)* JSON string representing the sampling result
@@ -708,16 +708,16 @@ export interface JobsTranspileResult {
     'transpiled_program': string | null;
     /**
      * 
-     * @type {string}
+     * @type {{ [key: string]: any; }}
      * @memberof JobsTranspileResult
      */
-    'stats': string | null;
+    'stats': { [key: string]: any; } | null;
     /**
      * 
-     * @type {string}
+     * @type {{ [key: string]: any; }}
      * @memberof JobsTranspileResult
      */
-    'virtual_physical_mapping': string | null;
+    'virtual_physical_mapping': { [key: string]: any; } | null;
 }
 /**
  * 

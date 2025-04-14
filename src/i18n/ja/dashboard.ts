@@ -9,7 +9,7 @@ export default {
     title: 'デバイス',
     button: '一覧へ',
     table: {
-      name: 'デバイス名',
+      name: 'デバイスID',
       status: 'ステータス',
       qubits: '量子ビット数',
       type: 'タイプ',
@@ -20,6 +20,7 @@ export default {
     button: '一覧へ',
     table: {
       id: 'ジョブID',
+      device: 'デバイスID',
       status: 'ステータス',
       date: '登録日時',
       shots: 'ショット数',
