@@ -9,6 +9,8 @@ import { Select } from '@/pages/_components/Select';
 import { TextArea } from '@/pages/_components/TextArea';
 import { Spacer } from '@/pages/_components/Spacer';
 import { NavLink } from 'react-router';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { useDeviceAPI, useJobAPI } from '@/backend/hook';
 import { FormEvent, useEffect, useLayoutEffect, useState } from 'react';
 import { Device } from '@/domain/types/Device';
@@ -28,13 +30,6 @@ import {
 import { JobsSubmitJobInfo } from '@/api/generated';
 import { Toggle } from '@/pages/_components/Toggle';
 import JobFileUpload from './_components/JobFileUpload';
-import Notification from './_components/Notification';
-
-interface NotificationItem {
-  id: number;
-  message: string;
-  type: 'success' | 'error';
-}
 
 export default function Page() {
   const { t } = useTranslation();
@@ -42,7 +37,6 @@ export default function Page() {
   const { submitJob } = useJobAPI();
 
   const [devices, setDevices] = useState<Device[]>([]);
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
   useLayoutEffect(() => {
     getDevices().then((devices) => setDevices(devices));
@@ -288,39 +282,31 @@ export default function Page() {
         mitigation_info: JSON.parse(mitigationInfo),
         shots,
       });
-      const newNotification: NotificationItem = {
-        id: Date.now(),
-        message: 'Submission successful!',
-        type: 'success',
-      };
-      setNotifications((prev) => [...prev, newNotification]);
+      toast.success('Submission successful!', {
+        position: 'top-right',
+      });
     } catch (e) {
       console.error(e);
-      const newNotification: NotificationItem = {
-        id: Date.now(),
-        message: 'Submission failed',
-        type: 'error',
-      };
-      setNotifications((prev) => [...prev, newNotification]);
+      toast.error('Submission failed', {
+        position: 'top-right',
+      });
     } finally {
       setProcessing(false);
     }
   };
 
-  const removeNotification = (id: number) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-  };
-
   return (
     <div>
-      {notifications.map((notification) => (
-        <Notification
-          key={notification.id}
-          message={notification.message}
-          type={notification.type}
-          onClose={() => removeNotification(notification.id)}
-        />
-      ))}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        newestOnTop={true}
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        hideProgressBar={true}
+        pauseOnHover
+      />
       <h2 className={clsx('text-primary', 'text-2xl', 'font-bold')}>{t('job.form.title')}</h2>
       <Spacer className="h-3" />
       <p className={clsx('text-sm')}>{t('job.form.description')}</p>
