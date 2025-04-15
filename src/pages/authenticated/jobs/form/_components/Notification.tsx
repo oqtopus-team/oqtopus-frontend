@@ -8,9 +8,9 @@ interface NotificationProps {
   onClose?: () => void;
 }
 
-const ANIMATION_DURATION: number = 300;
-const ANIMATION_DELAY: number = 50;
-const NOTIFICATION_DURATION: number = 3000;
+const ANIMATION_DURATION: number = 300; // Animation duration for the fade-out effect
+const ANIMATION_DELAY: number = 50; // Delay before the notification appears
+const NOTIFICATION_DURATION: number = 3000; // Duration for how long the notification is visible
 
 const Notification: React.FC<NotificationProps> = ({
   message,
