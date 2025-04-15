@@ -12,9 +12,16 @@ import { BsDownload } from 'react-icons/bs';
 interface JobProps {
   job: Job;
   onJobModified: () => void;
+  selectedJobs: Job[];
+  onJobSelectionChange: (job: Job, selected: boolean) => void;
 }
 
-export const JobListItem = ({ job, onJobModified }: JobProps) => {
+export const JobListItem = ({
+  job,
+  onJobModified,
+  selectedJobs,
+  onJobSelectionChange,
+}: JobProps) => {
   const { cancelJob, deleteJob } = useJobAPI();
   const [isProcessing, setIsProcessing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -57,6 +64,13 @@ export const JobListItem = ({ job, onJobModified }: JobProps) => {
 
   return (
     <tr>
+      <td>
+        <input
+          type="checkbox"
+          checked={selectedJobs.some((j) => j.id === job.id)}
+          onChange={(e) => onJobSelectionChange(job, e.target.checked)}
+        />
+      </td>
       <td>
         <NavLink to={`/jobs/${job.id}`} className="text-link">
           {job.id}
