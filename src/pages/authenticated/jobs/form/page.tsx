@@ -282,14 +282,10 @@ export default function Page() {
         mitigation_info: JSON.parse(mitigationInfo),
         shots,
       });
-      toast.success('Submission successful!', {
-        position: 'top-right',
-      });
+      toast.success(t('job.form.toast.success'));
     } catch (e) {
       console.error(e);
-      toast.error('Submission failed', {
-        position: 'top-right',
-      });
+      toast.error(t('job.form.toast.error'));
     } finally {
       setProcessing(false);
     }
@@ -299,7 +295,7 @@ export default function Page() {
     <div>
       <ToastContainer
         position="top-right"
-        autoClose={3000}
+        autoClose={3000} // display for 3 seconds
         newestOnTop={true}
         closeOnClick
         pauseOnFocusLoss

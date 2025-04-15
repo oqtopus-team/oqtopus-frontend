@@ -1,3 +1,6 @@
+import { error } from 'console';
+import { toast } from 'react-toastify';
+
 export default {
   list: {
     title: 'Job',
@@ -101,6 +104,10 @@ export default {
     operator: {
       pauli: 'Operator (Pauli string)',
       coeff: 'Coefficient',
+    },
+    toast: {
+      success: 'Success: Job submitted successfully',
+      error: 'Error: Failed to submit job',
     },
     error_message: {
       name: 'Please enter job name',

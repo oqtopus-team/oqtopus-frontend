@@ -1,3 +1,5 @@
+import { toast } from 'react-toastify';
+
 export default {
   list: {
     title: 'ジョブ',
@@ -98,6 +100,10 @@ export default {
     shots_placeholder: '例）4',
     upload_file_button: 'ファイル読み込み',
     button: '送信する',
+    toast: {
+      success: '成功: ジョブが正常に送信されました',
+      error: '失敗: ジョブの送信に失敗しました',
+    },
     error_message: {
       name: 'Job名を入力してください',
       shots: '正のショット数を入力してください',
