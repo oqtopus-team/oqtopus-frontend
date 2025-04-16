@@ -28,12 +28,12 @@ export default {
     modal: {
       title: '確認',
       delete: 'ジョブを削除します。よろしいでしょうか？',
-      bulk_delete: 'Are you sure you want to delete selected jobs?',
+      bulk_delete: '選択したジョブを一括削除します。よろしいでしょうか？',
       cancel: 'ジョブをキャンセルします。よろしいでしょうか？',
     },
     nodata: '表示するジョブがありません。',
-    delete_selected: 'Delete selected',
-    delete_in_progress: 'Deleting jobs in progress...',
+    delete_selected: '一括削除',
+    delete_in_progress: '一括削除進行中...',
   },
   detail: {
     title: 'ジョブ結果詳細',
