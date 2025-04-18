@@ -8,6 +8,7 @@ import { Button } from '@/pages/_components/Button';
 import { NavLink } from 'react-router';
 import { useJobAPI } from '@/backend/hook';
 import { BsDownload } from 'react-icons/bs';
+import DownloadJobButton from './DownloadJobButton';
 
 interface JobProps {
   job: Job;
@@ -93,40 +94,6 @@ const OperationButtons = ({ job, onClickCancel, onClickDelete }: ButtonProps) =>
     return status === 'created' || status === 'transpiling' || status === 'queued';
   }
 
-  function downloadJob() {
-    setDownloadInProgress(true);
-
-    const jobData: JobFileData = {
-      name: job.name,
-      description: job.description,
-      shots: job.shots,
-      deviceId: job.deviceId ?? '',
-      jobType: job.jobType as JobTypeType,
-      jobInfo: job.jobInfo as JobFileDataInfo,
-      transpilerInfo: job.transpilerInfo,
-      simulatorInfo: job.simulatorInfo,
-      mitigationInfo: job.mitigationInfo,
-    };
-
-    try {
-      const valuesBlob = new Blob([JSON.stringify(jobData, null, 2)], { type: 'application/json' });
-      const blobURL = URL.createObjectURL(valuesBlob);
-
-      const a = document.createElement('a');
-      a.href = blobURL;
-      a.download = 'job.json';
-      document.body.appendChild(a);
-      a.click();
-
-      document.body.removeChild(a);
-      URL.revokeObjectURL(blobURL);
-    } catch (error: any) {
-      console.error('failed to download file due to following error:', error);
-    } finally {
-      setDownloadInProgress(false);
-    }
-  }
-
   return (
     <div className={clsx('flex', 'gap-2')}>
       <Button color="error" onClick={() => setDeleteModalShow(true)}>
@@ -153,9 +120,7 @@ const OperationButtons = ({ job, onClickCancel, onClickDelete }: ButtonProps) =>
           />
         </>
       )}
-      <Button color="secondary" onClick={downloadJob} disabled={downloadInProgress}>
-        <BsDownload />
-      </Button>
+      <DownloadJobButton job={job} />
     </div>
   );
 };
