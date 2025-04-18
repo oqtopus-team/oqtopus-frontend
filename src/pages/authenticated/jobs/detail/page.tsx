@@ -12,6 +12,7 @@ import { SuccessViewMultiManual } from './_components/MultiManualJobDetail';
 import { SuccessViewSSELog } from './_components/SSEJobDetail';
 import { useJobAPI } from '@/backend/hook';
 import ReloadButton from './_components/panels/utils/ReloadButton';
+import DownloadJobButton from '../_components/DownloadJobButton';
 
 export default function JobDetailPage_() {
   const { id } = useParams();
@@ -30,13 +31,31 @@ const JobDetailPage = ({ params: { id } }: { params: Params }) => {
   useLayoutEffect(() => {
     setLoading(true);
     if (id != '') {
-      getJob(id)
-        .then((job) => setJob(job))
-        .catch(() => setIsSuccess(false))
-        .finally(() => {
-          setIsSuccess(true);
-          setLoading(false);
-        });
+      setJob({
+        id: '1',
+        name: 'test1',
+        description: 'test 1 desc',
+        jobInfo: { program: ['abc'] },
+        transpilerInfo: { test1: 'tt' },
+        jobType: 'estimation',
+        shots: 412,
+        status: 'submitted',
+        deviceId: 'Kawasaki',
+        submittedAt: '0',
+        readyAt: '0',
+        runningAt: '0',
+        endedAt: '0',
+        executionTime: 1,
+      } as Job);
+      setIsSuccess(true);
+      setLoading(false);
+      // getJob(id)
+      //   .then((job) => setJob(job))
+      //   .catch(() => setIsSuccess(false))
+      //   .finally(() => {
+      //     setIsSuccess(true);
+      //     setLoading(false);
+      //   });
     }
   }, [id]);
 
@@ -48,7 +67,7 @@ const JobDetailPage = ({ params: { id } }: { params: Params }) => {
   }
   return (
     <>
-      <Title />
+      <Title job={job} />
       <Spacer className="h-3" />
       <SuccessViewWrapper {...job} />
     </>
@@ -65,12 +84,13 @@ const LoadingView = () => {
   );
 };
 
-const Title = () => {
+const Title = ({ job }: { job?: Job }) => {
   const { t } = useTranslation();
   return (
     <div className={clsx('flex', 'items-center', 'text-primary', 'text-2xl', 'font-bold')}>
       {t('job.detail.title')}
       <ReloadButton />
+      <DownloadJobButton style={{ marginLeft: '0.5rem', marginRight: '0.5rem' }} job={job} />
     </div>
   );
 };
