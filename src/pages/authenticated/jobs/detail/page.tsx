@@ -31,31 +31,13 @@ const JobDetailPage = ({ params: { id } }: { params: Params }) => {
   useLayoutEffect(() => {
     setLoading(true);
     if (id != '') {
-      setJob({
-        id: '1',
-        name: 'test1',
-        description: 'test 1 desc',
-        jobInfo: { program: ['abc'] },
-        transpilerInfo: { test1: 'tt' },
-        jobType: 'estimation',
-        shots: 412,
-        status: 'submitted',
-        deviceId: 'Kawasaki',
-        submittedAt: '0',
-        readyAt: '0',
-        runningAt: '0',
-        endedAt: '0',
-        executionTime: 1,
-      } as Job);
-      setIsSuccess(true);
-      setLoading(false);
-      // getJob(id)
-      //   .then((job) => setJob(job))
-      //   .catch(() => setIsSuccess(false))
-      //   .finally(() => {
-      //     setIsSuccess(true);
-      //     setLoading(false);
-      //   });
+      getJob(id)
+        .then((job) => setJob(job))
+        .catch(() => setIsSuccess(false))
+        .finally(() => {
+          setIsSuccess(true);
+          setLoading(false);
+        });
     }
   }, [id]);
 
