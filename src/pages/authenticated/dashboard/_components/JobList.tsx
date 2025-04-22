@@ -5,9 +5,10 @@ import { Job } from '@/domain/types/Job';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
+import { DateTimeFormatter } from '@/pages/authenticated/_components/DateTimeFormatter';
 
 export const JobList = ({ jobs }: { jobs: Job[] }): React.ReactElement => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   return (
     <>
@@ -33,6 +34,7 @@ export const JobList = ({ jobs }: { jobs: Job[] }): React.ReactElement => {
         </thead>
         <tbody>
           {jobs.map((job) => {
+            const formattedSubmittedAt = DateTimeFormatter(t, i18n, job.submittedAt);
             return (
               <tr key={job.id}>
                 <td>
@@ -48,7 +50,7 @@ export const JobList = ({ jobs }: { jobs: Job[] }): React.ReactElement => {
                 <td>
                   <JobStatus status={job.status} />
                 </td>
-                <td>{job.submittedAt}</td>
+                <td>{formattedSubmittedAt}</td>
                 <td>{job.shots}</td>
                 <td>{job.description}</td>
               </tr>

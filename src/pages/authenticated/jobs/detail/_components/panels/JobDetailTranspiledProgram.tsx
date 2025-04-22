@@ -7,6 +7,7 @@ import ClipboardCopy from './utils/ClipboardCopy';
 
 export interface JobDetailTranspiledProgramProps {
   transpiledProgram?: string;
+  heading?: string;
   maxHeight: number;
 }
 
@@ -17,7 +18,9 @@ export const JobDetailTranspiledProgram: React.FC<JobDetailTranspiledProgramProp
   const text = jobInfo.transpiledProgram ?? '';
   return (
     <>
-      <h3 className={clsx('text-primary', 'font-bold')}>Transpiled Program</h3>
+      <h3 className={clsx('text-primary', 'font-bold')}>
+        {jobInfo.heading != null ? jobInfo.heading : 'Transpiled Program'}
+      </h3>
       <Spacer className="h-2" />
       {jobInfo.transpiledProgram === undefined ||
       jobInfo.transpiledProgram === null ||

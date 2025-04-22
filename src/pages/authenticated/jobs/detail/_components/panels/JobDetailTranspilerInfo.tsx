@@ -8,6 +8,7 @@ import ClipboardCopy from './utils/ClipboardCopy';
 
 export interface JobDetailTranspilerInfoProps {
   transpilerInfo?: string;
+  heading?: string;
   maxHeight: number;
 }
 
@@ -18,7 +19,9 @@ export const JobDetailTranspilerInfo: React.FC<JobDetailTranspilerInfoProps> = (
   const text = job.transpilerInfo ?? '';
   return (
     <>
-      <h3 className={clsx('text-primary', 'font-bold')}>Transpiler Info</h3>
+      <h3 className={clsx('text-primary', 'font-bold')}>
+        {job.heading != null ? job.heading : 'Transpiler Info'}
+      </h3>
       <Spacer className="h-2" />
       {job.transpilerInfo === undefined ||
       job.transpilerInfo === null ||

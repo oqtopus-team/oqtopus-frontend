@@ -10,6 +10,7 @@ import ClipboardCopy from './utils/ClipboardCopy';
 export interface JobDetailResultProps {
   result?: JobsSamplingResult | JobsEstimationResult;
   mitigationInfo?: string;
+  heading?: string;
   maxHeight: number;
 }
 
@@ -30,7 +31,9 @@ export const JobDetailResult: React.FC<JobDetailResultProps> = (job: JobDetailRe
 
   return (
     <>
-      <h3 className={clsx('text-primary', 'font-bold')}>Result</h3>
+      <h3 className={clsx('text-primary', 'font-bold')}>
+        {job.heading != null ? job.heading : 'Result'}
+      </h3>
       <Spacer className="h-2" />
       {job.result === undefined || job.result === null ? (
         <div className={clsx('text-xs')}>{t('job.detail.result.nodata')}</div>
