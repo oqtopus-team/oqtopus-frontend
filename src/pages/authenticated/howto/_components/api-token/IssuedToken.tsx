@@ -8,6 +8,7 @@ import { ConfirmModal } from '@/pages/_components/ConfirmModal';
 import { Button } from '@/pages/_components/Button';
 import { Spacer } from '@/pages/_components/Spacer';
 import { userApiContext } from '@/backend/Provider';
+import { DateTimeFormatter } from '../../../_components/DateTimeFormatter';
 
 export const IssuedToken = ({
   state,
@@ -19,7 +20,7 @@ export const IssuedToken = ({
     set: Setter;
   };
 }): React.ReactElement => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [showIssueModal, setShowIssueModal] = useState(false);
   const [showExpireModal, setShowExpireModal] = useState(false);
   const { apiToken } = useContext(userApiContext);
@@ -87,7 +88,8 @@ export const IssuedToken = ({
       <Spacer className="h-2" />
       <div className={clsx('flex', 'justify-between')}>
         <p className="text-xs">
-          ****************（{t('howto.token.expiry_date')} {state.apiTokenExpiration}）
+          ****************（{t('howto.token.expiry_date')}{' '}
+          {DateTimeFormatter(t, i18n, state.apiTokenExpiration)}）
         </p>
         <div className={clsx('flex', 'justify-end', 'gap-2')}>
           <Button

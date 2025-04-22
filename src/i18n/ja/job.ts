@@ -28,9 +28,12 @@ export default {
     modal: {
       title: '確認',
       delete: 'ジョブを削除します。よろしいでしょうか？',
+      bulk_delete: '選択したジョブを一括削除します。よろしいでしょうか？',
       cancel: 'ジョブをキャンセルします。よろしいでしょうか？',
     },
     nodata: '表示するジョブがありません。',
+    delete_selected: '一括削除',
+    delete_in_progress: '一括削除進行中...',
   },
   detail: {
     title: 'ジョブ詳細',
@@ -84,12 +87,12 @@ export default {
     },
   },
   form: {
-    title: 'QASM入力フォーム',
+    title: 'Job入力フォーム',
     description: '量子デバイスで実行するジョブを登録できます',
     name_placeholder: '例）〇〇〇',
     description_placeholder: '例）〇〇〇',
     program_placeholder:
-      '例）OPENQASM 3; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;',
+      '例) OPENQASM 3; include "stdgates.inc"; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;',
     operator_pauli_placeholder: '演算子のパウリ文字列 (例: X 0 X 1)',
     operator_coeff_placeholder: '演算子の係数を入力 (例: 1.5)',
     transpiler_placeholder: '例）{}',
@@ -98,6 +101,7 @@ export default {
     shots_placeholder: '例）4',
     upload_file_button: 'ファイル読み込み',
     button: '送信する',
+    submit_and_view_job_button: '送信して詳細を確認',
     error_message: {
       name: 'Job名を入力してください',
       shots: '正のショット数を入力してください',

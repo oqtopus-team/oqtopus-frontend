@@ -28,9 +28,12 @@ export default {
     modal: {
       title: 'Confirm',
       delete: 'Are you sure you want to delete this job?',
+      bulk_delete: 'Are you sure you want to delete selected jobs?',
       cancel: 'Are you sure you want to cancel this job?',
     },
     nodata: 'Data does not exist.',
+    delete_selected: 'Delete selected',
+    delete_in_progress: 'Deleting jobs in progress...',
   },
   detail: {
     title: 'Job details',
@@ -84,12 +87,12 @@ export default {
     },
   },
   form: {
-    title: 'QASM input form',
+    title: 'Job input form',
     description: 'Submit jobs to be executed on quantum devives.',
     name_placeholder: 'Example) ○○○',
     description_placeholder: 'Example) ○○○',
     program_placeholder:
-      'Example) OPENQASM 3; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;',
+      'Example) OPENQASM 3; include "stdgates.inc"; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;',
     operator_pauli_placeholder: 'Enter the operator (eq: X 0 X 1)',
     operator_coeff_placeholder: 'Enter the coefficient (eg: 1.5)',
     transpiler_placeholder: 'Example) {}',
@@ -97,7 +100,8 @@ export default {
     mitigation_placeholder: 'Example) {}',
     shots_placeholder: 'Example) ○○○',
     upload_file_button: 'Load file',
-    button: 'Send',
+    button: 'Submit',
+    submit_and_view_job_button: 'Submit and view job',
     operator: {
       pauli: 'Operator (Pauli string)',
       coeff: 'Coefficient',
