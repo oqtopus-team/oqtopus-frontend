@@ -95,4 +95,4 @@ export interface JobFileDataInfo {
   operator?: OperatorItem[];
 }
 
-export type OperatorItem = { pauli: string; coeff: [string, string] };
+export type OperatorItem = { pauli: string; coeff: number };

@@ -6,9 +6,10 @@ import { useTranslation } from 'react-i18next';
 
 interface Props {
   transpileResult?: JobsTranspileResult;
+  heading?: string;
 }
 
-export const JobDetailTranspileResult: React.FC<Props> = ({ transpileResult }: Props) => {
+export const JobDetailTranspileResult: React.FC<Props> = ({ transpileResult, heading }: Props) => {
   const { t } = useTranslation();
 
   // convert transpileResult to JSON to delete the specified key
@@ -18,7 +19,9 @@ export const JobDetailTranspileResult: React.FC<Props> = ({ transpileResult }: P
 
   return (
     <>
-      <h3 className={clsx('text-primary', 'font-bold')}>Transpile Result</h3>
+      <h3 className={clsx('text-primary', 'font-bold')}>
+        {heading != null ? heading : 'Transpile Result'}
+      </h3>
       <Spacer className="h-2" />
       {transpileResult ? (
         <JSONCodeBlock json={JSON.stringify(targetJson)} />

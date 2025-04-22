@@ -13,10 +13,16 @@ import { DateTimeFormatter } from '../../_components/DateTimeFormatter';
 interface JobProps {
   job: Job;
   onJobModified: () => void;
+  selectedJobs: Job[];
+  onJobSelectionChange: (job: Job, selected: boolean) => void;
 }
 
-export const JobListItem = ({ job, onJobModified }: JobProps) => {
-  const { t, i18n } = useTranslation();
+export const JobListItem = ({
+  job,
+  onJobModified,
+  selectedJobs,
+  onJobSelectionChange,
+}: JobProps) => {
   const { cancelJob, deleteJob } = useJobAPI();
   const [isProcessing, setIsProcessing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -60,8 +66,20 @@ export const JobListItem = ({ job, onJobModified }: JobProps) => {
   return (
     <tr>
       <td>
+        <input
+          type="checkbox"
+          checked={selectedJobs.some((j) => j.id === job.id)}
+          onChange={(e) => onJobSelectionChange(job, e.target.checked)}
+        />
+      </td>
+      <td>
         <NavLink to={`/jobs/${job.id}`} className="text-link">
           {job.id}
+        </NavLink>
+      </td>
+      <td>
+        <NavLink to={`/device/${job.deviceId}`} className="text-link">
+          {job.deviceId}
         </NavLink>
       </td>
       <td>
