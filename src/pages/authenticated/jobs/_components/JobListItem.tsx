@@ -23,6 +23,7 @@ export const JobListItem = ({
   selectedJobs,
   onJobSelectionChange,
 }: JobProps) => {
+  const { t, i18n } = useTranslation();
   const { cancelJob, deleteJob } = useJobAPI();
   const [isProcessing, setIsProcessing] = useState(false);
   const [loading, setLoading] = useState(true);
