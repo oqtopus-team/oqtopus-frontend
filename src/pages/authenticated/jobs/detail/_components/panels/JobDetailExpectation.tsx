@@ -31,7 +31,7 @@ export const JobDetailExpectation: React.FC<ExpectationProps> = (estimation: Exp
       {text === '' ? (
         <div className={clsx('text-xs')}>{t('job.detail.expectation.nodata')}</div>
       ) : (
-        <div className={clsx(['p-3', 'rounded', 'bg-cmd-bg'], ['text-xs', 'whitespace-pre-wrap'])}>
+        <div className={clsx(['p-3', 'rounded', 'bg-cmd-bg'], ['text-xs', 'whitespace-pre-line'])}>
           <MathJaxContext config={config}>
             <MathJax>{text}</MathJax>
           </MathJaxContext>

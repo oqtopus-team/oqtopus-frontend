@@ -59,7 +59,7 @@ const createNodeData = (qubits: any[]): { nodeData: any[]; tempNodeMap: Map<stri
       tempNodeMap.set(qubit.id.toString(), qubit);
       return {
         id: qubit.id.toString(),
-        label: `Q${qubit.physical_id}`,
+        label: `Q${qubit.id}`,
         fx: scalePosition(qubit.position.x),
         fy: scalePosition(qubit.position.y * -1), // multiply by -1 to flip the y-axis
       };
@@ -109,6 +109,8 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
   const [couplingMap, setCouplingMap] = useState<Map<string, object>>(new Map<string, object>());
   const [hoveredInfo, setStrHoveredInfo] = useState<object>({});
   const [isValidDeviceInfo, setIsValidDeviceInfo] = useState<boolean>(true);
+  const [hoveredNodeId, setHoveredNodeId] = useState<string | number | null>(null);
+  const [hoveredLinkId, setHoveredLinkId] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -145,8 +147,11 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
   const handleHoverNode = (node: NodeObject | null) => {
     try {
       if (node) {
-        const nodeInfo = nodeMap.get(node.id as string);
-        if (nodeInfo !== undefined) {
+        const nodeId = node.id as string;
+        const nodeInfo = nodeMap.get(nodeId);
+        if (nodeId !== undefined && nodeInfo !== undefined) {
+          setHoveredLinkId(null);
+          setHoveredNodeId(nodeId);
           setStrHoveredInfo(nodeInfo);
         }
       }
@@ -158,10 +163,14 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
   const handleHoverLink = (link: LinkObject | null) => {
     try {
       if (link) {
-        const source = (link.source as NodeObject).id;
-        const target = (link.target as NodeObject).id;
-        const coupling = couplingMap.get(createCouplingMapKey(source as number, target as number));
-        if (coupling !== undefined) {
+        const sourceId = (link.source as NodeObject).id;
+        const targetId = (link.target as NodeObject).id;
+        const couplingKey = createCouplingMapKey(sourceId as number, targetId as number);
+        const coupling = couplingMap.get(couplingKey);
+
+        if (couplingKey !== undefined && coupling !== undefined) {
+          setHoveredNodeId(null);
+          setHoveredLinkId(couplingKey);
           setStrHoveredInfo(coupling);
         }
       }
@@ -257,8 +266,8 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
               }
               ctx.fillStyle = '#4887fa';
               ctx.fill();
-              ctx.strokeStyle = 'white';
-              ctx.lineWidth = 1;
+              ctx.strokeStyle = node.id === hoveredNodeId ? '#fc6464' : 'white';
+              ctx.lineWidth = 3 / globalScale;
               ctx.stroke();
 
               const label = node.label || '';
@@ -271,10 +280,51 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
                 ctx.fillText(label, node.x, node.y);
               }
             }}
-            linkWidth={8}
-            linkColor={() => '#4887fa'}
-            linkDirectionalArrowLength={0}
-            linkDirectionalArrowRelPos={0}
+            linkCanvasObject={(
+              link: LinkObject,
+              ctx: CanvasRenderingContext2D,
+              globalScale: number
+            ) => {
+              const { source, target } = link;
+              const startX = (source as NodeObject).x;
+              const startY = (source as NodeObject).y;
+              const endX = (target as NodeObject).x;
+              const endY = (target as NodeObject).y;
+              const sourceId = (link.source as NodeObject).id;
+              const targetId = (link.target as NodeObject).id;
+              const couplingKey = createCouplingMapKey(sourceId as number, targetId as number);
+
+              if (
+                startX !== undefined &&
+                startY !== undefined &&
+                endX !== undefined &&
+                endY !== undefined
+              ) {
+                // Drawing the outer line
+                const outerStrokeColor = clsx({
+                  '#fc6464': couplingKey === hoveredLinkId,
+                  transparent: couplingKey !== hoveredLinkId,
+                });
+
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(endX, endY);
+                ctx.strokeStyle = outerStrokeColor;
+                ctx.lineWidth = 16 / globalScale;
+                ctx.stroke();
+
+                // Drawing the inner line
+                const innerStrokeColor = '#4887fa';
+
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(endX, endY);
+                ctx.strokeStyle = innerStrokeColor;
+                ctx.lineWidth = 10 / globalScale;
+                ctx.stroke();
+              }
+            }}
+            enableNodeDrag={false}
             onNodeHover={handleHoverNode}
             onLinkHover={handleHoverLink}
             height={divSize.height}

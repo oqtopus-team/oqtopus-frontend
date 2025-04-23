@@ -8,13 +8,22 @@ import { Button } from '@/pages/_components/Button';
 import { NavLink } from 'react-router';
 import { useJobAPI } from '@/backend/hook';
 import { BsDownload } from 'react-icons/bs';
+import { DateTimeFormatter } from '../../_components/DateTimeFormatter';
 
 interface JobProps {
   job: Job;
   onJobModified: () => void;
+  selectedJobs: Job[];
+  onJobSelectionChange: (job: Job, selected: boolean) => void;
 }
 
-export const JobListItem = ({ job, onJobModified }: JobProps) => {
+export const JobListItem = ({
+  job,
+  onJobModified,
+  selectedJobs,
+  onJobSelectionChange,
+}: JobProps) => {
+  const { t, i18n } = useTranslation();
   const { cancelJob, deleteJob } = useJobAPI();
   const [isProcessing, setIsProcessing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -58,6 +67,13 @@ export const JobListItem = ({ job, onJobModified }: JobProps) => {
   return (
     <tr>
       <td>
+        <input
+          type="checkbox"
+          checked={selectedJobs.some((j) => j.id === job.id)}
+          onChange={(e) => onJobSelectionChange(job, e.target.checked)}
+        />
+      </td>
+      <td>
         <NavLink to={`/jobs/${job.id}`} className="text-link">
           {job.id}
         </NavLink>
@@ -71,7 +87,7 @@ export const JobListItem = ({ job, onJobModified }: JobProps) => {
       <td>
         <JobStatus status={job.status} />
       </td>
-      <td>{job.submittedAt}</td>
+      <td>{DateTimeFormatter(t, i18n, job.submittedAt)}</td>
       <td className={clsx('py-1')}>
         <OperationButtons job={job} onClickCancel={onClickCancel} onClickDelete={onClickDelete} />
       </td>
