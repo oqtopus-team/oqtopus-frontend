@@ -14,9 +14,10 @@ import { DeviceStatus } from './DeviceStatus';
 import { Device, DeviceStatusType, DeviceType } from '@/domain/types/Device';
 import clsx from 'clsx';
 import { NavLink } from 'react-router';
+import { DateTimeFormatter } from '@/pages/authenticated/_components/DateTimeFormatter';
 
 export const DeviceListTable = ({ devices }: { devices: Device[] }): React.ReactElement => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const columnHelper = createColumnHelper<Device>();
   const columns: ColumnDef<Device, any>[] = [
     columnHelper.accessor('id', {
@@ -116,7 +117,7 @@ export const DeviceListTable = ({ devices }: { devices: Device[] }): React.React
       cell: (info: CellContext<Device, string>) => {
         try {
           const availableAt: string = info.getValue();
-          return <p> {availableAt} </p>;
+          return <p> {DateTimeFormatter(t, i18n, availableAt)} </p>;
         } catch (e) {
           return <p> - </p>;
         }

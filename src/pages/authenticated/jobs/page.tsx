@@ -12,6 +12,7 @@ import { Button } from '@/pages/_components/Button';
 import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
 import { useJobAPI } from '@/backend/hook';
+import { ConfirmModal } from '@/pages/_components/ConfirmModal';
 
 const PAGE_SIZE = 20; // 無限スクロールの1回の取得数
 
@@ -19,15 +20,18 @@ export default function JobListPage() {
   const { t } = useTranslation();
   useDocumentTitle(t('job.list.title'));
 
-  const { getLatestJobs } = useJobAPI();
+  const { getLatestJobs, deleteJob } = useJobAPI();
 
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [selectedJobs, setSelectedJobs] = useState<Job[]>([]);
   const [urlSearchParams, _] = useSearchParams();
   const [params, setParams] = useState<JobSearchParams>({});
 
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
+  const [bulkDeleteInProgress, setBulkDeleteInProgress] = useState(false);
 
   useLayoutEffect(() => {
     setParams((params) => {
@@ -53,6 +57,7 @@ export default function JobListPage() {
   const reloadJobs = (): void => {
     setPage(0);
     setJobs([]);
+    setSelectedJobs([]);
     getJobsScroll(1);
   };
 
@@ -75,6 +80,50 @@ export default function JobListPage() {
       });
   };
 
+  const handleJobSelectionChange = (job: Job, selected: boolean) => {
+    if (selected) {
+      setSelectedJobs([...selectedJobs, job]);
+    } else {
+      setSelectedJobs(selectedJobs.filter((j) => j.id !== job.id));
+    }
+  };
+
+  const handleAllJobsSelectionChange = (selected: boolean) => {
+    if (selected) {
+      setSelectedJobs([...jobs]);
+    } else {
+      setSelectedJobs([]);
+    }
+  };
+
+  const deleteSelectedJobs = async () => {
+    if (bulkDeleteInProgress) return;
+
+    setBulkDeleteInProgress(true);
+
+    for (const job of selectedJobs) {
+      try {
+        await deleteJob(job);
+      } catch (error: any) {
+        console.error(error);
+      }
+    }
+
+    reloadJobs();
+    setBulkDeleteInProgress(false);
+  };
+
+  const areAllJobsSelected = () => {
+    return (
+      jobs.length > 0 &&
+      jobs.every((j) => selectedJobs.some((selectedJob) => selectedJob.id === j.id))
+    );
+  };
+
+  const isDeleteSelectedDisabled = () => {
+    return selectedJobs.length === 0 || bulkDeleteInProgress;
+  };
+
   return (
     <div>
       <h2 className={clsx('text-primary', 'text-2xl', 'font-bold')}>{t('job.list.title')}</h2>
@@ -91,6 +140,14 @@ export default function JobListPage() {
           <JobSearchForm params={params} setParams={setParams} onSubmit={onSearchSubmit} />
         </Card>
         <Card>
+          <Button
+            className={clsx('mt-2', 'ml-auto', 'mb-2', 'block')}
+            color={isDeleteSelectedDisabled() ? 'disabled' : 'error'}
+            disabled={isDeleteSelectedDisabled()}
+            onClick={() => setShowBulkDeleteModal(true)}
+          >
+            {t('job.list.delete_selected')}
+          </Button>
           <InfiniteScroll
             next={() => getJobsScroll(page)}
             hasMore={hasMore}
@@ -101,6 +158,13 @@ export default function JobListPage() {
             <table className={clsx('w-full')}>
               <thead>
                 <tr>
+                  <th>
+                    <input
+                      type="checkbox"
+                      checked={areAllJobsSelected()}
+                      onChange={(e) => handleAllJobsSelectionChange(e.target.checked)}
+                    />
+                  </th>
                   <th>{t('job.list.table.id')}</th>
                   <th>{t('job.list.table.device')}</th>
                   <th>{t('job.list.table.status')}</th>
@@ -124,7 +188,13 @@ export default function JobListPage() {
                     return true;
                   })
                   .map((job) => (
-                    <JobListItem key={job.id} job={job} onJobModified={reloadJobs} />
+                    <JobListItem
+                      key={job.id}
+                      job={job}
+                      onJobModified={reloadJobs}
+                      selectedJobs={selectedJobs}
+                      onJobSelectionChange={handleJobSelectionChange}
+                    />
                   ))}
                 {!loading && jobs.length === 0 && (
                   <tr>
@@ -143,6 +213,26 @@ export default function JobListPage() {
               </tbody>
             </table>
           </InfiniteScroll>
+          <ConfirmModal
+            show={showBulkDeleteModal}
+            onHide={() => setShowBulkDeleteModal(false)}
+            title={t('job.list.modal.title')}
+            message={t('job.list.modal.bulk_delete')}
+            onConfirm={deleteSelectedJobs}
+          />
+          <div
+            className={clsx(
+              !bulkDeleteInProgress && '!hidden',
+              ['!fixed', '!top-0', '!left-0', '!w-full', '!h-full', 'z-40'],
+              ['flex', 'flex-col', 'items-center', 'justify-center'],
+              ['bg-modal-bg', 'bg-opacity-50']
+            )}
+          >
+            <Loader size="xl" color="secondary" />
+            <h3 className={clsx('text-secondary-content', 'mt-4')}>
+              {t('job.list.delete_in_progress')}
+            </h3>
+          </div>
         </Card>
       </div>
     </div>
