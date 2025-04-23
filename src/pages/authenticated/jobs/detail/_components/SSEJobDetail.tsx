@@ -2,12 +2,16 @@ import { Card } from '@/pages/_components/Card';
 import { Job } from '@/domain/types/Job';
 import clsx from 'clsx';
 import { JobDetailBasicInfo } from './panels/JobDetailBasicInfo';
+import { JobDetailMitigationInfo } from './panels/JobDetailMitigationInfo';
 import { JobDetailSSELog } from './panels/JobDetailSSELog';
 import { JobDetailResult } from './panels/JobDetailResult';
 import useWindowSize from '@/pages/_hooks/UseWindowSize';
 
 export const SuccessViewSSELog: React.FC<Job> = (job: Job) => {
   const nonHistogramPanelHeight = useWindowSize().height * 0.9;
+  const hasMitigationInfo: boolean = job.mitigationInfo
+    ? Object.keys(job.mitigationInfo).length > 0
+    : false;
 
   return (
     <>
@@ -29,6 +33,15 @@ export const SuccessViewSSELog: React.FC<Job> = (job: Job) => {
             message={job.jobInfo?.message}
           />
         </Card>
+        {/* MitigationInfo */}
+        {hasMitigationInfo && (
+          <Card className={clsx(['col-start-1', 'col-end-3'])}>
+            <JobDetailMitigationInfo
+              mitigationInfo={job.mitigationInfo}
+              maxHeight={nonHistogramPanelHeight}
+            />
+          </Card>
+        )}
         {/* SSE log */}
         <Card className={clsx(['col-start-1', 'col-end-3'])}>
           <JobDetailSSELog job_id={job.id} status={job.status} />
@@ -37,7 +50,6 @@ export const SuccessViewSSELog: React.FC<Job> = (job: Job) => {
         <Card className={clsx(['col-start-1', 'col-end-3'])}>
           <JobDetailResult
             result={job.jobInfo.result?.sampling}
-            mitigationInfo={JSON.stringify(job.mitigationInfo, null, 2)}
             maxHeight={nonHistogramPanelHeight}
           />
         </Card>

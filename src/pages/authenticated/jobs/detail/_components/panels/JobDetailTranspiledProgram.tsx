@@ -25,9 +25,9 @@ export const JobDetailTranspiledProgram: React.FC<JobDetailTranspiledProgramProp
       jobInfo.transpiledProgram === '' ? (
         <div className={clsx('text-xs')}>{t('job.detail.transpiled_program.nodata')}</div>
       ) : (
-        <div className={clsx(['p-3', 'rounded', 'bg-cmd-bg'], ['text-xs', 'whitespace-pre-wrap'])}>
+        <div className={clsx(['p-3', 'rounded', 'bg-cmd-bg'], ['text-xs'])}>
           <SimpleBar style={{ maxHeight: jobInfo.maxHeight }}>
-            {jobInfo.transpiledProgram}
+            <div className={clsx('whitespace-pre-wrap')}>{jobInfo.transpiledProgram}</div>
           </SimpleBar>
         </div>
       )}

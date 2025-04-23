@@ -86,7 +86,6 @@ const convertJobResult = (job: JobsGetJobsResponse): Job => ({
   simulatorInfo: job.simulator_info,
   mitigationInfo: job.mitigation_info,
 
-  // TODO: locale (UTC -> browser locale)
   submittedAt: job.submitted_at ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   readyAt: job.ready_at ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   runningAt: job.running_at ?? '', // TODO: fix invalid oas schema (nullable: should be false)

@@ -28,15 +28,19 @@ export default {
     modal: {
       title: '確認',
       delete: 'ジョブを削除します。よろしいでしょうか？',
+      bulk_delete: '選択したジョブを一括削除します。よろしいでしょうか？',
       cancel: 'ジョブをキャンセルします。よろしいでしょうか？',
     },
     nodata: '表示するジョブがありません。',
+    delete_selected: '一括削除',
+    delete_in_progress: '一括削除進行中...',
   },
   detail: {
-    title: 'ジョブ結果詳細',
+    title: 'ジョブ詳細',
     description:
       '実行日時、終了日時、実行時間、Transpiled Program、Result等の欄はジョブ処理時に反映されます。',
     not_found: '対象のジョブが存在しません。',
+    reload: '再読み込み',
     info: {
       head: '基本情報',
       item: '項目',
@@ -84,7 +88,7 @@ export default {
     },
   },
   form: {
-    title: 'QASM入力フォーム',
+    title: 'Job入力フォーム',
     description: '量子デバイスで実行するジョブを登録できます',
     name_placeholder: '例）〇〇〇',
     description_placeholder: '例）〇〇〇',
@@ -98,6 +102,7 @@ export default {
     shots_placeholder: '例）4',
     upload_file_button: 'ファイル読み込み',
     button: '送信する',
+    submit_and_view_job_button: '送信して詳細を確認',
     error_message: {
       name: 'Job名を入力してください',
       shots: '正のショット数を入力してください',

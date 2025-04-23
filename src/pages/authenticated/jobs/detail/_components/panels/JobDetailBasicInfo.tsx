@@ -3,6 +3,7 @@ import React from 'react';
 import clsx from 'clsx';
 import { Spacer } from '@/pages/_components/Spacer';
 import { isFinishedStatus } from './utils/StatusHelpers';
+import { DateTimeFormatter } from '../../../../_components/DateTimeFormatter';
 
 export interface JobDetailBasicInfoProps {
   id: string;
@@ -34,13 +35,12 @@ const BoldTh: React.FC<BoldThProps> = ({ children, className, ...props }) => {
 export const JobDetailBasicInfo: React.FC<JobDetailBasicInfoProps> = (
   job: JobDetailBasicInfoProps
 ) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const executionTime = isFinishedStatus(job.status) ? job.executionTime.toString() : '';
 
   return (
     <>
-      <h3 className={clsx('text-primary', 'font-bold')}>{t('job.detail.info.head')}</h3>
       <Spacer className="h-2" />
       <table className={clsx('w-full')}>
         <thead>
@@ -80,19 +80,19 @@ export const JobDetailBasicInfo: React.FC<JobDetailBasicInfoProps> = (
           </tr>
           <tr>
             <BoldTh>{t('job.detail.info.submitted_at')}</BoldTh>
-            <td>{job.submittedAt}</td>
+            <td>{DateTimeFormatter(t, i18n, job.submittedAt)}</td>
           </tr>
           <tr>
             <BoldTh>{t('job.detail.info.ready_at')}</BoldTh>
-            <td>{job.readyAt}</td>
+            <td>{DateTimeFormatter(t, i18n, job.readyAt)}</td>
           </tr>
           <tr>
             <BoldTh>{t('job.detail.info.running_at')}</BoldTh>
-            <td>{job.runningAt}</td>
+            <td>{DateTimeFormatter(t, i18n, job.runningAt)}</td>
           </tr>
           <tr>
             <BoldTh>{t('job.detail.info.ended_at')}</BoldTh>
-            <td>{job.endedAt}</td>
+            <td>{DateTimeFormatter(t, i18n, job.endedAt)}</td>
           </tr>
           <tr>
             <BoldTh>{t('job.detail.info.execution_time')}</BoldTh>

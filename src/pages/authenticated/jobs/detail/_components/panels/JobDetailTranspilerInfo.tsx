@@ -26,11 +26,9 @@ export const JobDetailTranspilerInfo: React.FC<JobDetailTranspilerInfoProps> = (
       job.transpilerInfo === '' ? (
         <div className={clsx('text-xs')}>{t('job.detail.transpiler_info.nodata')}</div>
       ) : (
-        <div className={clsx(['p-3', 'rounded', 'bg-cmd-bg'], ['text-xs', 'whitespace-pre-wrap'])}>
-          <SimpleBar style={{ maxHeight: job.maxHeight }}>
-            <JSONCodeBlock json={job.transpilerInfo} />
-          </SimpleBar>
-        </div>
+        <SimpleBar style={{ maxHeight: job.maxHeight }}>
+          <JSONCodeBlock json={job.transpilerInfo} />
+        </SimpleBar>
       )}
     </>
   );
