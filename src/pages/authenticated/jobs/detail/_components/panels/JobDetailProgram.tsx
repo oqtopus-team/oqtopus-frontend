@@ -25,7 +25,7 @@ export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
       ) : (
         <div className={clsx(['p-3', 'rounded', 'bg-cmd-bg'], ['text-xs'])}>
           <SimpleBar style={{ maxHeight: jobInfo.maxHeight }}>
-            {jobInfo.program.join('\n')}
+            <div className={clsx('whitespace-pre-wrap')}>{jobInfo.program.join('\n')}</div>
           </SimpleBar>
         </div>
       )}
