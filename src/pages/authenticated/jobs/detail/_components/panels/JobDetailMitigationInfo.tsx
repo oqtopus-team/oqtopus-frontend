@@ -24,7 +24,7 @@ export const JobDetailMitigationInfo: React.FC<JobDetailMitigationInfoProps> = (
         <div className={clsx('text-xs')}>{t('job.detail.mitigation_info.nodata')}</div>
       ) : (
         <div className={clsx('relative')}>
-          <div className={clsx('p-3', 'rounded', 'bg-cmd-bg', 'text-sm')}>
+          <div className={clsx('rounded', 'bg-cmd-bg', 'text-sm')}>
             <SimpleBar style={{ maxHeight: job.maxHeight }}>
               <JSONCodeBlock json={text} />
             </SimpleBar>

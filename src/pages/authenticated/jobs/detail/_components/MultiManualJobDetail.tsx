@@ -8,16 +8,23 @@ import { JobDetailResult } from './panels/JobDetailResult';
 import { JobDetailTranspiledProgram } from './panels/JobDetailTranspiledProgram';
 import { JobDetailTranspilerInfo } from './panels/JobDetailTranspilerInfo';
 import useWindowSize from '@/pages/_hooks/UseWindowSize';
+import { JobDetailMitigationInfo } from './panels/JobDetailMitigationInfo';
 import { JobDetailMultiManualHistogram } from './panels/JobDetailMultiManualHistogram';
-import { JobDetailMultiManualPullDown } from './panels/JobDetailMultiManualPullDown';
+import { JobDetailMultiManualTabs } from './panels/JobDetailMultiManualTabs';
 import { JobDetailTranspileResult } from './panels/JobDetailTranspileResult';
 
-const combinedCircuitKey = 'Combined Circuit';
+const combinedCircuitKey = 'Combined program';
+const combinedCircuitHeading = 'Combined';
+const dividedCountsKeyPre = 'Program index';
+const dividedCountsHeading = 'Index';
 
 export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
-  const [selectedKeyIndex, setSelectedKeyIndex] = useState<string>(combinedCircuitKey);
+  const [selectedKeyIndex, setSelectedKeyIndex] = useState<string>('0');
   const histogramHeight = useWindowSize().height * 0.5;
   const nonHistogramPanelHeight = useWindowSize().height * 0.9;
+  const hasMitigationInfo: boolean = job.mitigationInfo
+    ? Object.keys(job.mitigationInfo).length > 0
+    : false;
 
   const selectedQASM: string[] = useMemo(() => {
     try {
@@ -40,6 +47,32 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
     return [];
   }, [selectedKeyIndex, job.jobInfo?.combined_program, job.jobInfo?.program]);
 
+  const options = useMemo(() => {
+    try {
+      return [
+        {
+          value: combinedCircuitKey,
+          tabLabel: combinedCircuitKey,
+          heading: combinedCircuitHeading,
+        },
+        ...job.jobInfo.program.map((k, index) => ({
+          value: index.toString(),
+          tabLabel: `${dividedCountsKeyPre} ${index}`,
+          heading: `${dividedCountsHeading} ${index}`,
+        })),
+      ];
+    } catch (error) {
+      console.error('Failed to generate options:', error);
+      return [
+        {
+          value: combinedCircuitKey,
+          tabLabel: combinedCircuitKey,
+          heading: combinedCircuitHeading,
+        },
+      ];
+    }
+  }, [combinedCircuitKey, job.jobInfo.program]);
+
   return (
     <>
       <div className={clsx('grid', 'grid-cols-[1.0fr_1.0fr]', 'grid-rows-[auto_1fr]', 'gap-3')}>
@@ -60,13 +93,25 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
             message={job.jobInfo?.message}
           />
         </Card>
-        {/* Pull down */}
-        <JobDetailMultiManualPullDown
-          combinedCircuitKey={combinedCircuitKey}
-          programs={job.jobInfo?.program ?? []}
-          selectedKeyIndex={selectedKeyIndex}
-          onChange={setSelectedKeyIndex}
-        />
+        {/* Tabs */}
+        <div
+          className={clsx([
+            'col-start-1',
+            'col-end-3',
+            'transparent-header',
+            'sticky',
+            'top-0',
+            'z-50',
+          ])}
+        >
+          <JobDetailMultiManualTabs
+            combinedCircuitKey={combinedCircuitKey}
+            programs={job.jobInfo?.program ?? []}
+            selectedKeyIndex={selectedKeyIndex}
+            options={options}
+            onChange={setSelectedKeyIndex}
+          />
+        </div>
         {/* Histogram */}
         <Card className={clsx(['col-start-1', 'col-end-3'])}>
           <JobDetailMultiManualHistogram
@@ -82,24 +127,41 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
               null,
               2
             )}
+            heading={`Histogram (${options[Number(selectedKeyIndex)].heading})`}
             height={histogramHeight}
+            jobId={job.id}
           />
         </Card>
+        {/* MitigationInfo */}
+        {hasMitigationInfo && (
+          <Card className={clsx(['col-start-1', 'col-end-3'])}>
+            <JobDetailMitigationInfo
+              mitigationInfo={job.mitigationInfo}
+              maxHeight={nonHistogramPanelHeight}
+            />
+          </Card>
+        )}
         {/* TranspilerInfo */}
         <Card className={clsx(['col-start-1', 'col-end-3'])}>
           <JobDetailTranspilerInfo
             transpilerInfo={JSON.stringify(job.transpilerInfo, null, 2)}
+            heading="Transpiler Info (Combined)"
             maxHeight={nonHistogramPanelHeight}
           />
         </Card>
         {/* Program */}
         <Card className={clsx(['col-start-1', 'col-end-2'])}>
-          <JobDetailProgram program={selectedQASM} maxHeight={nonHistogramPanelHeight} />
+          <JobDetailProgram
+            program={selectedQASM}
+            maxHeight={nonHistogramPanelHeight}
+            heading={`Program (${options[Number(selectedKeyIndex)].heading})`}
+          />
         </Card>
         {/* Transpiled Program */}
         <Card className={clsx(['col-start-2', 'col-end-3'])}>
           <JobDetailTranspiledProgram
             transpiledProgram={job.jobInfo.transpile_result?.transpiled_program ?? ''}
+            heading="Transpiler Program (Combined)"
             maxHeight={nonHistogramPanelHeight}
           />
         </Card>
@@ -107,14 +169,17 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
         <Card className={clsx(['col-start-1', 'col-end-2'])}>
           <JobDetailResult
             result={job.jobInfo.result?.sampling}
-            mitigationInfo={JSON.stringify(job.mitigationInfo, null, 2)}
+            heading="Result (Combined)"
             maxHeight={nonHistogramPanelHeight}
           />
         </Card>
         {/* Transpile Result */}
         {job.jobInfo.transpile_result && (
           <Card className={clsx(['col-start-2', 'col-end-3'])}>
-            <JobDetailTranspileResult transpileResult={job.jobInfo.transpile_result} />
+            <JobDetailTranspileResult
+              transpileResult={job.jobInfo.transpile_result}
+              heading="Transpile Result (Combined)"
+            />
           </Card>
         )}
       </div>

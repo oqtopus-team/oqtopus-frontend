@@ -9,7 +9,7 @@ import ClipboardCopy from './utils/ClipboardCopy';
 
 export interface JobDetailResultProps {
   result?: JobsSamplingResult | JobsEstimationResult;
-  mitigationInfo?: string;
+  heading?: string;
   maxHeight: number;
 }
 
@@ -17,26 +17,27 @@ export const JobDetailResult: React.FC<JobDetailResultProps> = (job: JobDetailRe
   const { t } = useTranslation();
 
   const json = (() => {
-    const retVal: { [key: string]: any } = {};
-    if (job.result != null) {
-      retVal['result'] = { ...job.result };
-    }
-    if (job.mitigationInfo != null && job.mitigationInfo !== '') {
-      retVal['mitigation_info'] = job.mitigationInfo;
-    }
+    const retVal: { [key: string]: any } = (() => {
+      if (job.result != null) {
+        return job.result;
+      }
+      return {};
+    })();
     return retVal;
   })();
   const text = JSON.stringify(json);
 
   return (
     <>
-      <h3 className={clsx('text-primary', 'font-bold')}>Result</h3>
+      <h3 className={clsx('text-primary', 'font-bold')}>
+        {job.heading != null ? job.heading : 'Result'}
+      </h3>
       <Spacer className="h-2" />
       {job.result === undefined || job.result === null ? (
         <div className={clsx('text-xs')}>{t('job.detail.result.nodata')}</div>
       ) : (
         <div className={clsx('relative')}>
-          <div className={clsx('p-3', 'rounded', 'bg-cmd-bg', 'text-sm')}>
+          <div className={clsx('rounded', 'bg-cmd-bg', 'text-sm')}>
             <SimpleBar style={{ maxHeight: job.maxHeight }}>
               <JSONCodeBlock json={text} />
             </SimpleBar>

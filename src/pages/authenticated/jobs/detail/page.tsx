@@ -11,6 +11,7 @@ import { SuccessViewEstimation } from './_components/EstimationJobDetail';
 import { SuccessViewMultiManual } from './_components/MultiManualJobDetail';
 import { SuccessViewSSELog } from './_components/SSEJobDetail';
 import { useJobAPI } from '@/backend/hook';
+import ReloadButton from './_components/panels/utils/ReloadButton';
 
 export default function JobDetailPage_() {
   const { id } = useParams();
@@ -66,7 +67,12 @@ const LoadingView = () => {
 
 const Title = () => {
   const { t } = useTranslation();
-  return <h2 className={clsx('text-primary', 'text-2xl', 'font-bold')}>{t('job.detail.title')}</h2>;
+  return (
+    <h2 className={clsx('flex', 'items-center', 'text-primary', 'text-2xl', 'font-bold')}>
+      {t('job.detail.title')}
+      <ReloadButton />
+    </h2>
+  );
 };
 
 const SuccessViewWrapper: React.FC<Job> = (job: Job) => {
