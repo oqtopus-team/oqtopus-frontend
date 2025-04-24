@@ -97,7 +97,7 @@ export default {
     name_placeholder: '例）〇〇〇',
     description_placeholder: '例）〇〇〇',
     program_placeholder:
-      '例) OPENQASM 3; include "stdgates.inc"; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;',
+      '例）OPENQASM 3; include "stdgates.inc"; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;',
     operator_pauli_placeholder: '演算子のパウリ文字列 (例: X 0 X 1)',
     operator_coeff_placeholder: '演算子の係数を入力 (例: 1.5)',
     transpiler_placeholder: '例）{}',
