@@ -14,10 +14,10 @@ export default {
     },
     table: {
       id: 'ジョブID',
+      name: 'ジョブ名',
       device: 'デバイスID',
       status: 'ステータス',
-      date: '登録日時',
-      description: '説明',
+      date: 'Submit 日時',
       operation: '操作',
       delete_button: '削除',
     },

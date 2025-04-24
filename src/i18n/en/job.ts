@@ -14,10 +14,10 @@ export default {
     },
     table: {
       id: 'Job ID',
+      name: 'Job name',
       device: 'Device ID',
       status: 'Status',
-      date: 'Created',
-      description: 'Description',
+      date: 'Submitted at',
       operation: 'Action',
       delete_button: 'Delete',
     },
