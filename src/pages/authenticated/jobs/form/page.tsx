@@ -8,7 +8,7 @@ import { Input } from '@/pages/_components/Input';
 import { Select } from '@/pages/_components/Select';
 import { TextArea } from '@/pages/_components/TextArea';
 import { Spacer } from '@/pages/_components/Spacer';
-import { NavLink } from 'react-router';
+import { NavLink, useNavigate } from 'react-router';
 import { useDeviceAPI, useJobAPI } from '@/backend/hook';
 import { FormEvent, useEffect, useLayoutEffect, useState } from 'react';
 import { Device } from '@/domain/types/Device';
@@ -29,9 +29,9 @@ import { JobsSubmitJobInfo } from '@/api/generated';
 import { Toggle } from '@/pages/_components/Toggle';
 import JobFileUpload from './_components/JobFileUpload';
 
-
 export default function Page() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { getDevices } = useDeviceAPI();
   const { submitJob } = useJobAPI();
 
@@ -57,7 +57,7 @@ export default function Page() {
       ...jobInfo,
       operator: operator.map((op) => ({
         ...op,
-        coeff: Number(op.coeff)
+        coeff: Number(op.coeff),
       })),
     }));
     setError((error) => ({
@@ -154,11 +154,6 @@ export default function Page() {
 
   const [processing, setProcessing] = useState(false);
   const handleSubmit = async () => {
-    if (name.trim() === '') {
-      setError((error) => ({ ...error, name: t('job.form.error_message.name') }));
-      return;
-    }
-
     if (shots <= 0) {
       setError((error) => ({ ...error, shots: t('job.form.error_message.shots') }));
       return;
@@ -213,22 +208,23 @@ export default function Page() {
             }));
             return false;
           }
-          const coeffError = `{${operatorItem.coeff}`.trim() == "" || isNaN(Number(operatorItem.coeff))
+          const coeffError =
+            `{${operatorItem.coeff}`.trim() == '' || isNaN(Number(operatorItem.coeff))
               ? t('job.form.error_message.operator.coeff')
               : undefined;
-              
+
           if (coeffError) {
-            setError(errors => ({
+            setError((errors) => ({
               jobInfo: {
                 ...errors.jobInfo,
                 operator: {
                   ...errors.jobInfo.operator,
                   coeff: {
                     ...errors.jobInfo.operator.coeff,
-                    [i]: coeffError
-                  }
-                }
-              }
+                    [i]: coeffError,
+                  },
+                },
+              },
             }));
             return false;
           }
@@ -263,7 +259,7 @@ export default function Page() {
     }
 
     setProcessing(true);
-    await submitJob({
+    const res = await submitJob({
       name: name.trim(),
       description,
       device_id: deviceId,
@@ -280,6 +276,13 @@ export default function Page() {
       .finally(() => {
         setProcessing(false);
       });
+    return res;
+  };
+
+  const handleSubmitAndViewJob = async () => {
+    const jobId = await handleSubmit();
+    if (processing) return;
+    navigate('/jobs/' + jobId);
   };
 
   return (
@@ -383,7 +386,11 @@ export default function Page() {
             <Spacer className="h-5" />
             {/* operator */}
             {jobType === 'estimation' && (
-              <OperatorForm current={operator} set={(v) => setOperator(v)} error={error.jobInfo.operator} />
+              <OperatorForm
+                current={operator}
+                set={(v) => setOperator(v)}
+                error={error.jobInfo.operator}
+              />
             )}
             <Spacer className="h-7" />
           </div>
@@ -476,6 +483,9 @@ export default function Page() {
             <Button color="secondary" onClick={handleSubmit} loading={processing}>
               {t('job.form.button')}
             </Button>
+            <Button color="secondary" onClick={handleSubmitAndViewJob} loading={processing}>
+              {t('job.form.submit_and_view_job_button')}
+            </Button>
           </div>
           <CheckReferenceCTA />
         </div>
@@ -490,7 +500,7 @@ const CheckReferenceCTA = () => {
       {i18next.language === 'ja' ? (
         <>
           各入力値については
-          <NavLink to="#" className="text-link">
+          <NavLink to="/howto#/job/submit_job" className="text-link">
             こちら
           </NavLink>
           の説明を参照してください
@@ -498,7 +508,7 @@ const CheckReferenceCTA = () => {
       ) : (
         <>
           For each input value, please refer to the explanation{' '}
-          <NavLink to="#" className="text-link">
+          <NavLink to="/howto#/job/submit_job" className="text-link">
             here.
           </NavLink>
         </>
@@ -520,19 +530,19 @@ const OperatorForm = ({
   };
 }) => {
   const { t } = useTranslation();
-  const [ formValue, setFormValue ] = useState([{ pauli: "", coeff: "1.0" }])
+  const [formValue, setFormValue] = useState([{ pauli: '', coeff: '1.0' }]);
   const handleCoeffInput = (index: number) => (e: FormEvent<HTMLInputElement>) => {
     const coeffRaw = (e.target as HTMLInputElement).value;
-    const coeffNumber = coeffRaw.trim() === "" ? Number.NaN : Number(coeffRaw);
+    const coeffNumber = coeffRaw.trim() === '' ? Number.NaN : Number(coeffRaw);
 
     set(current.map((o, i) => (i === index ? { ...o, coeff: coeffNumber } : o)));
     setFormValue({ ...formValue, [index]: { ...formValue[index], coeff: coeffRaw } });
-  }
+  };
 
   const handlePlusButtonClick = () => {
-    set([...current, { pauli: "", coeff: 1.0 }]);
-    setFormValue([...formValue, { pauli: "", coeff: "1.0" }])
-  }
+    set([...current, { pauli: '', coeff: 1.0 }]);
+    setFormValue([...formValue, { pauli: '', coeff: '1.0' }]);
+  };
 
   return (
     <div className={clsx('grid', 'gap-2')}>
@@ -548,7 +558,7 @@ const OperatorForm = ({
                   label={t('job.form.operator.coeff')}
                   placeholder={t('job.form.operator_coeff_placeholder')}
                   value={formValue[index].coeff}
-                  type='string'
+                  type="string"
                   onInput={handleCoeffInput(index)}
                   errorMessage={error.coeff[index]}
                 />
@@ -557,12 +567,15 @@ const OperatorForm = ({
                   placeholder={t('job.form.operator_pauli_placeholder')}
                   value={item.pauli}
                   onChange={(e) => {
-                    set(current.map((o, i) => (i === index ? { ...o, pauli: (e.target as HTMLInputElement)?.value } : o)));
+                    set(
+                      current.map((o, i) =>
+                        i === index ? { ...o, pauli: (e.target as HTMLInputElement)?.value } : o
+                      )
+                    );
                   }}
                   errorMessage={error.pauli[index]}
                 />
               </div>
-
             </div>
             <Button
               color="error"
@@ -578,11 +591,7 @@ const OperatorForm = ({
         ))}
       </div>
       <div className={clsx('w-min')}>
-        <Button
-          color="secondary"
-          size="small"
-          onClick={handlePlusButtonClick}
-        >
+        <Button color="secondary" size="small" onClick={handlePlusButtonClick}>
           +
         </Button>
       </div>

@@ -1,13 +1,36 @@
+import { useRef, useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { Spacer } from '@/pages/_components/Spacer';
+import downloadIcon from './icon/download_icon.svg';
 
 interface HistogramInfoProps {
   categories: string[];
   data: number[];
   height: number;
+  filename: string;
 }
 
 export const Histogram: React.FC<HistogramInfoProps> = (histogramInfo: HistogramInfoProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState<number>(0);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      setWidth(containerRef.current.getBoundingClientRect().width);
+    }
+
+    const handleResize = () => {
+      if (containerRef.current) {
+        setWidth(containerRef.current.getBoundingClientRect().width);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   const state = {
     series: [
       {
@@ -16,6 +39,33 @@ export const Histogram: React.FC<HistogramInfoProps> = (histogramInfo: Histogram
       },
     ],
     options: {
+      chart: {
+        toolbar: {
+          show: true,
+          offsetX: width * -0.015,
+          offsetY: histogramInfo.height * -0.05,
+          tools: {
+            download: `<img src="${downloadIcon}" style="max-width: 5vw; height: 5vh;">`,
+          },
+          export: {
+            csv: {
+              filename: histogramInfo.filename,
+            },
+            svg: {
+              filename: histogramInfo.filename,
+            },
+            png: {
+              filename: histogramInfo.filename,
+            },
+          },
+        },
+      },
+      tooltip: {
+        enabled: true,
+        marker: {
+          show: false,
+        },
+      },
       plotOptions: {},
       dataLabels: {
         enabled: false,
@@ -28,21 +78,6 @@ export const Histogram: React.FC<HistogramInfoProps> = (histogramInfo: Histogram
         },
         axisTicks: {
           show: false,
-        },
-        crosshairs: {
-          fill: {
-            type: 'gradient',
-            gradient: {
-              colorFrom: '#D8E3F0',
-              colorTo: '#BED1E6',
-              stops: [0, 100],
-              opacityFrom: 0.4,
-              opacityTo: 0.5,
-            },
-          },
-        },
-        tooltip: {
-          enabled: true,
         },
       },
       yaxis: {
@@ -69,7 +104,7 @@ export const Histogram: React.FC<HistogramInfoProps> = (histogramInfo: Histogram
 
   return (
     <>
-      <div>
+      <div ref={containerRef}>
         <Spacer className="h-2" />
         <ReactApexChart
           series={state.series}
