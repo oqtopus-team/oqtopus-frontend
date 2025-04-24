@@ -76,7 +76,6 @@ export const JobDetailMultiManualHistogram: React.FC<countsProps> = ({
   };
 
   const histogramInfo = useMemo(() => getHistogramData(), [pullDownKey]);
-  console.log('histogramInfo', histogramInfo);
 
   return (
     <>

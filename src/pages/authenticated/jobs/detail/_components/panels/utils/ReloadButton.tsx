@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 
-const ReloadTitle: React.FC = () => {
+const ReloadButton: React.FC = () => {
   const { t } = useTranslation();
 
   const handleReload = () => {
@@ -30,4 +30,4 @@ const ReloadTitle: React.FC = () => {
   );
 };
 
-export default ReloadTitle;
+export default ReloadButton;

@@ -68,10 +68,10 @@ const LoadingView = () => {
 const Title = () => {
   const { t } = useTranslation();
   return (
-    <h2 className={clsx('flex', 'items-center', 'text-primary', 'text-2xl', 'font-bold')}>
+    <div className={clsx('flex', 'items-center', 'text-primary', 'text-2xl', 'font-bold')}>
       {t('job.detail.title')}
       <ReloadButton />
-    </h2>
+    </div>
   );
 };
 
