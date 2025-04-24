@@ -22,9 +22,9 @@ export default {
       id: 'ジョブID',
       device: 'デバイスID',
       status: 'ステータス',
-      date: '登録日時',
+      date: 'Submit 日時',
       shots: 'ショット数',
-      description: '説明文',
+      name: 'ジョブ名',
     },
   },
   news: {

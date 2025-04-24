@@ -8,6 +8,7 @@ import { JobDetailResult } from './panels/JobDetailResult';
 import { JobDetailTranspiledProgram } from './panels/JobDetailTranspiledProgram';
 import { JobDetailTranspilerInfo } from './panels/JobDetailTranspilerInfo';
 import useWindowSize from '@/pages/_hooks/UseWindowSize';
+import { JobDetailMitigationInfo } from './panels/JobDetailMitigationInfo';
 import { JobDetailMultiManualHistogram } from './panels/JobDetailMultiManualHistogram';
 import { JobDetailMultiManualTabs } from './panels/JobDetailMultiManualTabs';
 import { JobDetailTranspileResult } from './panels/JobDetailTranspileResult';
@@ -21,6 +22,9 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
   const [selectedKeyIndex, setSelectedKeyIndex] = useState<string>('0');
   const histogramHeight = useWindowSize().height * 0.5;
   const nonHistogramPanelHeight = useWindowSize().height * 0.9;
+  const hasMitigationInfo: boolean = job.mitigationInfo
+    ? Object.keys(job.mitigationInfo).length > 0
+    : false;
 
   const selectedQASM: string[] = useMemo(() => {
     try {
@@ -125,8 +129,18 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
             )}
             heading={`Histogram (${options[Number(selectedKeyIndex)].heading})`}
             height={histogramHeight}
+            jobId={job.id}
           />
         </Card>
+        {/* MitigationInfo */}
+        {hasMitigationInfo && (
+          <Card className={clsx(['col-start-1', 'col-end-3'])}>
+            <JobDetailMitigationInfo
+              mitigationInfo={job.mitigationInfo}
+              maxHeight={nonHistogramPanelHeight}
+            />
+          </Card>
+        )}
         {/* TranspilerInfo */}
         <Card className={clsx(['col-start-1', 'col-end-3'])}>
           <JobDetailTranspilerInfo
@@ -155,7 +169,6 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
         <Card className={clsx(['col-start-1', 'col-end-2'])}>
           <JobDetailResult
             result={job.jobInfo.result?.sampling}
-            mitigationInfo={JSON.stringify(job.mitigationInfo, null, 2)}
             heading="Result (Combined)"
             maxHeight={nonHistogramPanelHeight}
           />
