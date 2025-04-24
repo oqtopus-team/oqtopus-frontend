@@ -181,7 +181,8 @@ export default function Page() {
   });
 
   const [processing, setProcessing] = useState(false);
-  const handleSubmit = async () => {
+
+  const handleSubmit = async (shouldNavigate: boolean = false) => {
     if (processing) {
       console.warn('Already processing');
       return;
@@ -291,8 +292,9 @@ export default function Page() {
     }
 
     setProcessing(true);
+
     try {
-      await submitJob({
+      const res = await submitJob({
         name: name.trim(),
         description,
         device_id: deviceId,
@@ -303,7 +305,14 @@ export default function Page() {
         mitigation_info: JSON.parse(mitigationInfo),
         shots,
       });
-      toast.success(t('job.form.toast.success'));
+      toast.success(
+        t('job.form.toast.success'),
+        shouldNavigate
+          ? {
+              onClose: () => navigate('/jobs/' + res),
+            }
+          : {}
+      );
     } catch (e) {
       console.error(e);
       toast.error(t('job.form.toast.error'));
@@ -312,11 +321,39 @@ export default function Page() {
     }
   };
 
+  const handleProgramTypeChange = (newProgramType: ProgramType) => {
+    if (program[0] !== '') {
+      setPendingProgramType(newProgramType);
+      setDeleteModalShow(true);
+    } else {
+      setProgramType(newProgramType);
+      if (jobDefaults) {
+        setProgram([jobDefaults[newProgramType]]);
+      }
+    }
+  };
+
+  const confirmProgramTypeChange = () => {
+    if (pendingProgramType) {
+      setProgramType(pendingProgramType);
+      setPendingProgramType(null);
+      if (jobDefaults) {
+        setProgram([jobDefaults[pendingProgramType]]);
+      }
+    }
+    setDeleteModalShow(false);
+  };
+
+  const cancelProgramTypeChange = () => {
+    setPendingProgramType(null);
+    setDeleteModalShow(false);
+  };
+
   return (
     <div>
       <ToastContainer
         position="top-right"
-        autoClose={3000} // display for 3 seconds
+        autoClose={2000} // display for 2 seconds
         newestOnTop={true}
         closeOnClick
         pauseOnFocusLoss
@@ -541,10 +578,10 @@ export default function Page() {
         <div className={clsx('flex', 'flex-wrap', 'gap-2', 'justify-between', 'items-end')}>
           <div className={clsx('flex', 'flex-wrap', 'gap-2', 'justify-between')}>
             <JobFileUpload setJobFileData={setJobFileData} devices={devices} />
-            <Button color="secondary" onClick={handleSubmit} loading={processing}>
+            <Button color="secondary" onClick={() => handleSubmit(false)} loading={processing}>
               {t('job.form.button')}
             </Button>
-            <Button color="secondary" onClick={handleSubmitAndViewJob} loading={processing}>
+            <Button color="secondary" onClick={() => handleSubmit(true)} loading={processing}>
               {t('job.form.submit_and_view_job_button')}
             </Button>
           </div>
