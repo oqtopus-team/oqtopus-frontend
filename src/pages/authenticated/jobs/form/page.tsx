@@ -307,6 +307,7 @@ export default function Page() {
   const handleSubmitAndViewJob = async () => {
     const jobId = await handleSubmit();
     if (processing) return;
+    if (!jobId) return;
     navigate('/jobs/' + jobId);
   };
 
