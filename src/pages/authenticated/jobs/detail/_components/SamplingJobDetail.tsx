@@ -45,6 +45,7 @@ export const SuccessViewSampling: React.FC<Job> = (job: Job) => {
             countsJson={JSON.stringify(job.jobInfo.result?.sampling?.counts, null, 2)}
             mitigationInfo={job.mitigationInfo}
             height={histogramHeight}
+            jobId={job.id}
           />
         </Card>
         {/* MitigationInfo */}

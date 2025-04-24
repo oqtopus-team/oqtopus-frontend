@@ -31,6 +31,37 @@ export const JOB_FORM_TRANSPILER_INFO_DEFAULTS: { [key in TranspilerTypeType]: s
   None: JSON.stringify({ transpiler_lib: null }, null, 2),
 } as const;
 
+export const PROGRAM_TYPES = ['Default', 'Bell Measurement'] as const;
+export const PROGRAM_TYPE_DEFAULT = PROGRAM_TYPES[0];
+export type ProgramType = (typeof PROGRAM_TYPES)[number];
+
+export async function initializeJobFormProgramDefaults(): Promise<{
+  [key in ProgramType]: string;
+}> {
+  const results = await Promise.all(
+    PROGRAM_TYPES.map((fileName: string) => {
+      if (fileName === PROGRAM_TYPE_DEFAULT) {
+        // set the 'Default' program empty
+        return Promise.resolve({ fileName, content: '' });
+      }
+      return fetch(`/sample_program/${fileName}.txt`).then((res) => {
+        if (!res.ok) {
+          console.error('failed to load file:', fileName);
+          return { fileName, content: '' };
+        }
+        return res.text().then((content) => ({ fileName, content }));
+      });
+    })
+  );
+  const info: { [key in ProgramType]?: string } = {};
+  results.forEach((result) => {
+    if (result != null) {
+      info[result.fileName as ProgramType] = result.content;
+    }
+  });
+  return info as { [key in ProgramType]: string };
+}
+
 export const JOB_FORM_MITIGATION_INFO_DEFAULTS: { [key in 'PseudoInv' | 'None']: string } = {
   PseudoInv: JSON.stringify(
     {

@@ -16,10 +16,10 @@ export default {
     },
     table: {
       id: 'ジョブID',
+      name: 'ジョブ名',
       device: 'デバイスID',
       status: 'ステータス',
-      date: '登録日時',
-      description: '説明',
+      date: 'Submit 日時',
       operation: '操作',
       delete_button: '削除',
     },
@@ -30,15 +30,19 @@ export default {
     modal: {
       title: '確認',
       delete: 'ジョブを削除します。よろしいでしょうか？',
+      bulk_delete: '選択したジョブを一括削除します。よろしいでしょうか？',
       cancel: 'ジョブをキャンセルします。よろしいでしょうか？',
     },
     nodata: '表示するジョブがありません。',
+    delete_selected: '一括削除',
+    delete_in_progress: '一括削除進行中...',
   },
   detail: {
-    title: 'ジョブ結果詳細',
+    title: 'ジョブ詳細',
     description:
       '実行日時、終了日時、実行時間、Transpiled Program、Result等の欄はジョブ処理時に反映されます。',
     not_found: '対象のジョブが存在しません。',
+    reload: '再読み込み',
     info: {
       head: '基本情報',
       item: '項目',
@@ -84,14 +88,18 @@ export default {
       head: 'SSE ログ',
       button: 'Log ダウンロード',
     },
+    text: {
+      copied: 'コピーしました',
+      copy_tooltip: 'クリップボードにコピー',
+    },
   },
   form: {
-    title: 'QASM入力フォーム',
+    title: 'Job入力フォーム',
     description: '量子デバイスで実行するジョブを登録できます',
     name_placeholder: '例）〇〇〇',
     description_placeholder: '例）〇〇〇',
     program_placeholder:
-      '例）OPENQASM 3; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;',
+      '例）OPENQASM 3; include "stdgates.inc"; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;',
     operator_pauli_placeholder: '演算子のパウリ文字列 (例: X 0 X 1)',
     operator_coeff_placeholder: '演算子の係数を入力 (例: 1.5)',
     transpiler_placeholder: '例）{}',
@@ -100,6 +108,7 @@ export default {
     shots_placeholder: '例）4',
     upload_file_button: 'ファイル読み込み',
     button: '送信する',
+    submit_and_view_job_button: '送信して詳細を確認',
     toast: {
       success: '成功: ジョブが正常に送信されました',
       error: '失敗: ジョブの送信に失敗しました',

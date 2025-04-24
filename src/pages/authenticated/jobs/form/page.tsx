@@ -8,7 +8,7 @@ import { Input } from '@/pages/_components/Input';
 import { Select } from '@/pages/_components/Select';
 import { TextArea } from '@/pages/_components/TextArea';
 import { Spacer } from '@/pages/_components/Spacer';
-import { NavLink } from 'react-router';
+import { NavLink, useNavigate } from 'react-router';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useDeviceAPI, useJobAPI } from '@/backend/hook';
@@ -26,13 +26,19 @@ import {
   TRANSPILER_TYPE_DEFAULT,
   TRANSPILER_TYPES,
   TranspilerTypeType,
+  PROGRAM_TYPES,
+  ProgramType,
+  PROGRAM_TYPE_DEFAULT,
+  initializeJobFormProgramDefaults,
 } from '@/domain/types/Job';
 import { JobsSubmitJobInfo } from '@/api/generated';
 import { Toggle } from '@/pages/_components/Toggle';
 import JobFileUpload from './_components/JobFileUpload';
+import { ConfirmModal } from '@/pages/_components/ConfirmModal';
 
 export default function Page() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { getDevices } = useDeviceAPI();
   const { submitJob } = useJobAPI();
 
@@ -49,7 +55,27 @@ export default function Page() {
 
   const [jobInfo, setJobInfo] = useState<JobsSubmitJobInfo>({ program: [''], operator: [] });
   const [program, setProgram] = useState<string[]>(['']);
+  const [programType, setProgramType] = useState<ProgramType>(PROGRAM_TYPE_DEFAULT);
+  const [pendingProgramType, setPendingProgramType] = useState<ProgramType | null>(null);
+  const [deleteModalShow, setDeleteModalShow] = useState(false);
   const [operator, setOperator] = useState([{ pauli: '', coeff: 1.0 }]);
+  const [jobDefaults, setJobDefaults] = useState<{ [key in ProgramType]: string } | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    // Load the default program from /public/sample_program
+    async function fetchDefaults() {
+      try {
+        const defaults = await initializeJobFormProgramDefaults();
+        setJobDefaults(defaults);
+      } catch (error) {
+        console.error('failed to initialize:', error);
+      }
+    }
+    fetchDefaults();
+  }, []);
+
   useEffect(() => {
     setJobInfo((jobInfo) => ({ ...jobInfo, program }));
     setError((error) => ({ ...error, jobInfo: { ...error.jobInfo, program: {} } }));
@@ -160,11 +186,6 @@ export default function Page() {
       console.warn('Already processing');
       return;
     }
-    if (name.trim() === '') {
-      setError((error) => ({ ...error, name: t('job.form.error_message.name') }));
-      return;
-    }
-
     if (shots <= 0) {
       setError((error) => ({ ...error, shots: t('job.form.error_message.shots') }));
       return;
@@ -385,7 +406,24 @@ export default function Page() {
               <Spacer className="h-4" />
               <Divider />
               <Spacer className="h-4" />
-              <p className={clsx('font-bold', 'text-primary')}>program</p>
+              <div className={clsx('flex', 'justify-between')}>
+                <p className={clsx('font-bold', 'text-primary')}>program</p>
+                <Select
+                  labelLeft="sample program"
+                  value={programType}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                    handleProgramTypeChange(e.target.value as ProgramType);
+                  }}
+                  errorMessage={error.jobType}
+                  size="xs"
+                >
+                  {PROGRAM_TYPES.map((oneProgramType) => (
+                    <option key={oneProgramType} value={oneProgramType}>
+                      {oneProgramType}
+                    </option>
+                  ))}
+                </Select>
+              </div>
               <Spacer className="h-2" />
             </>
             {/* programs */}
@@ -398,6 +436,13 @@ export default function Page() {
                 setError((error) => ({ ...error, program: undefined }));
               }}
               errorMessage={error.jobInfo.program[0]}
+            />
+            <ConfirmModal
+              show={deleteModalShow}
+              onHide={cancelProgramTypeChange}
+              title={t('job.list.modal.title')}
+              message={t('job.form.modal.overwrite_program')}
+              onConfirm={confirmProgramTypeChange}
             />
             <Spacer className="h-5" />
             {/* operator */}
@@ -499,6 +544,9 @@ export default function Page() {
             <Button color="secondary" onClick={handleSubmit} loading={processing}>
               {t('job.form.button')}
             </Button>
+            <Button color="secondary" onClick={handleSubmitAndViewJob} loading={processing}>
+              {t('job.form.submit_and_view_job_button')}
+            </Button>
           </div>
           <CheckReferenceCTA />
         </div>
@@ -513,7 +561,7 @@ const CheckReferenceCTA = () => {
       {i18next.language === 'ja' ? (
         <>
           各入力値については
-          <NavLink to="#" className="text-link">
+          <NavLink to="/howto#/job/submit_job" className="text-link">
             こちら
           </NavLink>
           の説明を参照してください
@@ -521,7 +569,7 @@ const CheckReferenceCTA = () => {
       ) : (
         <>
           For each input value, please refer to the explanation{' '}
-          <NavLink to="#" className="text-link">
+          <NavLink to="/howto#/job/submit_job" className="text-link">
             here.
           </NavLink>
         </>
