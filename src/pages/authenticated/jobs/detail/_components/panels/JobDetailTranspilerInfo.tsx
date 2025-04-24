@@ -4,6 +4,7 @@ import { Spacer } from '@/pages/_components/Spacer';
 import { JSONCodeBlock } from '@/pages/_components/JSONCodeBlock';
 import SimpleBar from 'simplebar-react';
 import 'simplebar-react/dist/simplebar.min.css';
+import ClipboardCopy from './utils/ClipboardCopy';
 
 export interface JobDetailTranspilerInfoProps {
   transpilerInfo?: string;
@@ -15,6 +16,7 @@ export const JobDetailTranspilerInfo: React.FC<JobDetailTranspilerInfoProps> = (
   job: JobDetailTranspilerInfoProps
 ) => {
   const { t } = useTranslation();
+  const text = job.transpilerInfo ?? '';
   return (
     <>
       <h3 className={clsx('text-primary', 'font-bold')}>
@@ -26,10 +28,13 @@ export const JobDetailTranspilerInfo: React.FC<JobDetailTranspilerInfoProps> = (
       job.transpilerInfo === '' ? (
         <div className={clsx('text-xs')}>{t('job.detail.transpiler_info.nodata')}</div>
       ) : (
-        <div className={clsx(['p-3', 'rounded', 'bg-cmd-bg'], ['text-xs', 'whitespace-pre-wrap'])}>
-          <SimpleBar style={{ maxHeight: job.maxHeight }}>
-            <JSONCodeBlock json={job.transpilerInfo} />
-          </SimpleBar>
+        <div className={clsx('relative')}>
+          <div className={clsx('rounded', 'bg-cmd-bg', 'text-sm')}>
+            <SimpleBar style={{ maxHeight: job.maxHeight }}>
+              <JSONCodeBlock json={text} />
+            </SimpleBar>
+          </div>
+          <ClipboardCopy text={text} />
         </div>
       )}
     </>
