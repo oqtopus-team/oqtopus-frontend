@@ -9,6 +9,8 @@ import { Select } from '@/pages/_components/Select';
 import { TextArea } from '@/pages/_components/TextArea';
 import { Spacer } from '@/pages/_components/Spacer';
 import { NavLink, useNavigate } from 'react-router';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { useDeviceAPI, useJobAPI } from '@/backend/hook';
 import { FormEvent, useEffect, useLayoutEffect, useState } from 'react';
 import { Device } from '@/domain/types/Device';
@@ -24,10 +26,15 @@ import {
   TRANSPILER_TYPE_DEFAULT,
   TRANSPILER_TYPES,
   TranspilerTypeType,
+  PROGRAM_TYPES,
+  ProgramType,
+  PROGRAM_TYPE_DEFAULT,
+  initializeJobFormProgramDefaults,
 } from '@/domain/types/Job';
 import { JobsSubmitJobInfo } from '@/api/generated';
 import { Toggle } from '@/pages/_components/Toggle';
 import JobFileUpload from './_components/JobFileUpload';
+import { ConfirmModal } from '@/pages/_components/ConfirmModal';
 
 export default function Page() {
   const { t } = useTranslation();
@@ -36,6 +43,7 @@ export default function Page() {
   const { submitJob } = useJobAPI();
 
   const [devices, setDevices] = useState<Device[]>([]);
+
   useLayoutEffect(() => {
     getDevices().then((devices) => setDevices(devices));
   }, []);
@@ -47,7 +55,27 @@ export default function Page() {
 
   const [jobInfo, setJobInfo] = useState<JobsSubmitJobInfo>({ program: [''], operator: [] });
   const [program, setProgram] = useState<string[]>(['']);
+  const [programType, setProgramType] = useState<ProgramType>(PROGRAM_TYPE_DEFAULT);
+  const [pendingProgramType, setPendingProgramType] = useState<ProgramType | null>(null);
+  const [deleteModalShow, setDeleteModalShow] = useState(false);
   const [operator, setOperator] = useState([{ pauli: '', coeff: 1.0 }]);
+  const [jobDefaults, setJobDefaults] = useState<{ [key in ProgramType]: string } | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    // Load the default program from /public/sample_program
+    async function fetchDefaults() {
+      try {
+        const defaults = await initializeJobFormProgramDefaults();
+        setJobDefaults(defaults);
+      } catch (error) {
+        console.error('failed to initialize:', error);
+      }
+    }
+    fetchDefaults();
+  }, []);
+
   useEffect(() => {
     setJobInfo((jobInfo) => ({ ...jobInfo, program }));
     setError((error) => ({ ...error, jobInfo: { ...error.jobInfo, program: {} } }));
@@ -153,7 +181,12 @@ export default function Page() {
   });
 
   const [processing, setProcessing] = useState(false);
-  const handleSubmit = async () => {
+
+  const handleSubmit = async (shouldNavigate: boolean = false) => {
+    if (processing) {
+      console.warn('Already processing');
+      return;
+    }
     if (shots <= 0) {
       setError((error) => ({ ...error, shots: t('job.form.error_message.shots') }));
       return;
@@ -259,34 +292,75 @@ export default function Page() {
     }
 
     setProcessing(true);
-    const res = await submitJob({
-      name: name.trim(),
-      description,
-      device_id: deviceId,
-      job_type: jobType,
-      job_info: sanitizedJobInfo,
-      transpiler_info: JSON.parse(transpilerInfo),
-      simulator_info: JSON.parse(simulatorInfo),
-      mitigation_info: JSON.parse(mitigationInfo),
-      shots,
-    })
-      .catch((e) => {
-        console.error(e);
-      })
-      .finally(() => {
-        setProcessing(false);
+
+    try {
+      const res = await submitJob({
+        name: name.trim(),
+        description,
+        device_id: deviceId,
+        job_type: jobType,
+        job_info: sanitizedJobInfo,
+        transpiler_info: JSON.parse(transpilerInfo),
+        simulator_info: JSON.parse(simulatorInfo),
+        mitigation_info: JSON.parse(mitigationInfo),
+        shots,
       });
-    return res;
+      toast.success(
+        t('job.form.toast.success'),
+        shouldNavigate
+          ? {
+              onClose: () => navigate('/jobs/' + res),
+            }
+          : {}
+      );
+    } catch (e) {
+      console.error(e);
+      toast.error(t('job.form.toast.error'));
+    } finally {
+      setProcessing(false);
+    }
   };
 
-  const handleSubmitAndViewJob = async () => {
-    const jobId = await handleSubmit();
-    if (processing) return;
-    navigate('/jobs/' + jobId);
+  const handleProgramTypeChange = (newProgramType: ProgramType) => {
+    if (program[0] !== '') {
+      setPendingProgramType(newProgramType);
+      setDeleteModalShow(true);
+    } else {
+      setProgramType(newProgramType);
+      if (jobDefaults) {
+        setProgram([jobDefaults[newProgramType]]);
+      }
+    }
+  };
+
+  const confirmProgramTypeChange = () => {
+    if (pendingProgramType) {
+      setProgramType(pendingProgramType);
+      setPendingProgramType(null);
+      if (jobDefaults) {
+        setProgram([jobDefaults[pendingProgramType]]);
+      }
+    }
+    setDeleteModalShow(false);
+  };
+
+  const cancelProgramTypeChange = () => {
+    setPendingProgramType(null);
+    setDeleteModalShow(false);
   };
 
   return (
     <div>
+      <ToastContainer
+        position="top-right"
+        autoClose={2000} // display for 2 seconds
+        newestOnTop={true}
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        hideProgressBar={true}
+        pauseOnHover
+      />
       <h2 className={clsx('text-primary', 'text-2xl', 'font-bold')}>{t('job.form.title')}</h2>
       <Spacer className="h-3" />
       <p className={clsx('text-sm')}>{t('job.form.description')}</p>
@@ -369,7 +443,24 @@ export default function Page() {
               <Spacer className="h-4" />
               <Divider />
               <Spacer className="h-4" />
-              <p className={clsx('font-bold', 'text-primary')}>program</p>
+              <div className={clsx('flex', 'justify-between')}>
+                <p className={clsx('font-bold', 'text-primary')}>program</p>
+                <Select
+                  labelLeft="sample program"
+                  value={programType}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                    handleProgramTypeChange(e.target.value as ProgramType);
+                  }}
+                  errorMessage={error.jobType}
+                  size="xs"
+                >
+                  {PROGRAM_TYPES.map((oneProgramType) => (
+                    <option key={oneProgramType} value={oneProgramType}>
+                      {oneProgramType}
+                    </option>
+                  ))}
+                </Select>
+              </div>
               <Spacer className="h-2" />
             </>
             {/* programs */}
@@ -382,6 +473,13 @@ export default function Page() {
                 setError((error) => ({ ...error, program: undefined }));
               }}
               errorMessage={error.jobInfo.program[0]}
+            />
+            <ConfirmModal
+              show={deleteModalShow}
+              onHide={cancelProgramTypeChange}
+              title={t('job.list.modal.title')}
+              message={t('job.form.modal.overwrite_program')}
+              onConfirm={confirmProgramTypeChange}
             />
             <Spacer className="h-5" />
             {/* operator */}
@@ -480,10 +578,10 @@ export default function Page() {
         <div className={clsx('flex', 'flex-wrap', 'gap-2', 'justify-between', 'items-end')}>
           <div className={clsx('flex', 'flex-wrap', 'gap-2', 'justify-between')}>
             <JobFileUpload setJobFileData={setJobFileData} devices={devices} />
-            <Button color="secondary" onClick={handleSubmit} loading={processing}>
+            <Button color="secondary" onClick={() => handleSubmit(false)} loading={processing}>
               {t('job.form.button')}
             </Button>
-            <Button color="secondary" onClick={handleSubmitAndViewJob} loading={processing}>
+            <Button color="secondary" onClick={() => handleSubmit(true)} loading={processing}>
               {t('job.form.submit_and_view_job_button')}
             </Button>
           </div>

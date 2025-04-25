@@ -37,6 +37,7 @@
     "react-infinite-scroll-component": "^6.1.0",
     "react-json-formatter": "^0.4.0",
     "react-router": "^7.5.0",
+    "react-toastify": "^11.0.5",
     "simplebar-react": "^3.3.0",
     "swagger-ui-react": "^5.21.0",
     "yup": "^1.6.1"

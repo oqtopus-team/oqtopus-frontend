@@ -1,3 +1,6 @@
+import { error } from 'console';
+import { toast } from 'react-toastify';
+
 export default {
   list: {
     title: 'Job',
@@ -111,6 +114,10 @@ export default {
       pauli: 'Operator (Pauli string)',
       coeff: 'Coefficient',
     },
+    toast: {
+      success: 'Success: Job submitted successfully',
+      error: 'Error: Failed to submit job',
+    },
     error_message: {
       name: 'Please enter job name',
       shots: 'Please enter the positive number as shots',
@@ -122,6 +129,9 @@ export default {
         coeff: 'Enter the coefficient of the operator',
       },
       invalid_json: 'Please enter correct JSON',
+    },
+    modal: {
+      overwrite_program: 'Are you sure you want to overwrite this program?',
     },
   },
 };
