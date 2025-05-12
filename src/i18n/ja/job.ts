@@ -36,6 +36,8 @@ export default {
     nodata: '表示するジョブがありません。',
     delete_selected: '一括削除',
     delete_in_progress: '一括削除進行中...',
+    cancel_selected: 'Cancel selected',
+    cancel_in_progress: 'Cancelling jobs in progress...',
   },
   detail: {
     title: 'ジョブ詳細',

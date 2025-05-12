@@ -37,6 +37,8 @@ export default {
     nodata: 'Data does not exist.',
     delete_selected: 'Delete selected',
     delete_in_progress: 'Deleting jobs in progress...',
+    cancel_selected: 'Cancel selected',
+    cancel_in_progress: 'Cancelling jobs in progress...',
   },
   detail: {
     title: 'Job details',

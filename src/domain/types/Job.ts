@@ -12,6 +12,8 @@ export const JOB_STATUSES = [
 
 export type JobStatusType = (typeof JOB_STATUSES)[number];
 
+export const NOT_CANCELABLE_JOBS: JobStatusType[] = ['succeeded', 'failed', 'cancelled'] as const;
+
 export const JOB_TYPES = ['estimation', 'sampling'] as const;
 export const JOB_TYPE_DEFAULT = JOB_TYPES[1];
 export type JobTypeType = (typeof JOB_TYPES)[number];
