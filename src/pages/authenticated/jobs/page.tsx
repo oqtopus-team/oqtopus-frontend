@@ -173,18 +173,18 @@ export default function JobListPage() {
         <Card>
           <section className={clsx('mt-2', 'mb-2', 'flex', 'gap-[0.5rem]', 'justify-end')}>
             <Button
-              color={isCancelSelectedDisabled() ? 'disabled' : 'secondary'}
-              disabled={isCancelSelectedDisabled()}
-              onClick={() => setShowBulkCancelModal(true)}
-            >
-              {t('job.list.cancel_selected')}
-            </Button>
-            <Button
               color={isDeleteSelectedDisabled() ? 'disabled' : 'error'}
               disabled={isDeleteSelectedDisabled()}
               onClick={() => setShowBulkDeleteModal(true)}
             >
               {t('job.list.delete_selected')}
+            </Button>
+            <Button
+              color={isCancelSelectedDisabled() ? 'disabled' : 'secondary'}
+              disabled={isCancelSelectedDisabled()}
+              onClick={() => setShowBulkCancelModal(true)}
+            >
+              {t('job.list.cancel_selected')}
             </Button>
           </section>
           <InfiniteScroll
