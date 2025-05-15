@@ -17,13 +17,13 @@ export const useJobAPI = () => {
     return api.job.submitJob(job).then((res) => res.data.job_id);
   };
 
-  const getLatestJobs = async (page: number, pageSize: number): Promise<Job[]> => {
+  const getLatestJobs = async (page: number, pageSize: number, q?: string): Promise<Job[]> => {
     return api.job
       .listJobs(
         'job_id,name,description,device_id,job_info,transpiler_info,simulator_info,mitigation_info,job_type,shots,status,submitted_at',
         undefined,
         undefined,
-        undefined,
+        q,
         page,
         pageSize,
         'DESC'
