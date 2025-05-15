@@ -70,11 +70,11 @@ export default function JobListPage() {
   };
 
   // 無限スクロール取得
-  const getJobsScroll = (page: number): void => {
+  const getJobsScroll = (page: number, search?: string): void => {
     setHasMore(false); // 連続発火を防ぐためにfalseに変更
     setLoading(true);
 
-    getLatestJobs(page, PAGE_SIZE)
+    getLatestJobs(page, PAGE_SIZE, params)
       .then((resJobs) => {
         setJobs(page === 1 ? resJobs : [...jobs, ...resJobs]);
         if (resJobs.length === PAGE_SIZE) {
@@ -188,7 +188,7 @@ export default function JobListPage() {
             </Button>
           </section>
           <InfiniteScroll
-            next={() => getJobsScroll(page)}
+            next={() => getJobsScroll(page, params.jobid || params.description)}
             hasMore={hasMore}
             scrollThreshold={20}
             loader={undefined}
