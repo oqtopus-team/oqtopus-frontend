@@ -59,7 +59,7 @@ const createNodeData = (qubits: any[]): { nodeData: any[]; tempNodeMap: Map<stri
       tempNodeMap.set(qubit.id.toString(), qubit);
       return {
         id: qubit.id.toString(),
-        label: `Q${qubit.id}`,
+        label: `${qubit.id}`,
         fx: scalePosition(qubit.position.x),
         fy: scalePosition(qubit.position.y * -1), // multiply by -1 to flip the y-axis
       };
@@ -232,7 +232,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
 
   if (!isValidDeviceInfo) {
     return (
-      <p className={clsx('text-error', 'text-xs')}>
+      <p className={clsx('text-error', 'text-xl')}>
         {t('device.detail.topology_info.invalid_device_info')}
       </p>
     );
