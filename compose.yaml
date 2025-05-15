@@ -1,0 +1,61 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - 3000:5173
+    environment:
+      VITE_APP_AUTH_REGION: ap-northeast-1
+      VITE_APP_AUTH_USER_POOL_ID: ap-northeast-1_example
+      VITE_APP_AUTH_USER_POOL_WEB_CLIENT_ID: clientid_example
+      VITE_APP_AUTH_COOKIE_STORAGE_DOMAIN: localhost
+      VITE_APP_API_ENDPOINT: https://438i5dp1z9.execute-api.ap-northeast-1.amazonaws.com/v1
+      VITE_APP_API_SIGNUP_ENDPOINT: https://4hq0k3alvj.execute-api.ap-northeast-1.amazonaws.com/v1
+      VITE_APP_APP_ENV: local
+      VITE_APP_APP_ORG: oqtopus
+      VITE_APP_PUBLIC_BASE: /public
+    volumes:
+      - .:/workspace:cached
+      - node_modules:/workspace/node_modules
+      - ./docker/.env:/workspace/.env
+      - ./docker/.env:/workspace/.env.local
+
+  magnito:
+    image: frourio/magnito:latest
+    ports:
+      - 5050:5050 # Cognito API
+      - 5051:5051 # web interface
+    environment:
+      COGNITO_USER_POOL_ID: ap-northeast-1_example
+      COGNITO_USER_POOL_CLIENT_ID: example-client-name
+      COGNITO_ACCESS_KEY: magnito-access-key
+      COGNITO_SECRET_KEY: magnito-secret-key
+      COGNITO_REGION: ap-northeast-1
+      SMTP_HOST: inbucket
+      SMTP_PORT: 2500
+      SMTP_USER: fake_mail_user
+      SMTP_PASS: fake_mail_password
+    volumes:
+      - magnito:/usr/src/app/data
+
+  inbucket:
+    image: inbucket/inbucket:3.0.3
+    ports:
+      - 2500:2500 # SMTP
+      - 9000:9000 # web interface
+    volumes:
+      - inbucket:/storage
+
+volumes:
+  node_modules:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${PWD}/node_modules
+      o: bind
+  magnito:
+    driver: local
+  inbucket:
+    driver: local
