@@ -1,6 +1,12 @@
 import { useState, useLayoutEffect } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { Job, JobSearchParams, JOB_STATUSES, JobStatusType } from '@/domain/types/Job';
+import {
+  Job,
+  JobSearchParams,
+  JOB_STATUSES,
+  JobStatusType,
+  NOT_CANCELABLE_JOBS,
+} from '@/domain/types/Job';
 import { useTranslation } from 'react-i18next';
 import { JobListItem } from './_components/JobListItem';
 import { Card } from '@/pages/_components/Card';
@@ -20,7 +26,7 @@ export default function JobListPage() {
   const { t } = useTranslation();
   useDocumentTitle(t('job.list.title'));
 
-  const { getLatestJobs, deleteJob } = useJobAPI();
+  const { getLatestJobs, deleteJob, cancelJob } = useJobAPI();
 
   const [jobs, setJobs] = useState<Job[]>([]);
   const [selectedJobs, setSelectedJobs] = useState<Job[]>([]);
@@ -32,6 +38,8 @@ export default function JobListPage() {
   const [page, setPage] = useState(0);
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   const [bulkDeleteInProgress, setBulkDeleteInProgress] = useState(false);
+  const [showBulkCancelModal, setShowBulkCancelModal] = useState(false);
+  const [bulkCancelInProgress, setBulkCancelInProgress] = useState(false);
 
   useLayoutEffect(() => {
     setParams((params) => {
@@ -113,6 +121,23 @@ export default function JobListPage() {
     setBulkDeleteInProgress(false);
   };
 
+  const cancelSelectedJobs = async () => {
+    if (bulkCancelInProgress) return;
+
+    setBulkCancelInProgress(true);
+
+    for (const job of selectedJobs) {
+      try {
+        await cancelJob(job);
+      } catch (error: any) {
+        console.error(error);
+      }
+    }
+
+    reloadJobs();
+    setBulkCancelInProgress(false);
+  };
+
   const areAllJobsSelected = () => {
     return (
       jobs.length > 0 &&
@@ -122,6 +147,12 @@ export default function JobListPage() {
 
   const isDeleteSelectedDisabled = () => {
     return selectedJobs.length === 0 || bulkDeleteInProgress;
+  };
+
+  const isCancelSelectedDisabled = () => {
+    return (
+      selectedJobs.length === 0 || selectedJobs.some((j) => NOT_CANCELABLE_JOBS.includes(j.status))
+    );
   };
 
   return (
@@ -140,14 +171,22 @@ export default function JobListPage() {
           <JobSearchForm params={params} setParams={setParams} onSubmit={onSearchSubmit} />
         </Card>
         <Card>
-          <Button
-            className={clsx('mt-2', 'ml-auto', 'mb-2', 'block')}
-            color={isDeleteSelectedDisabled() ? 'disabled' : 'error'}
-            disabled={isDeleteSelectedDisabled()}
-            onClick={() => setShowBulkDeleteModal(true)}
-          >
-            {t('job.list.delete_selected')}
-          </Button>
+          <section className={clsx('mt-2', 'mb-2', 'flex', 'gap-[0.5rem]', 'justify-end')}>
+            <Button
+              color={isDeleteSelectedDisabled() ? 'disabled' : 'error'}
+              disabled={isDeleteSelectedDisabled()}
+              onClick={() => setShowBulkDeleteModal(true)}
+            >
+              {t('job.list.delete_selected')}
+            </Button>
+            <Button
+              color={isCancelSelectedDisabled() ? 'disabled' : 'secondary'}
+              disabled={isCancelSelectedDisabled()}
+              onClick={() => setShowBulkCancelModal(true)}
+            >
+              {t('job.list.cancel_selected')}
+            </Button>
+          </section>
           <InfiniteScroll
             next={() => getJobsScroll(page)}
             hasMore={hasMore}
@@ -220,9 +259,16 @@ export default function JobListPage() {
             message={t('job.list.modal.bulk_delete')}
             onConfirm={deleteSelectedJobs}
           />
+          <ConfirmModal
+            show={showBulkCancelModal}
+            onHide={() => setShowBulkCancelModal(false)}
+            title={t('job.list.modal.title')}
+            message={t('job.list.modal.cancel')}
+            onConfirm={cancelSelectedJobs}
+          />
           <div
             className={clsx(
-              !bulkDeleteInProgress && '!hidden',
+              !bulkDeleteInProgress && !bulkCancelInProgress && '!hidden',
               ['!fixed', '!top-0', '!left-0', '!w-full', '!h-full', 'z-40'],
               ['flex', 'flex-col', 'items-center', 'justify-center'],
               ['bg-modal-bg', 'bg-opacity-50']
@@ -230,7 +276,9 @@ export default function JobListPage() {
           >
             <Loader size="xl" color="secondary" />
             <h3 className={clsx('text-secondary-content', 'mt-4')}>
-              {t('job.list.delete_in_progress')}
+              {bulkCancelInProgress
+                ? t('job.list.cancel_in_progress')
+                : t('job.list.delete_in_progress')}
             </h3>
           </div>
         </Card>

@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { Job, JobFileData, JobFileDataInfo, JobTypeType } from '@/domain/types/Job';
+import {
+  Job,
+  JobFileData,
+  JobFileDataInfo,
+  JobStatusType,
+  JobTypeType,
+  NOT_CANCELABLE_JOBS,
+} from '@/domain/types/Job';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 import { JobStatus } from './JobStatus';
@@ -108,8 +115,8 @@ const OperationButtons = ({ job, onClickCancel, onClickDelete }: ButtonProps) =>
   const [deleteModalShow, setDeleteModalShow] = useState(false);
   const [downloadInProgress, setDownloadInProgress] = useState(false);
 
-  function canCancel(status: string): boolean {
-    return status === 'created' || status === 'transpiling' || status === 'queued';
+  function canCancel(status: JobStatusType): boolean {
+    return !NOT_CANCELABLE_JOBS.includes(status);
   }
 
   function downloadJob() {
