@@ -194,7 +194,9 @@ export default function JobListPage() {
           <InfiniteScroll
             next={() => getJobsScroll(page)}
             hasMore={hasMore}
-            loader={<div>load more</div>}
+            loader={<Loadmore  
+              handleClick={() => getJobsScroll(page)}
+            />}
             dataLength={jobs.length}
           >
             <table className={clsx('w-full')}>
@@ -288,6 +290,26 @@ export default function JobListPage() {
       </div>
     </div>
   );
+}
+
+const Loadmore = (props: { handleClick: () => void}) => {
+  return (
+    <div
+      className={clsx(
+        'flex',
+        'items-center',
+        'justify-center',
+        'w-full',
+        'h-12',
+        'text-sm',
+        'cursor-pointer',
+        'text-info'
+      )}
+      onClick={() => props.handleClick()}
+    >
+      Click to load more...
+    </div>
+  )
 }
 
 const generateSearchParams = (params: JobSearchParams): string => {
