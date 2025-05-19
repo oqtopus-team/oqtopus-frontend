@@ -9,6 +9,7 @@ import { NavLink } from 'react-router';
 import { useJobAPI } from '@/backend/hook';
 import { DateTimeFormatter } from '../../_components/DateTimeFormatter';
 import DownloadJobButton from './DownloadJobButton';
+import { TruncateText } from '@/pages/authenticated/_components/TruncateText';
 
 interface JobProps {
   job: Job;
@@ -78,7 +79,10 @@ export const JobListItem = ({
           {job.id}
         </NavLink>
       </td>
-      <td>{job.name}</td>
+      <td>
+        {/* limit the length to display to twice the length of the job.id */}
+        <TruncateText text={job.name} limit={job.id.length * 2} />
+      </td>
       <td>
         <NavLink to={`/device/${job.deviceId}`} className="text-link">
           {job.deviceId}

@@ -62,7 +62,7 @@ export const JobDetailBasicInfo: React.FC<JobDetailBasicInfoProps> = (
           </tr>
           <tr>
             <BoldTh>{t('job.detail.info.name')}</BoldTh>
-            <td>{job.name}</td>
+            <td className={clsx('whitespace-normal', 'break-words', 'max-w-sm')}>{job.name}</td>
           </tr>
           <tr>
             <BoldTh>{t('job.detail.info.description')}</BoldTh>
