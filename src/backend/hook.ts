@@ -17,7 +17,7 @@ export const useJobAPI = () => {
     return api.job.submitJob(job).then((res) => res.data.job_id);
   };
 
-  const getLatestJobs = async (page: number, pageSize: number, params: JobSearchParams): Promise<Job[]> => {
+  const getLatestJobs = async (page: number, pageSize: number, params: JobSearchParams = {}): Promise<Job[]> => {
     console.log(page, pageSize, params)
     return api.job
       .listJobs(
