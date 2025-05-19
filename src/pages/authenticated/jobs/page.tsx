@@ -20,7 +20,7 @@ import { useDocumentTitle } from '@/pages/_hooks/title';
 import { useJobAPI } from '@/backend/hook';
 import { ConfirmModal } from '@/pages/_components/ConfirmModal';
 
-const PAGE_SIZE = 20; // 無限スクロールの1回の取得数
+const PAGE_SIZE = 10; // The limit of items to fetch in one request
 
 export default function JobListPage() {
   const { t } = useTranslation();
@@ -69,17 +69,21 @@ export default function JobListPage() {
     getJobsScroll(1);
   };
 
-  // 無限スクロール取得
-  const getJobsScroll = (page: number, search?: string): void => {
-    setHasMore(false); // 連続発火を防ぐためにfalseに変更
+  // infinite scroll
+  const getJobsScroll = (page: number): void => {
+    // First, we unset the `hasMore` flag to prevent continuous requests
+    setHasMore(false);
     setLoading(true);
 
     getLatestJobs(page, PAGE_SIZE, params)
       .then((resJobs) => {
         setJobs(page === 1 ? resJobs : [...jobs, ...resJobs]);
+        // When the response contains items exactly same as the page size, 
+        // it means there are more items to fetch, so we set `hasMore` to true
         if (resJobs.length === PAGE_SIZE) {
-          setHasMore(true); // 続けて読み込み可
+          setHasMore(true);
         }
+        // And we proceed to the next page
         setPage(page + 1);
       })
       .catch((e) => console.error(e))
@@ -188,11 +192,10 @@ export default function JobListPage() {
             </Button>
           </section>
           <InfiniteScroll
-            next={() => getJobsScroll(page, params.jobid || params.description)}
+            next={() => getJobsScroll(page)}
             hasMore={hasMore}
-            scrollThreshold={20}
-            loader={undefined}
-            dataLength={0}
+            loader={<div>load more</div>}
+            dataLength={jobs.length}
           >
             <table className={clsx('w-full')}>
               <thead>
