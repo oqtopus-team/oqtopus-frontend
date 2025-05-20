@@ -24,6 +24,7 @@
     "date-fns": "^4.1.0",
     "i18next": "^24.2.3",
     "i18next-browser-languagedetector": "^8.0.4",
+    "marked": "^15.0.11",
     "mathjax": "^3.2.2",
     "qrcode.react": "^4.2.0",
     "react": "^19.1.0",
