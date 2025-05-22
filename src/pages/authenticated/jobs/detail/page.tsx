@@ -12,6 +12,7 @@ import { SuccessViewMultiManual } from './_components/MultiManualJobDetail';
 import { SuccessViewSSELog } from './_components/SSEJobDetail';
 import { useJobAPI } from '@/backend/hook';
 import ReloadButton from './_components/panels/utils/ReloadButton';
+import DownloadJobButton from '../_components/DownloadJobButton';
 
 export default function JobDetailPage_() {
   const { id } = useParams();
@@ -48,7 +49,7 @@ const JobDetailPage = ({ params: { id } }: { params: Params }) => {
   }
   return (
     <>
-      <Title />
+      <Title job={job} />
       <Spacer className="h-3" />
       <SuccessViewWrapper {...job} />
     </>
@@ -65,12 +66,13 @@ const LoadingView = () => {
   );
 };
 
-const Title = () => {
+const Title = ({ job }: { job?: Job }) => {
   const { t } = useTranslation();
   return (
     <div className={clsx('flex', 'items-center', 'text-primary', 'text-2xl', 'font-bold')}>
       {t('job.detail.title')}
       <ReloadButton />
+      <DownloadJobButton style={{ marginLeft: '0.5rem', marginRight: '0.5rem' }} job={job} />
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import { userApiContext } from './Provider';
 import { DevicesDeviceInfo, JobsGetJobsResponse, JobsSubmitJobRequest } from '@/api/generated';
-import { Job } from '@/domain/types/Job';
+import { Job, JobSearchParams } from '@/domain/types/Job';
 import { Device } from '@/domain/types/Device';
 
 export const useJobAPI = () => {
@@ -17,13 +17,14 @@ export const useJobAPI = () => {
     return api.job.submitJob(job).then((res) => res.data.job_id);
   };
 
-  const getLatestJobs = async (page: number, pageSize: number): Promise<Job[]> => {
+  const getLatestJobs = async (page: number, pageSize: number, params: JobSearchParams = {}): Promise<Job[]> => {
+    console.log(page, pageSize, params)
     return api.job
       .listJobs(
         'job_id,name,description,device_id,job_info,transpiler_info,simulator_info,mitigation_info,job_type,shots,status,submitted_at',
         undefined,
         undefined,
-        undefined,
+        params.jobid ?? params.description ?? "",
         page,
         pageSize,
         'DESC'

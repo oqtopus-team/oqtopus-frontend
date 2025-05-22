@@ -20,7 +20,7 @@ import { useDocumentTitle } from '@/pages/_hooks/title';
 import { useJobAPI } from '@/backend/hook';
 import { ConfirmModal } from '@/pages/_components/ConfirmModal';
 
-const PAGE_SIZE = 20; // 無限スクロールの1回の取得数
+const PAGE_SIZE = 10; // The limit of items to fetch in one request
 
 export default function JobListPage() {
   const { t } = useTranslation();
@@ -69,17 +69,21 @@ export default function JobListPage() {
     getJobsScroll(1);
   };
 
-  // 無限スクロール取得
+  // infinite scroll
   const getJobsScroll = (page: number): void => {
-    setHasMore(false); // 連続発火を防ぐためにfalseに変更
+    // First, we unset the `hasMore` flag to prevent continuous requests
+    setHasMore(false);
     setLoading(true);
 
-    getLatestJobs(page, PAGE_SIZE)
+    getLatestJobs(page, PAGE_SIZE, params)
       .then((resJobs) => {
         setJobs(page === 1 ? resJobs : [...jobs, ...resJobs]);
+        // When the response contains items exactly same as the page size, 
+        // it means there are more items to fetch, so we set `hasMore` to true
         if (resJobs.length === PAGE_SIZE) {
-          setHasMore(true); // 続けて読み込み可
+          setHasMore(true);
         }
+        // And we proceed to the next page
         setPage(page + 1);
       })
       .catch((e) => console.error(e))
@@ -190,9 +194,10 @@ export default function JobListPage() {
           <InfiniteScroll
             next={() => getJobsScroll(page)}
             hasMore={hasMore}
-            scrollThreshold={20}
-            loader={undefined}
-            dataLength={0}
+            loader={<Loadmore  
+              handleClick={() => getJobsScroll(page)}
+            />}
+            dataLength={jobs.length}
           >
             <table className={clsx('w-full')}>
               <thead>
@@ -285,6 +290,26 @@ export default function JobListPage() {
       </div>
     </div>
   );
+}
+
+const Loadmore = (props: { handleClick: () => void}) => {
+  return (
+    <div
+      className={clsx(
+        'flex',
+        'items-center',
+        'justify-center',
+        'w-full',
+        'h-12',
+        'text-sm',
+        'cursor-pointer',
+        'text-info'
+      )}
+      onClick={() => props.handleClick()}
+    >
+      Click to load more...
+    </div>
+  )
 }
 
 const generateSearchParams = (params: JobSearchParams): string => {

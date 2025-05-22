@@ -17,5 +17,5 @@ export function reshapeToHistogramInfo(counts: countsProps) {
   const keysList = Object.keys(countsObject).sort();
   const filteredKeys = keysList.filter((key) => countsObject[key] !== 0);
   const valuesList = filteredKeys.map((key) => countsObject[key]);
-  return { categories: keysList, data: valuesList, height: counts.height };
+  return { categories: filteredKeys, data: valuesList, height: counts.height };
 }
