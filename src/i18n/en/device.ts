@@ -1,8 +1,6 @@
 export default {
   list: {
     title: 'Device list',
-    description:
-      'These are electronic components that utilize the knowledge of quantum mechanics, which deals with molecules and atoms. You can check topology information and values ​​for each qubit.',
     table: {
       id: 'Device ID',
       name: 'Device name',

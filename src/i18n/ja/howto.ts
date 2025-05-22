@@ -1,6 +1,5 @@
 export default {
   title: 'APIドキュメント',
-  description: 'API仕様を確認できます。',
   token: {
     head: 'API トークン',
     none: 'APIトークンは発行されていません',
