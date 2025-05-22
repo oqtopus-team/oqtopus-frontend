@@ -12,7 +12,6 @@ export const Header = (): React.ReactElement => {
       <div className={clsx('flex', 'justify-between')}>
         <Logo />
         <span className={clsx('flex', 'items-center', 'gap-7')}>
-          <GithubLink />
           <LanguageSelector />
         </span>
       </div>
@@ -47,28 +46,6 @@ const Logo = (): React.ReactElement => {
         onClick={handleLogoClick}
       />
     </div>
-  );
-};
-
-const GithubLink = (): React.ReactElement => {
-  const handleGithubLink = () => {};
-
-  return (
-    <a
-      className={clsx(['cursor-pointer', 'flex', 'items-center', 'gap-2'])}
-      href="https://github.com/oqtopus-team/oqtopus-frontend.git"
-      target="_blank"
-      rel="noopener"
-    >
-      <img
-        src={'/img/common/github-mark.svg'}
-        width={32}
-        height={32}
-        alt={'Github'}
-        onClick={handleGithubLink}
-      />
-      <p className={clsx(['text-sm', 'font-sans'])}>v1.0.0</p>
-    </a>
   );
 };
 
