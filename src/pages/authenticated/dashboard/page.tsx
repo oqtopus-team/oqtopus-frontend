@@ -12,6 +12,7 @@ import { Spacer } from '@/pages/_components/Spacer';
 import { useTranslation } from 'react-i18next';
 import { useDocumentTitle } from '@/pages/_hooks/title';
 import { useJobAPI } from '@/backend/hook';
+import './page.css';
 
 export default function Page() {
   const { t } = useTranslation();
@@ -33,11 +34,19 @@ export default function Page() {
     <>
       <Hero />
       <Spacer className="h-5" />
-      <div className={clsx('grid', 'grid-cols-[1.2fr_1.9fr]', 'grid-rows-[auto_1fr]', 'gap-5')}>
+      <div
+        className={clsx(
+          'dashboard-page',
+          'grid',
+          'grid-cols-[1.2fr_1.9fr]',
+          'grid-rows-[auto_1fr]',
+          'gap-5'
+        )}
+      >
         <Card className={clsx(['col-start-1', 'col-end-1'], ['grayscale', 'bg-disable-bg'])}>
           <Composer />
         </Card>
-        <Card className={clsx(['col-start-2', 'col-end-3'])}>
+        <Card className={clsx(['col-start-2', 'col-end-3', 'overflow-x-auto'])}>
           <DeviceList />
         </Card>
         {/* // TODO: Enable news card */}
@@ -46,7 +55,7 @@ export default function Page() {
         >
           <News />
         </Card> */}
-        <Card className={clsx(['col-start-1', 'col-end-3', 'row-start-2'])}>
+        <Card className={clsx(['col-start-1', 'col-end-3', 'row-start-2', 'overflow-x-auto'])}>
           <JobList jobs={jobs ?? []} />
         </Card>
       </div>
