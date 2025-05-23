@@ -74,7 +74,7 @@ export const JobSearchForm = ({
             }
           />
         </div>
-        <div className="w-[60px]">
+        <div>
           <Button color="secondary" type="submit">
             {t('job.list.search.button')}
           </Button>
