@@ -170,7 +170,15 @@ export const NavigationBottomBar = () => {
 
   return (
     <div className={clsx('navigation-bottom-bar')}>
-      <ul className={clsx('navigation-bar-item-list', 'flex', 'flex-col', 'gap-[1px]', 'text-sm')}>
+      <ul
+        className={clsx(
+          'navigation-bottom-bar-item-list',
+          'flex',
+          'flex-col',
+          'gap-[1px]',
+          'text-sm'
+        )}
+      >
         {menuItems.map((menuItem, index) => (
           <li key={index}>
             <MenuItemComponent menuItem={menuItem} open={false} />
