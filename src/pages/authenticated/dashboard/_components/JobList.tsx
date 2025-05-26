@@ -6,6 +6,7 @@ import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
 import { DateTimeFormatter } from '@/pages/authenticated/_components/DateTimeFormatter';
+import { TruncateText } from '@/pages/authenticated/_components/TruncateText';
 
 export const JobList = ({ jobs }: { jobs: Job[] }): React.ReactElement => {
   const { t, i18n } = useTranslation();
@@ -42,7 +43,10 @@ export const JobList = ({ jobs }: { jobs: Job[] }): React.ReactElement => {
                     {job.id}
                   </NavLink>
                 </td>
-                <td>{job.name}</td>
+                <td>
+                  {/* limit the length to display to twice the length of the job.id */}
+                  <TruncateText text={job.name} limit={job.id.length * 2} />
+                </td>
                 <td>
                   <NavLink to={`/device/${job.deviceId}`} className="text-link">
                     {job.deviceId}
