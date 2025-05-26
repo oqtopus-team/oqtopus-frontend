@@ -2,22 +2,19 @@ import { useEffect, useRef, useState } from 'react';
 import { marked } from 'marked';
 import clsx from 'clsx';
 import styles from './news.module.css';
+import { AnnouncementsGetAnnouncementResponse } from '@/api/generated';
 
 interface PostProps {
-  post: {
-    title: string;
-    content: string;
-    timestamp: string;
-  };
+  announcement: AnnouncementsGetAnnouncementResponse;
 }
 
-export const NewsPost = ({ post }: PostProps) => {
+export const NewsPost = ({ announcement }: PostProps) => {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [shouldShowButton, setShouldShowButton] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
   // Преобразование markdown в html
-  const htmlContent = marked.parse(post.content);
+  const htmlContent = marked.parse(announcement.content);
 
   useEffect(() => {
     if (contentRef.current) {
@@ -25,7 +22,7 @@ export const NewsPost = ({ post }: PostProps) => {
       setShouldShowButton(shouldCollapse);
       setIsCollapsed(shouldCollapse);
     }
-  }, [post]);
+  }, [announcement]);
 
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
@@ -34,8 +31,8 @@ export const NewsPost = ({ post }: PostProps) => {
   return (
     <div className={styles.news_container}>
       <div className={styles.post_header}>
-        <span className={styles.post_title}>New title</span>
-        <span className={styles.post_time}>2023/01/25 15:00</span>
+        <span className={styles.post_title}>{announcement.title}</span>
+        <span className={styles.post_time}>{announcement.start_time}</span>
       </div>
       <div
         ref={contentRef}

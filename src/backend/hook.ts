@@ -1,8 +1,14 @@
 import { useContext } from 'react';
 import { userApiContext } from './Provider';
-import { DevicesDeviceInfo, JobsGetJobsResponse, JobsSubmitJobRequest } from '@/api/generated';
+import {
+  AnnouncementsGetAnnouncementResponse,
+  DevicesDeviceInfo,
+  JobsGetJobsResponse,
+  JobsSubmitJobRequest,
+} from '@/api/generated';
 import { Job } from '@/domain/types/Job';
 import { Device } from '@/domain/types/Device';
+import { Announcement } from '@/domain/types/Announcement';
 
 export const useJobAPI = () => {
   const api = useContext(userApiContext);
@@ -126,3 +132,18 @@ const convertDeviceResult = (device: DevicesDeviceInfo): Device => ({
   calibratedAt: device.calibrated_at ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   description: device.description,
 });
+
+export const useAnnouncementsAPI = () => {
+  const api = useContext(userApiContext);
+
+  const getAnnouncements = async () => {
+    return api.announcements.getAnnouncementsList().then((res) => {
+      if (res.status === 200) {
+        return res.data.announcements;
+      }
+      return null;
+    });
+  };
+
+  return { getAnnouncements };
+};
