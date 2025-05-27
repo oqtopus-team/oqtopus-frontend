@@ -3,6 +3,8 @@ import { marked } from 'marked';
 import clsx from 'clsx';
 import styles from './news.module.css';
 import { AnnouncementsGetAnnouncementResponse } from '@/api/generated';
+import { DateTimeFormatter } from '@/pages/authenticated/_components/DateTimeFormatter';
+import { useTranslation } from 'react-i18next';
 
 interface PostProps {
   announcement: AnnouncementsGetAnnouncementResponse;
@@ -12,6 +14,7 @@ export const NewsPost = ({ announcement }: PostProps) => {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [shouldShowButton, setShouldShowButton] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+  const { t, i18n } = useTranslation();
 
   // Преобразование markdown в html
   const htmlContent = marked.parse(announcement.content);
@@ -32,7 +35,7 @@ export const NewsPost = ({ announcement }: PostProps) => {
     <div className={styles.news_container}>
       <div className={styles.post_header}>
         <span className={styles.post_title}>{announcement.title}</span>
-        <span className={styles.post_time}>{announcement.start_time}</span>
+        <span className={styles.post_time}>{DateTimeFormatter(t, i18n, announcement.start_time)}</span>
       </div>
       <div
         ref={contentRef}
@@ -51,7 +54,7 @@ export const NewsPost = ({ announcement }: PostProps) => {
         ])}
         onClick={toggleCollapse}
       >
-        {isCollapsed ? 'Expand' : 'Collapse'}
+        {t(isCollapsed ? 'common.expand' : 'common.collapse')}
       </button>
     </div>
   );
