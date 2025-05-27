@@ -17,14 +17,18 @@ export const useJobAPI = () => {
     return api.job.submitJob(job).then((res) => res.data.job_id);
   };
 
-  const getLatestJobs = async (page: number, pageSize: number, params: JobSearchParams = {}): Promise<Job[]> => {
-    console.log(page, pageSize, params)
+  const getLatestJobs = async (
+    page: number,
+    pageSize: number,
+    params: JobSearchParams = {}
+  ): Promise<Job[]> => {
+    console.log(page, pageSize, params);
     return api.job
       .listJobs(
         'job_id,name,description,device_id,job_info,transpiler_info,simulator_info,mitigation_info,job_type,shots,status,submitted_at',
         undefined,
         undefined,
-        params.jobid ?? params.description ?? "",
+        params.jobid ?? params.description ?? '',
         page,
         pageSize,
         'DESC'

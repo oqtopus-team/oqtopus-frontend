@@ -32,8 +32,10 @@ export const JobSearchForm = ({
           <Input
             placeholder={t('job.list.search.id_placeholder')}
             label={t('job.list.table.id')}
-            value={params.jobid ?? ""}
-            onChange={(e) => setParams({ ...params, jobid: e.target.value === '' ? undefined : e.target.value })}
+            value={params.jobid ?? ''}
+            onChange={(e) =>
+              setParams({ ...params, jobid: e.target.value === '' ? undefined : e.target.value })
+            }
           />
         </div>
         <div className="flex-1">
@@ -65,7 +67,7 @@ export const JobSearchForm = ({
           <Input
             placeholder={t('job.list.search.description_placeholder')}
             label={t('job.list.table.description')}
-            value={params.description ?? ""}
+            value={params.description ?? ''}
             onChange={(e) =>
               setParams({
                 ...params,

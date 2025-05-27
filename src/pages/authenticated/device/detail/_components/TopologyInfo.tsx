@@ -45,11 +45,8 @@ const normalizePositions = <NodeType,>(nodes: NodeObject<NodeType>[]): NodeObjec
 };
 
 const createCouplingMapKey = (control: number, target: number): string => {
-  if (control > target) {
-    return `${target}-${control}`;
-  } else {
-    return `${control}-${target}`;
-  }
+  const [first, second] = [control, target].sort((a, b) => a - b);
+  return `${first}-${second}`;
 };
 
 const createNodeData = (qubits: any[]): { nodeData: any[]; tempNodeMap: Map<string, object> } => {
@@ -165,8 +162,10 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
       if (link) {
         const sourceId = (link.source as NodeObject).id;
         const targetId = (link.target as NodeObject).id;
+        console.log('hovered link', sourceId, targetId);
         const couplingKey = createCouplingMapKey(sourceId as number, targetId as number);
         const coupling = couplingMap.get(couplingKey);
+        console.log('hovered link', couplingKey, coupling);
 
         if (couplingKey !== undefined && coupling !== undefined) {
           setHoveredNodeId(null);
