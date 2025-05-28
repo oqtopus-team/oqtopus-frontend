@@ -78,7 +78,7 @@ export default function JobListPage() {
     getLatestJobs(page, PAGE_SIZE, params)
       .then((resJobs) => {
         setJobs(page === 1 ? resJobs : [...jobs, ...resJobs]);
-        // When the response contains items exactly same as the page size, 
+        // When the response contains items exactly same as the page size,
         // it means there are more items to fetch, so we set `hasMore` to true
         if (resJobs.length === PAGE_SIZE) {
           setHasMore(true);
@@ -194,9 +194,7 @@ export default function JobListPage() {
           <InfiniteScroll
             next={() => getJobsScroll(page)}
             hasMore={hasMore}
-            loader={<Loadmore  
-              handleClick={() => getJobsScroll(page)}
-            />}
+            loader={<Loadmore handleClick={() => getJobsScroll(page)} />}
             dataLength={jobs.length}
           >
             <table className={clsx('w-full')}>
@@ -223,7 +221,7 @@ export default function JobListPage() {
                     if (params.status && job.status !== params.status) {
                       return false;
                     }
-                    if (params.jobid && job.id !== params.jobid) {
+                    if (params.jobid && !job.id.startsWith(params.jobid)) {
                       return false;
                     }
                     if (params.description && !job.description?.includes(params.description)) {
@@ -292,7 +290,7 @@ export default function JobListPage() {
   );
 }
 
-const Loadmore = (props: { handleClick: () => void}) => {
+const Loadmore = (props: { handleClick: () => void }) => {
   return (
     <div
       className={clsx(
@@ -309,8 +307,8 @@ const Loadmore = (props: { handleClick: () => void}) => {
     >
       Click to load more...
     </div>
-  )
-}
+  );
+};
 
 const generateSearchParams = (params: JobSearchParams): string => {
   const searchParams = new URLSearchParams();
