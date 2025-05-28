@@ -221,7 +221,7 @@ export default function JobListPage() {
                     if (params.status && job.status !== params.status) {
                       return false;
                     }
-                    if (params.jobid && !job.id.startsWith(params.jobid)) {
+                    if (params.jobid && !job.id.includes(params.jobid)) {
                       return false;
                     }
                     if (params.description && !job.description?.includes(params.description)) {
