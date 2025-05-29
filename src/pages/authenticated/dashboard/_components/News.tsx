@@ -1,10 +1,32 @@
+import { useTranslation } from 'react-i18next';
+import clsx from 'clsx';
 import { Button } from '@/pages/_components/Button';
 import { Spacer } from '@/pages/_components/Spacer';
-import clsx from 'clsx';
-import { useTranslation } from 'react-i18next';
+import { NewsPost } from '@/pages/authenticated/dashboard/_components/NewsPost';
+import { useAnnouncementsAPI } from '@/backend/hook';
+import { useEffect, useState } from 'react';
+import { AnnouncementsGetAnnouncementResponse } from '@/api/generated';
 
 export const News = (): React.ReactElement => {
   const { t } = useTranslation();
+  const { getAnnouncements } = useAnnouncementsAPI();
+  const [newsList, setNewsList] = useState<AnnouncementsGetAnnouncementResponse[]>([]);
+
+  useEffect(() => {
+    async function getAnnouncementsList() {
+      try {
+        const response = await getAnnouncements();
+
+        if (!response) return;
+
+        setNewsList(response);
+      } catch (e) {
+        console.log(e);
+      }
+    }
+
+    getAnnouncementsList();
+  }, []);
 
   return (
     <>
@@ -18,34 +40,12 @@ export const News = (): React.ReactElement => {
       </div>
       <Spacer className="h-4" />
       <div className={clsx('grid', 'gap-[23px]')}>
-        <div className="text-xs">
-          <p>製品アップデート</p>
-          <Spacer className="h-2.5" />
-          <p className="line-clamp-2 pl-3 leading-[1.8]">
-            アクセススピード改善のためにプリミティブを最適化しましたアクセススピード改善のためにプリミティブを最適化しました
-          </p>
-          <Spacer className="h-2" />
-          <p className="text-neutral-content pl-3">2023-01-23</p>
-        </div>
-        <div className="text-xs">
-          <p>製品アップデート</p>
-          <Spacer className="h-2.5" />
-          <p className="line-clamp-2 pl-3 leading-[1.8]">
-            アクセススピード改善のためにプリミティブを最適化しました
-          </p>
-          <Spacer className="h-2" />
-          <p className="text-neutral-content pl-3">2023-01-23</p>
-        </div>
-        <div className="text-xs">
-          <p>製品アップデート</p>
-          <Spacer className="h-2.5" />
-          <p className="line-clamp-2 pl-3 leading-[1.8]">
-            アクセススピード改善のためにプリミティブを最適化しました
-          </p>
-          <Spacer className="h-2" />
-          <p className="text-neutral-content pl-3">2023-01-23</p>
-        </div>
+        {newsList.map((announcement) => (
+          <NewsPost announcement={announcement} />
+        ))}
       </div>
     </>
   );
 };
+
+export default News;

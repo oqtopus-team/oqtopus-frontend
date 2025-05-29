@@ -40,12 +40,11 @@ export default function Page() {
         <Card className={clsx(['col-start-2', 'col-end-3'])}>
           <DeviceList />
         </Card>
-        {/* // TODO: Enable news card */}
-        {/* <Card
+        <Card
           className={clsx(['col-start-3', 'col-end-4', 'row-start-1', '-row-end-1'], ['grayscale'])}
         >
           <News />
-        </Card> */}
+        </Card>
         <Card className={clsx(['col-start-1', 'col-end-3', 'row-start-2'])}>
           <JobList jobs={jobs ?? []} />
         </Card>

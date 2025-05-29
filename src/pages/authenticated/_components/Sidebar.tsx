@@ -67,7 +67,6 @@ export const Sidebar = () => {
       name: t('sidebar.nav.news'),
       path: '/news',
       icon: <SVGNews />,
-      disable: true,
     },
     {
       kind: 'onclick',
