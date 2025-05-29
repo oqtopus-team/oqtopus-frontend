@@ -45,11 +45,8 @@ const normalizePositions = <NodeType,>(nodes: NodeObject<NodeType>[]): NodeObjec
 };
 
 const createCouplingMapKey = (control: number, target: number): string => {
-  if (control > target) {
-    return `${target}-${control}`;
-  } else {
-    return `${control}-${target}`;
-  }
+  const [first, second] = [control, target].sort((a, b) => a - b);
+  return `${first}-${second}`;
 };
 
 const createNodeData = (qubits: any[]): { nodeData: any[]; tempNodeMap: Map<string, object> } => {

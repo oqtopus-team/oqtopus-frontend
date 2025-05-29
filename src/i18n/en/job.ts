@@ -4,7 +4,6 @@ import { toast } from 'react-toastify';
 export default {
   list: {
     title: 'Job',
-    description: 'You can check the list of quantum circuit jobs.',
     register_button: 'Register a new job',
     search: {
       head: 'Job search',

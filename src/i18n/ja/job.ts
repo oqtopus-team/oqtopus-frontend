@@ -3,7 +3,6 @@ import { toast } from 'react-toastify';
 export default {
   list: {
     title: 'ジョブ',
-    description: '量子回路のジョブを一覧できます。',
     register_button: '新規でジョブを登録する',
     search: {
       head: 'ジョブ検索',
