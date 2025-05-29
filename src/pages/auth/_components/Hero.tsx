@@ -13,7 +13,7 @@ export const Hero = (): React.ReactElement => {
       )}
     >
       <h2 className={clsx('text-3xl', 'font-bold', 'leading-normal')}>
-        Open Quantum Toolchain for OPerators & USers
+        {t('app.name.oqtopus')}
       </h2>
     </div>
   );

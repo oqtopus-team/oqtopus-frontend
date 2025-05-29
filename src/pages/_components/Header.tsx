@@ -21,6 +21,7 @@ export const Header = (): React.ReactElement => {
 
 const Logo = (): React.ReactElement => {
   const { isAuthenticated } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleLogoClick = () => {
@@ -37,14 +38,22 @@ const Logo = (): React.ReactElement => {
         ['text-xl', 'text-primary', 'font-semibold', 'font-sans'],
         ['cursor-pointer']
       )}
+      onClick={handleLogoClick}
     >
       <img
-        src={`/img/common/logo/oqtopus.png`}
-        width={320}
-        height={32}
-        alt={'OQTOPUS'}
-        onClick={handleLogoClick}
+        src={import.meta.env.VITE_APP_LOGO_IMAGE_URL}
+        className={clsx(
+          ['h-12', 'my-3']
+        )}        
+        alt={import.meta.env.VITE_APP_APP_NAME_EN}
       />
+      <span
+        className={clsx(
+          'cursor-pointer',
+        )}
+      >
+        {t('app.name.oqtopus')}
+      </span>
     </div>
   );
 };
