@@ -25,7 +25,7 @@ const Dashboard = lazy(async () => await import('@/pages/authenticated/dashboard
 const Composer = lazy(async () => await import('@/pages/authenticated/composer/page'));
 const DeviceList = lazy(async () => await import('@/pages/authenticated/device/page'));
 const DeviceDetail = lazy(async () => await import('@/pages/authenticated/device/detail/page'));
-const News = lazy(async () => await import('@/pages/authenticated/dashboard/_components/News'));
+const Announcements = lazy(async () => await import('@/pages/authenticated/dashboard/_components/Announcements'));
 
 export const App: React.FunctionComponent = () => {
   return (
@@ -75,7 +75,7 @@ export const App: React.FunctionComponent = () => {
                 <Route path="composer" element={<Composer />} />
                 <Route path="device" element={<DeviceList />} />
                 <Route path="device/:id" element={<DeviceDetail />} />
-                <Route path="news" element={<News />} />
+                <Route path="announcements" element={<Announcements />} />
               </Route>
 
               <Route path="dashboard" element={<DashboardLayout />}>

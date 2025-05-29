@@ -2,7 +2,7 @@ import { useLayoutEffect, useState } from 'react';
 import { useAuth } from '@/auth/hook';
 import { Job } from '@/domain/types/Job';
 import { DeviceList } from './_components/DeviceList';
-import { News } from './_components/News';
+import { Announcements } from './_components/Announcements';
 import { JobList } from './_components/JobList';
 import { Hero } from './_components/Hero';
 import { Composer } from './_components/Composer';
@@ -43,7 +43,7 @@ export default function Page() {
         <Card
           className={clsx(['col-start-3', 'col-end-4', 'row-start-1', '-row-end-1'], ['grayscale'])}
         >
-          <News />
+          <Announcements />
         </Card>
         <Card className={clsx(['col-start-1', 'col-end-3', 'row-start-2'])}>
           <JobList jobs={jobs ?? []} />

@@ -1,9 +1,8 @@
 import { useContext } from 'react';
 import { userApiContext } from './Provider';
-import {AnnouncementsGetAnnouncementResponse, DevicesDeviceInfo, JobsGetJobsResponse, JobsSubmitJobRequest } from '@/api/generated';
+import { DevicesDeviceInfo, JobsGetJobsResponse, JobsSubmitJobRequest } from '@/api/generated';
 import { Job, JobSearchParams } from '@/domain/types/Job';
 import { Device } from '@/domain/types/Device';
-import { Announcement } from '@/domain/types/Announcement';
 
 export const useJobAPI = () => {
   const api = useContext(userApiContext);
