@@ -5,6 +5,10 @@
 @tailwind utilities;
 
 @layer base {
+  html, body, #root {
+    height: 100%;
+  }
+
   body {
     @apply text-base-content bg-primary-content;
     min-width: 320px;
