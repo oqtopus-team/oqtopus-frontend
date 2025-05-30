@@ -168,8 +168,8 @@ export default function JobListPage() {
           <Button color="secondary">{t('job.list.register_button')}</Button>
         </NavLink>
       </div>
-      <div className={clsx('max-w-full', 'min-w-[800px]', 'flex', 'flex-col', 'gap-6')}>
-        <Card>
+      <div className={clsx('max-w-full', 'flex', 'flex-col', 'gap-6')}>
+        <Card className={clsx('overflow-x-auto')}>
           <JobSearchForm params={params} setParams={setParams} onSubmit={onSearchSubmit} />
         </Card>
         <Card>
