@@ -10,12 +10,20 @@ import { AnnouncementsGetAnnouncementResponse } from '@/api/generated';
 export const Announcements = (): React.ReactElement => {
   const { t } = useTranslation();
   const { getAnnouncements } = useAnnouncementsAPI();
-  const [announcementsList, setAnnouncementsList] = useState<AnnouncementsGetAnnouncementResponse[]>([]);
+  const [announcementsList, setAnnouncementsList] = useState<
+    AnnouncementsGetAnnouncementResponse[]
+  >([]);
 
   useEffect(() => {
     async function getAnnouncementsList() {
       try {
-        const response = await getAnnouncements();
+        const response = await getAnnouncements({
+          options: {
+            params: {
+              order: 'DESC'
+            },
+          },
+        });
 
         if (!response) return;
 

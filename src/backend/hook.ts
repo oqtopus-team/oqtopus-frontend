@@ -3,6 +3,13 @@ import { userApiContext } from './Provider';
 import { DevicesDeviceInfo, JobsGetJobsResponse, JobsSubmitJobRequest } from '@/api/generated';
 import { Job, JobSearchParams } from '@/domain/types/Job';
 import { Device } from '@/domain/types/Device';
+import type { RawAxiosRequestConfig } from 'axios';
+
+interface AnnouncementsApi {
+  offset?: string;
+  limit?: string;
+  options?: RawAxiosRequestConfig;
+}
 
 export const useJobAPI = () => {
   const api = useContext(userApiContext);
@@ -17,14 +24,18 @@ export const useJobAPI = () => {
     return api.job.submitJob(job).then((res) => res.data.job_id);
   };
 
-  const getLatestJobs = async (page: number, pageSize: number, params: JobSearchParams = {}): Promise<Job[]> => {
-    console.log(page, pageSize, params)
+  const getLatestJobs = async (
+    page: number,
+    pageSize: number,
+    params: JobSearchParams = {}
+  ): Promise<Job[]> => {
+    console.log(page, pageSize, params);
     return api.job
       .listJobs(
         'job_id,name,description,device_id,job_info,transpiler_info,simulator_info,mitigation_info,job_type,shots,status,submitted_at',
         undefined,
         undefined,
-        params.jobid ?? params.description ?? "",
+        params.jobid ?? params.description ?? '',
         page,
         pageSize,
         'DESC'
@@ -131,8 +142,8 @@ const convertDeviceResult = (device: DevicesDeviceInfo): Device => ({
 export const useAnnouncementsAPI = () => {
   const api = useContext(userApiContext);
 
-  const getAnnouncements = async () => {
-    return api.announcements.getAnnouncementsList().then((res) => {
+  const getAnnouncements = async ({ limit, offset, options }: AnnouncementsApi) => {
+    return api.announcements.getAnnouncementsList(offset, limit, options).then((res) => {
       if (res.status === 200) {
         return res.data.announcements;
       }
