@@ -1,0 +1,38 @@
+.navigation-bottom-bar {
+    flex-direction: row;
+    order: 2;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(240 248 255 / var(--tw-bg-opacity, 1));
+    height: 60px;
+}
+
+.application-sidebar {
+    display: block;
+}
+
+.navigation-bottom-bar-item-list .closed-navigation-menu-item {
+    border-radius: 0.25rem;
+}
+
+
+@media (max-width: 768px) {
+    .application-sidebar {
+        display: none;
+    }
+
+   .navigation-bottom-bar-item-list {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-around;
+    }
+
+    .navigation-bottom-bar {
+        display: flex;
+    }
+}

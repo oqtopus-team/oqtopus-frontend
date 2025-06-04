@@ -74,6 +74,9 @@ const config: Config = {
         success: '#38c172',
         error: '#e3342f',
       },
+      fontSize: {
+        clamp: 'clamp(1rem, 5vw, 2.5rem)',
+      }
     },
   },
   plugins: [require('@tailwindcss/typography')],

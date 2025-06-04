@@ -78,7 +78,7 @@ export default function JobListPage() {
     getLatestJobs(page, PAGE_SIZE, params)
       .then((resJobs) => {
         setJobs(page === 1 ? resJobs : [...jobs, ...resJobs]);
-        // When the response contains items exactly same as the page size, 
+        // When the response contains items exactly same as the page size,
         // it means there are more items to fetch, so we set `hasMore` to true
         if (resJobs.length === PAGE_SIZE) {
           setHasMore(true);
@@ -162,16 +162,14 @@ export default function JobListPage() {
   return (
     <div>
       <h2 className={clsx('text-primary', 'text-2xl', 'font-bold')}>{t('job.list.title')}</h2>
-      <Spacer className="h-3" />
-      <p className={clsx('text-sm')}>{t('job.list.description')}</p>
       <Spacer className="h-8" />
       <div className={clsx('absolute', 'top-8', 'right-8')}>
         <NavLink color="secondary" to={'/jobs/form'}>
           <Button color="secondary">{t('job.list.register_button')}</Button>
         </NavLink>
       </div>
-      <div className={clsx('max-w-full', 'min-w-[800px]', 'flex', 'flex-col', 'gap-6')}>
-        <Card>
+      <div className={clsx('max-w-full', 'flex', 'flex-col', 'gap-6')}>
+        <Card className={clsx('overflow-x-auto')}>
           <JobSearchForm params={params} setParams={setParams} onSubmit={onSearchSubmit} />
         </Card>
         <Card>
@@ -194,9 +192,7 @@ export default function JobListPage() {
           <InfiniteScroll
             next={() => getJobsScroll(page)}
             hasMore={hasMore}
-            loader={<Loadmore  
-              handleClick={() => getJobsScroll(page)}
-            />}
+            loader={<Loadmore handleClick={() => getJobsScroll(page)} />}
             dataLength={jobs.length}
           >
             <table className={clsx('w-full')}>
@@ -223,7 +219,7 @@ export default function JobListPage() {
                     if (params.status && job.status !== params.status) {
                       return false;
                     }
-                    if (params.jobid && job.id !== params.jobid) {
+                    if (params.jobid && !job.id.includes(params.jobid)) {
                       return false;
                     }
                     if (params.description && !job.description?.includes(params.description)) {
@@ -292,7 +288,7 @@ export default function JobListPage() {
   );
 }
 
-const Loadmore = (props: { handleClick: () => void}) => {
+const Loadmore = (props: { handleClick: () => void }) => {
   return (
     <div
       className={clsx(
@@ -309,8 +305,8 @@ const Loadmore = (props: { handleClick: () => void}) => {
     >
       Click to load more...
     </div>
-  )
-}
+  );
+};
 
 const generateSearchParams = (params: JobSearchParams): string => {
   const searchParams = new URLSearchParams();
