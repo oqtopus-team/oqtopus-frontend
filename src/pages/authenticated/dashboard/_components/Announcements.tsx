@@ -20,7 +20,7 @@ export const Announcements = (): React.ReactElement => {
         const response = await getAnnouncements({
           options: {
             params: {
-              order: 'DESC'
+              order: 'DESC',
             },
           },
         });
@@ -49,7 +49,10 @@ export const Announcements = (): React.ReactElement => {
       <Spacer className="h-4" />
       <div className={clsx('grid', 'gap-[23px]')}>
         {announcementsList.map((announcement) => (
-          <AnnouncementPost key={announcement.id} announcement={announcement} />
+          (announcement.publishable && (
+            new Date(announcement.start_time).getTime() < Date.now()
+            && new Date(announcement.end_time).getTime() > Date.now()
+          ) &&<AnnouncementPost key={announcement.id} announcement={announcement} />)
         ))}
       </div>
     </>
