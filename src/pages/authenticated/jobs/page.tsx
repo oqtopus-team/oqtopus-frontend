@@ -46,7 +46,7 @@ export default function JobListPage() {
       urlSearchParams.forEach((value, key) => {
         if (key === 'status' && JOB_STATUSES.includes(value as JobStatusType)) {
           params.status = value as JobStatusType;
-        } else if (key === 'jobid' || key === 'description') {
+        } else if (key === 'query') {
           params[key] = value;
         }
       });
@@ -219,12 +219,15 @@ export default function JobListPage() {
                     if (params.status && job.status !== params.status) {
                       return false;
                     }
-                    if (params.jobid && !job.id.includes(params.jobid)) {
+                    if (
+                      params.query &&
+                      !job.id.includes(params.query) &&
+                      !job.name.includes(params.query) &&
+                      !job.description?.includes(params.query)
+                    ) {
                       return false;
                     }
-                    if (params.description && !job.description?.includes(params.description)) {
-                      return false;
-                    }
+
                     return true;
                   })
                   .map((job) => (
