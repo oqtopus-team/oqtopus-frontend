@@ -8,8 +8,8 @@ import { AnnouncementsGetAnnouncementResponse } from '@/api/generated';
 import styles from './announcement.module.css';
 
 interface AnnouncementProps {
-  style: {
-    post: CSSProperties | Record<string, string | number>;
+  style?: {
+    post?: CSSProperties | Record<string, string | number>;
   }
 }
 
@@ -67,7 +67,7 @@ export const Announcements = (props: AnnouncementProps): React.ReactElement => {
         )}
 
         {filteredAnnouncementsList.map((announcement) => (
-          <AnnouncementPost key={announcement.id} announcement={announcement} style={{announcement: props.style.post}}/>
+          <AnnouncementPost key={announcement.id} announcement={announcement} style={{announcement: props.style?.post}}/>
         ))}
       </div>
     </>

@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 interface PostProps {
   announcement: AnnouncementsGetAnnouncementResponse;
   style?: {
-    announcement: CSSProperties
+    announcement?: CSSProperties
   };
 }
 
