@@ -1,5 +1,4 @@
 import { useLayoutEffect, useState } from 'react';
-import { useAuth } from '@/auth/hook';
 import { Job } from '@/domain/types/Job';
 import { DeviceList } from './_components/DeviceList';
 import { Announcements } from './_components/Announcements';
@@ -49,12 +48,10 @@ export default function Page() {
         <Card className={clsx(['col-start-2', 'col-end-3', 'overflow-x-auto'])}>
           <DeviceList />
         </Card>
-        <Card
-          className={clsx(['col-start-3', 'col-end-4', 'row-start-1', '-row-end-1'], ['grayscale'])}
-        >
-          <Announcements />
+        <Card className={clsx(['col-start-3', 'col-end-4', 'row-start-1', 'row-end-1  '])}>
+          <Announcements style={{ post: { '--base-size': 0.55 } }} />
         </Card>
-        <Card className={clsx(['col-start-1', 'col-end-3', 'row-start-2'])}>
+        <Card className={clsx(['col-start-1', 'col-end-3', 'row-start-2', 'overflow-x-auto'])}>
           <JobList jobs={jobs ?? []} />
         </Card>
       </div>

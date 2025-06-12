@@ -1,16 +1,25 @@
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
-import { Button } from '@/pages/_components/Button';
 import { Spacer } from '@/pages/_components/Spacer';
 import { AnnouncementPost } from '@/pages/authenticated/dashboard/_components/AnnouncementPost';
 import { useAnnouncementsAPI } from '@/backend/hook';
-import { useEffect, useState } from 'react';
+import { CSSProperties, useEffect, useState } from 'react';
 import { AnnouncementsGetAnnouncementResponse } from '@/api/generated';
+import styles from './announcement.module.css';
 
-export const Announcements = (): React.ReactElement => {
+interface AnnouncementProps {
+  style: {
+    post: CSSProperties | Record<string, string | number>;
+  }
+}
+
+export const Announcements = (props: AnnouncementProps): React.ReactElement => {
   const { t } = useTranslation();
   const { getAnnouncements } = useAnnouncementsAPI();
-  const [announcementsList, setAnnouncementsList] = useState<
+  const [allAnnouncementsList, setAllAnnouncementsList] = useState<
+    AnnouncementsGetAnnouncementResponse[]
+  >([]);
+  const [filteredAnnouncementsList, setFilteredAnnouncementsList] = useState<
     AnnouncementsGetAnnouncementResponse[]
   >([]);
 
@@ -27,7 +36,15 @@ export const Announcements = (): React.ReactElement => {
 
         if (!response) return;
 
-        setAnnouncementsList(response);
+        setAllAnnouncementsList(response);
+
+        const filteredList = response.filter(
+          (announcement) =>
+            announcement.publishable &&
+            new Date(announcement.start_time).getTime() < Date.now() &&
+            new Date(announcement.end_time).getTime() > Date.now()
+        );
+        setFilteredAnnouncementsList(filteredList);
       } catch (e) {
         console.log(e);
       }
@@ -42,17 +59,15 @@ export const Announcements = (): React.ReactElement => {
         <div className={clsx('text-base', 'font-bold', 'text-primary')}>
           {t('dashboard.announcements.title')}
         </div>
-        <Button kind="link" color="secondary" href="/announcements">
-          {t('dashboard.announcements.button')}
-        </Button>
       </div>
       <Spacer className="h-4" />
       <div className={clsx('grid', 'gap-[23px]')}>
-        {announcementsList.map((announcement) => (
-          (announcement.publishable && (
-            new Date(announcement.start_time).getTime() < Date.now()
-            && new Date(announcement.end_time).getTime() > Date.now()
-          ) &&<AnnouncementPost key={announcement.id} announcement={announcement} />)
+        {filteredAnnouncementsList.length === 0 && (
+          <p className={clsx(styles.no_announcements)}>{t('announcements.no_announcements')}</p>
+        )}
+
+        {filteredAnnouncementsList.map((announcement) => (
+          <AnnouncementPost key={announcement.id} announcement={announcement} style={{announcement: props.style.post}}/>
         ))}
       </div>
     </>

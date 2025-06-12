@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { CSSProperties, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { marked } from 'marked';
 import clsx from 'clsx';
 import styles from './announcement.module.css';
@@ -8,22 +8,37 @@ import { useTranslation } from 'react-i18next';
 
 interface PostProps {
   announcement: AnnouncementsGetAnnouncementResponse;
+  style?: {
+    announcement: CSSProperties
+  };
 }
 
-export const AnnouncementPost = ({ announcement }: PostProps) => {
+export const AnnouncementPost = ({ announcement, style: propsStyle }: PostProps) => {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [shouldShowButton, setShouldShowButton] = useState(false);
   const [htmlContent, setHtmlContent] = useState<string>('');
   const contentRef = useRef<HTMLDivElement>(null);
   const { t, i18n } = useTranslation();
 
-  useEffect(() => {
-    if (contentRef.current) {
-      const shouldCollapse = contentRef.current.scrollHeight > 400;
+  useLayoutEffect(() => {
+    // The effect defines the initial height of the content to display the showMore button.
+    if (!contentRef.current) return;
+
+    const observer = new ResizeObserver((entries) => {
+      console.log('observer work');
+      const entry = entries[0];
+      const scrollHeight = entry.target.scrollHeight;
+
+      const shouldCollapse = scrollHeight > 400;
       setShouldShowButton(shouldCollapse);
       setIsCollapsed(shouldCollapse);
-    }
-  }, [announcement]);
+      observer.disconnect()
+    });
+
+    observer.observe(contentRef.current);
+
+    return () => observer.disconnect();
+  }, [contentRef.current]);
 
   // Parsing html string
   useEffect(() => {
@@ -32,12 +47,13 @@ export const AnnouncementPost = ({ announcement }: PostProps) => {
     async function getHtmlContent() {
       try {
         const parsedHtml = await marked.parse(announcement.content);
-        setHtmlContent(parsedHtml)
+        setHtmlContent(parsedHtml);
       } catch (e) {
         console.log('Error parsing markdown: ', e);
       }
     }
-    getHtmlContent()
+
+    getHtmlContent();
   }, [announcement]);
 
   const toggleCollapse = () => {
@@ -54,9 +70,10 @@ export const AnnouncementPost = ({ announcement }: PostProps) => {
       </div>
       <div
         ref={contentRef}
-        className={clsx(styles.post_content, {
+        className={clsx(styles.post_content, styles.markdown_content , {
           [styles.collapsed]: isCollapsed,
         })}
+        style={propsStyle?.announcement}
         dangerouslySetInnerHTML={{ __html: htmlContent }}
       ></div>
       <button
