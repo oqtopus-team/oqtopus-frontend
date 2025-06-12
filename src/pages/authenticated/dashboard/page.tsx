@@ -37,7 +37,7 @@ export default function Page() {
         className={clsx(
           'dashboard-page',
           'grid',
-          'grid-cols-[1.2fr_1.9fr]',
+          'grid-cols-[1fr_1fr_1fr]',
           'grid-rows-[auto_1fr]',
           'gap-5'
         )}
