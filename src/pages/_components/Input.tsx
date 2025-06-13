@@ -64,6 +64,7 @@ export const Input = forwardRef<
         <input
           ref={ref}
           {...props}
+          type={type}
           className={clsx(
             'w-full',
             ['rounded', 'border', 'outline-primary'],
