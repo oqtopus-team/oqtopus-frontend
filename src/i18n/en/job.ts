@@ -7,8 +7,8 @@ export default {
     register_button: 'Register a new job',
     search: {
       head: 'Job search',
-      id: 'Job ID',
-      id_placeholder: 'Enter Job ID',
+      job_search_query_input: 'Job ID, Job Name or Job Description',
+      job_search_query_input_placeholder: 'Enter Job ID, Job Name or Job Description',
       status: 'Status',
       description: 'Description',
       description_placeholder: 'Enter description',

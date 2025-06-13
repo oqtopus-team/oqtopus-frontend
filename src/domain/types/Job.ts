@@ -94,8 +94,7 @@ export interface Job {
 }
 
 export interface JobSearchParams {
-  jobid?: string;
-  description?: string;
+  query?: string; // id, name or description query string
   status?: JobStatusType;
   page?: string;
 }

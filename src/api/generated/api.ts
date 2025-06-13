@@ -1600,7 +1600,7 @@ export const JobApiAxiosParamCreator = function (configuration?: Configuration) 
          * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
          * @param {string} [startTime] Allows to filter the list of jobs to fetch by creation time. If specified only jobs with creation time  (createdAt property) &gt;&#x3D; start_time are returned.
          * @param {string} [endTiime] Allows to filter the list of jobs to fetch by to creation time. If specified only jobs with creation time (createdAt property) &lt;&#x3D; end_time are returned.
-         * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s name and description. If specified only jobs which name or description contains specified search string are returned.
+         * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s id, name and description. If specified only jobs which id, name or description contains specified search string are returned.
          * @param {number} [page] Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned.
          * @param {number} [size] Configure number of jobs per page
          * @param {ListJobsOrderEnum} [order] Specify jobs order according to creation time (createdAt property)
@@ -1786,7 +1786,7 @@ export const JobApiFp = function(configuration?: Configuration) {
          * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
          * @param {string} [startTime] Allows to filter the list of jobs to fetch by creation time. If specified only jobs with creation time  (createdAt property) &gt;&#x3D; start_time are returned.
          * @param {string} [endTiime] Allows to filter the list of jobs to fetch by to creation time. If specified only jobs with creation time (createdAt property) &lt;&#x3D; end_time are returned.
-         * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s name and description. If specified only jobs which name or description contains specified search string are returned.
+         * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s id, name and description. If specified only jobs which id, name or description contains specified search string are returned.
          * @param {number} [page] Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned.
          * @param {number} [size] Configure number of jobs per page
          * @param {ListJobsOrderEnum} [order] Specify jobs order according to creation time (createdAt property)
@@ -1878,7 +1878,7 @@ export const JobApiFactory = function (configuration?: Configuration, basePath?:
          * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
          * @param {string} [startTime] Allows to filter the list of jobs to fetch by creation time. If specified only jobs with creation time  (createdAt property) &gt;&#x3D; start_time are returned.
          * @param {string} [endTiime] Allows to filter the list of jobs to fetch by to creation time. If specified only jobs with creation time (createdAt property) &lt;&#x3D; end_time are returned.
-         * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s name and description. If specified only jobs which name or description contains specified search string are returned.
+         * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s id, name and description. If specified only jobs which id, name or description contains specified search string are returned.
          * @param {number} [page] Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned.
          * @param {number} [size] Configure number of jobs per page
          * @param {ListJobsOrderEnum} [order] Specify jobs order according to creation time (createdAt property)
@@ -1974,7 +1974,7 @@ export class JobApi extends BaseAPI {
      * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
      * @param {string} [startTime] Allows to filter the list of jobs to fetch by creation time. If specified only jobs with creation time  (createdAt property) &gt;&#x3D; start_time are returned.
      * @param {string} [endTiime] Allows to filter the list of jobs to fetch by to creation time. If specified only jobs with creation time (createdAt property) &lt;&#x3D; end_time are returned.
-     * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s name and description. If specified only jobs which name or description contains specified search string are returned.
+     * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s id, name and description. If specified only jobs which id, name or description contains specified search string are returned.
      * @param {number} [page] Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned.
      * @param {number} [size] Configure number of jobs per page
      * @param {ListJobsOrderEnum} [order] Specify jobs order according to creation time (createdAt property)

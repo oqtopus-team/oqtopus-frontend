@@ -6,8 +6,8 @@ export default {
     register_button: '新規でジョブを登録する',
     search: {
       head: 'ジョブ検索',
-      id: 'ジョブID',
-      id_placeholder: 'Enter Job ID',
+      job_search_query_input: 'ジョブID、ジョブ名もしくはジョブ詳細',
+      job_search_query_input_placeholder: 'Enter Job ID, Job Name or Job Description',
       status: 'ステータス',
       description: '説明',
       description_placeholder: 'Enter description',
