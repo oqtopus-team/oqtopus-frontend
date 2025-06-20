@@ -27,7 +27,7 @@ export default {
       name: 'ジョブ名',
     },
   },
-  news: {
+  announcements: {
     title: 'お知らせ',
     button: '一覧へ',
   },

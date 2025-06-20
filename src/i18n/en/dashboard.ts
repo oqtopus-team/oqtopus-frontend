@@ -27,8 +27,8 @@ export default {
       shots: 'Shots',
     },
   },
-  news: {
-    title: 'News',
-    button: 'View News',
+  announcements: {
+    title: 'Announcements',
+    button: 'View Announcements',
   },
 };

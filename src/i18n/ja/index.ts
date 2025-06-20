@@ -9,7 +9,7 @@ import howto from './howto';
 import job from './job';
 import mfa from './mfa';
 import mfa_reset from './mfa_reset';
-import news from './news';
+import announcements from './announcements';
 import sidebar from './sidebar';
 import signin from './signin';
 import signup from './signup';
@@ -27,7 +27,7 @@ export default {
     job,
     mfa,
     mfa_reset,
-    news,
+    announcements,
     sidebar,
     signin,
     signup,

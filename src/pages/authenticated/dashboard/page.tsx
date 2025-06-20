@@ -1,8 +1,7 @@
 import { useLayoutEffect, useState } from 'react';
-import { useAuth } from '@/auth/hook';
 import { Job } from '@/domain/types/Job';
 import { DeviceList } from './_components/DeviceList';
-import { News } from './_components/News';
+import { Announcements } from './_components/Announcements';
 import { JobList } from './_components/JobList';
 import { Hero } from './_components/Hero';
 import { Composer } from './_components/Composer';
@@ -38,7 +37,7 @@ export default function Page() {
         className={clsx(
           'dashboard-page',
           'grid',
-          'grid-cols-[1.2fr_1.9fr]',
+          'grid-cols-[1fr_1fr_1fr]',
           'grid-rows-[auto_1fr]',
           'gap-5'
         )}
@@ -49,12 +48,9 @@ export default function Page() {
         <Card className={clsx(['col-start-2', 'col-end-3', 'overflow-x-auto'])}>
           <DeviceList />
         </Card>
-        {/* // TODO: Enable news card */}
-        {/* <Card
-          className={clsx(['col-start-3', 'col-end-4', 'row-start-1', '-row-end-1'], ['grayscale'])}
-        >
-          <News />
-        </Card> */}
+        <Card className={clsx(['col-start-3', 'col-end-4', 'row-start-1', 'row-end-1  '])}>
+          <Announcements style={{ post: { '--base-size': 0.55 } }} />
+        </Card>
         <Card className={clsx(['col-start-1', 'col-end-3', 'row-start-2', 'overflow-x-auto'])}>
           <JobList jobs={jobs ?? []} />
         </Card>
