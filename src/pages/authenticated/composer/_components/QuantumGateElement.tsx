@@ -98,6 +98,7 @@ const ControlledGate = (props: ControlledGateProps) => {
 export default function QuantumGateElement(props: Props) {
   const gate = props.gate
   const ref = useRef<HTMLDivElement>(null);
+  const executedRef = useRef(false)
   const [{ isDragging }, drag, preview] = useDrag<DragMoveGateItem, void, { isDragging: boolean }>(() => ({
     type: ItemTypeMoveGate,
     item: {
@@ -106,6 +107,10 @@ export default function QuantumGateElement(props: Props) {
 
       sourceQubit: props.qubitIndex,
       sourceTimestep: props.timestep,
+    },
+    end: () => {
+      props.onDragEnd?.();
+      executedRef.current = false;
     },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
@@ -119,11 +124,9 @@ export default function QuantumGateElement(props: Props) {
   }, [drag])
 
   useEffect(() => {
-    if (isDragging) {
+    if (isDragging && executedRef.current == false) {
       props.onDragStart?.();
-    }
-    else {
-      props.onDragEnd?.();
+      executedRef.current = true;
     }
   }, [isDragging])
 
@@ -136,7 +139,7 @@ export default function QuantumGateElement(props: Props) {
         ["transition-all", "duration-300"],
         [props.isDragging ? "cursor-grabbing" : "cursor-pointer"
         ],
-        [isDragging ? "opacity-50" : "opacity-100"],
+        [props.isDragging ? "opacity-50" : "opacity-100"],
       ])}
     >
       {

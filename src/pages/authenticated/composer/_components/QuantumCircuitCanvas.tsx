@@ -193,6 +193,7 @@ const swapCell = (qIndex: number, timestep1: number, timestep2: number, c: Compo
 const handleControlQubitClick = (
   holdingControlQubit: HoldingControlQubit,
   composed: ComposedProgram,
+  setHoldingControlQubit: (h: HoldingControlQubit) => void
 ) =>
   (qIndex: number, tIndex: number) => {
     if (holdingControlQubit.valueOf() !== false) {
@@ -202,7 +203,6 @@ const handleControlQubitClick = (
     if (!controlQubit) {
       throw new Error("Impossible!");
     }
-    console.log("HELLO", controlQubit)
   }
 
 const handleDragControlQubit = (
@@ -281,6 +281,8 @@ const handleDragIn = (
   composed: ComposedProgram,
   setComposedProgram: (composed: ComposedProgram) => void,
   // setShadowPos: (pos: [number, number]) => void
+  draggingFromCanvas: DraggingFromCanvasState,
+  setDraggingFromCanvas: (d: DraggingFromCanvasState) => void
 ) =>
   (
     qubitIndex: number,
@@ -288,7 +290,6 @@ const handleDragIn = (
     part: DropCellPart,
     item: DragGateItem | DragMoveGateItem,
   ) => {
-    debugger
     const effComposed = (() => {
       if (item.type === "MOVE_GATE") {
         return composed.map((w, i) => {
@@ -301,8 +302,8 @@ const handleDragIn = (
     })();
     const hoveredCell = effComposed[qubitIndex][timestep];
     const maxDepth = calcMaxDepth(effComposed);
-    const [newComposed, newHoldingGate] =
-      ((): [ComposedProgram, HoldingGate] => {
+    const [newComposed, newHoldingGate, shouldShift] =
+      ((): [ComposedProgram, HoldingGate, boolean] => {
         if (hoveredCell) {
           const checkPos = part == "left"
             ? timestep - 1
@@ -314,7 +315,8 @@ const handleDragIn = (
           ) {
             return [
               [...composed],
-              { dropQubitIndex: qubitIndex, dropTimestep: checkPos, part }
+              { dropQubitIndex: qubitIndex, dropTimestep: checkPos, part },
+              false
             ];
           }
           else {
@@ -326,7 +328,11 @@ const handleDragIn = (
                 undefined,
                 ...w.slice(insertPos),
               ]),
-              { dropQubitIndex: qubitIndex, dropTimestep: insertPos, part }
+              { dropQubitIndex: qubitIndex, dropTimestep: insertPos, part },
+              draggingFromCanvas.isDragging &&
+              (timestep < draggingFromCanvas.sourceTimestep
+                || (timestep == draggingFromCanvas.sourceTimestep && part == "left")
+              )
             ];
           }
 
@@ -335,12 +341,19 @@ const handleDragIn = (
           // ホバーしたセルが空白であればなにもしなくてよい
           return [
             [...composed],
-            { dropQubitIndex: qubitIndex, dropTimestep: timestep, part }
+            { dropQubitIndex: qubitIndex, dropTimestep: timestep, part },
+            false
           ];
         }
       })();
     setComposedProgram(newComposed);
     setHoldingGate(newHoldingGate);
+    if (shouldShift && draggingFromCanvas.isDragging) {
+      setDraggingFromCanvas({
+        ...draggingFromCanvas,
+        sourceTimestep: draggingFromCanvas.sourceTimestep + 1
+      })
+    }
   }
 
 interface Props {
@@ -372,9 +385,8 @@ const reconstructCircuit = (composed: ComposedProgram, qubitNumber: number, circ
 
   return {
     qubitNumber,
-    steps: [...new Array(circuitDepth)].flatMap((_, timestep) =>
-      composed.map((gs, i) => toGate(gs[timestep], i)).filter(x => x !== undefined)
-    )
+    steps: [...new Array(circuitDepth)]
+      .flatMap((_, timestep) => composed.map((gs, i) => toGate(gs[timestep], i)).filter(x => x !== undefined))
   };
 }
 
@@ -408,12 +420,18 @@ const handleMoveGate = (
   composedProgram: ComposedProgram,
   handleComposedProgramUpdated: (newComposed: ComposedProgram) => void,
   setHoldingControlQubit: (h: HoldingControlQubit) => void,
+  draggingFromCanvas: DraggingFromCanvasState,
+  setDraggingFromCanvas: (d: DraggingFromCanvasState) => void
 ) => {
+  if (draggingFromCanvas.isDragging === false) {
+    throw new Error("Impossible!");
+  }
+  const { sourceTimestep } = draggingFromCanvas;
   const hole = composedProgram[qubitIndex][timestep];
   if (hole) return;
   const newComposed = [...composedProgram];
   const movingGate = (() => {
-    const originalGate = composedProgram[item.sourceQubit][item.sourceTimestep];
+    const originalGate = composedProgram[item.sourceQubit][sourceTimestep];
     if (!originalGate) {
       throw new Error("Impossible!");
     }
@@ -427,7 +445,7 @@ const handleMoveGate = (
     }
   })();
   newComposed[qubitIndex][timestep] = movingGate;
-  composedProgram[item.sourceQubit][item.sourceTimestep] = undefined;
+  composedProgram[item.sourceQubit][sourceTimestep] = undefined;
   handleComposedProgramUpdated(newComposed);
   switch (movingGate._tag) {
     case "cnot":
@@ -511,7 +529,17 @@ export default (props: Props) => {
     return EmptyCell;
   };
 
-  const handleComposedProgramUpdated = (newComposed: ComposedProgram) => {
+  const handleComposedProgramUpdated = (composed: ComposedProgram) => {
+    let dropsCnt = 0;
+    for (let i = calcMaxDepth(composed) - 1; i >= 0; i--) {
+      if (composed.map(w => w[i]).every(g => g === undefined)) {
+        dropsCnt++;
+      }
+      else break;
+    }
+    const newComposed = dropsCnt == 0 
+      ? [...composed] 
+      : composed.map(w => w.slice(0, (-1) * dropsCnt));
     const newCircuitDepth = calcMaxDepth(newComposed);
     const newCircuit = reconstructCircuit(newComposed, qubitNumber.valueOf(), newCircuitDepth);
     console.log("newCircuit", newCircuit);
@@ -524,7 +552,16 @@ export default (props: Props) => {
         case ItemTypeGate:
           return handleDropNewGate(qubitIndex, timestep, item, composedProgram, handleComposedProgramUpdated, setHoldingControlQubit);
         case ItemTypeMoveGate:
-          return handleMoveGate(qubitIndex, timestep, item, composedProgram, handleComposedProgramUpdated, setHoldingControlQubit);
+          return handleMoveGate(
+            qubitIndex,
+            timestep,
+            item,
+            composedProgram,
+            handleComposedProgramUpdated,
+            setHoldingControlQubit,
+            draggingFromCanvas,
+            setDraggingFromCanvas
+          );
       }
     })();
     setHoldingGate(false);
@@ -702,7 +739,8 @@ export default (props: Props) => {
                           element={elm}
                           qubitIndex={qIndex}
                           timestep={tIndex}
-                          isDragging={false}
+                          isDragging={draggingFromCanvas.isDragging && draggingFromCanvas.sourceQubitIndex === qIndex && draggingFromCanvas.sourceTimestep === tIndex}
+                          // isDragging={false}
                           previewControl={(() => {
                             if (holdingControlQuit === false || holdingControlQuit.timestep !== tIndex) return null;
                             if (holdingControlQuit.targetQubitIndex === qIndex) {
@@ -732,9 +770,8 @@ export default (props: Props) => {
                             && qIndex == holdingGate.dropQubitIndex
                             && tIndex == holdingGate.dropTimestep
                           }
-                          onClickControlQubit={handleControlQubitClick(holdingControlQuit, composedProgram)}
+                          onClickControlQubit={handleControlQubitClick(holdingControlQuit, composedProgram, setHoldingControlQubit)}
                           onClickControlledGate={handleControlledGateClick}
-                          onDrop={f => f}
                           onDragStart={() => {
                             setDraggingFromCanvas({
                               isDragging: true,
@@ -801,7 +838,9 @@ export default (props: Props) => {
                           holdingGate,
                           setHoldingGate,
                           composedProgram,
-                          setComposedProgram
+                          setComposedProgram,
+                          draggingFromCanvas,
+                          setDraggingFromCanvas
                         )}
                         onDrop={(qubit, timestep, _, item) => handleDrop(qubit, timestep, item)}
                         onDragControlQubit={handleDragControlQubit(
@@ -826,7 +865,9 @@ export default (props: Props) => {
                           holdingGate,
                           setHoldingGate,
                           composedProgram,
-                          setComposedProgram
+                          setComposedProgram,
+                          draggingFromCanvas,
+                          setDraggingFromCanvas
                         )} onDrop={(qubit, timestep, _, item) => handleDrop(qubit, timestep, item)}
                         onDragControlQubit={handleDragControlQubit(
                           holdingControlQuit,
@@ -851,7 +892,10 @@ export default (props: Props) => {
         </div>
       </div>
       <div>
-        {/* {holdingGate ? `{ dropTimestep: ${holdingGate.dropTimestep}, dropQubitIndex ${holdingGate.dropQubitIndex}}` : "false"} */}
+        {/* {draggingFromCanvas.isDragging ? `{ isDragging: true, sourceQubitIndex: ${draggingFromCanvas.sourceQubitIndex}, sourceTimestep: ${draggingFromCanvas.sourceTimestep}` : "{ isDragging: false }"} */}
+        <div>
+          {/* {holdingGate ? `{ dropTimestep: ${holdingGate.dropTimestep}, dropQubitIndex ${holdingGate.dropQubitIndex}}` : "false"} */}
+        </div>
       </div>
       {/* {holdingControlQuit ? `{ hovered: ${holdingControlQuit.hovered}, timestep: ${holdingControlQuit.timestep}, rest: ${holdingControlQuit.rest}, targetQubit: ${holdingControlQuit.targetQubitIndex}}` : "false"} */}
     </div>

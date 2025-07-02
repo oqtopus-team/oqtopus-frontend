@@ -21,7 +21,7 @@ export const ControlQubit = (directions: ControlWireDirection[]): GateCellElemen
 export const EmptyCell: GateCellElement = { _tag: "emptyCell" };
 
 export type PreviewControl =
-  | { _tag: "controlWire" } 
+  | { _tag: "controlWire" }
   | { _tag: "controlQubit", directions: ("up" | "down")[] }
   | { _tag: "controlledGate", directions: ("up" | "down")[] }
   ;
@@ -35,7 +35,6 @@ export interface Props {
   previewControl: PreviewControl | null;
   onClickControlQubit: (qubitIndex: number, timestep: number) => void;
   onClickControlledGate: (qubitIndex: number, timestep: number) => void;
-  onDrop: (qubit: number, timestep: number, item: DragGateItem) => void;
   onDragStart: () => void;
   onDragEnd: () => void;
 }
@@ -54,15 +53,15 @@ export default (props: Props) => {
     >
       {(() => {
         if (props.previewControl?._tag === "controlQubit") {
-            return (
-              <ControlQubitCell
-                isPreview
-                isConnectedDown={props.previewControl.directions.includes("down")}
-                isConnectedUp={props.previewControl.directions.includes("up")}
-                handleClick={() => { }}
-              />
-            );
-          }
+          return (
+            <ControlQubitCell
+              isPreview
+              isConnectedDown={props.previewControl.directions.includes("down")}
+              isConnectedUp={props.previewControl.directions.includes("up")}
+              handleClick={() => props.onClickControlQubit(props.qubitIndex, props.timestep)}
+            />
+          );
+        }
         else if (props.previewControl?._tag === "controlWire") {
           return (
             <ControlWireCell isPreview />
@@ -77,14 +76,15 @@ export default (props: Props) => {
                   gate={element.gate}
                   qubitIndex={props.qubitIndex}
                   timestep={props.timestep}
-                  previewDirections={props.previewControl?.directions }
+                  previewDirections={props.previewControl?.directions}
                   onDragStart={props.onDragStart}
                   onDragEnd={props.onDragEnd}
-                  resetControlGate={() => {
-                    if (element.gate._tag === "cnot" || element.gate._tag === "ccnot") {
-                      props.onClickControlledGate(props.qubitIndex, props.timestep);
-                    }
-                  }}
+                  resetControlGate={
+                    () => {
+                      if (element.gate._tag === "cnot" || element.gate._tag === "ccnot") {
+                        props.onClickControlledGate(props.qubitIndex, props.timestep);
+                      }
+                    }}
                 >
                 </QuantumGateElement>
               </>
@@ -162,6 +162,7 @@ export const ControlQubitCell = (props: ControlQubitCellProps) => {
           ["flex-col", "justify-center", "h-full"],
           props.isPreview ? ["opacity-50"] : []
         ])}
+        onClick={(props.handleClick)}
       >
         <div className="flex justify-center items-center h-[24px]">
           {
@@ -171,7 +172,6 @@ export const ControlQubitCell = (props: ControlQubitCellProps) => {
           }
         </div>
         <div
-          onClick={props.handleClick}
           className="bg-gate-controlled w-[16px] h-[16px] rounded-full"
         >
         </div>
