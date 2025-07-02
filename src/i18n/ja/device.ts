@@ -1,8 +1,6 @@
 export default {
   list: {
     title: 'デバイス一覧',
-    description:
-      '分子や原子を扱う量子力学の知見を活かした電子部品です。トポロジー情報や量子ビットごとの値などを確認できます。',
     table: {
       id: 'デバイス ID',
       name: 'デバイス名',
@@ -55,7 +53,6 @@ export default {
         error: '読み出し割り当てエラー',
       },
     },
-    not_found: '対象のデバイスが存在しません',
   },
   status: {
     available: '利用可',

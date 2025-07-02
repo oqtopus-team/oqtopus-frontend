@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { useAuth } from '@/auth/hook';
 import { NavLink, useNavigate, useLocation } from 'react-router';
 import { Spacer } from '@/pages/_components/Spacer';
+import './Sidebar.css';
 
 type MenuItem = MenuNavigate | MenuOnClick;
 interface MenuNavigate {
@@ -63,10 +64,9 @@ export const Sidebar = () => {
     },
     {
       kind: 'navigate',
-      name: t('sidebar.nav.news'),
-      path: '/news',
-      icon: <SVGNews />,
-      disable: true,
+      name: t('sidebar.nav.announcements'),
+      path: '/announcements',
+      icon: <SVGAnnouncements />,
     },
     {
       kind: 'onclick',
@@ -80,7 +80,7 @@ export const Sidebar = () => {
   ];
 
   return (
-    <div>
+    <div className="application-sidebar">
       <div className={clsx('relative', 'h-full', open ? 'min-w-[269px]' : 'min-w-auto')}>
         <div className={clsx(['sticky', 'top-0', 'left-0'], ['p-8', !open && 'pr-0'])}>
           <div
@@ -107,6 +107,86 @@ export const Sidebar = () => {
   );
 };
 
+/**
+ * Navigation bottom bar is displayed only when the screen is too small (width < 768px) to display sidebar.
+ * With such screens we hide the sidebar and display navigation bottom bar as sidebar's replacement.
+ */
+export const NavigationBottomBar = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const auth = useAuth();
+
+  const menuItems: MenuItem[] = [
+    {
+      kind: 'navigate',
+      name: t('sidebar.nav.dashboard'),
+      path: '/dashboard',
+      icon: <SVGDashboard />,
+    },
+    {
+      kind: 'navigate',
+      name: t('sidebar.nav.composer'),
+      path: '/composer',
+      icon: <SVGComposer />,
+      disable: true,
+    },
+    {
+      kind: 'navigate',
+      name: t('sidebar.nav.device'),
+      path: '/device',
+      icon: <SVGDevice />,
+    },
+    {
+      kind: 'navigate',
+      name: t('sidebar.nav.job'),
+      path: '/jobs',
+      icon: <SVGJob />,
+    },
+    {
+      kind: 'navigate',
+      name: t('sidebar.nav.document'),
+      path: '/howto',
+      icon: <SVGDocument />,
+    },
+    {
+      kind: 'navigate',
+      name: t('sidebar.nav.news'),
+      path: '/news',
+      icon: <SVGAnnouncements />,
+      disable: true,
+    },
+    {
+      kind: 'onclick',
+      name: t('sidebar.nav.logout'),
+      onClick: () => {
+        auth.signOut();
+        navigate('/login');
+      },
+      icon: <SVGLogout />,
+    },
+  ];
+
+  return (
+    <div className={clsx('navigation-bottom-bar')}>
+      <ul
+        className={clsx(
+          'navigation-bottom-bar-item-list',
+          'flex',
+          'flex-col',
+          'gap-[1px]',
+          'text-sm'
+        )}
+      >
+        {menuItems.map((menuItem, index) => (
+          <li key={index}>
+            <MenuItemComponent menuItem={menuItem} open={false} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
 const MenuItemComponent = ({
   menuItem,
   open,
@@ -124,7 +204,7 @@ const MenuItemComponent = ({
         ['[&.active]:bg-gradient-p-s', '[&.active]:text-primary-content'],
         'group'
       ),
-      close: 'rounded-r-none',
+      close: clsx('rounded-r-none', 'closed-navigation-menu-item'),
     },
     icon: clsx(
       'w-[23px]',
@@ -295,7 +375,7 @@ const SVGDocument = (): React.ReactElement => (
   </svg>
 );
 
-const SVGNews = (): React.ReactElement => (
+const SVGAnnouncements = (): React.ReactElement => (
   <svg width="20" height="20" viewBox="0 0 20 20">
     <path
       d="M3.33317 3.33329H16.6665V13.3333H4.30817L3.33317 14.3083V3.33329ZM3.33317 1.66663C2.4165 1.66663 1.67484 2.41663 1.67484 3.33329L1.6665 18.3333L4.99984 15H16.6665C17.5832 15 18.3332 14.25 18.3332 13.3333V3.33329C18.3332 2.41663 17.5832 1.66663 16.6665 1.66663H3.33317ZM4.99984 9.99996H11.6665V11.6666H4.99984V9.99996ZM4.99984 7.49996H14.9998V9.16663H4.99984V7.49996ZM4.99984 4.99996H14.9998V6.66663H4.99984V4.99996Z"

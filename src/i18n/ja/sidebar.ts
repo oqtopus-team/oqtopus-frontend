@@ -5,7 +5,7 @@ export default {
     device: 'デバイス',
     job: 'ジョブ',
     document: 'APIドキュメント',
-    news: 'お知らせ',
+    announcements: 'お知らせ',
     logout: 'ログアウト',
   },
 };

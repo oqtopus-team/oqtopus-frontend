@@ -1,8 +1,15 @@
 import { useContext } from 'react';
 import { userApiContext } from './Provider';
 import { DevicesDeviceInfo, JobsGetJobsResponse, JobsSubmitJobRequest } from '@/api/generated';
-import { Job } from '@/domain/types/Job';
+import { Job, JobSearchParams } from '@/domain/types/Job';
 import { Device } from '@/domain/types/Device';
+import type { RawAxiosRequestConfig } from 'axios';
+
+interface AnnouncementsApi {
+  offset?: string;
+  limit?: string;
+  options?: RawAxiosRequestConfig;
+}
 
 export const useJobAPI = () => {
   const api = useContext(userApiContext);
@@ -17,13 +24,17 @@ export const useJobAPI = () => {
     return api.job.submitJob(job).then((res) => res.data.job_id);
   };
 
-  const getLatestJobs = async (page: number, pageSize: number): Promise<Job[]> => {
+  const getLatestJobs = async (
+    page: number,
+    pageSize: number,
+    params: JobSearchParams = {}
+  ): Promise<Job[]> => {
     return api.job
       .listJobs(
         'job_id,name,description,device_id,job_info,transpiler_info,simulator_info,mitigation_info,job_type,shots,status,submitted_at',
         undefined,
         undefined,
-        undefined,
+        params.query ?? '',
         page,
         pageSize,
         'DESC'
@@ -86,7 +97,6 @@ const convertJobResult = (job: JobsGetJobsResponse): Job => ({
   simulatorInfo: job.simulator_info,
   mitigationInfo: job.mitigation_info,
 
-  // TODO: locale (UTC -> browser locale)
   submittedAt: job.submitted_at ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   readyAt: job.ready_at ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   runningAt: job.running_at ?? '', // TODO: fix invalid oas schema (nullable: should be false)
@@ -127,3 +137,18 @@ const convertDeviceResult = (device: DevicesDeviceInfo): Device => ({
   calibratedAt: device.calibrated_at ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   description: device.description,
 });
+
+export const useAnnouncementsAPI = () => {
+  const api = useContext(userApiContext);
+
+  const getAnnouncements = async ({ limit, offset, options }: AnnouncementsApi) => {
+    return api.announcements.getAnnouncementsList(offset, limit, options).then((res) => {
+      if (res.status === 200) {
+        return res.data.announcements;
+      }
+      return null;
+    });
+  };
+
+  return { getAnnouncements };
+};

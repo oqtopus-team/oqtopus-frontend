@@ -75,6 +75,13 @@ const config: Config = {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
+      colors: {
+        success: '#38c172',
+        error: '#e3342f',
+      },
+      fontSize: {
+        clamp: 'clamp(1rem, 5vw, 2.5rem)',
+      }
     },
   },
   plugins: [require('@tailwindcss/typography')],

@@ -20,15 +20,15 @@ export default {
     button: 'View Jobs',
     table: {
       id: 'Job ID',
+      name: 'Job name',
       device: 'Device ID',
       status: 'Status',
-      date: 'Created',
+      date: 'Submitted at',
       shots: 'Shots',
-      description: 'Description',
     },
   },
-  news: {
-    title: 'News',
-    button: 'View News',
+  announcements: {
+    title: 'Announcements',
+    button: 'View Announcements',
   },
 };

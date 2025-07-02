@@ -5,7 +5,7 @@ export default {
     device: 'Device',
     job: 'Job',
     document: 'API documentation',
-    news: 'News',
+    announcements: 'Announcements',
     logout: 'Logout',
   },
 };

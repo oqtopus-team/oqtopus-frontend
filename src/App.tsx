@@ -16,7 +16,6 @@ import ResetMFAPage from '@/pages/auth/reset-mfa/page';
 import AuthenticatedLayout from '@/pages/authenticated/layout';
 import AuthenticatedDefaultLayout from '@/pages/authenticated/layout_default';
 import DashboardLayout from '@/pages/authenticated/layout_dashboard';
-
 // ログイン後の画面はlazyload
 const JobList = lazy(async () => await import('@/pages/authenticated/jobs/page'));
 const JobDetail = lazy(async () => await import('@/pages/authenticated/jobs/detail/page'));
@@ -26,7 +25,7 @@ const Dashboard = lazy(async () => await import('@/pages/authenticated/dashboard
 const Composer = lazy(async () => await import('@/pages/authenticated/composer/page'));
 const DeviceList = lazy(async () => await import('@/pages/authenticated/device/page'));
 const DeviceDetail = lazy(async () => await import('@/pages/authenticated/device/detail/page'));
-// const News = lazy(async () => await import('@/pages/(authenticated)/'));
+const Announcements = lazy(async () => await import('@/pages/authenticated/dashboard/_components/Announcements'));
 
 export const App: React.FunctionComponent = () => {
   return (
@@ -76,7 +75,7 @@ export const App: React.FunctionComponent = () => {
                 <Route path="composer" element={<Composer />} />
                 <Route path="device" element={<DeviceList />} />
                 <Route path="device/:id" element={<DeviceDetail />} />
-                {/* <Route path="news" element={<News />} /> */}
+                <Route path="announcements" element={<Announcements />} />
               </Route>
 
               <Route path="dashboard" element={<DashboardLayout />}>

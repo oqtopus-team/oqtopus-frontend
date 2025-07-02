@@ -50,8 +50,6 @@ export default function LoginPage() {
         auth
           .signIn(data.username, data.password)
           .then(({ success, message }) => {
-            console.log(success);
-            console.log(message);
             if (success) {
               navigate('/confirm-mfa');
               return;

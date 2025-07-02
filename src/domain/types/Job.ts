@@ -12,6 +12,8 @@ export const JOB_STATUSES = [
 
 export type JobStatusType = (typeof JOB_STATUSES)[number];
 
+export const NOT_CANCELABLE_JOBS: JobStatusType[] = ['succeeded', 'failed', 'cancelled'] as const;
+
 export const JOB_TYPES = ['estimation', 'sampling'] as const;
 export const JOB_TYPE_DEFAULT = JOB_TYPES[1];
 export type JobTypeType = (typeof JOB_TYPES)[number];
@@ -31,12 +33,44 @@ export const JOB_FORM_TRANSPILER_INFO_DEFAULTS: { [key in TranspilerTypeType]: s
   None: JSON.stringify({ transpiler_lib: null }, null, 2),
 } as const;
 
+export const PROGRAM_TYPES = ['Default', 'Bell Measurement'] as const;
+export const PROGRAM_TYPE_DEFAULT = PROGRAM_TYPES[0];
+export type ProgramType = (typeof PROGRAM_TYPES)[number];
+
+export async function initializeJobFormProgramDefaults(): Promise<{
+  [key in ProgramType]: string;
+}> {
+  const results = await Promise.all(
+    PROGRAM_TYPES.map((fileName: string) => {
+      if (fileName === PROGRAM_TYPE_DEFAULT) {
+        // set the 'Default' program empty
+        return Promise.resolve({ fileName, content: '' });
+      }
+      return fetch(`/sample_program/${fileName}.txt`).then((res) => {
+        if (!res.ok) {
+          console.error('failed to load file:', fileName);
+          return { fileName, content: '' };
+        }
+        return res.text().then((content) => ({ fileName, content }));
+      });
+    })
+  );
+  const info: { [key in ProgramType]?: string } = {};
+  results.forEach((result) => {
+    if (result != null) {
+      info[result.fileName as ProgramType] = result.content;
+    }
+  });
+  return info as { [key in ProgramType]: string };
+}
+
 export const JOB_FORM_MITIGATION_INFO_DEFAULTS: { [key in 'PseudoInv' | 'None']: string } = {
   PseudoInv: JSON.stringify(
     {
       readout: 'pseudo_inverse',
     },
-    null
+    null,
+    2
   ),
   None: JSON.stringify({}, null, 2),
 } as const;
@@ -61,8 +95,7 @@ export interface Job {
 }
 
 export interface JobSearchParams {
-  jobid?: string;
-  description?: string;
+  query?: string; // id, name or description query string
   status?: JobStatusType;
   page?: string;
 }
@@ -95,4 +128,4 @@ export interface JobFileDataInfo {
   operator?: OperatorItem[];
 }
 
-export type OperatorItem = { pauli: string; coeff: [string, string] };
+export type OperatorItem = { pauli: string; coeff: number };

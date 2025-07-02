@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Job, JobFileData, JobFileDataInfo, JobTypeType } from '@/domain/types/Job';
+import { Job, JobStatusType, NOT_CANCELABLE_JOBS } from '@/domain/types/Job';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 import { JobStatus } from './JobStatus';
@@ -7,14 +7,24 @@ import { ConfirmModal } from '@/pages/_components/ConfirmModal';
 import { Button } from '@/pages/_components/Button';
 import { NavLink } from 'react-router';
 import { useJobAPI } from '@/backend/hook';
-import { BsDownload } from 'react-icons/bs';
+import { DateTimeFormatter } from '../../_components/DateTimeFormatter';
+import DownloadJobButton from './DownloadJobButton';
+import { TruncateText } from '@/pages/authenticated/_components/TruncateText';
 
 interface JobProps {
   job: Job;
   onJobModified: () => void;
+  selectedJobs: Job[];
+  onJobSelectionChange: (job: Job, selected: boolean) => void;
 }
 
-export const JobListItem = ({ job, onJobModified }: JobProps) => {
+export const JobListItem = ({
+  job,
+  onJobModified,
+  selectedJobs,
+  onJobSelectionChange,
+}: JobProps) => {
+  const { t, i18n } = useTranslation();
   const { cancelJob, deleteJob } = useJobAPI();
   const [isProcessing, setIsProcessing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -58,9 +68,20 @@ export const JobListItem = ({ job, onJobModified }: JobProps) => {
   return (
     <tr>
       <td>
+        <input
+          type="checkbox"
+          checked={selectedJobs.some((j) => j.id === job.id)}
+          onChange={(e) => onJobSelectionChange(job, e.target.checked)}
+        />
+      </td>
+      <td>
         <NavLink to={`/jobs/${job.id}`} className="text-link">
           {job.id}
         </NavLink>
+      </td>
+      <td>
+        {/* limit the length to display to twice the length of the job.id */}
+        <TruncateText text={job.name} limit={job.id.length * 2} />
       </td>
       <td>
         <NavLink to={`/device/${job.deviceId}`} className="text-link">
@@ -70,10 +91,7 @@ export const JobListItem = ({ job, onJobModified }: JobProps) => {
       <td>
         <JobStatus status={job.status} />
       </td>
-      <td>{job.submittedAt}</td>
-      <td className={clsx('text-wrap', 'break-words', 'whitespace-normal', 'max-w-min')}>
-        {job.description}
-      </td>
+      <td>{DateTimeFormatter(t, i18n, job.submittedAt)}</td>
       <td className={clsx('py-1')}>
         <OperationButtons job={job} onClickCancel={onClickCancel} onClickDelete={onClickDelete} />
       </td>
@@ -92,44 +110,9 @@ const OperationButtons = ({ job, onClickCancel, onClickDelete }: ButtonProps) =>
 
   const [cancelModalShow, setCancelModalShow] = useState(false);
   const [deleteModalShow, setDeleteModalShow] = useState(false);
-  const [downloadInProgress, setDownloadInProgress] = useState(false);
 
-  function canCancel(status: string): boolean {
-    return status === 'created' || status === 'transpiling' || status === 'queued';
-  }
-
-  function downloadJob() {
-    setDownloadInProgress(true);
-
-    const jobData: JobFileData = {
-      name: job.name,
-      description: job.description,
-      shots: job.shots,
-      deviceId: job.deviceId ?? '',
-      jobType: job.jobType as JobTypeType,
-      jobInfo: job.jobInfo as JobFileDataInfo,
-      transpilerInfo: job.transpilerInfo,
-      simulatorInfo: job.simulatorInfo,
-      mitigationInfo: job.mitigationInfo,
-    };
-
-    try {
-      const valuesBlob = new Blob([JSON.stringify(jobData, null, 2)], { type: 'application/json' });
-      const blobURL = URL.createObjectURL(valuesBlob);
-
-      const a = document.createElement('a');
-      a.href = blobURL;
-      a.download = 'job.json';
-      document.body.appendChild(a);
-      a.click();
-
-      document.body.removeChild(a);
-      URL.revokeObjectURL(blobURL);
-    } catch (error: any) {
-      console.error('failed to download file due to following error:', error);
-    } finally {
-      setDownloadInProgress(false);
-    }
+  function canCancel(status: JobStatusType): boolean {
+    return !NOT_CANCELABLE_JOBS.includes(status);
   }
 
   return (
@@ -158,9 +141,7 @@ const OperationButtons = ({ job, onClickCancel, onClickDelete }: ButtonProps) =>
           />
         </>
       )}
-      <Button color="secondary" onClick={downloadJob} disabled={downloadInProgress}>
-        <BsDownload />
-      </Button>
+      <DownloadJobButton job={job} />
     </div>
   );
 };

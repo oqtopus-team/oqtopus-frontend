@@ -12,8 +12,14 @@ export const Hero = (): React.ReactElement => {
         ['text-primary-content', 'text-center']
       )}
     >
-      <h2 className={clsx('text-3xl', 'font-bold', 'leading-normal')}>
-        Open Quantum Toolchain for OPerators & USers
+      <h2 
+        className={
+          clsx(
+            ['font-bold', 'leading-normal'],
+            ['text-clamp']
+          )}
+      >
+        {t('app.name.oqtopus')}
       </h2>
     </div>
   );

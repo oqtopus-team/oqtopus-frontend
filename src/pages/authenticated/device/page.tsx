@@ -31,10 +31,8 @@ export default function Page() {
   return (
     <>
       <h2 className={clsx('text-primary', 'text-2xl', 'font-bold')}>{t('device.list.title')}</h2>
-      <Spacer className="h-3" />
-      <p className={clsx('text-sm')}>{t('device.list.description')}</p>
       <Spacer className="h-8" />
-      <Card>
+      <Card className={clsx('overflow-x-auto')}>
         <DeviceListTable devices={devices} />
       </Card>
     </>

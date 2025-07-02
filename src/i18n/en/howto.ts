@@ -1,6 +1,5 @@
 export default {
   title: 'API documentation',
-  description: 'View API specifications.',
   token: {
     head: 'API token',
     none: 'API token not created',

@@ -12,7 +12,6 @@ export const Header = (): React.ReactElement => {
       <div className={clsx('flex', 'justify-between')}>
         <Logo />
         <span className={clsx('flex', 'items-center', 'gap-7')}>
-          <GithubLink />
           <LanguageSelector />
         </span>
       </div>
@@ -22,6 +21,7 @@ export const Header = (): React.ReactElement => {
 
 const Logo = (): React.ReactElement => {
   const { isAuthenticated } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleLogoClick = () => {
@@ -38,37 +38,24 @@ const Logo = (): React.ReactElement => {
         ['text-xl', 'text-primary', 'font-semibold', 'font-sans'],
         ['cursor-pointer']
       )}
+      onClick={handleLogoClick}
     >
       <img
-        src={`/img/common/logo/oqtopus.png`}
-        width={320}
-        height={32}
-        alt={'OQTOPUS'}
-        onClick={handleLogoClick}
+        src={import.meta.env.VITE_APP_LOGO_IMAGE_URL}
+        className={clsx(
+          ['h-12', 'my-2', 'py-2']
+        )}        
+        alt={import.meta.env.VITE_APP_APP_NAME_EN}
       />
+      <span
+        className={clsx(
+          ['cursor-pointer'],
+          ['hidden', 'sm:block'],
+        )}
+      >
+        {t('app.name.oqtopus')}
+      </span>
     </div>
-  );
-};
-
-const GithubLink = (): React.ReactElement => {
-  const handleGithubLink = () => {};
-
-  return (
-    <a
-      className={clsx(['cursor-pointer', 'flex', 'items-center', 'gap-2'])}
-      href="https://github.com/oqtopus-team/oqtopus-frontend.git"
-      target="_blank"
-      rel="noopener"
-    >
-      <img
-        src={'/img/common/github-mark.svg'}
-        width={32}
-        height={32}
-        alt={'Github'}
-        onClick={handleGithubLink}
-      />
-      <p className={clsx(['text-sm', 'font-sans'])}>v1.0.0</p>
-    </a>
   );
 };
 

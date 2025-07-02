@@ -26,6 +26,62 @@ import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerM
 /**
  * 
  * @export
+ * @interface AnnouncementsGetAnnouncementResponse
+ */
+export interface AnnouncementsGetAnnouncementResponse {
+    /**
+     * 
+     * @type {number}
+     * @memberof AnnouncementsGetAnnouncementResponse
+     */
+    'id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof AnnouncementsGetAnnouncementResponse
+     */
+    'title': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AnnouncementsGetAnnouncementResponse
+     */
+    'content': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AnnouncementsGetAnnouncementResponse
+     */
+    'start_time': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AnnouncementsGetAnnouncementResponse
+     */
+    'end_time': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof AnnouncementsGetAnnouncementResponse
+     */
+    'publishable': boolean;
+}
+/**
+ * 
+ * @export
+ * @interface AnnouncementsGetAnnouncementsListResponse
+ */
+export interface AnnouncementsGetAnnouncementsListResponse {
+    /**
+     * 
+     * @type {Array<AnnouncementsGetAnnouncementResponse>}
+     * @memberof AnnouncementsGetAnnouncementsListResponse
+     */
+    'announcements'?: Array<AnnouncementsGetAnnouncementResponse>;
+}
+/**
+ * 
+ * @export
  * @interface ApiTokenApiToken
  */
 export interface ApiTokenApiToken {
@@ -575,10 +631,10 @@ export interface JobsOperatorItem {
     'pauli': string;
     /**
      * Coefficient number in the Pauli string representation.
-     * @type {any}
+     * @type {number}
      * @memberof JobsOperatorItem
      */
-    'coeff'?: any;
+    'coeff'?: number;
 }
 /**
  * *(Only for sampling jobs)* JSON string representing the sampling result
@@ -732,6 +788,200 @@ export interface SuccessSuccessResponse {
      */
     'message': string;
 }
+
+/**
+ * AnnouncementsApi - axios parameter creator
+ * @export
+ */
+export const AnnouncementsApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Get selected announcement
+         * @summary Get selected announcement
+         * @param {number} announcementId announcement ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAnnouncement: async (announcementId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'announcementId' is not null or undefined
+            assertParamExists('getAnnouncement', 'announcementId', announcementId)
+            const localVarPath = `/announcements/{announcement_id}`
+                .replace(`{${"announcement_id"}}`, encodeURIComponent(String(announcementId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get announcements list from backend
+         * @summary Get announcements list from backend
+         * @param {string} [offset] offset information
+         * @param {string} [limit] Limit information
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAnnouncementsList: async (offset?: string, limit?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/announcements`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * AnnouncementsApi - functional programming interface
+ * @export
+ */
+export const AnnouncementsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = AnnouncementsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Get selected announcement
+         * @summary Get selected announcement
+         * @param {number} announcementId announcement ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getAnnouncement(announcementId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AnnouncementsGetAnnouncementResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getAnnouncement(announcementId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AnnouncementsApi.getAnnouncement']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get announcements list from backend
+         * @summary Get announcements list from backend
+         * @param {string} [offset] offset information
+         * @param {string} [limit] Limit information
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getAnnouncementsList(offset?: string, limit?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AnnouncementsGetAnnouncementsListResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getAnnouncementsList(offset, limit, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AnnouncementsApi.getAnnouncementsList']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * AnnouncementsApi - factory interface
+ * @export
+ */
+export const AnnouncementsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = AnnouncementsApiFp(configuration)
+    return {
+        /**
+         * Get selected announcement
+         * @summary Get selected announcement
+         * @param {number} announcementId announcement ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAnnouncement(announcementId: number, options?: RawAxiosRequestConfig): AxiosPromise<AnnouncementsGetAnnouncementResponse> {
+            return localVarFp.getAnnouncement(announcementId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get announcements list from backend
+         * @summary Get announcements list from backend
+         * @param {string} [offset] offset information
+         * @param {string} [limit] Limit information
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAnnouncementsList(offset?: string, limit?: string, options?: RawAxiosRequestConfig): AxiosPromise<AnnouncementsGetAnnouncementsListResponse> {
+            return localVarFp.getAnnouncementsList(offset, limit, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * AnnouncementsApi - object-oriented interface
+ * @export
+ * @class AnnouncementsApi
+ * @extends {BaseAPI}
+ */
+export class AnnouncementsApi extends BaseAPI {
+    /**
+     * Get selected announcement
+     * @summary Get selected announcement
+     * @param {number} announcementId announcement ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AnnouncementsApi
+     */
+    public getAnnouncement(announcementId: number, options?: RawAxiosRequestConfig) {
+        return AnnouncementsApiFp(this.configuration).getAnnouncement(announcementId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get announcements list from backend
+     * @summary Get announcements list from backend
+     * @param {string} [offset] offset information
+     * @param {string} [limit] Limit information
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AnnouncementsApi
+     */
+    public getAnnouncementsList(offset?: string, limit?: string, options?: RawAxiosRequestConfig) {
+        return AnnouncementsApiFp(this.configuration).getAnnouncementsList(offset, limit, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
 
 /**
  * ApiTokenApi - axios parameter creator
@@ -1350,7 +1600,7 @@ export const JobApiAxiosParamCreator = function (configuration?: Configuration) 
          * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
          * @param {string} [startTime] Allows to filter the list of jobs to fetch by creation time. If specified only jobs with creation time  (createdAt property) &gt;&#x3D; start_time are returned.
          * @param {string} [endTiime] Allows to filter the list of jobs to fetch by to creation time. If specified only jobs with creation time (createdAt property) &lt;&#x3D; end_time are returned.
-         * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s name and description. If specified only jobs which name or description contains specified search string are returned.
+         * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s id, name and description. If specified only jobs which id, name or description contains specified search string are returned.
          * @param {number} [page] Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned.
          * @param {number} [size] Configure number of jobs per page
          * @param {ListJobsOrderEnum} [order] Specify jobs order according to creation time (createdAt property)
@@ -1536,7 +1786,7 @@ export const JobApiFp = function(configuration?: Configuration) {
          * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
          * @param {string} [startTime] Allows to filter the list of jobs to fetch by creation time. If specified only jobs with creation time  (createdAt property) &gt;&#x3D; start_time are returned.
          * @param {string} [endTiime] Allows to filter the list of jobs to fetch by to creation time. If specified only jobs with creation time (createdAt property) &lt;&#x3D; end_time are returned.
-         * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s name and description. If specified only jobs which name or description contains specified search string are returned.
+         * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s id, name and description. If specified only jobs which id, name or description contains specified search string are returned.
          * @param {number} [page] Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned.
          * @param {number} [size] Configure number of jobs per page
          * @param {ListJobsOrderEnum} [order] Specify jobs order according to creation time (createdAt property)
@@ -1628,7 +1878,7 @@ export const JobApiFactory = function (configuration?: Configuration, basePath?:
          * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
          * @param {string} [startTime] Allows to filter the list of jobs to fetch by creation time. If specified only jobs with creation time  (createdAt property) &gt;&#x3D; start_time are returned.
          * @param {string} [endTiime] Allows to filter the list of jobs to fetch by to creation time. If specified only jobs with creation time (createdAt property) &lt;&#x3D; end_time are returned.
-         * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s name and description. If specified only jobs which name or description contains specified search string are returned.
+         * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s id, name and description. If specified only jobs which id, name or description contains specified search string are returned.
          * @param {number} [page] Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned.
          * @param {number} [size] Configure number of jobs per page
          * @param {ListJobsOrderEnum} [order] Specify jobs order according to creation time (createdAt property)
@@ -1724,7 +1974,7 @@ export class JobApi extends BaseAPI {
      * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
      * @param {string} [startTime] Allows to filter the list of jobs to fetch by creation time. If specified only jobs with creation time  (createdAt property) &gt;&#x3D; start_time are returned.
      * @param {string} [endTiime] Allows to filter the list of jobs to fetch by to creation time. If specified only jobs with creation time (createdAt property) &lt;&#x3D; end_time are returned.
-     * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s name and description. If specified only jobs which name or description contains specified search string are returned.
+     * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s id, name and description. If specified only jobs which id, name or description contains specified search string are returned.
      * @param {number} [page] Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned.
      * @param {number} [size] Configure number of jobs per page
      * @param {ListJobsOrderEnum} [order] Specify jobs order according to creation time (createdAt property)

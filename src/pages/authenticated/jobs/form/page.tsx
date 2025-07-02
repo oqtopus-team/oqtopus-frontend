@@ -8,98 +8,189 @@ import { Input } from '@/pages/_components/Input';
 import { Select } from '@/pages/_components/Select';
 import { TextArea } from '@/pages/_components/TextArea';
 import { Spacer } from '@/pages/_components/Spacer';
-import { NavLink } from 'react-router';
+import { NavLink, useNavigate } from 'react-router';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { useDeviceAPI, useJobAPI } from '@/backend/hook';
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useLayoutEffect, useState } from 'react';
 import { Device } from '@/domain/types/Device';
 import {
+  initializeJobFormProgramDefaults,
   JOB_FORM_MITIGATION_INFO_DEFAULTS,
   JOB_FORM_TRANSPILER_INFO_DEFAULTS,
   JOB_TYPE_DEFAULT,
   JOB_TYPES,
   JobFileData,
-  JobTypeType,
   OperatorItem,
+  PROGRAM_TYPE_DEFAULT,
+  PROGRAM_TYPES,
+  ProgramType,
   SHOTS_DEFAULT,
   TRANSPILER_TYPE_DEFAULT,
   TRANSPILER_TYPES,
   TranspilerTypeType,
 } from '@/domain/types/Job';
-import { JobsSubmitJobInfo } from '@/api/generated';
+import { JobsJobType } from '@/api/generated';
 import { Toggle } from '@/pages/_components/Toggle';
 import JobFileUpload from './_components/JobFileUpload';
+import { ConfirmModal } from '@/pages/_components/ConfirmModal';
+import * as yup from 'yup';
+import { FieldError, FieldErrorsImpl, Merge, useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+
+interface FormInput {
+  name: string;
+  description?: string;
+  shots: number;
+  deviceId: string;
+  type: JobsJobType;
+  program: string;
+  programType: ProgramType;
+  transpilerType: TranspilerTypeType;
+  transpiler?: string;
+  simulator?: string;
+  mitigationEnabled: boolean;
+  mitigation?: string;
+  operator: OperatorItem[];
+}
+
+const isJsonParsable = (value: string | undefined): boolean => {
+  if (value === undefined) return false;
+
+  try {
+    JSON.parse(value);
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
+const operatorItemSchema = (t: (key: string) => string) =>
+  yup.object({
+    pauli: yup
+      .string()
+      .required(t('job.form.error_message.operator.pauli_required'))
+      .matches(/^([IXYZ][0-9]+)*$/, t('job.form.error_message.operator.pauli_match'))
+      .min(1, t('job.form.error_message.operator.pauli_empty')),
+    coeff: yup.number().required(t('job.form.error_message.operator.coeff_required')),
+  });
+
+const validationRules = (t: (key: string) => string): yup.ObjectSchema<FormInput> =>
+  yup.object({
+    name: yup.string().required(t('job.form.error_message.name')),
+    description: yup.string(),
+    shots: yup
+      .number()
+      .typeError(t('job.form.error_message.shots_is_number'))
+      .integer(t('job.form.error_message.shots_integer'))
+      .min(1, t('job.form.error_message.shots'))
+      .required(),
+    deviceId: yup.string().required(t('job.form.error_message.device')),
+    type: yup.mixed<JobsJobType>().required(t('job.form.error_message.type')),
+    programType: yup.mixed<ProgramType>().required(),
+    program: yup.string().required(t('job.form.error_message.program')),
+    transpilerType: yup.mixed<TranspilerTypeType>().required(),
+    transpiler: yup.string().test('', t('job.form.error_message.invalid_json'), isJsonParsable),
+    simulator: yup.string().test('', t('job.form.error_message.invalid_json'), isJsonParsable),
+    mitigationEnabled: yup.boolean().required(),
+    mitigation: yup.string().test('', t('job.form.error_message.invalid_json'), isJsonParsable),
+    operator: yup.array().of(operatorItemSchema(t)).required(),
+  });
 
 export default function Page() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { getDevices } = useDeviceAPI();
   const { submitJob } = useJobAPI();
 
+  const {
+    handleSubmit,
+    formState: { errors, isSubmitting, isValid },
+    setValue,
+    watch,
+    register,
+    trigger,
+  } = useForm<FormInput>({
+    mode: 'onChange',
+    resolver: yupResolver(validationRules(t)),
+    defaultValues: {
+      name: '',
+      description: '',
+      type: JOB_TYPE_DEFAULT,
+      mitigationEnabled: true,
+      mitigation: '',
+      programType: PROGRAM_TYPE_DEFAULT,
+      program: '',
+      transpilerType: TRANSPILER_TYPE_DEFAULT,
+      transpiler: JOB_FORM_TRANSPILER_INFO_DEFAULTS.Default,
+      shots: SHOTS_DEFAULT,
+      operator: [],
+      simulator: '{}',
+    },
+  });
+
+  const [transpilerType, transpiler, mitigationEnabled, mitigation, program, jobType, operator] =
+    watch([
+      'transpilerType',
+      'transpiler',
+      'mitigationEnabled',
+      'mitigation',
+      'program',
+      'type',
+      'operator',
+    ]);
+
   const [devices, setDevices] = useState<Device[]>([]);
+
   useLayoutEffect(() => {
     getDevices().then((devices) => setDevices(devices));
   }, []);
 
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [deviceId, setDeviceId] = useState<string | null>(null);
-  const [jobType, setJobType] = useState<JobTypeType>(JOB_TYPE_DEFAULT);
+  const [pendingProgramType, setPendingProgramType] = useState<ProgramType | null>(null);
+  const [deleteModalShow, setDeleteModalShow] = useState(false);
+  const [jobDefaults, setJobDefaults] = useState<{ [key in ProgramType]: string } | undefined>(
+    undefined
+  );
 
-  const [jobInfo, setJobInfo] = useState<JobsSubmitJobInfo>({ program: [''], operator: [] });
-  const [program, setProgram] = useState<string[]>(['']);
-  const [operator, setOperator] = useState<OperatorItem[]>([{ pauli: '', coeff: ['0', '0'] }]);
   useEffect(() => {
-    setJobInfo((jobInfo) => ({ ...jobInfo, program }));
-    setError((error) => ({ ...error, jobInfo: { ...error.jobInfo, program: {} } }));
-  }, [program]);
-  useEffect(() => {
-    setJobInfo((jobInfo) => ({
-      ...jobInfo,
-      operator: operator.map((op) => ({
-        ...op,
-        coeff: op.coeff.map((c) => (c === '' ? NaN : Number(c))),
-      })),
-    }));
-    setError((error) => ({
-      ...error,
-      jobInfo: { ...error.jobInfo, operator: { pauli: {}, coeff: {} } },
-    }));
-  }, [operator]);
+    // Load the default program from /public/sample_program
+    async function fetchDefaults() {
+      try {
+        const defaults = await initializeJobFormProgramDefaults();
+        setJobDefaults(defaults);
+      } catch (error) {
+        console.error('failed to initialize:', error);
+      }
+    }
 
-  const [shots, setShots] = useState(SHOTS_DEFAULT);
+    fetchDefaults();
+  }, []);
 
-  const [transpilerType, setTranspilerType] = useState<TranspilerTypeType>(TRANSPILER_TYPE_DEFAULT);
-  const [transpilerInfo, setTranspilerInfo] = useState(JOB_FORM_TRANSPILER_INFO_DEFAULTS.Default);
   useEffect(() => {
     // set default transpiler info if transpiler_info not changed or empty
     if (
       transpilerType === 'None' &&
-      (transpilerInfo === JOB_FORM_TRANSPILER_INFO_DEFAULTS.Default || transpilerInfo.trim() === '')
+      (transpiler === JOB_FORM_TRANSPILER_INFO_DEFAULTS.Default || transpiler?.trim() === '')
     ) {
-      setTranspilerInfo(JOB_FORM_TRANSPILER_INFO_DEFAULTS.None);
+      setValue('transpiler', JOB_FORM_TRANSPILER_INFO_DEFAULTS.None);
     }
     if (
       transpilerType === 'Default' &&
-      (transpilerInfo === JOB_FORM_TRANSPILER_INFO_DEFAULTS.None || transpilerInfo.trim() === '')
+      (transpiler === JOB_FORM_TRANSPILER_INFO_DEFAULTS.None || transpiler?.trim() === '')
     ) {
-      setTranspilerInfo(JOB_FORM_TRANSPILER_INFO_DEFAULTS.Default);
+      setValue('transpiler', JOB_FORM_TRANSPILER_INFO_DEFAULTS.Default);
     }
   }, [transpilerType]);
 
-  const [simulatorInfo, setSimulatorInfo] = useState('{}');
-
-  const [mitigationEnabled, setMitigationEnabled] = useState(true);
-  const [mitigationInfo, setMitigationInfo] = useState(JOB_FORM_MITIGATION_INFO_DEFAULTS.PseudoInv);
   useEffect(() => {
-    // set default transpiler info if transpiler_info not changed or empty
     if (
       mitigationEnabled &&
-      (mitigationInfo === JOB_FORM_MITIGATION_INFO_DEFAULTS.PseudoInv ||
-        mitigationInfo.trim() === '')
+      (mitigation === JOB_FORM_MITIGATION_INFO_DEFAULTS.None || mitigation?.trim() === '')
     ) {
-      setMitigationInfo(JOB_FORM_MITIGATION_INFO_DEFAULTS.PseudoInv);
+      setValue('mitigation', JOB_FORM_MITIGATION_INFO_DEFAULTS.PseudoInv);
     }
     if (!mitigationEnabled) {
-      setMitigationInfo(JOB_FORM_MITIGATION_INFO_DEFAULTS.None);
+      setValue('mitigation', JOB_FORM_MITIGATION_INFO_DEFAULTS.None);
     }
   }, [mitigationEnabled]);
 
@@ -107,187 +198,110 @@ export default function Page() {
   useEffect(() => {
     if (!jobFileData) return;
 
-    setName(jobFileData.name);
-    setDescription(jobFileData.description ?? '');
-    setShots(jobFileData.shots);
-    setJobType(jobFileData.jobType);
-    setJobInfo(jobFileData.jobInfo);
-    setProgram(jobFileData.jobInfo.program);
-    setOperator(jobFileData.jobInfo.operator ?? [{ pauli: '', coeff: ['0', '0'] }]);
-    setTranspilerInfo(JSON.stringify(jobFileData.transpilerInfo ?? ''));
-    setSimulatorInfo(JSON.stringify(jobFileData.simulatorInfo ?? ''));
+    setValue('name', jobFileData.name);
+    setValue('description', jobFileData.description ?? '');
+    setValue('shots', jobFileData.shots);
+    setValue('type', jobFileData.jobType);
+    setValue('type', jobFileData.jobType);
+    setValue('program', jobFileData.jobInfo.program[0]);
+    setValue('transpiler', JSON.stringify(jobFileData.transpilerInfo ?? ''));
+    setValue('simulator', JSON.stringify(jobFileData.simulatorInfo ?? ''));
+    setValue('operator', jobFileData.jobInfo.operator ?? [{ pauli: '', coeff: 1.0 }]);
 
     if (devices.some((d) => d.id === jobFileData.deviceId)) {
-      setDeviceId(jobFileData.deviceId);
+      setValue('deviceId', jobFileData.deviceId);
     }
 
     if (jobFileData.mitigationInfo) {
-      setMitigationInfo(JSON.stringify(jobFileData.mitigationInfo));
-      setMitigationEnabled(true);
+      setValue('mitigationEnabled', true);
+      setValue('mitigation', JSON.stringify(jobFileData.mitigationInfo));
     } else {
-      setMitigationEnabled(false);
+      setValue('mitigationEnabled', false);
     }
 
     setJobFileData(undefined);
   }, [jobFileData]);
 
-  const [error, setError] = useState<{
-    name?: string;
-    description?: string;
-    deviceId?: string;
-    jobType?: string;
-    jobInfo: {
-      program: { [index: number]: string };
-      operator: {
-        pauli: { [index: number]: string };
-        coeff: { [index: number]: [string | undefined, string | undefined] };
-      };
-    };
-    transpilerInfo?: string;
-    simulatorInfo?: string;
-    mitigationInfo?: string;
-    shots?: string;
-  }>({
-    jobInfo: { program: {}, operator: { pauli: {}, coeff: {} } },
-  });
-
-  const [processing, setProcessing] = useState(false);
-  const handleSubmit = async () => {
-    if (name.trim() === '') {
-      setError((error) => ({ ...error, name: t('job.form.error_message.name') }));
+  const onSubmit = async (data: FormInput) => {
+    if (isSubmitting) {
+      toast.info(t('job.form.submitting'));
       return;
-    }
-
-    if (shots <= 0) {
-      setError((error) => ({ ...error, shots: t('job.form.error_message.shots') }));
-      return;
-    }
-
-    if (deviceId === null) {
-      setError((error) => ({ ...error, deviceId: t('job.form.error_message.device') }));
-      return;
-    }
-
-    if (!JOB_TYPES.includes(jobType)) {
-      setError((error) => ({ ...error, jobType: t('job.form.error_message.type') }));
-      return;
-    }
-
-    const invalidProgram = jobInfo.program
-      .map((programItem, i) => {
-        if (programItem === '') {
-          setError((error) => ({
-            ...error,
-            jobInfo: {
-              ...error.jobInfo,
-              program: { ...error.jobInfo.program, [i]: t('job.form.error_message.program') },
-            },
-          }));
-          return false;
-        }
-        return true;
-      })
-      .some((valid) => !valid);
-    if (invalidProgram) {
-      return;
-    }
-
-    let sanitizedJobInfo: JobsSubmitJobInfo;
-    if (jobType === 'estimation') {
-      const invalidOperator = (jobInfo.operator ?? [])
-        .map((operatorItem, i) => {
-          if (operatorItem.pauli.trim() === '') {
-            setError((error) => ({
-              ...error,
-              jobInfo: {
-                ...error.jobInfo,
-                operator: {
-                  ...error.jobInfo.operator,
-                  pauli: {
-                    ...error.jobInfo.operator.pauli,
-                    [i]: t('job.form.error_message.operator.pauli'),
-                  },
-                },
-              },
-            }));
-            return false;
-          }
-          if (operatorItem.coeff) {
-            const errors = [undefined, undefined] as [string | undefined, string | undefined];
-            operatorItem.coeff.forEach((c: number, j: number) => {
-              if (isNaN(c)) {
-                errors[j] = t('job.form.error_message.operator.coeff');
-              }
-            });
-            if (errors.some((e) => e !== undefined)) {
-              setError((error) => ({
-                ...error,
-                jobInfo: {
-                  ...error.jobInfo,
-                  operator: {
-                    ...error.jobInfo.operator,
-                    coeff: {
-                      ...error.jobInfo.operator.coeff,
-                      [i]: errors,
-                    },
-                  },
-                },
-              }));
-              return false;
-            }
-          }
-          return true;
-        })
-        .some((valid) => !valid);
-      if (invalidOperator) {
-        return;
-      }
-      sanitizedJobInfo = { ...jobInfo };
-    } else {
-      sanitizedJobInfo = { ...jobInfo, operator: undefined };
     }
 
     try {
-      JSON.parse(transpilerInfo);
-    } catch (e) {
-      setError((error) => ({ ...error, transpilerInfo: t('job.form.error_message.invalid_json') }));
-      return;
-    }
-    try {
-      JSON.parse(simulatorInfo);
-    } catch (e) {
-      setError((error) => ({ ...error, simulatorInfo: t('job.form.error_message.invalid_json') }));
-      return;
-    }
-    try {
-      JSON.parse(mitigationInfo);
-    } catch (e) {
-      setError((error) => ({ ...error, mitigationInfo: t('job.form.error_message.invalid_json') }));
-      return;
-    }
-
-    setProcessing(true);
-    await submitJob({
-      name: name.trim(),
-      description,
-      device_id: deviceId,
-      job_type: jobType,
-      job_info: sanitizedJobInfo,
-      transpiler_info: JSON.parse(transpilerInfo),
-      simulator_info: JSON.parse(simulatorInfo),
-      mitigation_info: JSON.parse(mitigationInfo),
-      shots,
-    })
-      .catch((e) => {
-        console.error(e);
-      })
-      .finally(() => {
-        setProcessing(false);
+      const res = await submitJob({
+        name: data.name,
+        description: data.description,
+        device_id: data.deviceId,
+        shots: data.shots,
+        job_type: data.type,
+        job_info: {
+          program: [data.program],
+          operator: data.type === 'estimation' ? data.operator : undefined,
+        },
+        transpiler_info: JSON.parse(data.transpiler ?? ''),
+        simulator_info: JSON.parse(data.simulator ?? ''),
+        mitigation_info: JSON.parse(data.mitigation ?? ''),
       });
+      toast.success(t('job.form.toast.success'));
+      return res;
+    } catch (e) {
+      console.error(e);
+      toast.error(t('job.form.toast.error'));
+    }
+  };
+
+  const onSubmitWithRedirection = async (data: FormInput) => {
+    try {
+      const res = await onSubmit(data);
+      navigate('/jobs/' + res);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const handleProgramTypeChange = async (newProgramType: ProgramType) => {
+    if (program !== '') {
+      setPendingProgramType(newProgramType);
+      setDeleteModalShow(true);
+    } else {
+      setValue('programType', newProgramType);
+      if (jobDefaults) {
+        setValue('program', jobDefaults[newProgramType]);
+      }
+    }
+    await trigger('program');
+  };
+
+  const confirmProgramTypeChange = async () => {
+    if (pendingProgramType) {
+      setValue('programType', pendingProgramType);
+      setPendingProgramType(null);
+      if (jobDefaults) {
+        setValue('program', jobDefaults[pendingProgramType]);
+      }
+    }
+    setDeleteModalShow(false);
+    await trigger('program');
+  };
+
+  const cancelProgramTypeChange = () => {
+    setPendingProgramType(null);
+    setDeleteModalShow(false);
   };
 
   return (
     <div>
+      <ToastContainer
+        position="top-right"
+        autoClose={2000} // display for 2 seconds
+        newestOnTop={true}
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        hideProgressBar={true}
+        pauseOnHover
+      />
       <h2 className={clsx('text-primary', 'text-2xl', 'font-bold')}>{t('job.form.title')}</h2>
       <Spacer className="h-3" />
       <p className={clsx('text-sm')}>{t('job.form.description')}</p>
@@ -301,46 +315,34 @@ export default function Page() {
                 autoFocus
                 placeholder={t('job.form.name_placeholder')}
                 label="name"
-                value={name}
-                onChange={(e) => {
-                  setName(e.target.value);
-                  setError((error) => ({ ...error, name: undefined }));
-                }}
-                errorMessage={error.name}
+                {...register('name')}
+                errorMessage={errors.name && errors.name.message}
               />
               <Input
                 placeholder={t('job.form.description_placeholder')}
                 label="description"
-                value={description}
-                onChange={(e) => {
-                  setDescription(e.target.value);
-                  setError((error) => ({ ...error, description: undefined }));
-                }}
-                errorMessage={error.description}
+                {...register('description')}
+                errorMessage={errors.description && errors.description.message}
               />
               <Input
                 placeholder={t('job.form.shots_placeholder')}
                 label="shots"
                 type="number"
+                min={1}
                 defaultValue={SHOTS_DEFAULT}
-                value={shots}
-                onChange={(e) => {
-                  if (isNaN(Number(e.target.value))) {
+                onKeyDown={(event) => {
+                  if (/^[a-zA-Z+\-]$/.test(event.key)) {
+                    event.preventDefault();
                     return;
                   }
-                  setShots(Number(e.target.value));
-                  setError((error) => ({ ...error, shots: undefined }));
                 }}
-                errorMessage={error.shots}
+                {...register('shots')}
+                errorMessage={errors.shots && errors.shots.message}
               />
               <Select
                 label="device"
-                value={deviceId === null ? '' : deviceId}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                  setDeviceId(e.target.value);
-                  setError((error) => ({ ...error, deviceId: undefined }));
-                }}
-                errorMessage={error.deviceId}
+                {...register('deviceId')}
+                errorMessage={errors.deviceId && errors.deviceId.message}
               >
                 <option value=""></option>
                 {devices.map((device) => (
@@ -351,15 +353,8 @@ export default function Page() {
               </Select>
               <Select
                 label="type"
-                value={jobType}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                  if (!JOB_TYPES.includes(e.target.value as JobTypeType)) {
-                    return;
-                  }
-                  setJobType(e.target.value as JobTypeType);
-                  setError((error) => ({ ...error, jobType: undefined }));
-                }}
-                errorMessage={error.jobType}
+                {...register('type')}
+                errorMessage={errors.type && errors.type.message}
               >
                 {JOB_TYPES.map((jobType) => (
                   <option key={jobType}>{jobType}</option>
@@ -370,24 +365,51 @@ export default function Page() {
               <Spacer className="h-4" />
               <Divider />
               <Spacer className="h-4" />
-              <p className={clsx('font-bold', 'text-primary')}>program</p>
+              <div className={clsx('flex', 'justify-between')}>
+                <p className={clsx('font-bold', 'text-primary')}>program</p>
+                <Select
+                  labelLeft="sample program"
+                  {...register('programType')}
+                  onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                    handleProgramTypeChange(e.target.value as ProgramType);
+                  }}
+                  errorMessage={errors.programType && errors.programType.message}
+                  size="xs"
+                >
+                  {PROGRAM_TYPES.map((oneProgramType) => (
+                    <option key={oneProgramType} value={oneProgramType}>
+                      {oneProgramType}
+                    </option>
+                  ))}
+                </Select>
+              </div>
               <Spacer className="h-2" />
             </>
             {/* programs */}
             <TextArea
               className={clsx('h-[16rem]')}
               placeholder={t('job.form.program_placeholder')}
-              value={program[0]}
-              onChange={(e) => {
-                setProgram([e.target.value]);
-                setError((error) => ({ ...error, program: undefined }));
-              }}
-              errorMessage={error.jobInfo.program[0]}
+              {...register('program')}
+              errorMessage={errors.program && errors.program.message}
+            />
+            <ConfirmModal
+              show={deleteModalShow}
+              onHide={cancelProgramTypeChange}
+              title={t('job.list.modal.title')}
+              message={t('job.form.modal.overwrite_program')}
+              onConfirm={confirmProgramTypeChange}
             />
             <Spacer className="h-5" />
             {/* operator */}
             {jobType === 'estimation' && (
-              <OperatorForm current={operator} set={setOperator} error={error.jobInfo.operator} />
+              <OperatorForm
+                current={operator}
+                set={async (v) => {
+                  setValue('operator', v);
+                  await trigger('operator');
+                }}
+                errors={errors.operator}
+              />
             )}
             <Spacer className="h-7" />
           </div>
@@ -400,15 +422,8 @@ export default function Page() {
                 <p className={clsx('font-bold', 'text-primary')}>transpiler</p>
                 <Select
                   labelLeft="type"
-                  value={transpilerType}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                    if (!TRANSPILER_TYPES.includes(e.target.value as TranspilerTypeType)) {
-                      return;
-                    }
-                    setTranspilerType(e.target.value as TranspilerTypeType);
-                    setError((error) => ({ ...error, jobType: undefined }));
-                  }}
-                  errorMessage={error.jobType}
+                  {...register('transpilerType')}
+                  errorMessage={errors.transpilerType && errors.transpilerType.message}
                   size="xs"
                 >
                   {TRANSPILER_TYPES.map((jobType) => (
@@ -422,12 +437,8 @@ export default function Page() {
             <TextArea
               className={clsx('h-[16rem]')}
               placeholder={t('job.form.transpiler_placeholder')}
-              value={transpilerInfo}
-              onChange={(e) => {
-                setTranspilerInfo(e.target.value);
-                setError((error) => ({ ...error, transpilerInfo: undefined }));
-              }}
-              errorMessage={error.transpilerInfo}
+              {...register('transpiler')}
+              errorMessage={errors.transpiler && errors.transpiler.message}
             />
             {/* sumulator */}
             <>
@@ -440,12 +451,8 @@ export default function Page() {
             <TextArea
               className={clsx('h-[16rem]')}
               placeholder={t('job.form.simulator_placeholder')}
-              value={simulatorInfo}
-              onChange={(e) => {
-                setSimulatorInfo(e.target.value);
-                setError((error) => ({ ...error, simulatorInfo: undefined }));
-              }}
-              errorMessage={error.simulatorInfo}
+              {...register('simulator')}
+              errorMessage={errors.simulator && errors.simulator.message}
             />
             {/* mitigation */}
             <>
@@ -455,8 +462,13 @@ export default function Page() {
               <div className={clsx('flex', 'justify-between')}>
                 <p className={clsx('font-bold', 'text-primary')}>mitigation</p>
                 <Toggle
+                  {...register('mitigationEnabled')}
                   checked={mitigationEnabled}
-                  onChange={(enabled) => setMitigationEnabled(enabled)}
+                  onChange={(e) =>
+                    register('mitigationEnabled').onChange({
+                      target: { name: 'mitigationEnabled', value: e },
+                    })
+                  }
                 />
               </div>
               <Spacer className="h-2" />
@@ -464,12 +476,8 @@ export default function Page() {
             <TextArea
               className={clsx('h-[16rem]')}
               placeholder={t('job.form.mitigation_placeholder')}
-              value={mitigationInfo}
-              onChange={(e) => {
-                setMitigationInfo(e.target.value);
-                setError((error) => ({ ...error, mitigationInfo: undefined }));
-              }}
-              errorMessage={error.mitigationInfo}
+              {...register('mitigation')}
+              errorMessage={errors.mitigation && errors.mitigation.message}
             />
           </div>
         </div>
@@ -477,8 +485,15 @@ export default function Page() {
         <div className={clsx('flex', 'flex-wrap', 'gap-2', 'justify-between', 'items-end')}>
           <div className={clsx('flex', 'flex-wrap', 'gap-2', 'justify-between')}>
             <JobFileUpload setJobFileData={setJobFileData} devices={devices} />
-            <Button color="secondary" onClick={handleSubmit} loading={processing}>
+            <Button loading={isSubmitting} onClick={handleSubmit(onSubmit)} color="secondary">
               {t('job.form.button')}
+            </Button>
+            <Button
+              color="secondary"
+              onClick={handleSubmit(onSubmitWithRedirection)}
+              loading={isSubmitting}
+            >
+              {t('job.form.submit_and_view_job_button')}
             </Button>
           </div>
           <CheckReferenceCTA />
@@ -494,7 +509,7 @@ const CheckReferenceCTA = () => {
       {i18next.language === 'ja' ? (
         <>
           各入力値については
-          <NavLink to="#" className="text-link">
+          <NavLink to="/howto#/job/submit_job" className="text-link">
             こちら
           </NavLink>
           の説明を参照してください
@@ -502,7 +517,7 @@ const CheckReferenceCTA = () => {
       ) : (
         <>
           For each input value, please refer to the explanation{' '}
-          <NavLink to="#" className="text-link">
+          <NavLink to="/howto#/job/submit_job" className="text-link">
             here.
           </NavLink>
         </>
@@ -514,16 +529,37 @@ const CheckReferenceCTA = () => {
 const OperatorForm = ({
   current,
   set,
-  error,
+  errors = [],
 }: {
   current: OperatorItem[];
-  set: (_: OperatorItem[]) => void;
-  error: {
-    pauli: { [index: number]: string };
-    coeff: { [index: number]: [string | undefined, string | undefined] };
-  };
+  set: (_: OperatorItem[]) => Promise<void>;
+  errors?:
+    | Merge<FieldError, (Merge<FieldError, FieldErrorsImpl<OperatorItem>> | undefined)[]>
+    | undefined;
 }) => {
   const { t } = useTranslation();
+
+  useEffect(() => {
+    set([{ pauli: '', coeff: 1.0 }]); // Initial setting form value
+  }, []);
+
+  const handleCoeffInput = (index: number) => async (e: FormEvent<HTMLInputElement>) => {
+    const coeff = (e.target as HTMLInputElement).value;
+
+    await set(current.map((o, i) => (i === index ? { ...o, coeff: Number(coeff) } : o)));
+  };
+
+  const handlePauliInput = (index: number) => async (e: FormEvent<HTMLInputElement>) => {
+    await set(
+      current.map((o, i) =>
+        i === index ? { ...o, pauli: (e.target as HTMLInputElement)?.value } : o
+      )
+    );
+  };
+
+  const handlePlusButtonClick = async () => {
+    await set([...current, { pauli: '', coeff: 1.0 }]);
+  };
 
   return (
     <div className={clsx('grid', 'gap-2')}>
@@ -534,28 +570,28 @@ const OperatorForm = ({
         {current.map((item, index) => (
           <div key={index} className={clsx('flex', 'gap-1', 'items-center')}>
             <div className={clsx('grid', 'gap-1', 'w-full')}>
-              <Input
-                label="pauli"
-                placeholder={t('job.form.info_pauli_placeholder')}
-                value={item.pauli}
-                onChange={(e) => {
-                  set(current.map((o, i) => (i === index ? { ...o, pauli: e.target.value } : o)));
-                }}
-                errorMessage={error.pauli[index]}
-              />
-              <ComplexForm
-                label="coeff"
-                curr={item.coeff}
-                set={(coeff) => {
-                  set(current.map((o, i) => (i === index ? { ...o, coeff } : o)));
-                }}
-                error={error.coeff[index] ?? [undefined, undefined]}
-              />
+              <div className={clsx('flex', 'gap-3', 'items-start')}>
+                <Input
+                  type="number"
+                  label={t('job.form.operator.coeff')}
+                  placeholder={t('job.form.operator_coeff_placeholder')}
+                  value={current[index].coeff}
+                  onInput={handleCoeffInput(index)}
+                  errorMessage={errors[index]?.coeff?.message}
+                />
+                <Input
+                  label={t('job.form.operator.pauli')}
+                  placeholder={t('job.form.operator_pauli_placeholder')}
+                  value={item.pauli}
+                  onChange={handlePauliInput(index)}
+                  errorMessage={errors[index]?.pauli?.message}
+                />
+              </div>
             </div>
             <Button
               color="error"
               size="small"
-              className={clsx('w-8', 'h-16', 'flex', 'justify-center', 'items-center')}
+              className={clsx('w-8', 'h-8', 'flex', 'justify-center', 'items-center')}
               onClick={() => {
                 set(current.filter((_, i) => i !== index));
               }}
@@ -566,52 +602,9 @@ const OperatorForm = ({
         ))}
       </div>
       <div className={clsx('w-min')}>
-        <Button
-          color="secondary"
-          size="small"
-          onClick={() => set([...current, { pauli: '', coeff: ['', '0'] }])}
-        >
+        <Button color="secondary" size="small" onClick={handlePlusButtonClick}>
           +
         </Button>
-      </div>
-    </div>
-  );
-};
-
-const ComplexForm = ({
-  label,
-  curr,
-  set,
-  error,
-}: {
-  label?: string;
-  curr: [string, string];
-  set: (_: [string, string]) => void;
-  error: [string | undefined, string | undefined];
-}) => {
-  return (
-    <div className={clsx('grid', 'gap-1')}>
-      {label && <p className="text-xs">{label}</p>}
-      <div className={clsx('flex', 'gap-1', 'items-start')}>
-        <Input
-          value={curr[0]}
-          type="number"
-          onChange={(e) => {
-            set([e.target.value, curr[1]]);
-          }}
-          errorMessage={error[0]}
-        />
-        <p className={clsx('whitespace-nowrap', 'h-8', 'flex', 'items-center')}>
-          <span>+ i</span>
-        </p>
-        <Input
-          value={curr[1]}
-          type="number"
-          onChange={(e) => {
-            set([curr[0], e.target.value]);
-          }}
-          errorMessage={error[1]}
-        />
       </div>
     </div>
   );
