@@ -1,14 +1,11 @@
-import { error } from 'console';
-import { toast } from 'react-toastify';
-
 export default {
   list: {
     title: 'Job',
     register_button: 'Register a new job',
     search: {
       head: 'Job search',
-      id: 'Job ID',
-      id_placeholder: 'Enter Job ID',
+      job_search_query_input: 'Job ID, Job Name or Job Description',
+      job_search_query_input_placeholder: 'Enter Job ID, Job Name or Job Description',
       status: 'Status',
       description: 'Description',
       description_placeholder: 'Enter description',
@@ -102,7 +99,7 @@ export default {
     description_placeholder: 'Example) ○○○',
     program_placeholder:
       'Example) OPENQASM 3; include "stdgates.inc"; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;',
-    operator_pauli_placeholder: 'Enter the operator (eq: X 0 X 1)',
+    operator_pauli_placeholder: 'Enter the operator (eq: X0X1)',
     operator_coeff_placeholder: 'Enter the coefficient (eg: 1.5)',
     transpiler_placeholder: 'Example) {}',
     simulator_placeholder: 'Example) {}',
@@ -111,6 +108,7 @@ export default {
     upload_file_button: 'Load file',
     button: 'Submit',
     submit_and_view_job_button: 'Submit and view job',
+    submitting: 'Processing your request...',
     operator: {
       pauli: 'Operator (Pauli string)',
       coeff: 'Coefficient',
@@ -126,8 +124,10 @@ export default {
       type: 'Please select a job type',
       program: 'Please enter the program',
       operator: {
-        pauli: 'Enter operator in the Pauli string format',
-        coeff: 'Enter the coefficient of the operator',
+        pauli_required: 'Pauli field is required',
+        pauli_match: 'Only I, X, Y, Z, and digits 0-9 are allowed in Pauli field',
+        pauli_empty: 'Pauli field cannot be empty',
+        coeff_required: 'Coefficient field is required',
       },
       invalid_json: 'Please enter correct JSON',
     },

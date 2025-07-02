@@ -128,7 +128,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
       const { nodeData, tempNodeMap } = createNodeData(parsedDeviceInfo.qubits);
       const { edgeData, tempCouplingMap } = createEdgeData(parsedDeviceInfo.couplings);
 
-      if (nodeData.length === 0 || edgeData.length === 0) {
+      if (nodeData.length === 0) {
         setIsValidDeviceInfo(false);
       }
 

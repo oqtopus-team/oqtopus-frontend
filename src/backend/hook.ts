@@ -34,7 +34,7 @@ export const useJobAPI = () => {
         'job_id,name,description,device_id,job_info,transpiler_info,simulator_info,mitigation_info,job_type,shots,status,submitted_at',
         undefined,
         undefined,
-        params.jobid ?? params.description ?? '',
+        params.query ?? '',
         page,
         pageSize,
         'DESC'

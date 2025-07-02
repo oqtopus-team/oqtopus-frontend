@@ -30,11 +30,11 @@ export const JobSearchForm = ({
       <div className={clsx('flex', 'justify-between', 'items-end', 'flex-nowrap', 'gap-6')}>
         <div className="flex-1">
           <Input
-            placeholder={t('job.list.search.id_placeholder')}
-            label={t('job.list.table.id')}
-            value={params.jobid ?? ''}
+            placeholder={t('job.list.search.job_search_query_input_placeholder')}
+            label={t('job.list.search.job_search_query_input')}
+            value={params.query ?? ''}
             onChange={(e) =>
-              setParams({ ...params, jobid: e.target.value === '' ? undefined : e.target.value })
+              setParams({ ...params, query: e.target.value === '' ? undefined : e.target.value })
             }
           />
         </div>
@@ -62,19 +62,6 @@ export const JobSearchForm = ({
               ))}
             </Select>
           </div>
-        </div>
-        <div className="flex-1">
-          <Input
-            placeholder={t('job.list.search.description_placeholder')}
-            label={t('job.list.table.description')}
-            value={params.description ?? ''}
-            onChange={(e) =>
-              setParams({
-                ...params,
-                description: e.target.value === '' ? undefined : e.target.value,
-              })
-            }
-          />
         </div>
         <div>
           <Button color="secondary" type="submit">

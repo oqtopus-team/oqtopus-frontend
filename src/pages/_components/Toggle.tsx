@@ -5,9 +5,11 @@ export const Toggle = ({
   labelLeft,
   checked,
   onChange,
+  name
 }: {
   label?: string;
   labelLeft?: string;
+  name?: string;
   checked: boolean;
   onChange: (_: boolean) => void;
 }) => {
@@ -16,6 +18,7 @@ export const Toggle = ({
       {labelLeft && <span className={clsx('text-sm')}>{labelLeft}</span>}
       <input
         type="checkbox"
+        name={name ?? label}
         className={clsx('sr-only', 'peer')}
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}

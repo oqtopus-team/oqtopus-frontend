@@ -69,7 +69,8 @@ export const JOB_FORM_MITIGATION_INFO_DEFAULTS: { [key in 'PseudoInv' | 'None']:
     {
       readout: 'pseudo_inverse',
     },
-    null
+    null,
+    2
   ),
   None: JSON.stringify({}, null, 2),
 } as const;
@@ -94,8 +95,7 @@ export interface Job {
 }
 
 export interface JobSearchParams {
-  jobid?: string;
-  description?: string;
+  query?: string; // id, name or description query string
   status?: JobStatusType;
   page?: string;
 }

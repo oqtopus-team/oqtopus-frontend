@@ -1,13 +1,11 @@
-import { toast } from 'react-toastify';
-
 export default {
   list: {
     title: 'ジョブ',
     register_button: '新規でジョブを登録する',
     search: {
       head: 'ジョブ検索',
-      id: 'ジョブID',
-      id_placeholder: 'Enter Job ID',
+      job_search_query_input: 'ジョブID、ジョブ名もしくはジョブ詳細',
+      job_search_query_input_placeholder: 'Enter Job ID, Job Name or Job Description',
       status: 'ステータス',
       description: '説明',
       description_placeholder: 'Enter description',
@@ -110,6 +108,7 @@ export default {
     upload_file_button: 'ファイル読み込み',
     button: '送信する',
     submit_and_view_job_button: '送信して詳細を確認',
+    submitting: 'リクエストを処理中...',
     toast: {
       success: '成功: ジョブが正常に送信されました',
       error: '失敗: ジョブの送信に失敗しました',
@@ -121,8 +120,10 @@ export default {
       type: 'ジョブタイプを選択してください',
       program: 'プログラムを入力してください',
       operator: {
-        pauli: '演算子をPauli string形式で入力してください (例: X 0 Y 1)',
-        coeff: '演算子の係数を入力してください',
+        pauli_required: 'Pauliフィールドは必須です',
+        pauli_match: 'Pauliフィールドでは I、X、Y、Z、および数字の0-9のみが許可されています',
+        pauli_empty: 'Pauliフィールドを空にすることはできません',
+        coeff_required: '係数フィールドは必須です',
       },
       invalid_json: '正しいJSON形式で入力してください',
     },

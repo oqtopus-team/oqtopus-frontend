@@ -30,7 +30,7 @@ export default function JobListPage() {
 
   const [jobs, setJobs] = useState<Job[]>([]);
   const [selectedJobs, setSelectedJobs] = useState<Job[]>([]);
-  const [urlSearchParams, _] = useSearchParams();
+  const [urlSearchParams, setUrlSearchParams] = useSearchParams();
   const [params, setParams] = useState<JobSearchParams>({});
 
   const [loading, setLoading] = useState(true);
@@ -46,7 +46,7 @@ export default function JobListPage() {
       urlSearchParams.forEach((value, key) => {
         if (key === 'status' && JOB_STATUSES.includes(value as JobStatusType)) {
           params.status = value as JobStatusType;
-        } else if (key === 'jobid' || key === 'description') {
+        } else if (key === 'query') {
           params[key] = value;
         }
       });
@@ -58,7 +58,7 @@ export default function JobListPage() {
   }, []);
 
   const onSearchSubmit = (): void => {
-    window.history.pushState(null, '', `/jobs?${generateSearchParams(params)}`);
+    setUrlSearchParams(generateSearchParams(params));
     reloadJobs();
   };
 
@@ -71,6 +71,13 @@ export default function JobListPage() {
 
   // infinite scroll
   const getJobsScroll = (page: number): void => {
+    // When filter parameters have changed, we reload jobs from first up to the current page
+    // so that we have all jobs for the new filter up to the specified page
+    if (updateFilterParametersIfChanged()) {
+      getJobsUpToPage(page);
+      return;
+    }
+
     // First, we unset the `hasMore` flag to prevent continuous requests
     setHasMore(false);
     setLoading(true);
@@ -90,6 +97,61 @@ export default function JobListPage() {
       .finally(() => {
         setLoading(false);
       });
+  };
+
+  const getJobsUpToPage = async (maxPage: number) => {
+    const jobs: Job[] = [];
+    let currentPage = 1;
+    let hasMore = true;
+
+    setHasMore(false);
+    setLoading(true);
+
+    for (let i = 0; i < maxPage; i++) {
+      try {
+        const jobsForPage = await getLatestJobs(currentPage, PAGE_SIZE, params);
+        jobs.push(...jobsForPage);
+
+        currentPage++;
+
+        hasMore = jobsForPage.length === PAGE_SIZE;
+        if (!hasMore) break;
+      } catch (e: any) {
+        console.error(e);
+      }
+    }
+
+    setPage(currentPage);
+    setJobs(jobs);
+    setHasMore(hasMore);
+    setLoading(false);
+  };
+
+  const updateFilterParametersIfChanged = (): boolean => {
+    const mappedParams = mapUrlSearchParamsToParams();
+
+    for (const [key, value] of Object.entries(params)) {
+      if (mappedParams[key as keyof JobSearchParams] !== value) {
+        setUrlSearchParams(generateSearchParams(params));
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  const mapUrlSearchParamsToParams = (): JobSearchParams => {
+    const mappedParams: JobSearchParams = {};
+
+    urlSearchParams.forEach((value, key) => {
+      if (key === 'status' && JOB_STATUSES.includes(value as JobStatusType)) {
+        mappedParams.status = value as JobStatusType;
+      } else if (key === 'query') {
+        mappedParams[key] = value;
+      }
+    });
+
+    return mappedParams;
   };
 
   const handleJobSelectionChange = (job: Job, selected: boolean) => {
@@ -161,7 +223,29 @@ export default function JobListPage() {
 
   return (
     <div>
-      <h2 className={clsx('text-primary', 'text-2xl', 'font-bold')}>{t('job.list.title')}</h2>
+      <h2 className={clsx('text-primary', 'text-2xl', 'font-bold', 'flex', 'flex-wrap', 'gap-2')}>
+        {t('job.list.title')}
+        <div
+          className={clsx('flex', 'flex-wrap', 'gap-2', 'justify-between', 'items-center')}
+          onClick={() => {
+            getJobsUpToPage(page - 1);
+          }}
+        >
+          <div
+            title={t('job.detail.reload')}
+            className={clsx(
+              'ml-2',
+              'bg-primary',
+              'rounded-md',
+              'overflow-hidden',
+              'p-1',
+              'cursor-pointer'
+            )}
+          >
+            <img src="/img/common/reload.svg" alt="Reload Icon" width={16} />
+          </div>
+        </div>
+      </h2>
       <Spacer className="h-8" />
       <div className={clsx('absolute', 'top-8', 'right-8')}>
         <NavLink color="secondary" to={'/jobs/form'}>
@@ -219,12 +303,15 @@ export default function JobListPage() {
                     if (params.status && job.status !== params.status) {
                       return false;
                     }
-                    if (params.jobid && !job.id.includes(params.jobid)) {
+                    if (
+                      params.query &&
+                      !job.id.includes(params.query) &&
+                      !job.name.includes(params.query) &&
+                      !job.description?.includes(params.query)
+                    ) {
                       return false;
                     }
-                    if (params.description && !job.description?.includes(params.description)) {
-                      return false;
-                    }
+
                     return true;
                   })
                   .map((job) => (
