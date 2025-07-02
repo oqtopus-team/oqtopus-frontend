@@ -18,9 +18,13 @@ export interface UseAuth {
   confirmSignUp: (verificationCode: string) => Promise<Result>;
   forgotPassword: (username: string) => Promise<Result>;
   confirmPassword: (username: string, code: string, password: string) => Promise<Result>;
+  setQRCodeFromSecret: (username: string, secret: string) => void;
   setUpMfa: () => Promise<Result>;
   confirmMfa: (totpCode: string) => Promise<Result>;
   confirmSignIn: (totpCode: string) => Promise<Result>;
+  startMfaReset: (username: string, password: string) => Promise<Result>;
+  confirmMfaReset: (username: string, password: string, code: string) => Promise<Result>;
+  resetMfa: (username: string, password: string, totp_code: string) => Promise<Result>;
   refreshApiToken: () => Promise<Result>;
 }
 
@@ -228,15 +232,19 @@ const useProvideAuth = (): UseAuth => {
     }
   };
 
+  const setQRCodeFromSecret = (username: string, secret: string): void => {
+    const issuer = encodeURI('OQTOPUS');
+    const code =
+      'otpauth://totp/' + issuer + ':' + username + '?secret=' + secret + '&issuer=' + issuer;
+    setQRCode(code);
+  };
+
   const setUpMfa = async (): Promise<Result> => {
     try {
       const user = await Auth.currentAuthenticatedUser();
       const token = await Auth.setupTOTP(user);
-      const issuer = encodeURI('OQTOPUS');
       const username: string = user.username;
-      const code =
-        'otpauth://totp/' + issuer + ':' + username + '?secret=' + token + '&issuer=' + issuer;
-      setQRCode(code);
+      setQRCodeFromSecret(username, token);
       return { success: true, message: '' };
     } catch (error) {
       const errorMessage = (error as Error).message ?? 'signin.errors.totp_setup_failed';
@@ -276,6 +284,96 @@ const useProvideAuth = (): UseAuth => {
       return {
         success: false,
         message: errorMessage,
+      };
+    }
+  };
+
+  const startMfaReset = async (username: string, password: string): Promise<Result> => {
+    try {
+      const res = await fetch(`${ENV.API_SIGNUP_ENDPOINT}/mfa_reset/start`, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-type': 'application/json; charset=UTF-8',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          email: username,
+          password: password,
+        }),
+      });
+      setUsername(username);
+      setPassword(password);
+      setIsAuthenticated(false);
+      setInitialized(true);
+      return { success: true, message: '' };
+    } catch (error) {
+      console.log(error);
+      return {
+        success: false,
+        message: 'MFA再設定に必要な確認コードの送信に失敗しました。',
+      };
+    }
+  };
+
+  const confirmMfaReset = async (
+    username: string,
+    password: string,
+    code: string
+  ): Promise<Result> => {
+    try {
+      const res = await fetch(`${ENV.API_SIGNUP_ENDPOINT}/mfa_reset/verify_code`, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-type': 'application/json; charset=UTF-8',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          email: username,
+          password: password,
+          code: code,
+        }),
+      });
+      const data = await res.json();
+      const secret = data.secret;
+      return { success: true, message: secret };
+    } catch (error) {
+      console.log(error);
+      return {
+        success: false,
+        message: '確認コードの検証に失敗しました。',
+      };
+    }
+  };
+
+  const resetMfa = async (
+    username: string,
+    password: string,
+    totpCode: string
+  ): Promise<Result> => {
+    try {
+      const res = await fetch(`${ENV.API_SIGNUP_ENDPOINT}/mfa_reset/confirm_totp`, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-type': 'application/json; charset=UTF-8',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          email: username,
+          password: password,
+          totp_code: totpCode,
+        }),
+      });
+      setIsAuthenticated(true);
+      setInitialized(true);
+      return { success: true, message: '' };
+    } catch (error) {
+      console.log(error);
+      return {
+        success: false,
+        message: 'TOTPの認証に失敗しました。',
       };
     }
   };
@@ -320,9 +418,13 @@ const useProvideAuth = (): UseAuth => {
     confirmSignUp,
     forgotPassword,
     confirmPassword,
+    setQRCodeFromSecret,
     setUpMfa,
     confirmMfa,
     confirmSignIn,
+    startMfaReset,
+    confirmMfaReset,
+    resetMfa,
     refreshApiToken,
   };
 };
