@@ -7,6 +7,7 @@ import { QuantumCircuit } from "../circuit"
 import { GateCNOT, GateH, GateX, GateZ, QuantumGate } from "../gates"
 import clsx from "clsx"
 import QuantumGatePalette from "./QuantumGatePalette";
+import { Mode } from "../composer";
 
 
 const allGates: QuantumGate["_tag"][] =
@@ -25,26 +26,27 @@ const allGates: QuantumGate["_tag"][] =
   ]
 
 
-export default () => {
-  const [circuit, setCircuit] = useState<QuantumCircuit>({
-    qubitNumber: 2,
-    steps: [
-      GateH(0),
-      GateCNOT(0, 1),
-      // GateX(0),
-      // GateZ(1),
-    ]
-  });
+export interface QuantumCircuitComposerProps {
+  circuit: QuantumCircuit;
+  onCircuitUpdate: (c: QuantumCircuit) => void;
+}
+export default (props: QuantumCircuitComposerProps) => {
 
   const [grabbingGate, setGrabbingGate] = useState<null | QuantumGate["_tag"]>(null);
 
-
-  const handleCircuitUpdate = (newCircuit: QuantumCircuit) => {
-    setCircuit(newCircuit);
-  }
+  const [mode, setMode] = useState<Mode>("normal");
 
   const handleDragFromGatePalette = (gateTag: QuantumGate["_tag"]) => {
     setGrabbingGate(gateTag);
+  }
+
+  const toggleMode = (m: Mode) => () => {
+    if (mode !== m) {
+      setMode(m);
+    }
+    else {
+      setMode("normal");
+    }
   }
 
   return (
@@ -54,21 +56,9 @@ export default () => {
           ["w-full"]
         ])}
       >
-        <div
-        
-        >
-          <select>
-            <option label="Sampling" />
-            <option label="Estimation" />
-          </select>
-        </div>
-        <hr 
-          className={clsx([
-            ["w-full", "my-2"],
-            ["text-neutral-content"]
-          ])} 
-        />
         <QuantumGatePalette
+          mode={mode}
+          toggleMode={toggleMode}
           supportedGates={allGates}
           onDragStart={handleDragFromGatePalette}
           onDragEnd={() => setGrabbingGate(null)}
@@ -76,8 +66,9 @@ export default () => {
       </div>
 
       <QuantumCircuitCanvas
-        circuit={circuit}
-        onCircuitUpdate={handleCircuitUpdate}
+        circuit={props.circuit}
+        mode={mode}
+        onCircuitUpdate={props.onCircuitUpdate}
         draggingFromPalette={grabbingGate !== null}
       />
     </DndProvider>

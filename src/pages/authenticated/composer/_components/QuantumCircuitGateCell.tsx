@@ -1,18 +1,17 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { ControlWireDirection, Down, QuantumGate, Up } from "../gates";
 import QuantumGateElement from "./QuantumGateElement";
-import { useDrop } from "react-dnd";
-import { DragGateItem, ItemTypeGate } from "../dnd";
 import clsx from "clsx";
+import { DummyGate } from "../composer";
 
 export type GateCellElement =
-  | { readonly _tag: "gate", gate: QuantumGate }
+  | { readonly _tag: "gate", gate: QuantumGate | DummyGate }
   | { readonly _tag: "controlWire" }
   | { readonly _tag: "controlQubit", directions: ControlWireDirection[] }
   | { readonly _tag: "emptyCell" }
   ;
 
-export const Gate = (gate: QuantumGate): GateCellElement => ({ _tag: "gate", gate });
+export const Gate = (gate: QuantumGate | DummyGate): GateCellElement => ({ _tag: "gate", gate });
 export const ControlWire: GateCellElement = { _tag: "controlWire" };
 export const ControlQubit = (directions: ControlWireDirection[]): GateCellElement => ({
   _tag: "controlQubit",

@@ -5,18 +5,12 @@ import { DragGateItem, dragGateItemToQuantumGate, DragMoveGateItem, ItemTypeGate
 import clsx from "clsx";
 import QuantumCircuitGateCell, { ControlQubit, ControlWire, EmptyCell, Gate, PreviewControl, } from "./QuantumCircuitGateCell";
 import QuantumCircuitDropCell, { DropCellPart } from "./QuantumCircuitDropCell";
+import { DummyGate, ExtendedGate, Mode } from "../composer";
 
 type FoldCircuitState = {
   composed: (QuantumGate | undefined)[][];
-  circuit: ({ readonly _tag: "dummy", target: number } | QuantumGate)[];
+  circuit: (DummyGate | QuantumGate)[];
 }
-
-
-type ExtendedGate =
-  | { _tag: "$controlBit", target: number; from: number, to: number }
-  | { _tag: "$controlWire", target: number; from: number, to: number }
-  | QuantumGate
-  ;
 
 const compareExtendedGate = (lhs: ExtendedGate, rhs: ExtendedGate): boolean => {
   switch (lhs._tag) {
@@ -24,8 +18,10 @@ const compareExtendedGate = (lhs: ExtendedGate, rhs: ExtendedGate): boolean => {
       return rhs._tag === "$controlBit" && lhs.from === rhs.from && lhs.to === rhs.to;
     case "$controlWire":
       return rhs._tag === "$controlWire" && lhs.from === rhs.from && lhs.to === rhs.to;
+    case "$dummy":
+      return rhs._tag === "$dummy" && lhs.target === rhs.target;
     default:
-      if (rhs._tag == "$controlBit" || rhs._tag == "$controlWire") return false;
+      if (rhs._tag == "$controlBit" || rhs._tag == "$controlWire" || rhs._tag === "$dummy") return false;
       return compareGate(lhs, rhs);
   }
 }
@@ -127,17 +123,15 @@ const foldCircuit = (circuit: QuantumCircuit): ComposedProgram => {
         break;
 
       default:
-        state.composed[gateHead.target].push(gateHead._tag !== "dummy" ? gateHead : undefined);
+        state.composed[gateHead.target].push(gateHead._tag !== "$dummy" ? gateHead : undefined);
     }
   }
-  console.log("composed:", state.composed)
   const maxDepth = calcMaxDepth(state.composed);
   const rearranged = state.composed.map(w =>
     w.length < maxDepth
       ? [...w, ...new Array(maxDepth - w.length)]
       : w
   );
-  console.log("rearranged", rearranged)
   return rearranged;
 }
 
@@ -234,6 +228,7 @@ const handleDragControlQubit = (
                 .includes(holdingControlQubit.targetQubitIndex);
             }
             return g !== undefined
+              && g._tag !== "$dummy" 
               && false == compareExtendedGate(g, targetGate)
           })
           .length > 0
@@ -358,6 +353,7 @@ const handleDragIn = (
 
 interface Props {
   circuit: QuantumCircuit;
+  mode: Mode;
   onCircuitUpdate: (newCircuit: QuantumCircuit) => void;
   draggingFromPalette: boolean;
 }
@@ -372,14 +368,14 @@ const calcMaxDepth = (composed: ComposedProgram) => {
 
 const reconstructCircuit = (composed: ComposedProgram, qubitNumber: number, circuitDepth: number): QuantumCircuit => {
   const toGate = (x: ExtendedGate | undefined, qIndex: number): undefined | QuantumGate => {
-    if (!x) return { _tag: "dummy", target: qIndex } as unknown as QuantumGate;
+    if (!x) return { _tag: "$dummy", target: qIndex } as unknown as QuantumGate;
     switch (x._tag) {
       case "$controlBit":
         return undefined;
       case "$controlWire":
         return undefined;
       default:
-        return x
+        return x as unknown as QuantumGate
     }
   };
 
@@ -537,12 +533,11 @@ export default (props: Props) => {
       }
       else break;
     }
-    const newComposed = dropsCnt == 0 
-      ? [...composed] 
+    const newComposed = dropsCnt == 0
+      ? [...composed]
       : composed.map(w => w.slice(0, (-1) * dropsCnt));
     const newCircuitDepth = calcMaxDepth(newComposed);
     const newCircuit = reconstructCircuit(newComposed, qubitNumber.valueOf(), newCircuitDepth);
-    console.log("newCircuit", newCircuit);
     props.onCircuitUpdate(newCircuit);
   }
 
@@ -656,7 +651,8 @@ export default (props: Props) => {
     <div
       className={clsx([
         ["relative", "w-full", "min-h-64", "my-5"],
-        ["border", "border-table-border", "rounded-sm"]
+        ["overflow-auto"],
+        ["border", "border-neutral-content", "rounded-sm"]
       ])}
     >
       <div
@@ -698,197 +694,198 @@ export default (props: Props) => {
         </div>
         <div
           className={clsx([
-            ['relative']
+            ['relative', 'h-full', 'w-full']
           ])}
         >
-          <div
-            style={{
-              gridTemplateRows: `repeat(${qubitNumber}, 64px)`,
-              gridTemplateColumns: `repeat(${circuitDepth}, 64px)`,
-            }}
-            className={clsx([
-              ["absolute", "top-0", "left-0", "p-5",],
-              ["grid", "grid-flow",],
-              ["z-20"],
-              ["transition-all", "duration-300"]
-            ])}
-          >
-            {
-              [...new Array(qubitNumber)].map((_, qIndex) =>
-                [... new Array(circuitDepth)].map((_, tIndex) => {
-                  // slice of quantum circuit at current timestep
-                  const gatesAtTimestep = composedProgram.map(row => row[tIndex]);
 
-                  const elm = mkCellElement(qIndex, gatesAtTimestep);
+            <div
+              style={{
+                gridTemplateRows: `repeat(${qubitNumber}, 64px)`,
+                gridTemplateColumns: `repeat(${circuitDepth}, 64px)`,
+              }}
+              className={clsx([
+                ["absolute", "top-0", "left-0", "p-5",],
+                ["grid", "grid-flow",],
+                ["z-20", "w-full",],
+                ["transition-all", "duration-300"]
+              ])}
+            >
+              {
+                [...new Array(qubitNumber)].map((_, qIndex) =>
+                  [... new Array(circuitDepth)].map((_, tIndex) => {
+                    // slice of quantum circuit at current timestep
+                    const gatesAtTimestep = composedProgram.map(row => row[tIndex]);
 
-                  return (
-                    <div
-                      className={clsx([
-                        'relative', 'w-full', 'h-full'
-                      ])}
-                      key={`cell-q${qIndex}-t${tIndex}`}
-                    >
+                    const elm = mkCellElement(qIndex, gatesAtTimestep);
+
+                    return (
                       <div
                         className={clsx([
-                          'absolute', 'top-0', 'left-0',
-                          'w-full', 'h-full', 'z-20',
-                          'flex', 'items-center', 'justify-center'
+                          'relative', 'w-full', 'h-full'
                         ])}
-                      >
-                        <QuantumCircuitGateCell
-                          element={elm}
-                          qubitIndex={qIndex}
-                          timestep={tIndex}
-                          isDragging={draggingFromCanvas.isDragging && draggingFromCanvas.sourceQubitIndex === qIndex && draggingFromCanvas.sourceTimestep === tIndex}
-                          // isDragging={false}
-                          previewControl={(() => {
-                            if (holdingControlQuit === false || holdingControlQuit.timestep !== tIndex) return null;
-                            if (holdingControlQuit.targetQubitIndex === qIndex) {
-                              return {
-                                _tag: "controlledGate",
-                                directions: [
-                                  qIndex < holdingControlQuit.hovered ? ["down"] : [],
-                                  qIndex > holdingControlQuit.hovered ? ["up"] : []
-                                ].flat() as ("down" | "up")[]
-                              };
-                            }
-                            const [from, to] = [holdingControlQuit.hovered, holdingControlQuit.targetQubitIndex].sort();
-                            if (holdingControlQuit.hovered === qIndex) {
-                              return {
-                                _tag: "controlQubit",
-                                directions: [holdingControlQuit.targetQubitIndex >= qIndex ? "down" : "up"]
-                              };
-                            }
-                            if (qIndex > from && qIndex < to) {
-                              return { _tag: "controlWire" }
-                            }
-                            return null
-                          })()
-                          }
-                          focused={
-                            holdingGate !== false
-                            && qIndex == holdingGate.dropQubitIndex
-                            && tIndex == holdingGate.dropTimestep
-                          }
-                          onClickControlQubit={handleControlQubitClick(holdingControlQuit, composedProgram, setHoldingControlQubit)}
-                          onClickControlledGate={handleControlledGateClick}
-                          onDragStart={() => {
-                            setDraggingFromCanvas({
-                              isDragging: true,
-                              sourceQubitIndex: qIndex,
-                              sourceTimestep: tIndex
-                            });
-                          }}
-                          onDragEnd={() => {
-                            setDraggingFromCanvas({ isDragging: false });
-                          }}
-                          key={`q${qIndex}-t${tIndex}`}
-                        />
-                      </div>
-                      <div
-                        className={clsx([
-                          ['absolute', 'top-0', 'left-0'],
-                          ['z-10'],
-                          ['w-full', 'h-full'],
-                          ['flex', 'justify-center', 'items-center']
-                        ])}
+                        key={`cell-q${qIndex}-t${tIndex}`}
                       >
                         <div
                           className={clsx([
-                            ['w-full', 'h-1'],
-                            ['bg-neutral-content']
+                            'absolute', 'top-0', 'left-0',
+                            'w-full', 'h-full', 'z-20',
+                            'flex', 'items-center', 'justify-center'
                           ])}
+                        >
+                          <QuantumCircuitGateCell
+                            element={elm}
+                            qubitIndex={qIndex}
+                            timestep={tIndex}
+                            isDragging={draggingFromCanvas.isDragging && draggingFromCanvas.sourceQubitIndex === qIndex && draggingFromCanvas.sourceTimestep === tIndex}
+                            // isDragging={false}
+                            previewControl={(() => {
+                              if (holdingControlQuit === false || holdingControlQuit.timestep !== tIndex) return null;
+                              if (holdingControlQuit.targetQubitIndex === qIndex) {
+                                return {
+                                  _tag: "controlledGate",
+                                  directions: [
+                                    qIndex < holdingControlQuit.hovered ? ["down"] : [],
+                                    qIndex > holdingControlQuit.hovered ? ["up"] : []
+                                  ].flat() as ("down" | "up")[]
+                                };
+                              }
+                              const [from, to] = [holdingControlQuit.hovered, holdingControlQuit.targetQubitIndex].sort();
+                              if (holdingControlQuit.hovered === qIndex) {
+                                return {
+                                  _tag: "controlQubit",
+                                  directions: [holdingControlQuit.targetQubitIndex >= qIndex ? "down" : "up"]
+                                };
+                              }
+                              if (qIndex > from && qIndex < to) {
+                                return { _tag: "controlWire" }
+                              }
+                              return null
+                            })()
+                            }
+                            focused={
+                              holdingGate !== false
+                              && qIndex == holdingGate.dropQubitIndex
+                              && tIndex == holdingGate.dropTimestep
+                            }
+                            onClickControlQubit={handleControlQubitClick(holdingControlQuit, composedProgram, setHoldingControlQubit)}
+                            onClickControlledGate={handleControlledGateClick}
+                            onDragStart={() => {
+                              setDraggingFromCanvas({
+                                isDragging: true,
+                                sourceQubitIndex: qIndex,
+                                sourceTimestep: tIndex
+                              });
+                            }}
+                            onDragEnd={() => {
+                              setDraggingFromCanvas({ isDragging: false });
+                            }}
+                            key={`q${qIndex}-t${tIndex}`}
+                          />
+                        </div>
+                        <div
+                          className={clsx([
+                            ['absolute', 'top-0', 'left-0'],
+                            ['z-10'],
+                            ['w-full', 'h-full'],
+                            ['flex', 'justify-center', 'items-center']
+                          ])}
+                        >
+                          <div
+                            className={clsx([
+                              ['w-full', 'h-1'],
+                              ['bg-neutral-content']
+                            ])}
+                          />
+                        </div>
+                      </div>
+                    )
+                  })
+                )
+              }
+            </div>
+
+            <div
+              style={{
+                gridTemplateRows: `repeat(${qubitNumber}, 64px)`,
+                gridTemplateColumns: `repeat(${circuitDepth}, 64px)`,
+              }}
+              className={clsx([
+                ["absolute", "top-0", "left-0", "p-5",],
+                ["grid", "grid-flow-col",],
+                [props.draggingFromPalette || draggingFromCanvas.isDragging || holdingControlQuit !== false ? "z-30" : "z-10"]
+              ])}
+            >
+              {circuitDepth > 0
+                ? [...new Array(circuitDepth)].map((_, tIndex) =>
+                  [...new Array(qubitNumber)].map((_, qIndex) => {
+                    return (
+                      <div
+                        className={clsx([
+                          'relative', 'w-full', 'h-full',
+                          'flex', 'justify-center', 'items-center'
+                        ])}
+                        key={`drop-cell-q${qIndex}-t${tIndex}`}
+                      >
+                        <QuantumCircuitDropCell
+                          qubitIndex={qIndex}
+                          timestep={tIndex}
+                          part={"left"}
+                          holdingControlQubit={holdingControlQuit}
+                          onDragIn={handleDragIn(
+                            holdingGate,
+                            setHoldingGate,
+                            composedProgram,
+                            setComposedProgram,
+                            draggingFromCanvas,
+                            setDraggingFromCanvas
+                          )}
+                          onDrop={(qubit, timestep, _, item) => handleDrop(qubit, timestep, item)}
+                          onDragControlQubit={handleDragControlQubit(
+                            holdingControlQuit,
+                            composedProgram,
+                            setHoldingControlQubit,
+                            setComposedProgram
+                          )}
+                          onSetControlQubit={handleSetControlQubit(
+                            composedProgram,
+                            setComposedProgram,
+                            holdingControlQuit,
+                            setHoldingControlQubit
+                          )}
+                        />
+                        <QuantumCircuitDropCell
+                          qubitIndex={qIndex}
+                          timestep={tIndex}
+                          part={"right"}
+                          holdingControlQubit={holdingControlQuit}
+                          onDragIn={handleDragIn(
+                            holdingGate,
+                            setHoldingGate,
+                            composedProgram,
+                            setComposedProgram,
+                            draggingFromCanvas,
+                            setDraggingFromCanvas
+                          )} onDrop={(qubit, timestep, _, item) => handleDrop(qubit, timestep, item)}
+                          onDragControlQubit={handleDragControlQubit(
+                            holdingControlQuit,
+                            composedProgram,
+                            setHoldingControlQubit,
+                            setComposedProgram
+                          )}
+                          onSetControlQubit={handleSetControlQubit(
+                            composedProgram,
+                            setComposedProgram,
+                            holdingControlQuit,
+                            setHoldingControlQubit
+                          )}
                         />
                       </div>
-                    </div>
-                  )
-                })
-              )
-            }
-          </div>
-
-          <div
-            style={{
-              gridTemplateRows: `repeat(${qubitNumber}, 64px)`,
-              gridTemplateColumns: `repeat(${circuitDepth}, 64px)`,
-            }}
-            className={clsx([
-              ["absolute", "top-0", "left-0", "p-5",],
-              ["grid", "grid-flow-col",],
-              [props.draggingFromPalette || draggingFromCanvas.isDragging || holdingControlQuit !== false ? "z-30" : "z-10"]
-            ])}
-          >
-            {circuitDepth > 0
-              ? [...new Array(circuitDepth)].map((_, tIndex) =>
-                [...new Array(qubitNumber)].map((_, qIndex) => {
-                  return (
-                    <div
-                      className={clsx([
-                        'relative', 'w-full', 'h-full',
-                        'flex', 'justify-center', 'items-center'
-                      ])}
-                      key={`drop-cell-q${qIndex}-t${tIndex}`}
-                    >
-                      <QuantumCircuitDropCell
-                        qubitIndex={qIndex}
-                        timestep={tIndex}
-                        part={"left"}
-                        holdingControlQubit={holdingControlQuit}
-                        onDragIn={handleDragIn(
-                          holdingGate,
-                          setHoldingGate,
-                          composedProgram,
-                          setComposedProgram,
-                          draggingFromCanvas,
-                          setDraggingFromCanvas
-                        )}
-                        onDrop={(qubit, timestep, _, item) => handleDrop(qubit, timestep, item)}
-                        onDragControlQubit={handleDragControlQubit(
-                          holdingControlQuit,
-                          composedProgram,
-                          setHoldingControlQubit,
-                          setComposedProgram
-                        )}
-                        onSetControlQubit={handleSetControlQubit(
-                          composedProgram,
-                          setComposedProgram,
-                          holdingControlQuit,
-                          setHoldingControlQubit
-                        )}
-                      />
-                      <QuantumCircuitDropCell
-                        qubitIndex={qIndex}
-                        timestep={tIndex}
-                        part={"right"}
-                        holdingControlQubit={holdingControlQuit}
-                        onDragIn={handleDragIn(
-                          holdingGate,
-                          setHoldingGate,
-                          composedProgram,
-                          setComposedProgram,
-                          draggingFromCanvas,
-                          setDraggingFromCanvas
-                        )} onDrop={(qubit, timestep, _, item) => handleDrop(qubit, timestep, item)}
-                        onDragControlQubit={handleDragControlQubit(
-                          holdingControlQuit,
-                          composedProgram,
-                          setHoldingControlQubit,
-                          setComposedProgram
-                        )}
-                        onSetControlQubit={handleSetControlQubit(
-                          composedProgram,
-                          setComposedProgram,
-                          holdingControlQuit,
-                          setHoldingControlQubit
-                        )}
-                      />
-                    </div>
-                  )
-                })
-              )
-              : null
-            }
-          </div>
+                    )
+                  })
+                )
+                : null
+              }
+            </div>
         </div>
       </div>
       <div>

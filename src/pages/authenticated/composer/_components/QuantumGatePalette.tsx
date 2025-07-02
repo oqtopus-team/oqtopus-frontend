@@ -1,6 +1,7 @@
 import clsx, { ClassValue } from "clsx";
 import { QuantumGate } from "../gates";
 import QuantumGatePaletteItem from "./QuantumGatePaletteItem";
+import { Mode } from "../composer";
 
 interface AtomicGateProps {
   label: string;
@@ -29,14 +30,14 @@ const AtomicGate = (props: AtomicGateProps) => {
 
 const CNotGate = () => {
   return (
-    <div 
+    <div
       className={clsx([
         "w-10", "h-10", "rounded",
         "flex", "justify-center", "items-center", "p-1",
         "bg-gate-controlled",
       ])}
     >
-      <img 
+      <img
         src={`/img/composer/gate-cnot.svg`}
         className="h-full w-auto object-contain"
       />
@@ -46,14 +47,14 @@ const CNotGate = () => {
 
 const CCNotGate = () => {
   return (
-    <div 
+    <div
       className={clsx([
         "w-10", "h-10", "rounded",
         "flex", "justify-center", "items-center", "p-1",
         "bg-gate-controlled",
       ])}
     >
-      <img 
+      <img
         src={`/img/composer/gate-ccnot.svg`}
         className="h-full w-auto object-contain"
       />
@@ -63,6 +64,8 @@ const CCNotGate = () => {
 
 export interface QuantumGatePaletteProps {
   supportedGates: QuantumGate["_tag"][];
+  mode: Mode;
+  toggleMode: (m: Mode) => () => void
   onDragStart: (gate: QuantumGate["_tag"]) => void;
   onDragEnd: () => void;
 }
@@ -104,7 +107,7 @@ export default (props: QuantumGatePaletteProps) => {
                   onDragStart={() => props.onDragStart(gateTag)}
                   onDragEnd={props.onDragEnd}
                 >
-                  <CNotGate 
+                  <CNotGate
                   />
                 </QuantumGatePaletteItem>
               )
@@ -116,7 +119,7 @@ export default (props: QuantumGatePaletteProps) => {
                   onDragStart={() => props.onDragStart(gateTag)}
                   onDragEnd={props.onDragEnd}
                 >
-                  <CCNotGate 
+                  <CCNotGate
                   />
                 </QuantumGatePaletteItem>
               )
@@ -130,7 +133,7 @@ export default (props: QuantumGatePaletteProps) => {
                   onDragStart={() => props.onDragStart(gateTag)}
                   onDragEnd={props.onDragEnd}
                 >
-                  <AtomicGate 
+                  <AtomicGate
                     label={gateTag}
                     classes={["bg-gate-parametrized"]}
                   />
@@ -141,6 +144,21 @@ export default (props: QuantumGatePaletteProps) => {
           }
         })
       }
+      <div
+        className={clsx([
+          ["flex", "items-center", "justify-center"],
+          ["w-10", "h-10", "rounded"],
+          ['cursor-pointer'],
+          ['border', 'border-gate-operation-border'],
+          props.mode == "eraser" ? ['bg-gate-operation-enabled'] : []
+        ])}
+        onClick={props.toggleMode("eraser")}
+      >
+        <img
+          className="p-2"
+          src={`/img/composer/eraser.svg`}
+        />
+      </div>
     </div>
   )
 }

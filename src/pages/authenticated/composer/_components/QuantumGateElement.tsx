@@ -3,11 +3,12 @@ import { ControlWireDirection, Down, QuantumGate, Up, labelOfGate } from "../gat
 import { useEffect, useRef } from "react";
 import { useDrag } from "react-dnd";
 import { DragMoveGateItem, FromCanvas, ItemTypeGate, ItemTypeMoveGate } from "../dnd";
+import { DummyGate } from "../composer";
 
 interface Props {
   qubitIndex: number;
   timestep: number;
-  gate: QuantumGate;
+  gate: QuantumGate | DummyGate;
   isDragging: boolean;
   previewDirections?: ("up" | "down")[];
   onDragStart?: () => void;
