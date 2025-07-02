@@ -6,12 +6,13 @@ import clsx from "clsx";
 
 export interface Props {
   gateTag: QuantumGate["_tag"];
+  disabled: boolean;
   children: ReactNode;
   onDragStart: () => void;
   onDragEnd: () => void;
 }
 
-export default ({ gateTag, children, onDragStart, onDragEnd }: Props) => {
+export default ({ disabled, gateTag, children, onDragStart, onDragEnd }: Props) => {
   const ref = useRef<HTMLDivElement>(null);
 
   const [{ isDragging }, drag] = useDrag(() => ({
@@ -21,10 +22,11 @@ export default ({ gateTag, children, onDragStart, onDragEnd }: Props) => {
       from: FromPalette,
       gateTag, // どの種類のゲートか
     },
+    canDrag: disabled === false,
     collect: monitor => ({
       isDragging: monitor.isDragging(),
     }),
-  }), [gateTag]);
+  }), [gateTag, disabled]);
 
   useEffect(() => {
     if (ref.current) {
@@ -33,20 +35,20 @@ export default ({ gateTag, children, onDragStart, onDragEnd }: Props) => {
   }, [ref, drag]);
 
   useEffect(() => {
-    if (isDragging) {
-      onDragStart();
-    }
-    else {
-      onDragEnd();
-    }
+      if (isDragging) {
+        onDragStart();
+      }
+      else {
+        onDragEnd();
+      }
   }, [isDragging]);
 
   return (
     <div 
       ref={ref} 
       style={{ 
-        opacity: isDragging ? 0.5 : 1,
-        cursor: isDragging ? "grabbing" : "pointer",
+        opacity: isDragging || disabled ? 0.5 : 1,
+        cursor: isDragging ? "grabbing" : disabled ? "not-allowed" :  "pointer",
     }}
     >
       {children}

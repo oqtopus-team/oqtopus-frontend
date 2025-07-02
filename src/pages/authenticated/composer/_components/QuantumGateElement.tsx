@@ -11,6 +11,7 @@ interface Props {
   gate: QuantumGate | DummyGate;
   isDragging: boolean;
   previewDirections?: ("up" | "down")[];
+  onClick: () => void;
   onDragStart?: () => void;
   onDragEnd?: () => void;
   resetControlGate?: () => void
@@ -160,6 +161,7 @@ export default function QuantumGateElement(props: Props) {
                     props.isDragging ? ["opacity-50"] : [],
                     ["bg-gate-atomic", "text-center", "align-middle"]
                   ])}
+                  onClick={props.onClick}
                 >
                   <span
                     className={clsx([

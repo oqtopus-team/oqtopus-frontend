@@ -1,10 +1,12 @@
 import { JobsSubmitJobInfo, JobsSubmitJobRequest } from "@/api/generated";
 import { Device } from "@/domain/types/Device";
 import { JobTypeType } from "@/domain/types/Job";
+import { Accordion } from "@/pages/_components/Accordion";
 import { Button } from "@/pages/_components/Button";
 import { Input } from "@/pages/_components/Input";
 import { Select } from "@/pages/_components/Select";
 import { Spacer } from "@/pages/_components/Spacer";
+import { Checkbox } from "@mui/material";
 import clsx from "clsx"
 import { ReactNode, useState } from "react"
 import { useForm } from "react-hook-form";
@@ -244,7 +246,8 @@ export const ControlPanelExecution = (props: ControlPanelExecutionProps) => {
 
         </div>
       </div>
-      <Spacer className="h-4"/>
+
+      <Spacer className="h-8"/>
       <div>
         <div className="flex">
           <Button 

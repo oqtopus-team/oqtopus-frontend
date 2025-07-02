@@ -90,6 +90,7 @@ export default (props: QuantumGatePaletteProps) => {
                 <QuantumGatePaletteItem
                   gateTag={gateTag}
                   key={gateTag}
+                  disabled={props.mode == "eraser"}
                   onDragStart={() => props.onDragStart(gateTag)}
                   onDragEnd={props.onDragEnd}
                 >
@@ -104,6 +105,7 @@ export default (props: QuantumGatePaletteProps) => {
                 <QuantumGatePaletteItem
                   gateTag={gateTag}
                   key={gateTag}
+                  disabled={props.mode == "eraser"}
                   onDragStart={() => props.onDragStart(gateTag)}
                   onDragEnd={props.onDragEnd}
                 >
@@ -116,6 +118,7 @@ export default (props: QuantumGatePaletteProps) => {
                 <QuantumGatePaletteItem
                   gateTag={gateTag}
                   key={gateTag}
+                  disabled={props.mode == "eraser"}
                   onDragStart={() => props.onDragStart(gateTag)}
                   onDragEnd={props.onDragEnd}
                 >
@@ -130,6 +133,7 @@ export default (props: QuantumGatePaletteProps) => {
                 <QuantumGatePaletteItem
                   gateTag={gateTag}
                   key={gateTag}
+                  disabled={props.mode == "eraser"}
                   onDragStart={() => props.onDragStart(gateTag)}
                   onDragEnd={props.onDragEnd}
                 >

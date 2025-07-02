@@ -32,6 +32,7 @@ export interface Props {
   focused: boolean;
   isDragging: boolean;
   previewControl: PreviewControl | null;
+  onClickGateElement: (qubitIndex: number, timestep: number) => void;
   onClickControlQubit: (qubitIndex: number, timestep: number) => void;
   onClickControlledGate: (qubitIndex: number, timestep: number) => void;
   onDragStart: () => void;
@@ -42,6 +43,9 @@ export default (props: Props) => {
   const ref = useRef<HTMLDivElement>(null);
   const { element } = props;
 
+  const handleGateElementClick = () => {
+
+  }
   return (
     <div
       ref={ref}
@@ -76,6 +80,7 @@ export default (props: Props) => {
                   qubitIndex={props.qubitIndex}
                   timestep={props.timestep}
                   previewDirections={props.previewControl?.directions}
+                  onClick={() => props.onClickGateElement(props.qubitIndex, props.timestep)}
                   onDragStart={props.onDragStart}
                   onDragEnd={props.onDragEnd}
                   resetControlGate={
