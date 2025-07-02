@@ -1,8 +1,0 @@
-{
-  "name": "oqtopus-composer",
-  "version": "v0.1.0",
-  "dependencies": {
-    "oqtopus-simulator": "workspace:*",
-    "react-dnd": "^16.0.1"
-  }
-}

@@ -1,2 +1,0 @@
-export const DEFAULT_GATE_ITEMS_ROW_LENGTH = 1;
-export const MAX_GATE_ITEMS_ROW_LENGTH = 5;
