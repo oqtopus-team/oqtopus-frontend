@@ -85,3 +85,20 @@ export const compareGate = (lhs: QuantumGate, rhs: QuantumGate): boolean => {
       return lhs._tag === rhs._tag;
   }
 }
+
+export const gateName =(g: QuantumGate): string => {
+  switch(g._tag) {
+    case "ccnot": return "Toffoli Gate";
+    case "cnot": return "Controlled Not Gate";
+    case "h": return "Hadamard Gate";
+    case "rx": return "RX Gate";
+    case "ry": return "RY Gate";
+    case "rz": return "RZ Gate";
+    case "s": return "S Gate";
+    case "t": return "T Gate";
+    case "x": return "X Gate";
+    case "y": return "Y Gate";
+    case "z": return "Z Gate";
+    case "barrier": return "Barrier" 
+  }
+}

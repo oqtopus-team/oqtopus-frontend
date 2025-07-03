@@ -9,8 +9,11 @@ export default {
     sampling: "サンプリング",
     estimation: "期待値推定"
   },
-
-    control_panel: {
+  gate_viewer: {
+    title: "ゲートビューア",
+    update: "更新",
+  },
+  control_panel: {
     exec: {
       tab_label: "実行",
       job_name: "ジョブ名",
@@ -27,4 +30,5 @@ export default {
     settings: {
       tab_label: "設定",
     }
-  }};
+  }
+};

@@ -10,6 +10,8 @@ interface Props {
   timestep: number;
   gate: QuantumGate | DummyGate;
   isDragging: boolean;
+  static?: boolean;
+  active: boolean;
   previewDirections?: ("up" | "down")[];
   onClick: () => void;
   onDragStart?: () => void;
@@ -22,6 +24,7 @@ interface ControlledGateProps {
   wireDirections: ControlWireDirection[];
   previewWire: boolean;
   resetControlGate?: () => void;
+  onClick?: () => void;
 }
 
 const ControlledGate = (props: ControlledGateProps) => {
@@ -31,6 +34,7 @@ const ControlledGate = (props: ControlledGateProps) => {
         ['relative', 'w-full', 'h-full']
       ])}
       onClick={() => {
+        props.onClick?.();
         props.resetControlGate?.();
       }}
     >
@@ -139,9 +143,11 @@ export default function QuantumGateElement(props: Props) {
         ["w-10", "h-10"],
         ["text-primary-content"],
         ["transition-all", "duration-300"],
-        [props.isDragging ? "cursor-grabbing" : "cursor-pointer"
-        ],
+        props.static === true
+          ? []
+          : [props.isDragging ? "cursor-grabbing" : "cursor-pointer"],
         [props.isDragging ? "opacity-50" : "opacity-100"],
+        props.active ? ["shadow-md", "ring-4", "ring-primary", "ring-opacity-50"] : []
       ])}
     >
       {
@@ -184,6 +190,7 @@ export default function QuantumGateElement(props: Props) {
                     ["flex", "flex", "items-center", "justify-center"],
                     ["bg-gate-parametrized"],
                   ])}
+                  onClick={props.onClick}
                 >
                   <span
                     className={clsx([
@@ -217,6 +224,7 @@ export default function QuantumGateElement(props: Props) {
                   wireDirections={cnotWireDirections}
                   previewWire={props.previewDirections !== undefined}
                   label="+"
+                  onClick={props.onClick}
                   resetControlGate={props.resetControlGate}
                 />
               );

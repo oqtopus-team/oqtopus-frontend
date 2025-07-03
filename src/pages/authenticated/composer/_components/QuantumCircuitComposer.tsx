@@ -68,6 +68,7 @@ export default (props: QuantumCircuitComposerProps) => {
       <QuantumCircuitCanvas
         circuit={props.circuit}
         mode={mode}
+        toggleMode={toggleMode}
         onCircuitUpdate={props.onCircuitUpdate}
         draggingFromPalette={grabbingGate !== null}
       />

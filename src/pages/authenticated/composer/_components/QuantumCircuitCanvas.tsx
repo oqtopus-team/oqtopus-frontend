@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { QuantumGate, Down, Up, GateS, ControlWireDirection, compareGate, GateCNOT } from "../gates";
+import { QuantumGate, Down, Up, GateS, ControlWireDirection, compareGate, GateCNOT, gateName } from "../gates";
 import { QuantumCircuit } from "../circuit";
 import { DragGateItem, dragGateItemToQuantumGate, DragMoveGateItem, ItemTypeGate, ItemTypeMoveGate } from "../dnd";
 import clsx from "clsx";
@@ -7,6 +7,10 @@ import QuantumCircuitGateCell, { ControlQubit, ControlWire, EmptyCell, Gate, Pre
 import QuantumCircuitDropCell, { DropCellPart } from "./QuantumCircuitDropCell";
 import { DummyGate, ExtendedGate, Mode } from "../composer";
 import { t } from "i18next";
+import QuantumGateElement from "./QuantumGateElement";
+import { Slider } from "@mui/material";
+import { Input } from "@/pages/_components/Input";
+import { Button } from "@/pages/_components/Button";
 
 type FoldCircuitState = {
   composed: (QuantumGate | undefined)[][];
@@ -203,6 +207,7 @@ const handleControlQubitClick = (
     if (!controlQubit) {
       throw new Error("Impossible!");
     }
+    // TODO CNOT自体ではなく、CNOTの制御ビットをクリックすることで制御ビット操作モードに入れるようにしたい。
   }
 
 const handleDragControlQubit = (
@@ -234,7 +239,7 @@ const handleDragControlQubit = (
                 .includes(holdingControlQubit.targetQubitIndex);
             }
             return g !== undefined
-              && g._tag !== "$dummy" 
+              && g._tag !== "$dummy"
               && false == compareExtendedGate(g, targetGate)
           })
           .length > 0
@@ -360,6 +365,7 @@ const handleDragIn = (
 interface Props {
   circuit: QuantumCircuit;
   mode: Mode;
+  toggleMode: (m: Mode) => () => void;
   onCircuitUpdate: (newCircuit: QuantumCircuit) => void;
   draggingFromPalette: boolean;
 }
@@ -472,6 +478,70 @@ type DraggingFromCanvasState =
   | { isDragging: true, sourceQubitIndex: number, sourceTimestep: number }
   ;
 
+type GateViewer =
+  | false
+  | { gate: QuantumGate, timestep: number, values: any[] }
+
+type GateViewerEventType =
+  | { readonly _tag: "ParametrizedGateParamChange", params: Array<number> }
+  ;
+const handleGateViewer = (
+  ev: GateViewerEventType,
+  gateViewerState: GateViewer,
+  setGateViewerState: (gv: GateViewer) => void
+) => {
+  if (gateViewerState === false) {
+    return;
+  }
+  const gate = gateViewerState.gate;
+  switch (ev._tag) {
+    case "ParametrizedGateParamChange":
+      switch (gate._tag) {
+        case "rx":
+        case "ry":
+        case "rz":
+          return setGateViewerState({
+            ...gateViewerState,
+            values: [ev.params[0]]
+          });
+        default:
+          return;
+      }
+  }
+}
+
+const handleGateVierwerUpdate = (
+  composedProgram: ComposedProgram,
+  handleComposedProgramUpdated: (c: ComposedProgram) => void,
+  gateViewerState: GateViewer,
+  setGateViewerState: (gs: GateViewer) => void
+) => {
+  if (gateViewerState === false) {
+    return;
+  }
+
+  const newComposed: ComposedProgram = (() => {
+    switch (gateViewerState.gate._tag) {
+      case "rx":
+      case "ry":
+      case "rz":
+
+        return composedProgram.map((w, qIndex) =>
+          qIndex !== gateViewerState.gate.target
+            ? w
+            : w.map((g, tIndex) =>
+              gateViewerState.timestep !== tIndex
+                ? g
+                : { ...gateViewerState.gate, arg: gateViewerState.values[0] * Math.PI }
+            )
+        );
+      default:
+        return [...composedProgram];
+    }
+  })();
+
+  handleComposedProgramUpdated(newComposed);
+}
 export default (props: Props) => {
   const [qubitNumber, setQubitNumber] = useState(props.circuit.qubitNumber);
   const [circuitDepth, setCircuitDepth] = useState(0);
@@ -479,6 +549,8 @@ export default (props: Props) => {
   const [holdingControlQuit, setHoldingControlQubit] = useState<HoldingControlQubit>(false)
   const [holdingGate, setHoldingGate] = useState<HoldingGate>(false);
   const [draggingFromCanvas, setDraggingFromCanvas] = useState<DraggingFromCanvasState>({ isDragging: false });
+
+  const [gateViewer, setGateViewer] = useState<GateViewer>(false);
 
   useEffect(() => {
     const composed = foldCircuit(props.circuit);
@@ -504,11 +576,22 @@ export default (props: Props) => {
             ...originralGate,
             control: originralGate.target
           }
-          handleComposedProgramUpdated(composedProgram)
+          handleComposedProgramUpdated(composedProgram, qubitNumber.valueOf())
           break;
       }
     }
   }, [draggingFromCanvas])
+
+  useEffect(() => {
+    if (holdingControlQuit === false) {
+      props.toggleMode("normal")();
+    }
+    else {
+      if (props.mode !== "control") {
+        props.toggleMode("control")();
+      }
+    }
+  }, [holdingControlQuit]);
 
   const mkCellElement = (qIndex: number, gatesAtTimestep: (undefined | ExtendedGate)[]) => {
     const gate = gatesAtTimestep[qIndex];
@@ -531,7 +614,7 @@ export default (props: Props) => {
     return EmptyCell;
   };
 
-  const handleComposedProgramUpdated = (composed: ComposedProgram) => {
+  const handleComposedProgramUpdated = (composed: ComposedProgram, qubitNumber: number) => {
     let dropsCnt = 0;
     for (let i = calcMaxDepth(composed) - 1; i >= 0; i--) {
       if (composed.map(w => w[i]).every(g => g === undefined)) {
@@ -543,7 +626,7 @@ export default (props: Props) => {
       ? [...composed]
       : composed.map(w => w.slice(0, (-1) * dropsCnt));
     const newCircuitDepth = calcMaxDepth(newComposed);
-    const newCircuit = reconstructCircuit(newComposed, qubitNumber.valueOf(), newCircuitDepth);
+    const newCircuit = reconstructCircuit(newComposed, qubitNumber, newCircuitDepth);
     props.onCircuitUpdate(newCircuit);
   }
 
@@ -551,14 +634,21 @@ export default (props: Props) => {
     (() => {
       switch (item.type) {
         case ItemTypeGate:
-          return handleDropNewGate(qubitIndex, timestep, item, composedProgram, handleComposedProgramUpdated, setHoldingControlQubit);
+          return handleDropNewGate(
+            qubitIndex,
+            timestep,
+            item,
+            composedProgram,
+            (c) => handleComposedProgramUpdated(c, qubitNumber.valueOf()),
+            setHoldingControlQubit
+          );
         case ItemTypeMoveGate:
           return handleMoveGate(
             qubitIndex,
             timestep,
             item,
             composedProgram,
-            handleComposedProgramUpdated,
+            (c) => handleComposedProgramUpdated(c, qubitNumber.valueOf()),
             setHoldingControlQubit,
             draggingFromCanvas,
             setDraggingFromCanvas
@@ -577,6 +667,7 @@ export default (props: Props) => {
     if (holdingControlQubit === false) {
       throw new Error("Impossible!");
     }
+    if (holdingControlQubit.timestep !== cqTimestep) return;
     const controlledGate = composed[holdingControlQubit.targetQubitIndex][holdingControlQubit.timestep];
     if (!controlledGate) {
       throw new Error("Impossible!")
@@ -610,7 +701,7 @@ export default (props: Props) => {
         // ){...w, [cqTimestep]: newItem(i) }
         : [...w.slice(0, cqTimestep), newItem(i), ...w.slice(cqTimestep + 1)]
     });
-    handleComposedProgramUpdated(newComposed);
+    handleComposedProgramUpdated(newComposed, qubitNumber.valueOf());
     const controlQubitRest = holdingControlQubit.rest;
     if (controlQubitRest == 1) {
       setHoldingControlQubit(false);
@@ -637,8 +728,30 @@ export default (props: Props) => {
         i === qIndex
           ? [...w.slice(0, tIndex), undefined, ...w.slice(tIndex + 1)]
           : w
-      ))
+      ), qubitNumber.valueOf())
     }
+    else if (props.mode == "control") {
+      return;
+    }
+    else {
+      const clickedGate = composedProgram[qIndex][tIndex];
+      if (!clickedGate || clickedGate._tag == "$dummy") return;
+      switch (clickedGate._tag) {
+        case "rx":
+        case "ry":
+        case "rz":
+          setGateViewer({
+            gate: clickedGate,
+            timestep: tIndex,
+            values: [clickedGate.arg / Math.PI]
+          })
+          return;
+        default:
+          setGateViewer(false);
+          return;
+      }
+    }
+
   }
 
   const handleControlledGateClick = (qIndex: number, tIndex: number) => {
@@ -648,21 +761,23 @@ export default (props: Props) => {
         const [cnotFrom, cnotTo] = [gate.control, gate.target].sort();
 
         composedProgram.forEach((w, i) => {
-          w[tIndex] = i == qIndex 
+          w[tIndex] = i == qIndex
             ? (props.mode == "eraser" ? undefined : { ...gate, control: qIndex })
-            : [...new Array (cnotTo - cnotFrom + 1)].map((_, j) => j).includes(i)
-                ? undefined
-                : w[tIndex];
+            : [...new Array(cnotTo - cnotFrom + 1)].map((_, j) => j).includes(i)
+              ? undefined
+              : w[tIndex];
         });
-        handleComposedProgramUpdated(composedProgram);
+        handleComposedProgramUpdated(composedProgram, qubitNumber.valueOf());
         setHoldingControlQubit({ targetQubitIndex: qIndex, hovered: qIndex, timestep: tIndex, rest: 1 });
+        props.toggleMode("control")();
         break;
       case "ccnot":
         composedProgram.forEach((w, i) => {
           w[tIndex] = i == qIndex ? { ...gate, control1: qIndex, control2: qIndex } : undefined;
         });
-        handleComposedProgramUpdated(composedProgram);
+        handleComposedProgramUpdated(composedProgram, qubitNumber.valueOf());
         setHoldingControlQubit({ targetQubitIndex: qIndex, hovered: qIndex, timestep: tIndex, rest: 2 });
+        props.toggleMode("control")();
         break;
       default:
         return;
@@ -671,62 +786,83 @@ export default (props: Props) => {
       handleComposedProgramUpdated((() => {
         composedProgram[qIndex][tIndex] = undefined;
         return composedProgram;
-      })());
+      })(), qubitNumber.valueOf());
       setHoldingControlQubit(false);
     }
   };
 
+  const handleQubitClick = (qIndex: number) => {
+    const wire = composedProgram[qIndex];
+    if (props.mode === "eraser") {
+      if (wire.every(g => g === undefined || g._tag === "$dummy")) {
+        handleComposedProgramUpdated([
+          ...composedProgram.slice(0, qIndex),
+          ...composedProgram.slice(qIndex + 1)
+        ], composedProgram.length - 1);
+      }
+    }
+  }
+
+
   return (
     <div
       className={clsx([
-        ["relative", "w-full", "min-h-64", "my-5"],
-        ["overflow-auto"],
-        ["border", "border-neutral-content", "rounded-sm"]
+        ["flex"],
+        [gateViewer === false ? "gap-0" : "gap-3"]
       ])}
     >
       <div
         className={clsx([
-          ['flex']
+          ["relative", "min-h-64", "my-5"],
+          ["transition-all"],
+          gateViewer === false ? ['w-full'] : ['w-[calc(60%-24px)]'],
+          ["overflow-auto"],
+          ["border", "border-neutral-content", "rounded-sm"]
         ])}
       >
         <div
           className={clsx([
-            ['py-5', 'pl-2'],
+            ['flex']
           ])}
         >
-          {[...new Array(qubitNumber)].map((_, qIndex) => {
-            return (
-              <div
-                className={clsx([
-                  ['h-[64px]', 'w-8'],
-                  ['flex', 'justify-center', 'items-center']
-                ])}
-                key={qIndex}
-              >
-                <span>q{qIndex}</span>
-              </div>
-            )
-          })
-          }
           <div
             className={clsx([
-              ['h-8', 'w-8'],
-              ['flex', 'justify-center', 'items-center'],
-              ['rounded-full', 'bg-neutral-content', 'text-primary-content'],
-              ['hover:bg-primary'],
-              ['cursor-pointer']
+              ['py-5', 'pl-2'],
             ])}
-            onClick={handleAddQubitButton}
           >
-            <span>+</span>
+            {[...new Array(qubitNumber)].map((_, qIndex) => {
+              return (
+                <div
+                  className={clsx([
+                    ['h-[64px]', 'w-8'],
+                    ['flex', 'justify-center', 'items-center']
+                  ])}
+                  key={qIndex}
+                  onClick={() => handleQubitClick(qIndex)}
+                >
+                  <span>q{qIndex}</span>
+                </div>
+              )
+            })
+            }
+            <div
+              className={clsx([
+                ['h-8', 'w-8'],
+                ['flex', 'justify-center', 'items-center'],
+                ['rounded-full', 'bg-neutral-content', 'text-primary-content'],
+                ['hover:bg-primary'],
+                ['cursor-pointer']
+              ])}
+              onClick={handleAddQubitButton}
+            >
+              <span>+</span>
+            </div>
           </div>
-        </div>
-        <div
-          className={clsx([
-            ['relative', 'h-full', 'w-full']
-          ])}
-        >
-
+          <div
+            className={clsx([
+              ['relative', 'h-full', 'w-full']
+            ])}
+          >
             <div
               style={{
                 gridTemplateRows: `repeat(${qubitNumber}, 64px)`,
@@ -768,6 +904,7 @@ export default (props: Props) => {
                             isDragging={draggingFromCanvas.isDragging && draggingFromCanvas.sourceQubitIndex === qIndex && draggingFromCanvas.sourceTimestep === tIndex}
                             // isDragging={false}
                             previewControl={(() => {
+                              // FIXME Avoid inlining long process. Split to function.
                               if (holdingControlQuit === false || holdingControlQuit.timestep !== tIndex) return null;
                               if (holdingControlQuit.targetQubitIndex === qIndex) {
                                 return {
@@ -795,6 +932,15 @@ export default (props: Props) => {
                               holdingGate !== false
                               && qIndex == holdingGate.dropQubitIndex
                               && tIndex == holdingGate.dropTimestep
+                            }
+                            active={
+                              (gateViewer !== false
+                                && gateViewer.gate.target == qIndex
+                                && gateViewer.timestep == tIndex)
+                              || (holdingControlQuit !== false
+                                && holdingControlQuit.targetQubitIndex == qIndex
+                                && holdingControlQuit.timestep == tIndex
+                              )
                             }
                             onClickGateElement={handleGateElementClick}
                             onClickControlQubit={handleControlQubitClick(holdingControlQuit, composedProgram, setHoldingControlQubit)}
@@ -916,15 +1062,143 @@ export default (props: Props) => {
                 : null
               }
             </div>
+          </div>
         </div>
-      </div>
-      <div>
-        {/* {draggingFromCanvas.isDragging ? `{ isDragging: true, sourceQubitIndex: ${draggingFromCanvas.sourceQubitIndex}, sourceTimestep: ${draggingFromCanvas.sourceTimestep}` : "{ isDragging: false }"} */}
         <div>
-          {/* {holdingGate ? `{ dropTimestep: ${holdingGate.dropTimestep}, dropQubitIndex ${holdingGate.dropQubitIndex}}` : "false"} */}
+          {/* {draggingFromCanvas.isDragging ? `{ isDragging: true, sourceQubitIndex: ${draggingFromCanvas.sourceQubitIndex}, sourceTimestep: ${draggingFromCanvas.sourceTimestep}` : "{ isDragging: false }"} */}
+          <div>
+            {/* {holdingGate ? `{ dropTimestep: ${holdingGate.dropTimestep}, dropQubitIndex ${holdingGate.dropQubitIndex}}` : "false"} */}
+          </div>
         </div>
+        {/* {holdingControlQuit ? `{ hovered: ${holdingControlQuit.hovered}, timestep: ${holdingControlQuit.timestep}, rest: ${holdingControlQuit.rest}, targetQubit: ${holdingControlQuit.targetQubitIndex}}` : "false"} */}
       </div>
-      {/* {holdingControlQuit ? `{ hovered: ${holdingControlQuit.hovered}, timestep: ${holdingControlQuit.timestep}, rest: ${holdingControlQuit.rest}, targetQubit: ${holdingControlQuit.targetQubitIndex}}` : "false"} */}
+
+      {/* Gate Viewer */}
+      <div
+        className={clsx([
+          gateViewer !== false ? ['w-[40%]'] : ['w-0', 'border-0'],
+          ["relative", "min-h-64", "my-5", "p-3"],
+          ["transition-all"],
+          ["overflow-auto", "rounded"],
+          ["border", "border-neutral-content", "rounded-sm"]
+        ])}
+      >
+        {gateViewer !== false
+          ? (
+            <div className="p-2 flex flex-col gap-5 h-full">
+              <div className="w-full flex justify-center">
+                <h1
+                  className={clsx([
+                    ["text-primary", "font-bold", "text-xl"],
+                    ["mb-3"]
+                  ])}
+                >
+                  {t("composer.gate_viewer.title")}
+                </h1>
+
+                <div
+                  className="ml-auto cursor-pointer rounded-full "
+                  onClick={() => setGateViewer(false)}
+                >
+                  <img
+                    src="/img/common/sidebar_arrow.svg"
+                    alt=""
+                    width="25"
+                    height="25"
+                  />
+                </div>
+              </div>
+              <div className="w-full">
+
+                <div className="grid grid-cols-8">
+                  <span className="col-span-2">
+                    <QuantumGateElement
+                      gate={gateViewer.gate}
+                      qubitIndex={0}
+                      timestep={0}
+                      active={false}
+                      static
+                      isDragging={false}
+                      onClick={() => { }}
+                    />
+                  </span>
+                  <div className="col-span-6">
+                    <h2 className="font-bold text-base-content">
+                      {gateName(gateViewer.gate)}
+                    </h2>
+                  </div>
+                </div>
+
+                {(() => {
+                  switch (gateViewer.gate._tag) {
+                    case "rx":
+                    case "ry":
+                    case "rz":
+                      return (
+                        <div className="w-full mt-5">
+                          <div className="grid grid-cols-12 gap-3 items-center justify-center">
+                            <div className="sm:col-span-2 col-span-12">
+                              Arg / π
+                            </div>
+                            <div className="sm:col-span-7 col-span-12 p-3">
+                              <Slider
+                                key="param-slider1"
+                                aria-label="θ"
+                                onChange={(ev, val) => handleGateViewer(
+                                  { _tag: "ParametrizedGateParamChange", params: [val] },
+                                  gateViewer,
+                                  setGateViewer
+                                )}
+                                value={Number(gateViewer.values[0])}
+                                min={0}
+                                max={2}
+                                step={0.001}
+                              />
+                            </div>
+                            <div className="sm:col-span-3 col-span-12 flex items-center">
+                              <Input
+                                type="number"
+                                max={2}
+                                min={0}
+                                step={0.00001}
+                                value={gateViewer.values[0]}
+                                onChange={(ev) => {
+                                  const value = Number(ev.target.value);
+                                  if (isNaN(value)) return;
+                                  handleGateViewer({
+                                    _tag: "ParametrizedGateParamChange",
+                                    params: [value]
+                                  }, gateViewer, setGateViewer)
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    default:
+                      return null;
+                  }
+                })()}
+              </div>
+
+              <div className="w-full mt-auto">
+                <Button
+                  onClick={() => handleGateVierwerUpdate(
+                    composedProgram,
+                    (c) => handleComposedProgramUpdated(c, qubitNumber.valueOf()),
+                    gateViewer,
+                    setGateViewer,
+                  )}
+                  color="secondary"
+                >
+                  {t('composer.gate_viewer.update')}
+                </Button>
+              </div>
+            </div>
+          )
+          : null
+        }
+      </div>
     </div>
   );
 }

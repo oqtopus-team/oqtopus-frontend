@@ -30,6 +30,7 @@ export interface Props {
   timestep: number;
   element: GateCellElement;
   focused: boolean;
+  active: boolean;
   isDragging: boolean;
   previewControl: PreviewControl | null;
   onClickGateElement: (qubitIndex: number, timestep: number) => void;
@@ -43,15 +44,12 @@ export default (props: Props) => {
   const ref = useRef<HTMLDivElement>(null);
   const { element } = props;
 
-  const handleGateElementClick = () => {
-
-  }
   return (
     <div
       ref={ref}
       className={clsx([
-        "w-full", "h-full", "flex", "items-center", "justify-center", "relative",
-        "relative"
+        ["w-full", "h-full", "flex", "items-center", "justify-center"],
+        [ "relative"],
       ])}
     >
       {(() => {
@@ -77,6 +75,7 @@ export default (props: Props) => {
                 <QuantumGateElement
                   isDragging={props.isDragging}
                   gate={element.gate}
+                  active={props.active}
                   qubitIndex={props.qubitIndex}
                   timestep={props.timestep}
                   previewDirections={props.previewControl?.directions}

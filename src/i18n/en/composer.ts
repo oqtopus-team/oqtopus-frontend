@@ -9,6 +9,10 @@ export default {
     sampling: "Sampling",
     estimation: "Estimation"
   },
+  gate_viewer: {
+    title: "Gate Viewer",
+    update: "Update",
+  },
   control_panel: {
     exec: {
       tab_label: "Execution" ,
