@@ -9,6 +9,10 @@ export default {
     sampling: "Sampling",
     estimation: "Estimation"
   },
+  observable: {
+    title: "Observable"
+  },
+
   gate_viewer: {
     title: "Gate Viewer",
     update: "Update",

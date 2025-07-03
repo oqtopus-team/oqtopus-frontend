@@ -9,6 +9,9 @@ export default {
     sampling: "サンプリング",
     estimation: "期待値推定"
   },
+  observable: {
+    title: "可観測量"
+  },
   gate_viewer: {
     title: "ゲートビューア",
     update: "更新",

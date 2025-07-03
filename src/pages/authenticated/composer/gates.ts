@@ -1,5 +1,6 @@
 export type Complex = [number, number];
 
+export type GateI = { readonly _tag: "i"; target: number };
 export type GateX = { readonly _tag: "x"; target: number };
 export type GateY = { readonly _tag: "y"; target: number };
 export type GateZ = { readonly _tag: "z"; target: number };
@@ -14,6 +15,7 @@ export type GateCCNOT = { readonly _tag: "ccnot"; target: number; control1: numb
 export type OpBarrier = { readonly _tag: "barrier"; target: number };
 
 export type QuantumGate =
+  | GateI
   | GateX
   | GateY
   | GateZ
@@ -27,6 +29,7 @@ export type QuantumGate =
   | GateCCNOT
   | OpBarrier;
 
+export const GateI = (target: number): GateI => ({ _tag: "i", target });
 export const GateX = (target: number): GateX => ({ _tag: "x", target });
 export const GateY = (target: number): GateY => ({ _tag: "y", target });
 export const GateZ = (target: number): GateZ => ({ _tag: "z", target });
@@ -45,6 +48,7 @@ export const labelOfGate = (gate: QuantumGate): string => {
     case "barrier": return "Barrier";
     case "ccnot": return "CCNot";
     case "cnot": return "CNot";
+    case "i": return "i";
     case "h": return "H";
     case "rx": return "RX";
     case "ry": return "RY";
@@ -90,6 +94,7 @@ export const gateName =(g: QuantumGate): string => {
   switch(g._tag) {
     case "ccnot": return "Toffoli Gate";
     case "cnot": return "Controlled Not Gate";
+    case "i": return "Identity Gate";
     case "h": return "Hadamard Gate";
     case "rx": return "RX Gate";
     case "ry": return "RY Gate";

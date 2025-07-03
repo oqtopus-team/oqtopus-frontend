@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 
 export interface ToolPaletteProps {
   jobType: JobTypeType;
+  handleChange: (jt: JobTypeType) => void;
 }
 
 export default (props: ToolPaletteProps) => {
@@ -25,6 +26,9 @@ export default (props: ToolPaletteProps) => {
       <Select
         labelLeft={t("composer.tool_palette.job_type")}
         defaultValue={"sampling"}
+        onChange={(ev: React.ChangeEvent<HTMLSelectElement>) => {
+          props.handleChange(ev.target.value as unknown as JobTypeType);
+        }}
       >
         {jobTypeOptions.map((opt) => (
           <option 

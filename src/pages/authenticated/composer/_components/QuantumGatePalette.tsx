@@ -86,6 +86,7 @@ export default (props: QuantumGatePaletteProps) => {
             case "h":
             case "t":
             case "s":
+            case "i":
               return (
                 <QuantumGatePaletteItem
                   gateTag={gateTag}

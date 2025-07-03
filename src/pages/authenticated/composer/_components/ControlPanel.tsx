@@ -1,4 +1,4 @@
-import { JobsSubmitJobInfo, JobsSubmitJobRequest } from "@/api/generated";
+import { JobsOperatorItem, JobsSubmitJobInfo, JobsSubmitJobRequest } from "@/api/generated";
 import { Device } from "@/domain/types/Device";
 import { JobTypeType } from "@/domain/types/Job";
 import { Accordion } from "@/pages/_components/Accordion";
@@ -99,6 +99,7 @@ export interface ControlPanelProps {
   devices: Device[];
   busy: boolean;
   mkProgram: () => string;
+  mkOperator: () => JobsOperatorItem[];
   onSubmit: (req: JobsSubmitJobRequest) => Promise<void>;
 }
 
@@ -123,6 +124,7 @@ export default (props: ControlPanelProps) => {
                   jobType={props.jobType}
                   busy={props.busy}
                   mkProgram={props.mkProgram} 
+                  mkOperator={props.mkOperator}
                   devices={props.devices}
                   onSubmit={props.onSubmit}
                   key="control-panel-exec"
@@ -151,6 +153,7 @@ interface ControlPanelExecutionProps {
   jobType: JobTypeType;
   busy: boolean;
   mkProgram: () => string;
+  mkOperator: () => JobsOperatorItem[];
   onSubmit: (req: JobsSubmitJobRequest) => Promise<void>;
 }
 
@@ -173,10 +176,19 @@ export const ControlPanelExecution = (props: ControlPanelExecutionProps) => {
   })
 
   const handleClickSubmit = async (form: ExecutionFormInput) => {
+    debugger
     const mkJobInfo = (): JobsSubmitJobInfo => {
-      return {
-        program: [ props.mkProgram() ],
-      };
+      switch (props.jobType) {
+        case "sampling":
+          return {
+            program: [ props.mkProgram() ],
+          };
+        case "estimation":
+          return {
+            program: [ props.mkProgram() ],
+            operator: props.mkOperator(),
+          }
+      }
     };
 
     const req: JobsSubmitJobRequest = {

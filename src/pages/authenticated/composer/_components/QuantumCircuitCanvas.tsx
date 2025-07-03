@@ -368,6 +368,7 @@ interface Props {
   toggleMode: (m: Mode) => () => void;
   onCircuitUpdate: (newCircuit: QuantumCircuit) => void;
   draggingFromPalette: boolean;
+  fixedQubitNumber: boolean;
 }
 
 type ComposedProgram = (undefined | ExtendedGate)[][];
@@ -845,18 +846,22 @@ export default (props: Props) => {
               )
             })
             }
-            <div
-              className={clsx([
-                ['h-8', 'w-8'],
-                ['flex', 'justify-center', 'items-center'],
-                ['rounded-full', 'bg-neutral-content', 'text-primary-content'],
-                ['hover:bg-primary'],
-                ['cursor-pointer']
-              ])}
-              onClick={handleAddQubitButton}
-            >
-              <span>+</span>
-            </div>
+            {
+              props.fixedQubitNumber === false
+                ? <div
+                  className={clsx([
+                    ['h-8', 'w-8'],
+                    ['flex', 'justify-center', 'items-center'],
+                    ['rounded-full', 'bg-neutral-content', 'text-primary-content'],
+                    ['hover:bg-primary'],
+                    ['cursor-pointer']
+                  ])}
+                  onClick={handleAddQubitButton}
+                >
+                  <span>+</span>
+                </div>
+                : null
+            }
           </div>
           <div
             className={clsx([

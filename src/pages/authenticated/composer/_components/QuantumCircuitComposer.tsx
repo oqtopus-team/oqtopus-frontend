@@ -29,6 +29,7 @@ const allGates: QuantumGate["_tag"][] =
 export interface QuantumCircuitComposerProps {
   circuit: QuantumCircuit;
   onCircuitUpdate: (c: QuantumCircuit) => void;
+  fixedQubitNumber?: boolean;
 }
 export default (props: QuantumCircuitComposerProps) => {
 
@@ -71,6 +72,7 @@ export default (props: QuantumCircuitComposerProps) => {
         toggleMode={toggleMode}
         onCircuitUpdate={props.onCircuitUpdate}
         draggingFromPalette={grabbingGate !== null}
+        fixedQubitNumber={props.fixedQubitNumber || false}
       />
     </DndProvider>
   )

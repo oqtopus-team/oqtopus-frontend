@@ -159,6 +159,7 @@ export default function QuantumGateElement(props: Props) {
             case "h":
             case "s":
             case "t":
+            case "i":
               return (
                 <div
                   className={clsx([
