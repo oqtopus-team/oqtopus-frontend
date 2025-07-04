@@ -51,7 +51,7 @@ export default function LoginPage() {
               // if MFA reset is successful, redirect to confirm code page
               // transfer username and password to the next page
               navigate('/mfa-confirmation-code', {
-                state: { username: data.username, password: data.password },
+                state: { username: data.username, accessToken: message },
               });
             } else {
               // if something goes wrong, alert the user and redirect to login
