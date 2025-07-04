@@ -33,5 +33,23 @@ export default {
     },
     button: 'Send',
   },
-  disclaimer: `Please check <1>the term of use</1> and <3>the private policy</3>, and if you agree, please complete the account registration below.`
+  disclaimer: `Please check <1>the term of use</1> and <3>the private policy</3>, and if you agree, please complete the account registration below.`,
+  auth: {
+    message: {
+      success: {
+        refresh_token: 'API token has been reissued.',
+      },
+      error: {
+        record_overlap: 'The email address you entered is already registered.',
+        signup:
+          'Sign up failed.\nPre-registration is required for sign up.\nIf you have not registered yet, please contact the administrator.',
+        authorize: 'Authorization failed.',
+        setup_totp: 'Failed to set up TOTP.',
+        send_code: 'Failed to send the confirmation code required for MFA reset.',
+        verify_code: 'Failed to verify the confirmation code.',
+        refresh_token: 'Failed to refresh API token.',
+        unexpected: 'An unexpected error occurred.',
+      },
+    },
+  },
 };

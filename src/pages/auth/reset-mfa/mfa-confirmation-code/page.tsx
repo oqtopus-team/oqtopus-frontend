@@ -9,6 +9,7 @@ import { Input } from '@/pages/_components/Input';
 import { useFormProcessor } from '@/pages/_hooks/form';
 import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
+import { useEffect } from 'react';
 
 interface FormInput {
   verificationCode: string;
@@ -22,25 +23,31 @@ const validationRules = (t: (key: string) => string): yup.ObjectSchema<FormInput
 export default function ConfirmResetMFAPage() {
   const { t } = useTranslation();
   const location = useLocation();
-  const { username, password } = location.state || {};
+  const { username, accessToken } = location.state || {};
   const navigate = useNavigate();
-  if (!username || !password) {
-    alert(t('signup.confirm.form.unexpected_error'));
-    navigate('/login');
+  useEffect(() => {
+    if (!username || !accessToken) {
+      alert(t('mfa.form.error_message.unexpected'));
+      navigate('/login', { replace: true });
+    }
+  }, [username, accessToken, t, navigate]);
+
+  if (!username || !accessToken) {
     return null;
   }
-  useDocumentTitle(t('signup.confirm.title'));
+
+  useDocumentTitle(t('mfa.confirm.title'));
   const auth = useAuth();
   const { processing, register, onSubmit, errors } = useFormProcessor(
     validationRules(t),
     ({ setProcessingFalse }) => {
       return (data) => {
         auth
-          .confirmMfaReset(username, password, data.verificationCode)
+          .confirmMfaReset(accessToken, data.verificationCode)
           .then((result) => {
             if (result.success) {
               navigate('/mfa-re-registration', {
-                state: { username: username, password: password, secret: result.message },
+                state: { username: username, accessToken: accessToken, secret: result.message },
               });
               return;
             }
@@ -56,7 +63,7 @@ export default function ConfirmResetMFAPage() {
 
   return (
     <div className={clsx('w-[300px]', 'pt-8', 'text-sm')}>
-      <FormTitle>{t('signup.confirm.title')}</FormTitle>
+      <FormTitle>{t('mfa.confirm.title')}</FormTitle>
       <Spacer className="h-4" />
       <form noValidate onSubmit={onSubmit}>
         <Input
@@ -64,16 +71,14 @@ export default function ConfirmResetMFAPage() {
           type={'text'}
           placeholder="Enter Verification Code (6 digits)"
           {...register('verificationCode')}
-          label={t('signup.confirm.form.code')}
+          label={t('mfa.confirm.form.code')}
           errorMessage={errors.verificationCode?.message}
         />
         <Spacer className="h-2.5" />
-        <p className={clsx('text-xs', 'leading-[1.8]')}>
-          {t('signup.confirm.form.code_explanation')}
-        </p>
+        <p className={clsx('text-xs', 'leading-[1.8]')}>{t('mfa.confirm.form.code_explanation')}</p>
         <Spacer className="h-3" />
         <Button type="submit" color="secondary" loading={processing}>
-          {t('signup.confirm.button')}
+          {t('mfa.confirm.button')}
         </Button>
       </form>
     </div>

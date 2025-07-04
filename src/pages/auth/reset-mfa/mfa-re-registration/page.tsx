@@ -1,4 +1,4 @@
-import { useState, useLayoutEffect } from 'react';
+import { useState, useLayoutEffect, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import * as yup from 'yup';
 import { useTranslation, Trans } from 'react-i18next';
@@ -18,15 +18,29 @@ interface FormInput {
 
 const validationRules = (t: (key: string) => string): yup.ObjectSchema<FormInput> =>
   yup.object({
-    totpCode: yup.string().required(t('mfa.form.error_message.totp_code')),
+    totpCode: yup.string().required(t('mfa.reset.form.error_message.totp_code')),
   });
 
 export default function SetupMFAPage() {
   const auth = useAuth();
   const location = useLocation();
-  const { username, password, secret } = location.state || {};
+  const { username, accessToken, secret } = location.state || {};
   const navigate = useNavigate();
   const [qrLoading, setQRLoading] = useState(false);
+
+  const { t } = useTranslation();
+  useDocumentTitle(t('mfa.reset.title'));
+
+  useEffect(() => {
+    if (!username || !accessToken) {
+      alert(t('mfa.form.error_message.unexpected'));
+      navigate('/login', { replace: true });
+    }
+  }, [username, accessToken, t, navigate]);
+
+  if (!username || !accessToken) {
+    return null;
+  }
 
   useLayoutEffect(() => {
     if (secret) {
@@ -37,20 +51,15 @@ export default function SetupMFAPage() {
     }
     auth.setQRCodeFromSecret(username, secret);
   }, []);
-  console.log('QR Code:', auth.qrcode);
-  console.log('secret:', secret);
 
-  const { t } = useTranslation();
-  useDocumentTitle(t('mfa.title'));
   const { processing, register, onSubmit, errors } = useFormProcessor(
     validationRules(t),
     ({ setProcessingFalse }) => {
       return (data) => {
         auth
-          .resetMfa(username, password, data.totpCode)
+          .resetMfa(accessToken, data.totpCode)
           .then((result) => {
             if (result.success) {
-              console.log(result);
               navigate('/dashboard');
               return;
             }
@@ -66,7 +75,7 @@ export default function SetupMFAPage() {
 
   return (
     <div className={clsx('w-[300px]', 'pt-8', 'text-sm')}>
-      <FormTitle>{t('mfa.title')}</FormTitle>
+      <FormTitle>{t('mfa.reset.title')}</FormTitle>
       <Spacer className="h-4" />
       <p className={clsx('text-xs', 'leading-[1.8]')}>
         <Trans i18nKey={'mfa.explanation01'} />

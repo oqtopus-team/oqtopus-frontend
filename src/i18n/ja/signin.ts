@@ -1,3 +1,5 @@
+import { log } from 'console';
+
 export default {
   title: 'サインイン',
   explanation:
@@ -22,12 +24,21 @@ export default {
   confirm: {
     title: 'ワンタイムパスワードの入力',
     form: {
-      totp_code: 'ワンタイムパスワード(TOTP Code)',
+      totp_code: 'ワンタイムパスワード (TOTP Code)',
       totp_code_explanation: 'MFAアプリからワンタイムパスワードを入力してください。',
       error_message: {
         code: 'ワンタイムパスワードを入力してください',
       },
     },
     button: '送信する',
+  },
+  auth: {
+    message: {
+      error: {
+        authorize: '認証に失敗しました。',
+        logout: 'ログアウトに失敗しました。',
+        noMFA: 'MFAを設定してください。',
+      },
+    },
   },
 };

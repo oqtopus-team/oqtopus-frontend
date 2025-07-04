@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { createContext, useEffect, useState } from 'react';
 import ENV from '@/env';
 import { CognitoUser, CognitoUserSession } from 'amazon-cognito-identity-js';
@@ -23,8 +24,8 @@ export interface UseAuth {
   confirmMfa: (totpCode: string) => Promise<Result>;
   confirmSignIn: (totpCode: string) => Promise<Result>;
   startMfaReset: (username: string, password: string) => Promise<Result>;
-  confirmMfaReset: (username: string, password: string, code: string) => Promise<Result>;
-  resetMfa: (username: string, password: string, totp_code: string) => Promise<Result>;
+  confirmMfaReset: (access_token: string, code: string) => Promise<Result>;
+  resetMfa: (access_token: string, totp_code: string) => Promise<Result>;
   refreshApiToken: () => Promise<Result>;
 }
 
@@ -48,6 +49,8 @@ const useProvideAuth = (): UseAuth => {
   const [qrcode, setQRCode] = useState('');
   const [resultUser, setResultUser] = useState({});
   const [email, setEmail] = useState('');
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     Auth.currentAuthenticatedUser()
@@ -94,14 +97,14 @@ const useProvideAuth = (): UseAuth => {
       setIsAuthenticated(false);
       setInitialized(true);
       if (!hasChallenge) {
-        return { success: false, message: 'MFAを設定してください。' };
+        return { success: false, message: t('signin.auth.message.error.noMFA') };
       }
       return { success: true, message: '' };
     } catch (error) {
       console.log(error);
       return {
         success: false,
-        message: '認証に失敗しました。',
+        message: t('signin.auth.message.error.authorize'),
       };
     }
   };
@@ -117,7 +120,7 @@ const useProvideAuth = (): UseAuth => {
       console.log(error);
       return {
         success: false,
-        message: 'ログアウトに失敗しました。',
+        message: t('signin.auth.message.error.logout'),
       };
     }
   };
@@ -149,13 +152,12 @@ const useProvideAuth = (): UseAuth => {
       if (error.code === 'UsernameExistsException') {
         return {
           success: false,
-          message: '入力したメールアドレスはすでに登録されています',
+          message: t('signup.auth.message.error.record_overlap'),
         };
       } else {
         return {
           success: false,
-          message:
-            'サインアップに失敗しました。\nサインアップには事前ユーザー登録が必要です。\n登録がお済みでない場合は管理者までお問い合わせください。',
+          message: t('signup.auth.message.error.signup'),
         };
       }
     }
@@ -186,7 +188,7 @@ const useProvideAuth = (): UseAuth => {
     } catch (error) {
       return {
         success: false,
-        message: '認証に失敗しました。',
+        message: t('signup.auth.message.error.authorize'),
       };
     }
   };
@@ -250,7 +252,7 @@ const useProvideAuth = (): UseAuth => {
       console.log(error);
       return {
         success: false,
-        message: 'TOTPの設定に失敗しました。',
+        message: t('signup.auth.message.error.setup_totp'),
       };
     }
   };
@@ -268,7 +270,7 @@ const useProvideAuth = (): UseAuth => {
       console.log(error);
       return {
         success: false,
-        message: 'TOTPの認証に失敗しました。',
+        message: t('signup.auth.message.error.setup_totp'),
       };
     }
   };
@@ -283,7 +285,7 @@ const useProvideAuth = (): UseAuth => {
       console.log(error);
       return {
         success: false,
-        message: 'TOTPの認証に失敗しました。',
+        message: t('signup.auth.message.error.setup_totp'),
       };
     }
   };
@@ -302,25 +304,23 @@ const useProvideAuth = (): UseAuth => {
           password: password,
         }),
       });
+      const resJson = await res.json();
+      const accessToken = resJson.access_token;
       setUsername(username);
       setPassword(password);
       setIsAuthenticated(false);
       setInitialized(true);
-      return { success: true, message: '' };
+      return { success: true, message: accessToken };
     } catch (error) {
       console.log(error);
       return {
         success: false,
-        message: 'MFA再設定に必要な確認コードの送信に失敗しました。',
+        message: t('signup.auth.message.error.send_code'),
       };
     }
   };
 
-  const confirmMfaReset = async (
-    username: string,
-    password: string,
-    code: string
-  ): Promise<Result> => {
+  const confirmMfaReset = async (accessToken: string, code: string): Promise<Result> => {
     try {
       const res = await fetch(`${ENV.API_SIGNUP_ENDPOINT}/mfa_reset/verify_code`, {
         method: 'POST',
@@ -330,8 +330,7 @@ const useProvideAuth = (): UseAuth => {
           Accept: 'application/json',
         },
         body: JSON.stringify({
-          email: username,
-          password: password,
+          access_token: accessToken,
           code: code,
         }),
       });
@@ -342,16 +341,12 @@ const useProvideAuth = (): UseAuth => {
       console.log(error);
       return {
         success: false,
-        message: '確認コードの検証に失敗しました。',
+        message: t('signup.auth.message.error.verify_code'),
       };
     }
   };
 
-  const resetMfa = async (
-    username: string,
-    password: string,
-    totpCode: string
-  ): Promise<Result> => {
+  const resetMfa = async (accessToken: string, totpCode: string): Promise<Result> => {
     try {
       const res = await fetch(`${ENV.API_SIGNUP_ENDPOINT}/mfa_reset/confirm_totp`, {
         method: 'POST',
@@ -361,11 +356,13 @@ const useProvideAuth = (): UseAuth => {
           Accept: 'application/json',
         },
         body: JSON.stringify({
-          email: username,
-          password: password,
+          access_token: accessToken,
           totp_code: totpCode,
         }),
       });
+      if (res.status !== 204) {
+        throw new Error('Failed to reset MFA');
+      }
       setIsAuthenticated(true);
       setInitialized(true);
       return { success: true, message: '' };
@@ -373,7 +370,7 @@ const useProvideAuth = (): UseAuth => {
       console.log(error);
       return {
         success: false,
-        message: 'TOTPの認証に失敗しました。',
+        message: t('signup.auth.message.error.setup_totp'),
       };
     }
   };
@@ -394,13 +391,13 @@ const useProvideAuth = (): UseAuth => {
 
       return {
         success: true,
-        message: 'APIトークンを再発行しました。',
+        message: t('signup.auth.message.success.refresh_token'),
       };
     } catch (error) {
       console.error(error);
       return {
         success: false,
-        message: 'APIトークンの再発行に失敗しました。',
+        message: t('signup.auth.message.error.refresh_token'),
       };
     }
   };
