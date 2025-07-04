@@ -6,8 +6,8 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **transpiled_program** | **string** |  | [default to undefined]
-**stats** | **string** |  | [default to undefined]
-**virtual_physical_mapping** | **string** |  | [default to undefined]
+**stats** | **{ [key: string]: any; }** |  | [default to undefined]
+**virtual_physical_mapping** | **{ [key: string]: any; }** |  | [default to undefined]
 
 ## Example
 

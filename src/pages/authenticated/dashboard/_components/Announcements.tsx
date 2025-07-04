@@ -4,13 +4,16 @@ import { Spacer } from '@/pages/_components/Spacer';
 import { AnnouncementPost } from '@/pages/authenticated/dashboard/_components/AnnouncementPost';
 import { useAnnouncementsAPI } from '@/backend/hook';
 import { CSSProperties, useEffect, useState } from 'react';
-import { AnnouncementsGetAnnouncementResponse } from '@/api/generated';
+import {
+  AnnouncementsGetAnnouncementResponse,
+  GetAnnouncementsListOrderEnum,
+} from '@/api/generated';
 import styles from './announcement.module.css';
 
 interface AnnouncementProps {
   style?: {
     post?: CSSProperties | Record<string, string | number>;
-  }
+  };
 }
 
 export const Announcements = (props: AnnouncementProps): React.ReactElement => {
@@ -27,23 +30,15 @@ export const Announcements = (props: AnnouncementProps): React.ReactElement => {
     async function getAnnouncementsList() {
       try {
         const response = await getAnnouncements({
-          options: {
-            params: {
-              order: 'DESC',
-            },
-          },
+          order: GetAnnouncementsListOrderEnum.Desc,
+          currentTime: new Date().toISOString(),
         });
 
         if (!response) return;
 
         setAllAnnouncementsList(response);
 
-        const filteredList = response.filter(
-          (announcement) =>
-            announcement.publishable &&
-            new Date(announcement.start_time).getTime() < Date.now() &&
-            new Date(announcement.end_time).getTime() > Date.now()
-        );
+        const filteredList = response.filter((announcement) => announcement.publishable);
         setFilteredAnnouncementsList(filteredList);
       } catch (e) {
         console.log(e);
@@ -67,7 +62,11 @@ export const Announcements = (props: AnnouncementProps): React.ReactElement => {
         )}
 
         {filteredAnnouncementsList.map((announcement) => (
-          <AnnouncementPost key={announcement.id} announcement={announcement} style={{announcement: props.style?.post}}/>
+          <AnnouncementPost
+            key={announcement.id}
+            announcement={announcement}
+            style={{ announcement: props.style?.post }}
+          />
         ))}
       </div>
     </>
