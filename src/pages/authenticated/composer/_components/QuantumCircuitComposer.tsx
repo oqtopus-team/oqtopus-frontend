@@ -9,24 +9,8 @@ import clsx from "clsx"
 import QuantumGatePalette from "./QuantumGatePalette";
 import { Mode } from "../composer";
 
-
-const allGates: QuantumGate["_tag"][] =
-  ["x",
-    "y",
-    "z",
-    "h",
-    "s",
-    "t",
-    "cnot",
-    // "ccnot",
-    "rx",
-    "ry",
-    "rz",
-    "barrier"
-  ]
-
-
 export interface QuantumCircuitComposerProps {
+  supportedGates: Array<QuantumGate["_tag"]>;
   circuit: QuantumCircuit;
   onCircuitUpdate: (c: QuantumCircuit) => void;
   fixedQubitNumber?: boolean;
@@ -60,7 +44,7 @@ export default (props: QuantumCircuitComposerProps) => {
         <QuantumGatePalette
           mode={mode}
           toggleMode={toggleMode}
-          supportedGates={allGates}
+          supportedGates={props.supportedGates}
           onDragStart={handleDragFromGatePalette}
           onDragEnd={() => setGrabbingGate(null)}
         />

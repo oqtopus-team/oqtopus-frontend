@@ -6,7 +6,7 @@ import QuantumCircuitComposer from './_components/QuantumCircuitComposer';
 import ControlPanel from './_components/ControlPanel';
 import { JobsOperatorItem, JobsSubmitJobRequest } from '@/api/generated';
 import { useEffect, useLayoutEffect, useState } from 'react';
-import { GateCNOT, GateH, GateI, QuantumGate } from './gates';
+import { allGates, GateCNOT, GateH, GateI, QuantumGate } from './gates';
 import { QuantumCircuit } from './circuit';
 import { JobTypeType } from '@/domain/types/Job';
 import ToolPalette from './_components/ToolPalette';
@@ -18,7 +18,7 @@ import { ExtendedGate } from './composer';
 import ObservableComposer from './_components/ObservableComposer';
 import { Observable } from './observable';
 
-const bellSampling: QuantumCircuit = {
+export const bellSampling: QuantumCircuit = {
   qubitNumber: 2,
   steps: [
     GateH(0),
@@ -194,6 +194,7 @@ export default function Page() {
       ])} />
 
       <QuantumCircuitComposer
+        supportedGates={allGates}
         circuit={circuit}
         onCircuitUpdate={handleCircuitUpdate}
       />

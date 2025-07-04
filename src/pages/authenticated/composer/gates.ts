@@ -107,3 +107,19 @@ export const gateName =(g: QuantumGate): string => {
     case "barrier": return "Barrier" 
   }
 }
+
+
+export const allGates: QuantumGate["_tag"][] =
+  ["x",
+    "y",
+    "z",
+    "h",
+    "s",
+    "t",
+    "cnot",
+    // "ccnot",
+    "rx",
+    "ry",
+    "rz",
+    "barrier"
+  ]
