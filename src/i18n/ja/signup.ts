@@ -34,4 +34,22 @@ export default {
     },
     button: '送信する',
   },
+  auth: {
+    message: {
+      success: {
+        refresh_token: 'APIトークンを再発行しました。',
+      },
+      error: {
+        record_overlap: '入力したメールアドレスはすでに登録されています。',
+        signup:
+          'サインアップに失敗しました。\nサインアップには事前ユーザー登録が必要です。\n登録がお済みでない場合は管理者までお問い合わせください。',
+        authorize: '認証に失敗しました。',
+        setup_totp: 'TOTPの設定に失敗しました。',
+        send_code: 'MFA再設定に必要な確認コードの送信に失敗しました。',
+        verify_code: '確認コードの検証に失敗しました。',
+        refresh_token: 'APIトークンの再発行に失敗しました。',
+        unexpected: '予期しないエラーが発生しました。',
+      },
+    },
+  },
 };

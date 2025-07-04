@@ -11,15 +11,17 @@ export const ResetMFADeviceCTA = () => (
         MFAデバイスをリセットしたい場合
         <br />
         <NavLink to={URI} className="text-link">
-          MFA無効化を先に行ってください。
+          MFA無効化
         </NavLink>
+        を先に行ってください。
       </>
     ) : (
       <>
         If you want to reset the MFA device
         <br />
+        First,{' '}
         <NavLink to={URI} className="text-link">
-          First, invalidate the MFA.
+          invalidate the MFA.
         </NavLink>
       </>
     )}

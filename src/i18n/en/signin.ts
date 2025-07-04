@@ -22,12 +22,21 @@ export default {
   confirm: {
     title: 'Enter one-time password',
     form: {
-      totp_code: 'one-time password(TOTP Code)',
+      totp_code: 'one-time password (TOTP Code)',
       totp_code_explanation: 'Enter the one-time password from the MFA application.',
       error_message: {
         code: 'Please enter one-time password',
       },
     },
     button: 'Send',
+  },
+  auth: {
+    message: {
+      error: {
+        authorize: 'Authorization failed.',
+        logout: 'Logout failed.',
+        noMFA: 'Please set up MFA.',
+      },
+    },
   },
 };
