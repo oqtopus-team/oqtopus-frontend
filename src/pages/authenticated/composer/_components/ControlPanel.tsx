@@ -8,7 +8,7 @@ import { Select } from "@/pages/_components/Select";
 import { Spacer } from "@/pages/_components/Spacer";
 import { Checkbox } from "@mui/material";
 import clsx from "clsx"
-import { ReactNode, useState } from "react"
+import { ReactNode, useEffect, useState } from "react"
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next"
 
@@ -47,10 +47,10 @@ export const TabPanels = (props: TabPanelsProps) => {
                 ['px-5', 'h-10'],
                 ['flex', 'items-end', 'justify-center'],
                 tabItem.disabled
-                    ? ['bg-disable-bg', 'text-disable-content']
-                    : tabItem.id === activeTab
-                      ? ['bg-base-card', 'text-primary',]
-                      : ['bg-gray-bg'],
+                  ? ['bg-disable-bg', 'text-disable-content']
+                  : tabItem.id === activeTab
+                    ? ['bg-base-card', 'text-primary',]
+                    : ['bg-gray-bg'],
               ])}
               onClick={tabItem.disabled ? () => { } : handleTabItemClick(tabItem.id)}
               key={`tab-${i}`}
@@ -84,7 +84,7 @@ export const TabPanels = (props: TabPanelsProps) => {
       <div
         className={clsx([
 
-          ['w-full, p-5', 'rounded','rounded-t-none'],
+          ['w-full, p-5', 'rounded', 'rounded-t-none'],
           ['border', 'border-t-0', 'border-b-neutral-content', 'border-x-neutral-content']
         ])}
       >
@@ -98,7 +98,7 @@ export interface ControlPanelProps {
   jobType: JobTypeType;
   devices: Device[];
   busy: boolean;
-  mkProgram: () => string;
+  mkProgram: () => { program: string, qubitNumber: number };
   mkOperator: () => JobsOperatorItem[];
   onSubmit: (req: JobsSubmitJobRequest) => Promise<void>;
 }
@@ -123,7 +123,7 @@ export default (props: ControlPanelProps) => {
                 <ControlPanelExecution
                   jobType={props.jobType}
                   busy={props.busy}
-                  mkProgram={props.mkProgram} 
+                  mkProgram={props.mkProgram}
                   mkOperator={props.mkOperator}
                   devices={props.devices}
                   onSubmit={props.onSubmit}
@@ -152,7 +152,7 @@ interface ControlPanelExecutionProps {
   devices: Device[];
   jobType: JobTypeType;
   busy: boolean;
-  mkProgram: () => string;
+  mkProgram: () => { program: string, qubitNumber: number };
   mkOperator: () => JobsOperatorItem[];
   onSubmit: (req: JobsSubmitJobRequest) => Promise<void>;
 }
@@ -173,34 +173,63 @@ export const ControlPanelExecution = (props: ControlPanelExecutionProps) => {
       device_id: "",
       shots: 1000,
     },
-  })
+  });
+
+  useEffect(() => {
+    const availableDevice = props.devices.find((device) => device.status === "available");
+
+    if (availableDevice) {
+      setValue("device_id", availableDevice.id ?? undefined);
+    }
+  }, [props.devices]);
 
   const handleClickSubmit = async (form: ExecutionFormInput) => {
-    debugger
-    const mkJobInfo = (): JobsSubmitJobInfo => {
+    const mkJobInfo = (): [JobsSubmitJobInfo, number] => {
+      const { program, qubitNumber } = props.mkProgram();
       switch (props.jobType) {
         case "sampling":
-          return {
-            program: [ props.mkProgram() ],
-          };
+          return [
+            {
+              program: [program],
+            },
+            qubitNumber
+          ];
         case "estimation":
-          return {
-            program: [ props.mkProgram() ],
-            operator: props.mkOperator(),
-          }
+          return [
+            {
+              program: [program],
+              operator: props.mkOperator(),
+            },
+            qubitNumber
+          ];
       }
     };
+    const [submitJobInfo, qubitNumber] = mkJobInfo();
 
-    const req: JobsSubmitJobRequest = {
-      name: form.name,
-      description: form.description,
-      device_id: form.device_id,
-      job_info: mkJobInfo(),
-      job_type: props.jobType,
-      shots: form.shots,
-    };
+    const selectedDevice = props.devices.find(d => d.id === form.device_id);
+    if (!selectedDevice) {
+      alert("Select an available device!");
+      return;
+    }
 
-    props.onSubmit(req);
+    if (qubitNumber > selectedDevice.nQubits) {
+      alert(`The device ${selectedDevice.id} supports quantum circuits of ${selectedDevice.nQubits} qubits or fewer.`)
+    }
+
+    if (Object.values(errors).every(e => e === undefined)) {
+
+
+      const req: JobsSubmitJobRequest = {
+        name: form.name,
+        description: form.description,
+        device_id: form.device_id,
+        job_info: submitJobInfo,
+        job_type: props.jobType,
+        shots: form.shots,
+      };
+
+      props.onSubmit(req);
+    }
   }
   return (
     <>
@@ -241,11 +270,12 @@ export const ControlPanelExecution = (props: ControlPanelExecutionProps) => {
               label={t("composer.control_panel.exec.device_id")}
               {...register("device_id")}
               value={undefined}
+              errorMessage={errors.device_id?.message}
             >
               {props.devices.map((device) =>
                 <>
-                  <option 
-                    disabled={device.status === 'unavailable'} 
+                  <option
+                    disabled={device.status === 'unavailable'}
                     key={device.id}
                   >
                     {device.id}
@@ -259,12 +289,12 @@ export const ControlPanelExecution = (props: ControlPanelExecutionProps) => {
         </div>
       </div>
 
-      <Spacer className="h-8"/>
+      <Spacer className="h-8" />
       <div>
         <div className="flex">
-          <Button 
-            loading={isSubmitting} 
-            onClick={handleSubmit(handleClickSubmit)} 
+          <Button
+            loading={isSubmitting}
+            onClick={handleSubmit(handleClickSubmit)}
             color="secondary"
             disabled={props.busy}
           >

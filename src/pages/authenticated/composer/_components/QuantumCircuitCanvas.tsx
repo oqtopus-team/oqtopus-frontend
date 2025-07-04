@@ -11,6 +11,7 @@ import QuantumGateElement from "./QuantumGateElement";
 import { Slider } from "@mui/material";
 import { Input } from "@/pages/_components/Input";
 import { Button } from "@/pages/_components/Button";
+import { Spacer } from "@/pages/_components/Spacer";
 
 type FoldCircuitState = {
   composed: (QuantumGate | undefined)[][];
@@ -1115,7 +1116,7 @@ export default (props: Props) => {
               </div>
               <div className="w-full">
 
-                <div className="grid grid-cols-8">
+                <div className="grid grid-cols-8 ">
                   <span className="col-span-2">
                     <QuantumGateElement
                       gate={gateViewer.gate}
@@ -1134,6 +1135,8 @@ export default (props: Props) => {
                   </div>
                 </div>
 
+                <Spacer className="h-6" />
+
                 {(() => {
                   switch (gateViewer.gate._tag) {
                     case "rx":
@@ -1142,30 +1145,36 @@ export default (props: Props) => {
                       return (
                         <div className="w-full mt-5">
                           <div className="grid grid-cols-12 gap-3 items-center justify-center">
-                            <div className="sm:col-span-2 col-span-12">
-                              Arg / π
+                            <div className="sm:col-span-12 col-span-12">
+                              Param
                             </div>
-                            <div className="sm:col-span-7 col-span-12 p-3">
-                              <Slider
-                                key="param-slider1"
-                                aria-label="θ"
-                                onChange={(ev, val) => handleGateViewer(
-                                  { _tag: "ParametrizedGateParamChange", params: [val] },
-                                  gateViewer,
-                                  setGateViewer
-                                )}
-                                value={Number(gateViewer.values[0])}
-                                min={0}
-                                max={2}
-                                step={0.001}
-                              />
+                            <div className="sm:col-span-8 col-span-12 px-3">
+                              <div className="flex flex-col"> 
+                                <Slider
+                                  key="param-slider1"
+                                  aria-label="θ"
+                                  onChange={(ev, val) => handleGateViewer(
+                                    { _tag: "ParametrizedGateParamChange", params: [val] },
+                                    gateViewer,
+                                    setGateViewer
+                                  )}
+                                  value={Number(gateViewer.values[0])}
+                                  min={0}
+                                  max={2}
+                                  step={0.001}
+                                />
+                                <div className="flex w-full">
+                                  <span className="mr-auto"> 0</span>
+                                  <span className="ml-auto">2π</span>
+                                </div>
+                              </div>
                             </div>
-                            <div className="sm:col-span-3 col-span-12 flex items-center">
+                            <div className="sm:col-span-4 col-span-12 flex items-center">
                               <Input
                                 type="number"
                                 max={2}
                                 min={0}
-                                step={0.00001}
+                                step={0.001}
                                 value={gateViewer.values[0]}
                                 onChange={(ev) => {
                                   const value = Number(ev.target.value);
@@ -1176,6 +1185,7 @@ export default (props: Props) => {
                                   }, gateViewer, setGateViewer)
                                 }}
                               />
+                              <span className="mx-2">π</span>
                             </div>
                           </div>
                         </div>

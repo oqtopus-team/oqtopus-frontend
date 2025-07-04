@@ -219,10 +219,13 @@ export default function Page() {
         devices={devices}
         jobType={jobType}
         busy={busy}
-        mkProgram={() => renderQasm(
-          circuit.qubitNumber.valueOf(),
-          circuit.steps
-        )}
+        mkProgram={() => ({
+          program: renderQasm(
+            circuit.qubitNumber.valueOf(),
+            circuit.steps
+          ),
+          qubitNumber: circuit.qubitNumber.valueOf()
+        })}
         mkOperator={() => renderOperator(observable)}
       />
     </>
