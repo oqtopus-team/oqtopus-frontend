@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import clsx from 'clsx';
 import { ForceGraph2D } from 'react-force-graph';
 import { useTranslation } from 'react-i18next';
@@ -109,6 +109,17 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
   const [hoveredNodeId, setHoveredNodeId] = useState<string | number | null>(null);
   const [hoveredLinkId, setHoveredLinkId] = useState<string | null>(null);
 
+  // ForceGraph2D not exporting ref types
+  const fgRef = useRef<any>(null);
+  const [zoomLevel, setZoomLevel] = useState<string>('1.00');
+
+  const handleZoom = useCallback(() => {
+    if (fgRef.current && typeof fgRef.current.zoom === 'function') {
+      const zoom = fgRef.current.zoom();
+      setZoomLevel(zoom.toFixed(2));
+    }
+  }, []);
+
   useEffect(() => {
     try {
       const parsedDeviceInfo = (() => {
@@ -188,6 +199,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
   const windowSize = useWindowSize();
   const divRef = useRef<HTMLDivElement>(null);
   const heddingRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const updateDivSize = () => {
       try {
@@ -235,6 +247,12 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
     );
   }
 
+  useLayoutEffect(() => {
+    if (fgRef.current && typeof fgRef.current.zoom === 'function') {
+      fgRef.current.zoom(0.5);
+    }
+  }, [])
+
   return (
     <div className={clsx('flex', 'grid', 'grid-cols-[1.3fr_2fr]', 'gap-5')}>
       <Card className={clsx(['col-start-1', 'col-end-2'])}>
@@ -247,9 +265,13 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
           </SimpleBar>
         )}
       </Card>
-      <Card className={clsx(['col-start-2', 'col-end-3'])}>
+      <Card className={clsx(['col-start-2', 'col-end-3', 'relative'])}>
+        <div style={{ zIndex: 1000, position: 'absolute', bottom: '25px', right: '25px' }}>
+          Zoom: {zoomLevel}x
+        </div>
         <div ref={divRef}>
           <ForceGraph2D
+            ref={fgRef}
             graphData={topologyData}
             nodeCanvasObject={(
               node: NodeObject,
@@ -327,6 +349,8 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
             height={divSize.height}
             width={divSize.width}
             backgroundColor={'white'}
+            onZoom={handleZoom}
+            onZoomEnd={handleZoom}
           />
         </div>
       </Card>
