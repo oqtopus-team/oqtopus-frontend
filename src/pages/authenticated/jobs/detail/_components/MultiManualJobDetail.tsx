@@ -49,27 +49,14 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
 
   const options = useMemo(() => {
     try {
-      return [
-        {
-          value: combinedCircuitKey,
-          tabLabel: combinedCircuitKey,
-          heading: combinedCircuitHeading,
-        },
-        ...job.jobInfo.program.map((k, index) => ({
-          value: index.toString(),
-          tabLabel: `${dividedCountsKeyPre} ${index}`,
-          heading: `${dividedCountsHeading} ${index}`,
-        })),
-      ];
+      return job.jobInfo.program.map((k, index) => ({
+        value: index.toString(),
+        tabLabel: `${dividedCountsKeyPre} ${index}`,
+        heading: `${dividedCountsHeading} ${index}`,
+      }));
     } catch (error) {
       console.error('Failed to generate options:', error);
-      return [
-        {
-          value: combinedCircuitKey,
-          tabLabel: combinedCircuitKey,
-          heading: combinedCircuitHeading,
-        },
-      ];
+      return [];
     }
   }, [combinedCircuitKey, job.jobInfo.program]);
 
@@ -127,7 +114,7 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
               null,
               2
             )}
-            heading={`Histogram (${options[Number(selectedKeyIndex)].heading})`}
+            heading={`Histogram (${selectedKeyIndex === combinedCircuitKey ? combinedCircuitKey : options[Number(selectedKeyIndex)].heading})`}
             height={histogramHeight}
             jobId={job.id}
           />
@@ -154,7 +141,7 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
           <JobDetailProgram
             program={selectedQASM}
             maxHeight={nonHistogramPanelHeight}
-            heading={`Program (${options[Number(selectedKeyIndex)].heading})`}
+            heading={`Program (${selectedKeyIndex === combinedCircuitKey ? combinedCircuitKey : options[Number(selectedKeyIndex)].heading})`}
           />
         </Card>
         {/* Transpiled Program */}
