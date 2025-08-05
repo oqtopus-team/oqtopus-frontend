@@ -14,23 +14,26 @@ export const JobDetailMultiManualTabs: React.FC<countsProps> = ({
   selectedKeyIndex,
   options,
   onChange,
+  combinedCircuitKey
 }: countsProps) => {
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    onChange(newValue.toString());
+  const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
+    onChange(newValue);
   };
 
   return (
     <>
       {/* Tabs */}
       <Tabs
-        value={parseInt(selectedKeyIndex, 10)} // radix: 10
+        value={selectedKeyIndex}
         onChange={handleTabChange}
         className={clsx('custom-tabs')}
         variant="scrollable"
         scrollButtons={true}
       >
+        <Tab label={combinedCircuitKey} value={combinedCircuitKey} className={clsx('custom-tab')} />
+
         {options.map((opt, index) => (
-          <Tab key={opt.value} label={opt.tabLabel} value={index} className={clsx('custom-tab')} />
+          <Tab key={opt.value} label={opt.tabLabel} value={opt.value} className={clsx('custom-tab')} />
         ))}
       </Tabs>
     </>
