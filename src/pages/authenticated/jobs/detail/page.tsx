@@ -1,6 +1,6 @@
 import { Loader } from '@/pages/_components/Loader';
 import { useAuth } from '@/auth/hook';
-import { Job } from '@/domain/types/Job';
+import { JobWithInfo } from '@/domain/types/Job';
 import clsx from 'clsx';
 import { useLayoutEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +13,7 @@ import { SuccessViewSSELog } from './_components/SSEJobDetail';
 import { useJobAPI } from '@/backend/hook';
 import ReloadButton from './_components/panels/utils/ReloadButton';
 import DownloadJobButton from '../_components/DownloadJobButton';
+import { JobsJobType } from '@/api/generated';
 
 export default function JobDetailPage_() {
   const { id } = useParams();
@@ -23,23 +24,43 @@ type Params = { id: string };
 
 const JobDetailPage = ({ params: { id } }: { params: Params }) => {
   const auth = useAuth();
-  const [job, setJob] = useState<Job | null>(null);
+  const [job, setJob] = useState<JobWithInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSuccess, setIsSuccess] = useState(false);
-  const { getJob } = useJobAPI();
+  const { getJob, retrieveJobFiles } = useJobAPI();
 
   useLayoutEffect(() => {
     setLoading(true);
     if (id != '') {
-      getJob(id)
-        .then((job) => setJob(job))
-        .catch(() => setIsSuccess(false))
-        .finally(() => {
-          setIsSuccess(true);
-          setLoading(false);
-        });
+      loadJob(id);
     }
   }, [id]);
+
+  const loadJob = async (id: string) => {
+    try {
+      const job = await getJob(id);
+      if (!job) return;
+
+      const jobS3Data = await retrieveJobFiles(job.jobInfo);
+
+      setJob({
+        ...job,
+        ...jobS3Data,
+        jobType: JobsJobType.MultiManual,
+        input: { program: [...jobS3Data.input.program, 'h q[123]; h q[0];'] },
+      });
+
+      console.log('AND GOT JOB!!!', {
+        ...job,
+        ...jobS3Data,
+      });
+    } catch {
+      setIsSuccess(false);
+    } finally {
+      setIsSuccess(true);
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return <LoadingView />;
@@ -66,7 +87,7 @@ const LoadingView = () => {
   );
 };
 
-const Title = ({ job }: { job?: Job }) => {
+const Title = ({ job }: { job?: JobWithInfo }) => {
   const { t } = useTranslation();
   return (
     <div className={clsx('flex', 'items-center', 'text-primary', 'text-2xl', 'font-bold')}>
@@ -77,7 +98,7 @@ const Title = ({ job }: { job?: Job }) => {
   );
 };
 
-const SuccessViewWrapper: React.FC<Job> = (job: Job) => {
+const SuccessViewWrapper: React.FC<JobWithInfo> = (job: JobWithInfo) => {
   const jobType: string = job.jobType;
   if (jobType === 'sampling') {
     return <SuccessViewSampling {...job} />;

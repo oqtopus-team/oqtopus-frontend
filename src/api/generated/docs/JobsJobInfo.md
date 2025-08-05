@@ -1,16 +1,17 @@
 # JobsJobInfo
 
+Presigned URLs for downloading relevant job information .zip files from OQTOPUS cloud.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**program** | **Array&lt;string&gt;** | A list of OPENQASM3 program. For non-multiprogramming jobs, this field is assumed to contain exactly one program. Otherwise, those programs are combined according to the multiprogramming machinery. | [default to undefined]
-**combined_program** | **string** | For multiprogramming jobs, this field contains the combined circuit. | [optional] [default to undefined]
-**operator** | [**Array&lt;JobsOperatorItem&gt;**](JobsOperatorItem.md) | *(Only for estimation jobs)* The operator (or observable) for which the expectation value is to be estimated.  | [optional] [default to undefined]
-**result** | [**JobsJobResult**](JobsJobResult.md) |  | [optional] [default to undefined]
-**transpile_result** | [**JobsTranspileResult**](JobsTranspileResult.md) |  | [optional] [default to undefined]
-**message** | **string** | Describing the reason why there is no result | [optional] [default to undefined]
+**input** | **string** | Content of the file will match &#x60;jobs.S3SubmitJobInfo&#x60; schema. | [default to undefined]
+**combined_program** | **string** | For multiprogramming jobs, this file contains the combined circuit. | [optional] [default to undefined]
+**result** | **string** | Content of the file will match &#x60;jobs.S3JobResult&#x60; schema. | [optional] [default to undefined]
+**transpile_result** | **string** | Content of the file will match &#x60;jobs.S3TranspileResult&#x60; schema. | [optional] [default to undefined]
+**sse_log** | **string** | File available only for sse jobs. | [optional] [default to undefined]
+**message** | **string** |  | [optional] [default to undefined]
 
 ## Example
 
@@ -18,11 +19,11 @@ Name | Type | Description | Notes
 import { JobsJobInfo } from './api';
 
 const instance: JobsJobInfo = {
-    program,
+    input,
     combined_program,
-    operator,
     result,
     transpile_result,
+    sse_log,
     message,
 };
 ```

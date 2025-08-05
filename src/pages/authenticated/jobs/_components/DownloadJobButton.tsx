@@ -1,10 +1,10 @@
-import { Job, JobFileData, JobFileDataInfo, JobTypeType } from '@/domain/types/Job';
+import { Job, JobFileData, JobFileDataInfo, JobTypeType, JobWithInfo } from '@/domain/types/Job';
 import { Button } from '@/pages/_components/Button';
 import { CSSProperties, useState } from 'react';
 import { BsDownload } from 'react-icons/bs';
 
 type DownloadJobButtonProps = {
-  job?: Job | null;
+  job?: JobWithInfo | null;
   style?: CSSProperties | undefined;
 };
 

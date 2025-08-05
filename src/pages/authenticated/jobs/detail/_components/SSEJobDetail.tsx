@@ -1,5 +1,5 @@
 import { Card } from '@/pages/_components/Card';
-import { Job } from '@/domain/types/Job';
+import { JobWithInfo } from '@/domain/types/Job';
 import clsx from 'clsx';
 import { JobDetailBasicInfo } from './panels/JobDetailBasicInfo';
 import { JobDetailMitigationInfo } from './panels/JobDetailMitigationInfo';
@@ -7,7 +7,7 @@ import { JobDetailSSELog } from './panels/JobDetailSSELog';
 import { JobDetailResult } from './panels/JobDetailResult';
 import useWindowSize from '@/pages/_hooks/UseWindowSize';
 
-export const SuccessViewSSELog: React.FC<Job> = (job: Job) => {
+export const SuccessViewSSELog: React.FC<JobWithInfo> = (job: JobWithInfo) => {
   const nonHistogramPanelHeight = useWindowSize().height * 0.9;
   const hasMitigationInfo: boolean = job.mitigationInfo
     ? Object.keys(job.mitigationInfo).length > 0
@@ -30,7 +30,7 @@ export const SuccessViewSSELog: React.FC<Job> = (job: Job) => {
             runningAt={job.runningAt}
             endedAt={job.endedAt}
             executionTime={job.executionTime}
-            message={job.jobInfo?.message}
+            message={job.jobInfo.message}
           />
         </Card>
         {/* MitigationInfo */}
@@ -48,10 +48,7 @@ export const SuccessViewSSELog: React.FC<Job> = (job: Job) => {
         </Card>
         {/* Result */}
         <Card className={clsx(['col-start-1', 'col-end-3'])}>
-          <JobDetailResult
-            result={job.jobInfo.result?.sampling}
-            maxHeight={nonHistogramPanelHeight}
-          />
+          <JobDetailResult result={job.result?.sampling} maxHeight={nonHistogramPanelHeight} />
         </Card>
       </div>
     </>
