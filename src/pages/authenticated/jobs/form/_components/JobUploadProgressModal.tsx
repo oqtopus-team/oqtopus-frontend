@@ -30,7 +30,6 @@ export default function JobUploadProgressModal({
   const registerStatus = getStageStatus(registerDone);
   const uploadStatus = getStageStatus(uploadDone, registerDone);
   const submitStatus = getStageStatus(submitDone, registerDone, uploadDone);
-  // const jobUploadFailed = Boolean(registerError || uploadError || submitError);
   const jobUploadCompleted = [registerStatus, uploadStatus, submitStatus].every(
     (s) => s === StageStatus.SUCCEEDED
   );
@@ -67,12 +66,6 @@ export default function JobUploadProgressModal({
           <UploadStage status={submitStatus} />
         </section>
         <Spacer className="h-8" />
-        <section className={clsx('flex', 'items-center', 'justify-center')}>
-          <Button className={clsx('m-auto')} color="secondary">
-            {t('common.modal.yes')}
-          </Button>
-        </section>
-        {/* {jobUploadFailed && <p>Job upload failed</p>} */}
         {jobUploadCompleted && <p>Job upload completed</p>}
       </Card>
     </div>

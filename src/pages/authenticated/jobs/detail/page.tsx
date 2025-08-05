@@ -46,13 +46,6 @@ const JobDetailPage = ({ params: { id } }: { params: Params }) => {
       setJob({
         ...job,
         ...jobS3Data,
-        jobType: JobsJobType.MultiManual,
-        input: { program: [...jobS3Data.input.program, 'h q[123]; h q[0];'] },
-      });
-
-      console.log('AND GOT JOB!!!', {
-        ...job,
-        ...jobS3Data,
       });
     } catch {
       setIsSuccess(false);

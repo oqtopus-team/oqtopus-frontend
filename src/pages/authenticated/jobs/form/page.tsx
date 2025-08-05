@@ -248,7 +248,6 @@ export default function Page() {
     setValue('description', jobFileData.description ?? '');
     setValue('shots', jobFileData.shots);
     setValue('type', jobFileData.jobType);
-    setValue('type', jobFileData.jobType);
     setValue('program', jobFileData.jobInfo.program[0]);
     setValue('transpiler', JSON.stringify(jobFileData.transpilerInfo ?? ''));
     setValue('simulator', JSON.stringify(jobFileData.simulatorInfo ?? ''));
@@ -283,10 +282,9 @@ export default function Page() {
 
     try {
       const { job_id, presigned_url } = await registerJob();
-      console.log('JOB REGISTERED', job_id, presigned_url);
       const { url } = presigned_url;
       const fileToUpload: File =
-        data.jobInfo ?? (await createZipFile({ program: [data.program], operator: data.operator })); // TODO: generate file from program and operator after ??
+        data.jobInfo ?? (await createZipFile({ program: [data.program], operator: data.operator }));
 
       if (!url) {
         toast.error('no url received');
@@ -299,7 +297,6 @@ export default function Page() {
 
       setJobInfoUploadStageDone(true);
 
-      console.log('UPLOADED JOB', job_id);
       const res = await submitJob(job_id, {
         name: data.name,
         description: data.description,
@@ -310,7 +307,6 @@ export default function Page() {
         simulator_info: JSON.parse(data.simulator ?? ''),
         mitigation_info: JSON.parse(data.mitigation ?? ''),
       });
-      console.log('JOB PATCHED', job_id, res);
       setSubmitUploadStageDone(true);
       toast.success(t('job.form.toast.success'));
       return res;
@@ -366,18 +362,6 @@ export default function Page() {
   const handleJobInfoProviderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setJobInfoProvider(e.target.value as JobInfoProviderMethod);
   };
-
-  useEffect(() => {
-    console.log('CHANGED', jobInfoProvider);
-    switch (jobInfoProvider) {
-      case JobInfoProviderMethod.FILE_UPLOAD:
-        console.log('FILE!!!!');
-        break;
-      case JobInfoProviderMethod.FORM_INPUT:
-        console.log('FORM!!!!');
-        break;
-    }
-  }, [jobInfoProvider]);
 
   return (
     <div>
@@ -466,6 +450,7 @@ export default function Page() {
                   name="job-info-upload-option"
                   value={JobInfoProviderMethod.FILE_UPLOAD}
                   onChange={handleJobInfoProviderChange}
+                  checked={jobInfoProvider === JobInfoProviderMethod.FILE_UPLOAD}
                 />
                 <label htmlFor="job-info-file-upload-option">Upload file</label>
               </div>
@@ -477,6 +462,7 @@ export default function Page() {
                   name="job-info-upload-option"
                   value={JobInfoProviderMethod.FORM_INPUT}
                   onChange={handleJobInfoProviderChange}
+                  checked={jobInfoProvider === JobInfoProviderMethod.FORM_INPUT}
                 />
                 <label htmlFor="job-info-file-upload-option">Enter manually</label>
               </div>
