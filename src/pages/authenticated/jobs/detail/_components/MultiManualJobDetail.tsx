@@ -49,27 +49,14 @@ export const SuccessViewMultiManual: React.FC<JobWithInfo> = (job: JobWithInfo) 
 
   const options = useMemo(() => {
     try {
-      return [
-        {
-          value: combinedCircuitKey,
-          tabLabel: combinedCircuitKey,
-          heading: combinedCircuitHeading,
-        },
-        ...job.input.program.map((_, index) => ({
-          value: index.toString(),
-          tabLabel: `${dividedCountsKeyPre} ${index}`,
-          heading: `${dividedCountsHeading} ${index}`,
-        })),
-      ];
+      return job.input.program.map((k, index) => ({
+        value: index.toString(),
+        tabLabel: `${dividedCountsKeyPre} ${index}`,
+        heading: `${dividedCountsHeading} ${index}`,
+      }));
     } catch (error) {
       console.error('Failed to generate options:', error);
-      return [
-        {
-          value: combinedCircuitKey,
-          tabLabel: combinedCircuitKey,
-          heading: combinedCircuitHeading,
-        },
-      ];
+      return [];
     }
   }, [combinedCircuitKey, job.input.program]);
 
@@ -119,7 +106,7 @@ export const SuccessViewMultiManual: React.FC<JobWithInfo> = (job: JobWithInfo) 
             pullDownKey={selectedKeyIndex}
             combinedCircuitCountsJson={JSON.stringify(job.result?.sampling?.counts, null, 2)}
             dividedCircuitCountsJson={JSON.stringify(job.result?.sampling?.divided_counts, null, 2)}
-            heading={`Histogram (${options[Number(selectedKeyIndex)].heading})`}
+            heading={`Histogram (${selectedKeyIndex === combinedCircuitKey ? combinedCircuitKey : options[Number(selectedKeyIndex)].heading})`}
             height={histogramHeight}
             jobId={job.id}
           />
@@ -146,7 +133,7 @@ export const SuccessViewMultiManual: React.FC<JobWithInfo> = (job: JobWithInfo) 
           <JobDetailProgram
             program={selectedQASM}
             maxHeight={nonHistogramPanelHeight}
-            heading={`Program (${options[Number(selectedKeyIndex)].heading})`}
+            heading={`Program (${selectedKeyIndex === combinedCircuitKey ? combinedCircuitKey : options[Number(selectedKeyIndex)].heading})`}
           />
         </Card>
         {/* Transpiled Program */}
