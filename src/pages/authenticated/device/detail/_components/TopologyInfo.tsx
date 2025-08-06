@@ -95,6 +95,9 @@ const createEdgeData = (
   }
 };
 
+const MIN_ZOOM = 0.1;
+const MAX_ZOOM = 3;
+
 export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ deviceInfo }) => {
   const { t } = useTranslation();
 
@@ -116,9 +119,12 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
   const handleZoom = useCallback(() => {
     if (fgRef.current && typeof fgRef.current.zoom === 'function') {
       const zoom = fgRef.current.zoom();
-      setZoomLevel(zoom.toFixed(2));
+      requestAnimationFrame(() => {
+        setZoomLevel(zoom.toFixed(2));
+      });
     }
   }, []);
+
 
   useEffect(() => {
     try {
@@ -247,11 +253,16 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
     );
   }
 
-  useLayoutEffect(() => {
-    if (fgRef.current && typeof fgRef.current.zoom === 'function') {
-      fgRef.current.zoom(0.5);
-    }
-  }, [])
+  useEffect(() => {
+    // Delay to ensure the canvas is rendered
+    const timeout = setTimeout(() => {
+      if (fgRef.current && typeof fgRef.current.zoomToFit === 'function') {
+        fgRef.current.zoomToFit(300, 30);
+      }
+    }, 100);
+
+    return () => clearTimeout(timeout);
+  }, []);
 
   return (
     <div className={clsx('flex', 'grid', 'grid-cols-[1.3fr_2fr]', 'gap-5')}>
@@ -268,6 +279,36 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
       <Card className={clsx(['col-start-2', 'col-end-3', 'relative'])}>
         <div style={{ zIndex: 1000, position: 'absolute', bottom: '25px', right: '25px' }}>
           Zoom: {zoomLevel}x
+        </div>
+        <div
+          style={{
+            marginBottom: '15px',
+            position: 'absolute',
+            left: 0,
+            width: '100%',
+            zIndex: 9999,
+          }}
+        >
+          <input
+            type="range"
+            min={MIN_ZOOM}
+            max={MAX_ZOOM}
+            step={0.1}
+            value={zoomLevel}
+            onChange={(e) => {
+              if (fgRef.current && typeof fgRef.current.zoom === 'function') {
+                fgRef.current.zoom(e.target.value);
+              }
+            }}
+            style={{
+              width: '100%',
+              height: '4px',
+              borderRadius: '2px',
+              background: '#ddd',
+              outline: 'none',
+              cursor: 'pointer',
+            }}
+          />
         </div>
         <div ref={divRef}>
           <ForceGraph2D
@@ -349,6 +390,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
             height={divSize.height}
             width={divSize.width}
             backgroundColor={'white'}
+            maxZoom={MAX_ZOOM}
             onZoom={handleZoom}
             onZoomEnd={handleZoom}
           />
