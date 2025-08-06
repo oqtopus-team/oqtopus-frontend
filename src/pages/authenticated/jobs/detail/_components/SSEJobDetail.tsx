@@ -44,7 +44,7 @@ export const SuccessViewSSELog: React.FC<JobWithInfo> = (job: JobWithInfo) => {
         )}
         {/* SSE log */}
         <Card className={clsx(['col-start-1', 'col-end-3'])}>
-          <JobDetailSSELog job_id={job.id} status={job.status} />
+          <JobDetailSSELog status={job.status} sseLogFileURL={job.jobInfo.sse_log} />
         </Card>
         {/* Result */}
         <Card className={clsx(['col-start-1', 'col-end-3'])}>

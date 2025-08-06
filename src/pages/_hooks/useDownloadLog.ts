@@ -1,12 +1,16 @@
-import { useAuth } from '@/auth/hook';
 import { useJobAPI } from '@/backend/hook';
 
 export const useDownloadLog = () => {
   const api = useJobAPI();
 
-  const handleDownloadLog = async (job_id: string) => {
+  const handleDownloadLog = async (sseLogFileURL: string | undefined) => {
+    if (!sseLogFileURL) {
+      alert('Log file does not exist');
+      return;
+    }
+
     try {
-      const res = await api.getSselog(job_id);
+      const res = await api.getSselog(sseLogFileURL);
       if (res.status !== 200) {
         if (res.status === 404) {
           alert('Log file does not exist');

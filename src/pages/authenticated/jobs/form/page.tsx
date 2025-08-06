@@ -21,7 +21,6 @@ import {
   JOB_TYPE_DEFAULT,
   JOB_TYPES,
   JobFileData,
-  OperatorItem,
   PROGRAM_TYPE_DEFAULT,
   PROGRAM_TYPES,
   ProgramType,
@@ -30,7 +29,7 @@ import {
   TRANSPILER_TYPES,
   TranspilerTypeType,
 } from '@/domain/types/Job';
-import { JobsJobType, JobsSubmitJobType } from '@/api/generated';
+import { JobsJobType, JobsS3OperatorItem, JobsSubmitJobType } from '@/api/generated';
 import { Toggle } from '@/pages/_components/Toggle';
 import JobFileUpload from './_components/JobFileUpload';
 import { ConfirmModal } from '@/pages/_components/ConfirmModal';
@@ -54,7 +53,7 @@ interface FormInput {
   simulator?: string;
   mitigationEnabled: boolean;
   mitigation?: string;
-  operator?: OperatorItem[];
+  operator?: JobsS3OperatorItem[];
   jobInfo?: File;
 }
 
@@ -655,10 +654,10 @@ const OperatorForm = ({
   set,
   errors = [],
 }: {
-  current: OperatorItem[] | undefined;
-  set: (_: OperatorItem[]) => Promise<void>;
+  current: JobsS3OperatorItem[] | undefined;
+  set: (_: JobsS3OperatorItem[]) => Promise<void>;
   errors?:
-    | Merge<FieldError, (Merge<FieldError, FieldErrorsImpl<OperatorItem>> | undefined)[]>
+    | Merge<FieldError, (Merge<FieldError, FieldErrorsImpl<JobsS3OperatorItem>> | undefined)[]>
     | undefined;
 }) => {
   const { t } = useTranslation();

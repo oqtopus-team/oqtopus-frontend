@@ -1,6 +1,7 @@
 import {
   JobsJobInfo,
   JobsS3JobResult,
+  JobsS3OperatorItem,
   JobsS3SubmitJobInfo,
   JobsS3TranspileResult,
 } from '@/api/generated';
@@ -146,7 +147,7 @@ export interface JobFileData {
 
 export interface JobFileDataInfo {
   program: string[];
-  operator?: OperatorItem[];
+  operator?: JobsS3OperatorItem[];
 }
 
 export type OperatorItem = { pauli: string; coeff: number };

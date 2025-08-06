@@ -22,7 +22,7 @@ export default function DownloadJobButton({ job, style }: DownloadJobButtonProps
       shots: job.shots,
       deviceId: job.deviceId ?? '',
       jobType: job.jobType as JobTypeType,
-      jobInfo: job.jobInfo as JobFileDataInfo,
+      jobInfo: job.input,
       transpilerInfo: job.transpilerInfo,
       simulatorInfo: job.simulatorInfo,
       mitigationInfo: job.mitigationInfo,

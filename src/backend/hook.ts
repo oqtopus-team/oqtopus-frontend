@@ -9,7 +9,7 @@ import {
   JobsRegisterJobResponse,
   JobsSubmitJobRequest,
 } from '@/api/generated';
-import { Job, JobS3Data, JobS3Files, JobSearchParams } from '@/domain/types/Job';
+import { Job, JobS3Data, JobSearchParams } from '@/domain/types/Job';
 import { Device } from '@/domain/types/Device';
 import type { RawAxiosRequestConfig } from 'axios';
 import axios from 'axios';
@@ -43,7 +43,7 @@ export const useJobAPI = () => {
   const uploadJobToS3 = async (
     presigned_url: JobsJobInfoUploadPresignedURL,
     jobFile: File,
-    setUploadProgressPercent: (progress: number) => void
+    setUploadProgressPercent?: (progress: number) => void
   ): Promise<void> => {
     const { url, fields } = presigned_url;
     if (!url || !fields) throw new Error('missing presigned URL data');
@@ -60,7 +60,7 @@ export const useJobAPI = () => {
       onUploadProgress(progressEvent) {
         if (!progressEvent.total) return;
         const progressPercent = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
-        setUploadProgressPercent(progressPercent);
+        setUploadProgressPercent?.(progressPercent);
       },
     });
   };
@@ -142,26 +142,24 @@ export const useJobAPI = () => {
   };
 
   const getSselog = async (
-    job_id: string
+    sselogFileURL: string
   ): Promise<{ file: string | null; file_name: string | null; status: number }> => {
-    return { file: null, file_name: null, status: 5 };
-    // return api.job
-    //   .getSselog(job_id)
-    //   .then((res) => {
-    //     return {
-    //       file: res.data.file ?? null,
-    //       file_name: res.data.file_name ?? null,
-    //       status: res.status,
-    //     };
-    //   })
-    //   .catch((error) => {
-    //     console.log(error);
-    //     return {
-    //       file: null,
-    //       file_name: null,
-    //       status: error.response.status,
-    //     };
-    //   });
+    try {
+      const res = await axios.get(sselogFileURL, { responseType: 'blob' });
+      const object = await convertZipBlobToObject(res.data);
+
+      return {
+        file: object.sselog.file,
+        file_name: object.sselog.file_name,
+        status: res.status,
+      };
+    } catch (error: any) {
+      return {
+        file: null,
+        file_name: null,
+        status: error.response.status,
+      };
+    }
   };
 
   return {
