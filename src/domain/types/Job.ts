@@ -107,14 +107,13 @@ export type JobS3Data = {
   transpileResult?: JobsS3TranspileResult;
   result?: JobsS3JobResult;
   combinedProgram?: string;
-  sseLogs?: { file: string | null; file_name: string | null; status: number };
 };
 
 export type JobS3Files = {
   [K in keyof JobS3Data]: File;
 };
 
-export type JobWithInfo = Job & JobS3Data;
+export type JobWithS3Data = Job & JobS3Data;
 
 export interface JobSearchParams {
   query?: string; // id, name or description query string

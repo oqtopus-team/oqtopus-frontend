@@ -1,6 +1,6 @@
 import { Loader } from '@/pages/_components/Loader';
 import { useAuth } from '@/auth/hook';
-import { JobWithInfo } from '@/domain/types/Job';
+import { JobWithS3Data } from '@/domain/types/Job';
 import clsx from 'clsx';
 import { useLayoutEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,7 +13,6 @@ import { SuccessViewSSELog } from './_components/SSEJobDetail';
 import { useJobAPI } from '@/backend/hook';
 import ReloadButton from './_components/panels/utils/ReloadButton';
 import DownloadJobButton from '../_components/DownloadJobButton';
-import { JobsJobType } from '@/api/generated';
 
 export default function JobDetailPage_() {
   const { id } = useParams();
@@ -24,7 +23,7 @@ type Params = { id: string };
 
 const JobDetailPage = ({ params: { id } }: { params: Params }) => {
   const auth = useAuth();
-  const [job, setJob] = useState<JobWithInfo | null>(null);
+  const [job, setJob] = useState<JobWithS3Data | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSuccess, setIsSuccess] = useState(false);
   const { getJob, retrieveJobFiles } = useJobAPI();
@@ -80,18 +79,22 @@ const LoadingView = () => {
   );
 };
 
-const Title = ({ job }: { job?: JobWithInfo }) => {
+const Title = ({ job }: { job?: JobWithS3Data }) => {
   const { t } = useTranslation();
   return (
     <div className={clsx('flex', 'items-center', 'text-primary', 'text-2xl', 'font-bold')}>
       {t('job.detail.title')}
       <ReloadButton />
-      <DownloadJobButton style={{ marginLeft: '0.5rem', marginRight: '0.5rem' }} job={job} />
+      <DownloadJobButton
+        kind="jobWithS3Data"
+        job={job}
+        style={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}
+      />
     </div>
   );
 };
 
-const SuccessViewWrapper: React.FC<JobWithInfo> = (job: JobWithInfo) => {
+const SuccessViewWrapper: React.FC<JobWithS3Data> = (job: JobWithS3Data) => {
   const jobType: string = job.jobType;
   if (jobType === 'sampling') {
     return <SuccessViewSampling {...job} />;

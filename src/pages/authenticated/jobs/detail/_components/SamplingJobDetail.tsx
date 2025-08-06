@@ -1,5 +1,5 @@
 import { Card } from '@/pages/_components/Card';
-import { JobWithInfo } from '@/domain/types/Job';
+import { JobWithS3Data } from '@/domain/types/Job';
 import clsx from 'clsx';
 import { JobDetailBasicInfo } from './panels/JobDetailBasicInfo';
 import { JobDetailProgram } from './panels/JobDetailProgram';
@@ -11,7 +11,7 @@ import { JobDetailTranspilerInfo } from './panels/JobDetailTranspilerInfo';
 import useWindowSize from '@/pages/_hooks/UseWindowSize';
 import { JobDetailTranspileResult } from './panels/JobDetailTranspileResult';
 
-export const SuccessViewSampling: React.FC<JobWithInfo> = (job: JobWithInfo) => {
+export const SuccessViewSampling: React.FC<JobWithS3Data> = (job: JobWithS3Data) => {
   const histogramHeight = useWindowSize().height * 0.5;
   const nonHistogramPanelHeight = useWindowSize().height * 0.9;
   const hasMitigationInfo: boolean = job.mitigationInfo

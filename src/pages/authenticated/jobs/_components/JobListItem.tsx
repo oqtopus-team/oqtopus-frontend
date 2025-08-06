@@ -141,7 +141,7 @@ const OperationButtons = ({ job, onClickCancel, onClickDelete }: ButtonProps) =>
           />
         </>
       )}
-      <DownloadJobButton job={job} />
+      <DownloadJobButton kind="jobWithoutS3Data" job={job} />
     </div>
   );
 };

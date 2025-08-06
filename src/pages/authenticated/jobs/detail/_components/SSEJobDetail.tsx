@@ -1,5 +1,5 @@
 import { Card } from '@/pages/_components/Card';
-import { JobWithInfo } from '@/domain/types/Job';
+import { JobWithS3Data } from '@/domain/types/Job';
 import clsx from 'clsx';
 import { JobDetailBasicInfo } from './panels/JobDetailBasicInfo';
 import { JobDetailMitigationInfo } from './panels/JobDetailMitigationInfo';
@@ -7,7 +7,7 @@ import { JobDetailSSELog } from './panels/JobDetailSSELog';
 import { JobDetailResult } from './panels/JobDetailResult';
 import useWindowSize from '@/pages/_hooks/UseWindowSize';
 
-export const SuccessViewSSELog: React.FC<JobWithInfo> = (job: JobWithInfo) => {
+export const SuccessViewSSELog: React.FC<JobWithS3Data> = (job: JobWithS3Data) => {
   const nonHistogramPanelHeight = useWindowSize().height * 0.9;
   const hasMitigationInfo: boolean = job.mitigationInfo
     ? Object.keys(job.mitigationInfo).length > 0

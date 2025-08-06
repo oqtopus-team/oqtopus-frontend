@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Card } from '@/pages/_components/Card';
-import { JobWithInfo } from '@/domain/types/Job';
+import { JobWithS3Data } from '@/domain/types/Job';
 import clsx from 'clsx';
 import { JobDetailBasicInfo } from './panels/JobDetailBasicInfo';
 import { JobDetailProgram } from './panels/JobDetailProgram';
@@ -18,7 +18,7 @@ const combinedCircuitHeading = 'Combined';
 const dividedCountsKeyPre = 'Program index';
 const dividedCountsHeading = 'Index';
 
-export const SuccessViewMultiManual: React.FC<JobWithInfo> = (job: JobWithInfo) => {
+export const SuccessViewMultiManual: React.FC<JobWithS3Data> = (job: JobWithS3Data) => {
   const [selectedKeyIndex, setSelectedKeyIndex] = useState<string>('0');
   const histogramHeight = useWindowSize().height * 0.5;
   const nonHistogramPanelHeight = useWindowSize().height * 0.9;
