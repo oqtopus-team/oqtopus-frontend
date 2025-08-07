@@ -297,7 +297,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
             background: "#fff",
           }}
         >
-          <Button size="small" onClick={handleFitToView}>Fit to View</Button>
+          <Button size="small" onClick={handleFitToView}>{t('device.detail.topology_info.fit_to_view')}</Button>
           <input
             type="range"
             min={MIN_ZOOM}
