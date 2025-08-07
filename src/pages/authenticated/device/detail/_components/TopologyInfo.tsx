@@ -7,6 +7,7 @@ import { JSONCodeBlock } from '@/pages/_components/JSONCodeBlock';
 import { Card } from '@/pages/_components/Card';
 import useWindowSize from '@/pages/_hooks/UseWindowSize';
 import 'simplebar-react/dist/simplebar.min.css';
+import { Button } from '@/pages/_components/Button';
 
 type NodeObject<NodeType = {}> = NodeType & {
   id?: string | number;
@@ -264,6 +265,12 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
     return () => clearTimeout(timeout);
   }, []);
 
+  const handleFitToView = () => {
+    if (fgRef.current) {
+      fgRef.current.zoomToFit(300, 30);
+    }
+  }
+
   return (
     <div className={clsx('flex', 'grid', 'grid-cols-[1.3fr_2fr]', 'gap-5')}>
       <Card className={clsx(['col-start-1', 'col-end-2'])}>
@@ -283,12 +290,14 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
         <div
           style={{
             marginBottom: '15px',
-            position: 'absolute',
-            left: 0,
             width: '100%',
             zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            background: "#fff",
           }}
         >
+          <Button size="small" onClick={handleFitToView}>Fit to View</Button>
           <input
             type="range"
             min={MIN_ZOOM}
@@ -301,12 +310,14 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
               }
             }}
             style={{
-              width: '100%',
+              width: '200px',
               height: '4px',
               borderRadius: '2px',
               background: '#ddd',
               outline: 'none',
               cursor: 'pointer',
+              flex: 1,
+              marginLeft: '10px',
             }}
           />
         </div>
