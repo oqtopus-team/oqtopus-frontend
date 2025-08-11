@@ -76,7 +76,7 @@ export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
       {programExceededMaxDisplayLength && (
         <>
           <span className={clsx('text-xs')}>
-            Program is too large to be fully displayed. Please download the job to view it.
+            {t('job.detail.program.too_large_to_fully_display')}
           </span>
           <Spacer className="h-2" />
         </>

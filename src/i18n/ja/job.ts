@@ -61,6 +61,8 @@ export default {
     },
     program: {
       nodata: 'データが存在しません',
+      too_large_to_fully_display:
+        'Program is too large to be fully displayed. Please download the job to view it.',
     },
     transpiled_program: {
       nodata: 'データが存在しません',
