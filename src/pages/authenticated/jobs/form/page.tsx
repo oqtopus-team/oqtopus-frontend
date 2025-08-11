@@ -286,7 +286,7 @@ export default function Page() {
         data.jobInfo ?? (await createZipFile({ program: [data.program], operator: data.operator }));
 
       if (!url) {
-        toast.error('no url received');
+        toast.error(t('job.form.toast.register_error'));
         return;
       }
 
@@ -437,7 +437,7 @@ export default function Page() {
             <Divider />
             <Spacer className="h-4" />
             <p className={clsx('font-bold', 'text-primary')}>
-              Select method for providing job info
+              {t('job.form.job_info_provider_selector')}
             </p>
             <Spacer className="h-4" />
             <div className={clsx('flex', 'justify-around')}>
@@ -451,7 +451,9 @@ export default function Page() {
                   onChange={handleJobInfoProviderChange}
                   checked={jobInfoProvider === JobInfoProviderMethod.FILE_UPLOAD}
                 />
-                <label htmlFor="job-info-file-upload-option">Upload file</label>
+                <label htmlFor="job-info-file-upload-option">
+                  {t('job.form.job_info_provider_file')}
+                </label>
               </div>
               <div className={clsx('flex', 'gap-[0.5rem]')}>
                 <input
@@ -463,18 +465,13 @@ export default function Page() {
                   onChange={handleJobInfoProviderChange}
                   checked={jobInfoProvider === JobInfoProviderMethod.FORM_INPUT}
                 />
-                <label htmlFor="job-info-file-upload-option">Enter manually</label>
+                <label htmlFor="job-info-file-upload-option">
+                  {t('job.form.job_info_provider_input')}
+                </label>
               </div>
             </div>
             <Spacer className="h-8" />
             {jobInfoProvider === JobInfoProviderMethod.FILE_UPLOAD && (
-              // <input
-              //   type="file"
-              //   accept=".zip"
-              //   onChange={(e) => {
-              //     setValue('jobInfo', e.target.files?.[0]);
-              //   }}
-              // />
               <JobProgramUpload setProgram={(f) => setValue('jobInfo', f)} />
             )}
 

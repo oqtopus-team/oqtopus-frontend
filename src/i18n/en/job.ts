@@ -113,9 +113,24 @@ export default {
       pauli: 'Operator (Pauli string)',
       coeff: 'Coefficient',
     },
+    job_info_provider_selector: 'Select method for providing job info',
+    job_info_provider_file: 'Upload file',
+    job_info_provider_input: 'Enter manually',
+    upload_job_info: {
+      choose_file: 'Choose File',
+      no_file_chosen: 'No file chosen',
+    },
+    job_upload_progress_modal: {
+      title: 'Job Upload',
+      register_job: 'Register job',
+      upload_job_info: 'Upload job info',
+      submit_job: 'Submit job',
+      job_upload_completed: 'Job upload completed',
+    },
     toast: {
       success: 'Success: Job submitted successfully',
       error: 'Error: Failed to submit job',
+      register_error: 'Failed to submit job, no job URL received',
     },
     error_message: {
       name: 'Please enter job name',
@@ -129,6 +144,7 @@ export default {
         pauli_empty: 'Pauli field cannot be empty',
         coeff_required: 'Coefficient field is required',
       },
+      job_info_must_be_zip_file: 'Please upload correct job info zip file',
       invalid_json: 'Please enter correct JSON',
     },
     modal: {

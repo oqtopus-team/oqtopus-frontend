@@ -44,15 +44,21 @@ export default function JobUploadProgressModal({
       )}
     >
       <Card className={clsx('max-w-[800px]', 'min-w-[400px]', 'text-xg')}>
-        <h1 className={clsx('text-2xl', 'font-bold', 'text-primary')}>Job Upload</h1>
+        <h1 className={clsx('text-2xl', 'font-bold', 'text-primary')}>
+          {t('job.form.job_upload_progress_modal.title')}
+        </h1>
         <Spacer className={'h-8'} />
         <section className={clsx('flex', 'flex-col', 'gap-[0.5rem]')}>
-          <h2 className={clsx('font-bold', 'text-primary')}>Register job</h2>
+          <h2 className={clsx('font-bold', 'text-primary')}>
+            {t('job.form.job_upload_progress_modal.register_job')}
+          </h2>
           <UploadStage status={registerStatus} />
         </section>
         <Spacer className={'h-8'} />
         <section className={clsx('flex', 'flex-col', 'gap-[0.5rem]')}>
-          <h2 className={clsx('font-bold', 'text-primary')}>Upload job info</h2>
+          <h2 className={clsx('font-bold', 'text-primary')}>
+            {t('job.form.job_upload_progress_modal.upload_job_info')}
+          </h2>
           <UploadStage status={uploadStatus} />
           <progress
             className="upload-job-info-progress-bar"
@@ -62,11 +68,15 @@ export default function JobUploadProgressModal({
         </section>
         <Spacer className={'h-8'} />
         <section className={clsx('flex', 'flex-col', 'gap-[0.5rem]')}>
-          <h2 className={clsx('font-bold', 'text-primary')}>Submit job</h2>
+          <h2 className={clsx('font-bold', 'text-primary')}>
+            {t('job.form.job_upload_progress_modal.submit_job')}
+          </h2>
           <UploadStage status={submitStatus} />
         </section>
         <Spacer className="h-8" />
-        {jobUploadCompleted && <p>Job upload completed</p>}
+        {jobUploadCompleted && (
+          <p>{t('job.form.job_upload_progress_modal.job_upload_completed')}</p>
+        )}
       </Card>
     </div>
   );

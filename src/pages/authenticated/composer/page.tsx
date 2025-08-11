@@ -161,7 +161,7 @@ export default function Page() {
       const fileToUpload: File = await createZipFile(jobS3Info);
 
       if (!url) {
-        toast.error('no url received');
+        toast.error(t('job.form.toast.register_error'));
         return;
       }
       await jobApi.uploadJobToS3(presigned_url, fileToUpload);

@@ -1,11 +1,12 @@
 import { Button } from '@/pages/_components/Button';
-import { Divider } from '@mui/material';
 import clsx from 'clsx';
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function JobProgramUpload({ setProgram }: JobProgramUploadProps) {
   const ref = useRef<HTMLInputElement>(null);
   const [filename, setFilename] = useState<string | undefined>();
+  const { t } = useTranslation();
 
   return (
     <div className={clsx('flex', 'flex-row', 'items-center', 'gap-[0.25rem]', 'cursor-pointer')}>
@@ -23,7 +24,7 @@ export default function JobProgramUpload({ setProgram }: JobProgramUploadProps) 
         }}
       />
       <Button color="secondary" onClick={() => ref.current?.click()}>
-        Choose File
+        {t('job.form.upload_job_info.choose_file')}
       </Button>
       <div
         className={clsx(
@@ -39,7 +40,9 @@ export default function JobProgramUpload({ setProgram }: JobProgramUploadProps) 
           'border-[#E5E7EB]'
         )}
       >
-        <span onClick={() => ref.current?.click()}>{filename ?? 'No file chosen'}</span>
+        <span onClick={() => ref.current?.click()}>
+          {filename ?? t('job.form.upload_job_info.no_file_chosen')}
+        </span>
         <Button
           disabled={!filename}
           color="error"
