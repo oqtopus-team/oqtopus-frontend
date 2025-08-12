@@ -1,9 +1,11 @@
 import clsx, { ClassValue } from "clsx";
-import { ControlWireDirection, Down, QuantumGate, Up, labelOfGate } from "../gates";
+import { ControlWireDirection, Down, QuantumGate, Up, getDaggerGateBaseLabel, labelOfGate } from "../gates";
 import { useEffect, useRef } from "react";
 import { useDrag } from "react-dnd";
 import { DragMoveGateItem, FromCanvas, ItemTypeGate, ItemTypeMoveGate } from "../dnd";
 import { DummyGate } from "../composer";
+
+import "./Composer.css";
 
 interface Props {
   qubitIndex: number;
@@ -102,6 +104,100 @@ const ControlledGate = (props: ControlledGateProps) => {
   )
 }
 
+const ControlledZGate = (props: ControlledGateProps) => {
+  return (
+    <div
+      className={clsx([
+        ['relative', 'w-full', 'h-full']
+      ])}
+      onClick={() => {
+        props.onClick?.();
+        props.resetControlGate?.();
+      }}
+    >
+      <div
+        className={clsx([
+          ['absolute', 'top-0', 'left-0', 'z-20'],
+          ["w-full", "h-full", "rounded-full"],
+          ["flex", "items-center", "justify-center"],
+          ["text-center", "align-middle"]
+        ])}
+      >
+        <div
+          className="bg-gate-controlled w-[16px] h-[16px] rounded-full"
+        >
+        </div>
+      </div>
+      {props.wireDirections.includes(Up)
+        ? (
+          <div
+            className={clsx([
+              ['absolute', 'top-[-12px]', 'left-0', 'z-10'],
+              ["w-full", "h-[24px]"],
+              ["flex", "items-center", "justify-center"],
+              props.previewWire ? ["opacity-50"] : []
+            ])}
+          >
+            <div
+              className={clsx([
+                ["bg-gate-controlled", "font-bold"],
+                ["text-2xl"],
+                ['h-full', 'w-1']
+              ])}
+            />
+          </div>
+        )
+        : <></>
+      }
+      {props.wireDirections.includes(Down)
+        ? (
+          <div
+            className={clsx([
+              ['absolute', 'bottom-[-12px]', 'left-0', 'z-10'],
+              ["w-full", "h-[24px]"],
+              ["flex", "items-center", "justify-center"],
+              props.previewWire ? ["opacity-50"] : []
+            ])}
+          >
+            <div
+              className={clsx([
+                ["bg-gate-controlled", "font-bold"],
+                ["text-2xl"],
+                ['h-full', 'w-1']
+              ])}
+            />
+          </div>
+        )
+        : <></>
+      }
+    </div>
+  )
+}
+
+interface BarrierGateProps {
+  onClick?: () => void;
+  isDragging?: boolean;
+}
+
+const BarrierGate = ({ isDragging, onClick }: BarrierGateProps) => {
+  return (
+    <div
+      className={clsx([
+        ["w-full", "h-full", "rounded",],
+        ["flex", "items-center", "justify-center"],
+        isDragging ? ["opacity-50"] : [],
+        ["text-center", "align-middle"]
+      ])}
+      onClick={onClick}
+    >
+      <img
+        className="h-full"
+        src={`/img/composer/barrier.svg`}
+      />
+    </div>
+  );
+}
+
 export default function QuantumGateElement(props: Props) {
   const gate = props.gate
   const ref = useRef<HTMLDivElement>(null);
@@ -159,6 +255,7 @@ export default function QuantumGateElement(props: Props) {
             case "z":
             case "h":
             case "s":
+            case "sx":
             case "t":
             case "i":
               return (
@@ -178,6 +275,29 @@ export default function QuantumGateElement(props: Props) {
                     ])}
                   >
                     {labelOfGate(gate)}
+                  </span>
+                </div>
+              )
+            case "sdg":
+            case "tdg":
+              return (
+                <div
+                  className={clsx([
+                    ["w-full", "h-full", "rounded",],
+                    ["flex", "items-center", "justify-center"],
+                    props.isDragging ? ["opacity-50"] : [],
+                    ["bg-gate-atomic", "text-center", "align-middle"]
+                  ])}
+                  onClick={props.onClick}
+                >
+                  <span
+                    className={clsx([
+                      ["text-primary-content", "font-bold"],
+                      ["text-xl"],
+                      ["dagger-gate"]
+                    ])}
+                  >
+                    {getDaggerGateBaseLabel(gate._tag)}
                   </span>
                 </div>
               )
@@ -245,6 +365,26 @@ export default function QuantumGateElement(props: Props) {
                   resetControlGate={props.resetControlGate}
                 />
               );
+            case "cz":
+              const czWireDirections = (() => {
+                return [
+                  (props.previewDirections?.includes("up") || gate.control < gate.target) ? [Up] : [],
+                  (props.previewDirections?.includes("down") || gate.control > gate.target) ? [Down] : []
+                ].flat() as ControlWireDirection[]
+              })()
+              return (
+                <ControlledZGate
+                  wireDirections={czWireDirections}
+                  previewWire={props.previewDirections !== undefined}
+                  label="+"
+                  onClick={props.onClick}
+                  resetControlGate={props.resetControlGate}
+                />
+              );
+            case "barrier":
+              return (
+                <BarrierGate onClick={props.onClick} isDragging={props.isDragging} />
+              )
           }
 
         })()

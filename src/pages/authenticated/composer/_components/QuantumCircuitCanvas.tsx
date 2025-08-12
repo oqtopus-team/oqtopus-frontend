@@ -50,6 +50,7 @@ const foldCircuit = (circuit: QuantumCircuit): ComposedProgram => {
         case "dummy":
           return undefined;
         case "cnot":
+        case "cz":
           return (
             i == gate.target
               ? gate
@@ -93,6 +94,7 @@ const foldCircuit = (circuit: QuantumCircuit): ComposedProgram => {
     let to = 0;
     switch (gateHead._tag) {
       case "cnot":
+      case "cz":
         const di = gateHead.control < gateHead.target ? (-1) : (+1);
         insertPos = calcMaxDepth(
           state.composed.slice(
@@ -160,6 +162,7 @@ const calcMaxShiftRange = (qFrom: number, qTo: number, tFrom: number, c: Compose
         case "$controlWire":
           return [Math.min(g.from, result[0]), Math.max(g.to, result[1])];
         case "cnot":
+        case "cz":
           return [Math.min(g.control, g.target, result[0]), Math.max(g.control, g.target, result[1])];
         case "ccnot":
           return [
@@ -426,6 +429,7 @@ const handleDropNewGate = (
   handleComposedProgramUpdated(newComposed);
   switch (item.gateTag) {
     case "cnot":
+    case "cz":
       setHoldingControlQubit({ targetQubitIndex: qubitIndex, hovered: qubitIndex, timestep, rest: 1 })
       return;
     case "ccnot":
@@ -458,6 +462,7 @@ const handleMoveGate = (
     }
     switch (originalGate._tag) {
       case "cnot":
+      case "cz":
         return { ...originalGate, control: qubitIndex, target: qubitIndex };
       case "ccnot":
         return { ...originalGate, control1: qubitIndex, control2: qubitIndex, target: qubitIndex };
@@ -470,6 +475,7 @@ const handleMoveGate = (
   handleComposedProgramUpdated(newComposed);
   switch (movingGate._tag) {
     case "cnot":
+    case "cz":
       setHoldingControlQubit({ targetQubitIndex: qubitIndex, hovered: qubitIndex, timestep, rest: 1 });
       break;
 
@@ -585,6 +591,7 @@ export default (props: Props) => {
       const originralGate = composedProgram[qIndex][tIndex];
       switch (originralGate?._tag) {
         case "cnot":
+        case "cz":
           composedProgram[qIndex][tIndex] = {
             ...originralGate,
             control: originralGate.target
@@ -692,6 +699,7 @@ export default (props: Props) => {
       if (i === holdingControlQubit.targetQubitIndex) {
         switch (controlledGate._tag) {
           case "cnot":
+          case "cz":
             controlledGate.control = cqIndex;
             return controlledGate;
           case "ccnot":
@@ -773,6 +781,7 @@ export default (props: Props) => {
     const gate = composedProgram[qIndex][tIndex];
     switch (gate?._tag) {
       case "cnot":
+      case "cz":
         const [cnotFrom, cnotTo] = [gate.control, gate.target].sort();
 
         composedProgram.forEach((w, i) => {

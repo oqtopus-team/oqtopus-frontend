@@ -86,7 +86,7 @@ export default (props: Props) => {
                   onDragEnd={props.onDragEnd}
                   resetControlGate={
                     () => {
-                      if (element.gate._tag === "cnot" || element.gate._tag === "ccnot") {
+                      if (element.gate._tag === "cnot" || element.gate._tag === "ccnot" || element.gate._tag === "cz") {
                         props.onClickControlledGate(props.qubitIndex, props.timestep);
                       }
                     }}

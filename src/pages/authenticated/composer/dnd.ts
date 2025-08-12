@@ -1,4 +1,4 @@
-import { GateCCNOT, GateCNOT, GateH, GateI, GateRX, GateRY, GateRZ, GateS, GateT, GateX, GateY, GateZ, QuantumGate } from "./gates";
+import { GateCCNOT, GateCNOT, GateCZ, GateH, GateI, GateRX, GateRY, GateRZ, GateS, GateSdg, GateSX, GateT, GateTdg, GateX, GateY, GateZ, OpBarrier, QuantumGate } from "./gates";
 
 export const ItemTypeGate = "GATE" as const;
 export const ItemTypeMoveGate = "MOVE_GATE" as const;
@@ -36,18 +36,28 @@ export const dragGateItemToQuantumGate = (qubitIndex:number, item: DragGateItem)
       return GateT(qubitIndex);
     case "s":
       return GateS(qubitIndex);
+    case "sdg":
+      return GateSdg(qubitIndex);
+    case "tdg":
+      return GateTdg(qubitIndex);
+    case "sx":
+      return GateSX(qubitIndex);
     case "i":
       return GateI(qubitIndex);
     case "cnot":
       return GateCNOT(qubitIndex, qubitIndex);
     case "ccnot":
       return GateCCNOT(qubitIndex, qubitIndex, qubitIndex);
+    case "cz":
+      return GateCZ(qubitIndex, qubitIndex);
     case "rx":
       return GateRX(qubitIndex, 0);
     case "ry":
       return GateRY(qubitIndex, 0);
     case "rz":
       return GateRZ(qubitIndex, 0);
+    case "barrier":
+      return OpBarrier(qubitIndex);
     default: 
       throw new Error("Unsuppoted gate!")
     }
