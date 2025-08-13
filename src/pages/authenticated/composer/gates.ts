@@ -16,6 +16,7 @@ export type GateRZ = { readonly _tag: "rz"; target: number; arg: number }; // ä¿
 export type GateCNOT = { readonly _tag: "cnot"; target: number; control: number };
 export type GateCCNOT = { readonly _tag: "ccnot"; target: number; control1: number; control2: number };
 export type GateCZ = { readonly _tag: "cz"; target: number; control: number };
+export type GateSwap = { readonly _tag: "swap"; target: number; control: number; };
 export type OpBarrier = { readonly _tag: "barrier"; target: number };
 
 export type QuantumGate =
@@ -35,6 +36,7 @@ export type QuantumGate =
   | GateCNOT
   | GateCCNOT
   | GateCZ
+  | GateSwap
   | OpBarrier;
 
 export const GateI = (target: number): GateI => ({ _tag: "i", target });
@@ -53,6 +55,7 @@ export const GateRZ = (target: number, arg: number): GateRZ => ({ _tag: "rz", ta
 export const GateCNOT = (control: number, target: number): GateCNOT => ({ _tag: "cnot", control, target });
 export const GateCCNOT = (control1: number, control2: number, target: number): GateCCNOT => ({ _tag: "ccnot", control1, control2, target });
 export const GateCZ = (control: number, target: number): GateCZ => ({ _tag: "cz", control, target });
+export const GateSwap = (control: number, target: number): GateSwap => ({ _tag: "swap", control, target });
 export const OpBarrier = (target: number): OpBarrier => ({ _tag: "barrier", target });
 
 export const labelOfGate = (gate: QuantumGate): string => {
@@ -61,6 +64,7 @@ export const labelOfGate = (gate: QuantumGate): string => {
     case "ccnot": return "CCNot";
     case "cnot": return "CNot";
     case "cz": return "CZ";
+    case "swap": return "Swap";
     case "i": return "i";
     case "h": return "H";
     case "rx": return "RX";
@@ -111,6 +115,7 @@ export const gateName =(g: QuantumGate): string => {
     case "ccnot": return "Toffoli Gate";
     case "cnot": return "Controlled Not Gate";
     case "cz": return "Controlled Z Gate";
+    case "swap": return "Swap Gate";
     case "i": return "Identity Gate";
     case "h": return "Hadamard Gate";
     case "rx": return "RX Gate";
@@ -142,6 +147,7 @@ export const allGates: QuantumGate["_tag"][] =
     "cnot",
     // "ccnot",
     "cz",
+    "swap",
     "rx",
     "ry",
     "rz",
@@ -156,3 +162,11 @@ export const getDaggerGateBaseLabel = (tag: DaggerGateTag): string => {
     case "tdg": return "T";
   }
 }
+
+export type ControlledGateTag =  Extract<typeof allGates[number], "cnot" | "ccnot" | "cz" | "swap">; 
+export const controlledGateTags: ControlledGateTag[] = [
+  "ccnot",
+  "cnot",
+  "cz",
+  "swap"
+] as const; 

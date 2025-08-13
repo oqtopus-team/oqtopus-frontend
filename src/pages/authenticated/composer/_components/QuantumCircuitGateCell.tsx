@@ -1,28 +1,30 @@
 import { useRef } from "react";
-import { ControlWireDirection, Down, QuantumGate, Up } from "../gates";
+import { ControlledGateTag, ControlWireDirection, Down, QuantumGate, Up } from "../gates";
 import QuantumGateElement from "./QuantumGateElement";
 import clsx from "clsx";
 import { DummyGate } from "../composer";
+import { RxCross2 } from "react-icons/rx";
 
 export type GateCellElement =
   | { readonly _tag: "gate", gate: QuantumGate | DummyGate }
-  | { readonly _tag: "controlWire" }
-  | { readonly _tag: "controlQubit", directions: ControlWireDirection[] }
+  | { readonly _tag: "controlWire", gateTag: ControlledGateTag, }
+  | { readonly _tag: "controlQubit", gateTag: ControlledGateTag, directions: ControlWireDirection[] }
   | { readonly _tag: "emptyCell" }
   ;
 
 export const Gate = (gate: QuantumGate | DummyGate): GateCellElement => ({ _tag: "gate", gate });
-export const ControlWire: GateCellElement = { _tag: "controlWire" };
-export const ControlQubit = (directions: ControlWireDirection[]): GateCellElement => ({
+export const ControlWire = (gateTag: ControlledGateTag): GateCellElement => ({ _tag: "controlWire", gateTag });
+export const ControlQubit = (gateTag: ControlledGateTag, directions: ControlWireDirection[]): GateCellElement => ({
   _tag: "controlQubit",
+  gateTag,
   directions
 });
 export const EmptyCell: GateCellElement = { _tag: "emptyCell" };
 
 export type PreviewControl =
-  | { _tag: "controlWire" }
-  | { _tag: "controlQubit", directions: ("up" | "down")[] }
-  | { _tag: "controlledGate", directions: ("up" | "down")[] }
+  | { _tag: "controlWire", gateTag: ControlledGateTag, }
+  | { _tag: "controlQubit", gateTag: ControlledGateTag, directions: ("up" | "down")[] }
+  | { _tag: "controlledGate", gateTag: ControlledGateTag, directions: ("up" | "down")[] }
   ;
 
 export interface Props {
@@ -57,6 +59,7 @@ export default (props: Props) => {
         if (props.previewControl?._tag === "controlQubit") {
           return (
             <ControlQubitCell
+              baseGateTag={props.previewControl.gateTag}
               isPreview
               isConnectedDown={props.previewControl.directions.includes("down")}
               isConnectedUp={props.previewControl.directions.includes("up")}
@@ -86,7 +89,7 @@ export default (props: Props) => {
                   onDragEnd={props.onDragEnd}
                   resetControlGate={
                     () => {
-                      if (element.gate._tag === "cnot" || element.gate._tag === "ccnot" || element.gate._tag === "cz") {
+                      if (element.gate._tag === "cnot" || element.gate._tag === "ccnot" || element.gate._tag === "cz" || element.gate._tag === "swap") {
                         props.onClickControlledGate(props.qubitIndex, props.timestep);
                       }
                     }}
@@ -97,6 +100,7 @@ export default (props: Props) => {
           case "controlQubit":
             return (
               <ControlQubitCell
+                baseGateTag={element.gateTag}
                 isConnectedDown={element.directions.includes(Down)}
                 isConnectedUp={element.directions.includes(Up)}
                 handleClick={() => {
@@ -154,40 +158,105 @@ export const ControlWireCell = (props: { isPreview?: boolean }) => {
 }
 
 interface ControlQubitCellProps {
+  baseGateTag: ControlledGateTag;
   isConnectedUp: boolean;
   isConnectedDown: boolean;
   handleClick: () => void;
   isPreview?: boolean;
 }
 export const ControlQubitCell = (props: ControlQubitCellProps) => {
-  return (
-    <>
-      <div
-        className={clsx([
-          ["flex-col", "justify-center", "h-full"],
-          props.isPreview ? ["opacity-50"] : []
-        ])}
-        onClick={(props.handleClick)}
-      >
-        <div className="flex justify-center items-center h-[24px]">
-          {
-            props.isConnectedUp
-              ? <div className="bg-gate-controlled w-1 h-full"></div>
-              : <div className="h-full"></div>
-          }
+  switch (props.baseGateTag) {
+    case "cnot":
+    case "ccnot":
+    case "cz":
+      return (
+        <>
+          <div
+            className={clsx([
+              ["flex-col", "justify-center", "h-full"],
+              props.isPreview ? ["opacity-50"] : []
+            ])}
+            onClick={(props.handleClick)}
+          >
+            <div className="flex justify-center items-center h-[24px]">
+              {
+                props.isConnectedUp
+                  ? <div className="bg-gate-controlled w-1 h-full"></div>
+                  : <div className="h-full"></div>
+              }
+            </div>
+            <div
+              className="bg-gate-controlled w-[16px] h-[16px] rounded-full"
+            >
+            </div>
+            <div className="flex justify-center items-center h-[24px]">
+              {
+                props.isConnectedDown
+                  ? <div className="bg-gate-controlled w-1 h-full"></div>
+                  : <div className="h-full"></div>
+              }
+            </div>
+          </div>
+        </>
+      )
+   case "swap":
+    return (
+        <div className={clsx([props.isPreview ? ["opacity-50"] : []])} onClick={(props.handleClick)}>
+          <div
+            className={clsx([
+              ['relative', 'w-full', 'h-full']
+            ])}
+          >
+            <div
+              className={clsx([
+                ['absolute', 'top-0', 'left-0', 'z-20'],
+                ["w-full", "h-full", "rounded-full"],
+                ["flex", "items-center", "justify-center"],
+                ["text-center", "align-middle"]
+              ])}
+            >
+              <div
+                className={clsx(
+                  ["w-[32px]", "h-[32px]"], 
+                  ["text-gate-controlled", "font-bold", "text-3xl"],
+                  ["flex", "justify-center", "items-center"]
+                )}
+              >
+                <RxCross2 style={{ strokeWidth: 0.5}} />
+              </div>
+            </div>
+          </div>
+          {props.isConnectedUp && <div
+            className={clsx([
+              ['absolute', 'top-0', 'left-0', 'z-10'],
+              ["w-full", "h-[32px]"],
+              ["flex", "items-center", "justify-center"],
+            ])}
+          >
+            <div
+              className={clsx([
+                ["bg-gate-controlled", "font-bold"],
+                ["text-2xl"],
+                ['h-full', 'w-1']
+              ])}
+            />
+          </div>}
+          {props.isConnectedDown && <div
+            className={clsx([
+              ['absolute', 'bottom-0', 'left-0', 'z-10'],
+              ["w-full", "h-[32px]"],
+              ["flex", "items-center", "justify-center"],
+            ])}
+          >
+            <div
+              className={clsx([
+                ["bg-gate-controlled", "font-bold"],
+                ["text-2xl"],
+                ['h-full', 'w-1']
+              ])}
+            />
+          </div>}
         </div>
-        <div
-          className="bg-gate-controlled w-[16px] h-[16px] rounded-full"
-        >
-        </div>
-        <div className="flex justify-center items-center h-[24px]">
-          {
-            props.isConnectedDown
-              ? <div className="bg-gate-controlled w-1 h-full"></div>
-              : <div className="h-full"></div>
-          }
-        </div>
-      </div>
-    </>
-  )
+      );
+  }
 }

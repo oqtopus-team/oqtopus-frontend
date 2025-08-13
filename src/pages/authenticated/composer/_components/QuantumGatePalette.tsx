@@ -1,5 +1,5 @@
 import clsx, { ClassValue } from "clsx";
-import { allGates, DaggerGateTag, getDaggerGateBaseLabel, QuantumGate } from "../gates";
+import { DaggerGateTag, getDaggerGateBaseLabel, QuantumGate } from "../gates";
 import QuantumGatePaletteItem from "./QuantumGatePaletteItem";
 import { Mode } from "../composer";
 import "./Composer.css";
@@ -95,6 +95,23 @@ const CZGate = () => {
     >
       <img
         src={`/img/composer/gate-cz.svg`}
+        className="h-full w-auto object-contain"
+      />
+    </div>
+  )
+}
+
+const SwapGate = () => {
+  return (
+    <div
+      className={clsx([
+        "w-10", "h-10", "rounded",
+        "flex", "justify-center", "items-center", "p-1",
+        "bg-gate-controlled",
+      ])}
+    >
+      <img
+        src={`/img/composer/gate-swap.svg`}
         className="h-full w-auto object-contain"
       />
     </div>
@@ -207,6 +224,18 @@ export default (props: QuantumGatePaletteProps) => {
                   onDragEnd={props.onDragEnd}
                 >
                   <CZGate />
+                </QuantumGatePaletteItem>
+              )
+            case "swap":
+              return (
+                <QuantumGatePaletteItem
+                  gateTag={gateTag}
+                  key={gateTag}
+                  disabled={props.mode == "eraser"}
+                  onDragStart={() => props.onDragStart(gateTag)}
+                  onDragEnd={props.onDragEnd}
+                >
+                  <SwapGate />
                 </QuantumGatePaletteItem>
               )
             case "rx":

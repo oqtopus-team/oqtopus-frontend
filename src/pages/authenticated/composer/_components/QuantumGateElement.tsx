@@ -1,9 +1,10 @@
-import clsx, { ClassValue } from "clsx";
+import clsx from "clsx";
 import { ControlWireDirection, Down, QuantumGate, Up, getDaggerGateBaseLabel, labelOfGate } from "../gates";
 import { useEffect, useRef } from "react";
 import { useDrag } from "react-dnd";
-import { DragMoveGateItem, FromCanvas, ItemTypeGate, ItemTypeMoveGate } from "../dnd";
+import { DragMoveGateItem, FromCanvas, ItemTypeMoveGate } from "../dnd";
 import { DummyGate } from "../composer";
+import { RxCross2 } from "react-icons/rx";
 
 import "./Composer.css";
 
@@ -155,6 +156,81 @@ const ControlledZGate = (props: ControlledGateProps) => {
             className={clsx([
               ['absolute', 'bottom-[-12px]', 'left-0', 'z-10'],
               ["w-full", "h-[24px]"],
+              ["flex", "items-center", "justify-center"],
+              props.previewWire ? ["opacity-50"] : []
+            ])}
+          >
+            <div
+              className={clsx([
+                ["bg-gate-controlled", "font-bold"],
+                ["text-2xl"],
+                ['h-full', 'w-1']
+              ])}
+            />
+          </div>
+        )
+        : <></>
+      }
+    </div>
+  )
+}
+
+const SwapGate = (props: ControlledGateProps) => {
+  return (
+    <div
+      className={clsx([
+        ['relative', 'w-full', 'h-full']
+      ])}
+      onClick={() => {
+        props.onClick?.();
+        props.resetControlGate?.();
+      }}
+    >
+      <div
+        className={clsx([
+          ['absolute', 'top-0', 'left-0', 'z-20'],
+          ["w-full", "h-full", "rounded-full"],
+          ["flex", "items-center", "justify-center"],
+          ["text-center", "align-middle"]
+        ])}
+      >
+        <div
+          className={clsx(
+            ["w-[32px]", "h-[32px]"], 
+            ["text-gate-controlled", "font-bold", "text-3xl"],
+            ["flex", "justify-center", "items-center"]
+          )}
+        >
+          <RxCross2 style={{ strokeWidth: 0.5}} />
+        </div>
+      </div>
+      {props.wireDirections.includes(Up)
+        ? (
+          <div
+            className={clsx([
+              ['absolute', 'top-[-12px]', 'left-0', 'z-10'],
+              ["w-full", "h-[32px]"],
+              ["flex", "items-center", "justify-center"],
+              props.previewWire ? ["opacity-50"] : []
+            ])}
+          >
+            <div
+              className={clsx([
+                ["bg-gate-controlled", "font-bold"],
+                ["text-2xl"],
+                ['h-full', 'w-1']
+              ])}
+            />
+          </div>
+        )
+        : <></>
+      }
+      {props.wireDirections.includes(Down)
+        ? (
+          <div
+            className={clsx([
+              ['absolute', 'bottom-[-12px]', 'left-0', 'z-10'],
+              ["w-full", "h-[32px]"],
               ["flex", "items-center", "justify-center"],
               props.previewWire ? ["opacity-50"] : []
             ])}
@@ -375,6 +451,22 @@ export default function QuantumGateElement(props: Props) {
               return (
                 <ControlledZGate
                   wireDirections={czWireDirections}
+                  previewWire={props.previewDirections !== undefined}
+                  label="+"
+                  onClick={props.onClick}
+                  resetControlGate={props.resetControlGate}
+                />
+              );
+            case "swap":
+              const swapWireDirections = (() => {
+                return [
+                  (props.previewDirections?.includes("up") || gate.control < gate.target) ? [Up] : [],
+                  (props.previewDirections?.includes("down") || gate.control > gate.target) ? [Down] : []
+                ].flat() as ControlWireDirection[]
+              })()
+              return (
+                <SwapGate
+                  wireDirections={swapWireDirections}
                   previewWire={props.previewDirections !== undefined}
                   label="+"
                   onClick={props.onClick}

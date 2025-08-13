@@ -50,6 +50,7 @@ const renderQasm = (qubitNumber: number, steps: ExtendedGate[]): string => {
           return `${gate._tag} q[${gate.target}];`;
         case "cnot":
         case 'cz':
+        case "swap":
           return `cx q[${gate.control}], q[${gate.target}];`
         case "rx":
         case "ry":

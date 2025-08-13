@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { QuantumGate, Down, Up, GateS, ControlWireDirection, compareGate, GateCNOT, gateName } from "../gates";
+import { QuantumGate, Down, Up, compareGate, gateName, controlledGateTags, ControlledGateTag } from "../gates";
 import { QuantumCircuit } from "../circuit";
 import { DragGateItem, dragGateItemToQuantumGate, DragMoveGateItem, ItemTypeGate, ItemTypeMoveGate } from "../dnd";
 import clsx from "clsx";
-import QuantumCircuitGateCell, { ControlQubit, ControlWire, EmptyCell, Gate, PreviewControl, } from "./QuantumCircuitGateCell";
+import QuantumCircuitGateCell, { ControlQubit, ControlWire, EmptyCell, Gate } from "./QuantumCircuitGateCell";
 import QuantumCircuitDropCell, { DropCellPart } from "./QuantumCircuitDropCell";
 import { DummyGate, ExtendedGate, Mode } from "../composer";
 import { t } from "i18next";
@@ -51,18 +51,21 @@ const foldCircuit = (circuit: QuantumCircuit): ComposedProgram => {
           return undefined;
         case "cnot":
         case "cz":
+        case "swap":
           return (
             i == gate.target
               ? gate
               : i == gate.control
                 ? {
                   _tag: "$controlBit",
+                  baseGateTag: gate._tag,
                   target: i,
                   from: Math.min(gate.control, gate.target),
                   to: Math.max(gate.control, gate.target)
                 }
                 : {
                   _tag: "$controlWire",
+                  baseGateTag: gate._tag,
                   target: i,
                   from: Math.min(gate.control, gate.target),
                   to: Math.max(gate.control, gate.target)
@@ -75,12 +78,14 @@ const foldCircuit = (circuit: QuantumCircuit): ComposedProgram => {
               : (i == gate.control1 || i == gate.control2)
                 ? {
                   _tag: "$controlBit",
+                  baseGateTag: gate._tag,
                   target: i,
                   from: Math.min(gate.control1, gate.control2, gate.target),
                   to: Math.max(gate.control1, gate.control2, gate.target),
                 }
                 : {
                   _tag: "$controlWire",
+                  baseGateTag: gate._tag,
                   target: i,
                   from: Math.min(gate.control1, gate.control2, gate.target),
                   to: Math.max(gate.control1, gate.control2, gate.target),
@@ -95,6 +100,7 @@ const foldCircuit = (circuit: QuantumCircuit): ComposedProgram => {
     switch (gateHead._tag) {
       case "cnot":
       case "cz":
+      case "swap":
         const di = gateHead.control < gateHead.target ? (-1) : (+1);
         insertPos = calcMaxDepth(
           state.composed.slice(
@@ -163,6 +169,7 @@ const calcMaxShiftRange = (qFrom: number, qTo: number, tFrom: number, c: Compose
           return [Math.min(g.from, result[0]), Math.max(g.to, result[1])];
         case "cnot":
         case "cz":
+        case "swap":
           return [Math.min(g.control, g.target, result[0]), Math.max(g.control, g.target, result[1])];
         case "ccnot":
           return [
@@ -430,10 +437,11 @@ const handleDropNewGate = (
   switch (item.gateTag) {
     case "cnot":
     case "cz":
-      setHoldingControlQubit({ targetQubitIndex: qubitIndex, hovered: qubitIndex, timestep, rest: 1 })
+    case "swap":
+      setHoldingControlQubit({ targetQubitIndex: qubitIndex, gateTag: item.gateTag, hovered: qubitIndex, timestep, rest: 1 })
       return;
     case "ccnot":
-      setHoldingControlQubit({ targetQubitIndex: qubitIndex, hovered: qubitIndex, timestep, rest: 2 })
+      setHoldingControlQubit({ targetQubitIndex: qubitIndex, gateTag: item.gateTag,hovered: qubitIndex, timestep, rest: 2 })
       return;
   }
 };
@@ -463,6 +471,7 @@ const handleMoveGate = (
     switch (originalGate._tag) {
       case "cnot":
       case "cz":
+      case "swap":
         return { ...originalGate, control: qubitIndex, target: qubitIndex };
       case "ccnot":
         return { ...originalGate, control1: qubitIndex, control2: qubitIndex, target: qubitIndex };
@@ -476,11 +485,12 @@ const handleMoveGate = (
   switch (movingGate._tag) {
     case "cnot":
     case "cz":
-      setHoldingControlQubit({ targetQubitIndex: qubitIndex, hovered: qubitIndex, timestep, rest: 1 });
+    case "swap":
+      setHoldingControlQubit({ targetQubitIndex: qubitIndex, gateTag: movingGate._tag, hovered: qubitIndex, timestep, rest: 1 });
       break;
 
     case "ccnot":
-      setHoldingControlQubit({ targetQubitIndex: qubitIndex, hovered: qubitIndex, timestep, rest: 2 })
+      setHoldingControlQubit({ targetQubitIndex: qubitIndex, gateTag: movingGate._tag, hovered: qubitIndex, timestep, rest: 2 })
       break;
   }
 }
@@ -490,7 +500,7 @@ type HoldingGate =
 
 type HoldingControlQubit =
   | false
-  | { targetQubitIndex: number; timestep: number, rest: number, hovered: number };
+  | { targetQubitIndex: number; gateTag: ControlledGateTag; timestep: number, rest: number, hovered: number };
 
 type DraggingFromCanvasState =
   | { isDragging: false }
@@ -592,6 +602,7 @@ export default (props: Props) => {
       switch (originralGate?._tag) {
         case "cnot":
         case "cz":
+        case "swap":
           composedProgram[qIndex][tIndex] = {
             ...originralGate,
             control: originralGate.target
@@ -620,13 +631,14 @@ export default (props: Props) => {
       switch (gate._tag) {
         case "$controlBit":
           return ControlQubit(
+            gate.baseGateTag,
             [
               gate.from < qIndex ? [Up] : [],
               gate.to > qIndex ? [Down] : []
             ].flat()
           );
         case "$controlWire":
-          return ControlWire;
+          return ControlWire(gate.baseGateTag);
         default:
           return Gate(gate);
       }
@@ -689,17 +701,18 @@ export default (props: Props) => {
     }
     if (holdingControlQubit.timestep !== cqTimestep) return;
     const controlledGate = composed[holdingControlQubit.targetQubitIndex][holdingControlQubit.timestep];
-    if (!controlledGate) {
+    if (!controlledGate || !controlledGateTags.includes(controlledGate._tag as ControlledGateTag)) {
       throw new Error("Impossible!")
     }
     const [from, to] = [cqIndex, holdingControlQubit.targetQubitIndex].sort();
 
     const newItem = (i: number): ExtendedGate => {
-      if (i === cqIndex) return { _tag: "$controlBit", from, to, target: cqIndex };
+      if (i === cqIndex) return { _tag: "$controlBit", baseGateTag: controlledGate._tag as ControlledGateTag, from, to, target: cqIndex };
       if (i === holdingControlQubit.targetQubitIndex) {
         switch (controlledGate._tag) {
           case "cnot":
           case "cz":
+          case "swap":
             controlledGate.control = cqIndex;
             return controlledGate;
           case "ccnot":
@@ -713,7 +726,7 @@ export default (props: Props) => {
             throw new Error("Impossible!");
         }
       }
-      return { _tag: "$controlWire", from, to, target: i };
+      return { _tag: "$controlWire", baseGateTag: controlledGate._tag as ControlledGateTag, from, to, target: i };
     }
 
     const newComposed = composed.map((w, i) => {
@@ -782,6 +795,7 @@ export default (props: Props) => {
     switch (gate?._tag) {
       case "cnot":
       case "cz":
+      case "swap":
         const [cnotFrom, cnotTo] = [gate.control, gate.target].sort();
 
         composedProgram.forEach((w, i) => {
@@ -793,7 +807,7 @@ export default (props: Props) => {
         });
         handleComposedProgramUpdated(composedProgram, qubitNumber.valueOf());
         
-        setHoldingControlQubit({ targetQubitIndex: qIndex, hovered: qIndex, timestep: tIndex, rest: 1 });
+        setHoldingControlQubit({ targetQubitIndex: qIndex, gateTag: gate._tag, hovered: qIndex, timestep: tIndex, rest: 1 });
         props.toggleMode("control")();
         break;
       case "ccnot":
@@ -801,7 +815,7 @@ export default (props: Props) => {
           w[tIndex] = i == qIndex ? { ...gate, control1: qIndex, control2: qIndex } : undefined;
         });
         handleComposedProgramUpdated(composedProgram, qubitNumber.valueOf());
-        setHoldingControlQubit({ targetQubitIndex: qIndex, hovered: qIndex, timestep: tIndex, rest: 2 });
+        setHoldingControlQubit({ targetQubitIndex: qIndex, gateTag: gate._tag, hovered: qIndex, timestep: tIndex, rest: 2 });
         props.toggleMode("control")();
         break;
       default:
@@ -947,6 +961,7 @@ export default (props: Props) => {
                               if (holdingControlQuit.targetQubitIndex === qIndex) {
                                 return {
                                   _tag: "controlledGate",
+                                  gateTag: holdingControlQuit.gateTag,
                                   directions: [
                                     qIndex < holdingControlQuit.hovered ? ["down"] : [],
                                     qIndex > holdingControlQuit.hovered ? ["up"] : []
@@ -957,11 +972,12 @@ export default (props: Props) => {
                               if (holdingControlQuit.hovered === qIndex) {
                                 return {
                                   _tag: "controlQubit",
+                                  gateTag: holdingControlQuit.gateTag,
                                   directions: [holdingControlQuit.targetQubitIndex >= qIndex ? "down" : "up"]
                                 };
                               }
                               if (qIndex > from && qIndex < to) {
-                                return { _tag: "controlWire" }
+                                return { _tag: "controlWire", gateTag: holdingControlQuit.gateTag, }
                               }
                               return null
                             })()

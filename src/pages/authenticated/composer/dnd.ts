@@ -1,4 +1,4 @@
-import { GateCCNOT, GateCNOT, GateCZ, GateH, GateI, GateRX, GateRY, GateRZ, GateS, GateSdg, GateSX, GateT, GateTdg, GateX, GateY, GateZ, OpBarrier, QuantumGate } from "./gates";
+import { GateCCNOT, GateCNOT, GateCZ, GateH, GateI, GateRX, GateRY, GateRZ, GateS, GateSdg, GateSwap, GateSX, GateT, GateTdg, GateX, GateY, GateZ, OpBarrier, QuantumGate } from "./gates";
 
 export const ItemTypeGate = "GATE" as const;
 export const ItemTypeMoveGate = "MOVE_GATE" as const;
@@ -50,6 +50,8 @@ export const dragGateItemToQuantumGate = (qubitIndex:number, item: DragGateItem)
       return GateCCNOT(qubitIndex, qubitIndex, qubitIndex);
     case "cz":
       return GateCZ(qubitIndex, qubitIndex);
+    case "swap":
+      return GateSwap(qubitIndex, qubitIndex);
     case "rx":
       return GateRX(qubitIndex, 0);
     case "ry":
