@@ -12,9 +12,6 @@ import { JobDetailTranspiledProgram } from './panels/JobDetailTranspiledProgram'
 
 export const SuccessViewEstimation: React.FC<Job> = (job: Job) => {
   const nonHistogramPanelHeight = useWindowSize().height * 0.9;
-  const hasMitigationInfo: boolean = job.mitigationInfo
-    ? Object.keys(job.mitigationInfo).length > 0
-    : false;
 
   return (
     <>
@@ -41,14 +38,12 @@ export const SuccessViewEstimation: React.FC<Job> = (job: Job) => {
           <JobDetailExpectation expectationValue={job.jobInfo.result?.estimation?.exp_value} />
         </Card>
         {/* MitigationInfo */}
-        {hasMitigationInfo && (
-          <Card className={clsx(['col-start-1', 'col-end-3'])}>
-            <JobDetailMitigationInfo
-              mitigationInfo={job.mitigationInfo}
-              maxHeight={nonHistogramPanelHeight}
-            />
-          </Card>
-        )}
+        <Card className={clsx(['col-start-1', 'col-end-3'])}>
+          <JobDetailMitigationInfo
+            mitigationInfo={job.mitigationInfo}
+            maxHeight={nonHistogramPanelHeight}
+          />
+        </Card>
         {/* QASM */}
         <Card className={clsx(['col-start-1', 'col-end-2'])}>
           <JobDetailProgram program={job.jobInfo.program} maxHeight={nonHistogramPanelHeight} />
