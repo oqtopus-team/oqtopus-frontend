@@ -117,6 +117,21 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
   const fgRef = useRef<any>(null);
   const [zoomLevel, setZoomLevel] = useState<string>('1.00');
 
+  const [divSize, setDivSize] = useState<{ width: number; height: number }>({
+    width: 0,
+    height: 0,
+  });
+  const [heddingSize, setHeddingSize] = useState<{ width: number; height: number }>({
+    width: 0,
+    height: 0,
+  });
+
+  const windowSize = useWindowSize();
+  const divRef = useRef<HTMLDivElement>(null);
+  const heddingRef = useRef<HTMLDivElement>(null);
+
+  const strHoveredInfo = JSON.stringify(hoveredInfo);
+
   const handleZoom = useCallback(() => {
     if (fgRef.current && typeof fgRef.current.zoom === 'function') {
       const zoom = fgRef.current.zoom();
@@ -125,39 +140,6 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
       });
     }
   }, []);
-
-
-  useEffect(() => {
-    try {
-      const parsedDeviceInfo = (() => {
-        try {
-          if (!deviceInfo) {
-            setIsValidDeviceInfo(false);
-            return {};
-          }
-          return JSON.parse(deviceInfo);
-        } catch (err) {
-          setIsValidDeviceInfo(false);
-          console.error('Failed to parse device info:', err);
-          return {};
-        }
-      })();
-
-      const { nodeData, tempNodeMap } = createNodeData(parsedDeviceInfo.qubits);
-      const { edgeData, tempCouplingMap } = createEdgeData(parsedDeviceInfo.couplings);
-
-      if (nodeData.length === 0) {
-        setIsValidDeviceInfo(false);
-      }
-
-      setTopologyData({ nodes: normalizePositions(nodeData), links: edgeData });
-      setNodeMap(tempNodeMap);
-      setCouplingMap(tempCouplingMap);
-    } catch (err) {
-      setIsValidDeviceInfo(false);
-      console.error('Failed to update topology data:', err);
-    }
-  }, [deviceInfo]);
 
   const handleHoverNode = (node: NodeObject | null) => {
     try {
@@ -194,18 +176,11 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
     }
   };
 
-  const [divSize, setDivSize] = useState<{ width: number; height: number }>({
-    width: 0,
-    height: 0,
-  });
-  const [heddingSize, setHeddingSize] = useState<{ width: number; height: number }>({
-    width: 0,
-    height: 0,
-  });
-
-  const windowSize = useWindowSize();
-  const divRef = useRef<HTMLDivElement>(null);
-  const heddingRef = useRef<HTMLDivElement>(null);
+  const handleFitToView = () => {
+    if (fgRef.current) {
+      fgRef.current.zoomToFit(300, 30);
+    }
+  };
 
   useEffect(() => {
     const updateDivSize = () => {
@@ -244,15 +219,39 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
     };
   }, [windowSize]);
 
-  const strHoveredInfo = JSON.stringify(hoveredInfo);
+  useEffect(() => {
+    try {
+      const parsedDeviceInfo = (() => {
+        try {
+          if (!deviceInfo) {
+            setIsValidDeviceInfo(false);
+            return {};
+          }
+          return JSON.parse(deviceInfo);
+        } catch (err) {
+          setIsValidDeviceInfo(false);
+          console.error('Failed to parse device info:', err);
+          return {};
+        }
+      })();
 
-  if (!isValidDeviceInfo) {
-    return (
-      <p className={clsx('text-error', 'text-xl')}>
-        {t('device.detail.topology_info.invalid_device_info')}
-      </p>
-    );
-  }
+      if(!parsedDeviceInfo.qubits || !parsedDeviceInfo.couplings) return;
+
+      const { nodeData, tempNodeMap } = createNodeData(parsedDeviceInfo.qubits);
+      const { edgeData, tempCouplingMap } = createEdgeData(parsedDeviceInfo.couplings);
+
+      if (nodeData.length === 0) {
+        setIsValidDeviceInfo(false);
+      }
+
+      setTopologyData({ nodes: normalizePositions(nodeData), links: edgeData });
+      setNodeMap(tempNodeMap);
+      setCouplingMap(tempCouplingMap);
+    } catch (err) {
+      setIsValidDeviceInfo(false);
+      console.error('Failed to update topology data:', err);
+    }
+  }, [deviceInfo]);
 
   useEffect(() => {
     // Delay to ensure the canvas is rendered
@@ -265,10 +264,13 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
     return () => clearTimeout(timeout);
   }, []);
 
-  const handleFitToView = () => {
-    if (fgRef.current) {
-      fgRef.current.zoomToFit(300, 30);
-    }
+
+  if (!isValidDeviceInfo) {
+    return (
+      <p className={clsx('text-error', 'text-xl')}>
+        {t('device.detail.topology_info.invalid_device_info')}
+      </p>
+    );
   }
 
   return (
@@ -294,10 +296,12 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
             zIndex: 9999,
             display: 'flex',
             alignItems: 'center',
-            background: "#fff",
+            background: '#fff',
           }}
         >
-          <Button size="small" onClick={handleFitToView}>{t('device.detail.topology_info.fit_to_view')}</Button>
+          <Button size="small" onClick={handleFitToView}>
+            {t('device.detail.topology_info.fit_to_view')}
+          </Button>
           <input
             type="range"
             min={MIN_ZOOM}
