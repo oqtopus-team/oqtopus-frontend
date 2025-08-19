@@ -12,6 +12,7 @@ import { Slider } from "@mui/material";
 import { Input } from "@/pages/_components/Input";
 import { Button } from "@/pages/_components/Button";
 import { Spacer } from "@/pages/_components/Spacer";
+import { RxCopy } from "react-icons/rx";
 
 type FoldCircuitState = {
   composed: (QuantumGate | undefined)[][];
@@ -232,6 +233,7 @@ const handleDragControlQubit = (
     timestep: number,
     part: DropCellPart
   ) => {
+    console.log("I AM DRAGGING")
     if (holdingControlQubit === false) {
       throw new Error("Impossible!");
     }
@@ -307,6 +309,7 @@ const handleDragIn = (
     part: DropCellPart,
     item: DragGateItem | DragMoveGateItem,
   ) => {
+    console.log("I AM DRAGGING IN")
     const effComposed = (() => {
       if (item.type === "MOVE_GATE") {
         return composed.map((w, i) => {
@@ -322,6 +325,7 @@ const handleDragIn = (
     const [newComposed, newHoldingGate, shouldShift] =
       ((): [ComposedProgram, HoldingGate, boolean] => {
         if (hoveredCell && hoveredCell._tag !== "$dummy") {
+          console.log("AS EXPECTED", hoveredCell);
           const checkPos = part == "left"
             ? timestep - 1
             : timestep + 1;
@@ -330,6 +334,7 @@ const handleDragIn = (
             && checkPos >= 0
             && checkPos <= maxDepth - 1
           ) {
+            console.log("1?")
             return [
               [...composed],
               { dropQubitIndex: qubitIndex, dropTimestep: checkPos, part },
@@ -337,6 +342,7 @@ const handleDragIn = (
             ];
           }
           else {
+            console.log("2?")
             // 　空白を入れる
             const insertPos = part == "right" ? timestep + 1 : timestep;
             return [
@@ -363,6 +369,9 @@ const handleDragIn = (
           ];
         }
       })();
+    console.log(newComposed[0][0]?._tag, newComposed[0][1]?._tag, newComposed[0][2]?._tag)
+    console.log(newComposed[1][0]?._tag, newComposed[1][1]?._tag, newComposed[1][2]?._tag)
+    console.log(newComposed[2][0]?._tag, newComposed[2][1]?._tag, newComposed[2][2]?._tag)
     setComposedProgram(newComposed);
     setHoldingGate(newHoldingGate);
     if (shouldShift && draggingFromCanvas.isDragging) {
@@ -394,6 +403,11 @@ interface Props {
 }
 
 type ComposedProgram = (undefined | ExtendedGate)[][];
+
+type QuantumGateWithPosition = QuantumGate & {
+  qIndex: number;
+  tIndex: number;
+}
 
 const calcMaxDepth = (composed: ComposedProgram) => {
   return composed.reduce((prev, gs) => {
@@ -430,6 +444,8 @@ const handleDropNewGate = (
   setHoldingControlQubit: (h: HoldingControlQubit) => void,
 ) => {
   const hole = composedProgram[qubitIndex][timestep];
+  console.log("DROP NEW GATE", qubitIndex, timestep, item, {...hole}, { ...composedProgram});
+  console.log("LOL", composedProgram[0][0], composedProgram[0][1], composedProgram[0][2]);
   if (hole && hole._tag !== "$dummy") return;
   const newComposed = [...composedProgram];
   newComposed[qubitIndex][timestep] = dragGateItemToQuantumGate(qubitIndex, item);
@@ -580,6 +596,7 @@ export default (props: Props) => {
   const [draggingFromCanvas, setDraggingFromCanvas] = useState<DraggingFromCanvasState>({ isDragging: false });
 
   const [gateViewer, setGateViewer] = useState<GateViewer>(false);
+  const [selectedGates, setSelectedGates] = useState<QuantumGateWithPosition[]>([]);
 
   useEffect(() => {
     const composed = foldCircuit(props.circuit);
@@ -664,6 +681,7 @@ export default (props: Props) => {
 
   const handleDrop = (qubitIndex: number, timestep: number, item: DragGateItem | DragMoveGateItem) => {
     (() => {
+      console.log("HANDLE DROP GATE", item?.type, item)
       switch (item.type) {
         case ItemTypeGate:
           return handleDropNewGate(
@@ -756,6 +774,10 @@ export default (props: Props) => {
     });
   }
 
+  useEffect(() => {
+    // console.log("NEW LIST OF SELECTED GATES", [...selectedGates]);
+  },[selectedGates])
+
   const handleGateElementClick = (qIndex: number, tIndex: number) => {
     if (props.mode == "eraser") {
       handleComposedProgramUpdated(composedProgram.map((w, i) =>
@@ -770,6 +792,16 @@ export default (props: Props) => {
     else {
       const clickedGate = composedProgram[qIndex][tIndex];
       if (!clickedGate || clickedGate._tag == "$dummy") return;
+      
+      if (clickedGate._tag !== "$controlWire" && clickedGate._tag !== "$controlBit") {
+        const clickedGateWithPosition = { ...clickedGate, qIndex, tIndex };
+        if (!selectedGates.some(g => compareGatesWithPositions(g, clickedGateWithPosition))) {
+          setSelectedGates([...selectedGates, clickedGateWithPosition]);
+        } else {
+          setSelectedGates(selectedGates.filter(g => !compareGatesWithPositions(g, clickedGateWithPosition)));
+        }
+      }
+
       switch (clickedGate._tag) {
         case "rx":
         case "ry":
@@ -787,6 +819,10 @@ export default (props: Props) => {
     }
 
   }
+
+  const compareGatesWithPositions = (g1: QuantumGateWithPosition, g2: QuantumGateWithPosition): boolean => {
+    return compareGate(g1, g2) && g1.qIndex === g2.qIndex && g1.tIndex == g2.tIndex;
+  } 
 
   const handleControlledGateClick = (qIndex: number, tIndex: number) => {
     if (props.mode === "eraser") return;
@@ -844,6 +880,8 @@ export default (props: Props) => {
 
 
   return (
+    <div>
+
     <div
       className={clsx([
         ["flex"],
@@ -997,6 +1035,7 @@ export default (props: Props) => {
                                 && holdingControlQuit.timestep == tIndex
                               )
                             }
+                            selected={selectedGates.some(g => g.qIndex === qIndex && g.tIndex === tIndex)}
                             onClickGateElement={props.static ? (_1, _2) => { } : handleGateElementClick}
                             onClickControlQubit={props.static ? (..._) => { } : handleControlQubitClick(holdingControlQuit, composedProgram, setHoldingControlQubit)}
                             onClickControlledGate={props.static ? (..._) => { } : handleControlledGateClick}
@@ -1178,6 +1217,7 @@ export default (props: Props) => {
                       qubitIndex={0}
                       timestep={0}
                       active={false}
+                      selected={false}
                       static={props.static}
                       isDragging={false}
                       onClick={() => { }}
@@ -1271,6 +1311,53 @@ export default (props: Props) => {
           : null
         }
       </div>
+    </div>
+    <Button color="secondary" style={{marginBottom: "1.25rem"}} onClick={() => {
+      let updatedComposedProgram = composedProgram;
+      
+      for (const gate of selectedGates) {
+        updatedComposedProgram = updatedComposedProgram.map((r, i) => {
+
+          if(i === gate.qIndex) return [...r.slice(0, gate.tIndex + 1), { ...gate }, ...r.slice(gate.tIndex+1)];
+
+          switch (gate._tag) {
+            case "cnot":
+            case "cz":
+            case "swap":
+              if (i === gate.control) return [
+                ...r.slice(0, gate.tIndex + 1), 
+                {
+                  _tag: "$controlBit",
+                  baseGateTag: gate._tag,
+                  target: i,
+                  from: Math.min(gate.control, gate.target),
+                  to: Math.max(gate.control, gate.target)
+                }, 
+                ...r.slice(gate.tIndex+1)
+              ]
+            else if (i > Math.min(gate.control, gate.target) && i < Math.max(gate.control, gate.target)) return [
+              ...r.slice(0, gate.tIndex + 1),
+              {
+                _tag: "$controlWire",
+                baseGateTag: gate._tag,
+                target: i,
+                from: Math.min(gate.control, gate.target),
+                to: Math.max(gate.control, gate.target)
+              },
+                ...r.slice(gate.tIndex+1)
+            ]
+          }
+          return [...r.slice(0, gate.tIndex + 1), undefined, ...r.slice(gate.tIndex+1)]
+        })
+      }
+
+      setComposedProgram(updatedComposedProgram);
+    }}>
+      <div style={{display: "flex", flexDirection: "row", alignItems: "center", gap: "0.25rem"}}>
+        <RxCopy />
+        Duplicate
+      </div>
+    </Button>
     </div>
   );
 }

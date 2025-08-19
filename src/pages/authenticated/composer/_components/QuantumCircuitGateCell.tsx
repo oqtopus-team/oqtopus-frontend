@@ -34,6 +34,7 @@ export interface Props {
   focused: boolean;
   static?: boolean;
   active: boolean;
+  selected: boolean;
   isDragging: boolean;
   previewControl: PreviewControl | null;
   onClickGateElement: (qubitIndex: number, timestep: number) => void;
@@ -80,6 +81,7 @@ export default (props: Props) => {
                   isDragging={props.isDragging}
                   gate={element.gate}
                   active={props.active}
+                  selected={props.selected}
                   static={props.static}
                   qubitIndex={props.qubitIndex}
                   timestep={props.timestep}

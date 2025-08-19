@@ -15,6 +15,7 @@ interface Props {
   isDragging: boolean;
   static?: boolean;
   active: boolean;
+  selected: boolean;
   previewDirections?: ("up" | "down")[];
   onClick: () => void;
   onDragStart?: () => void;
@@ -320,7 +321,7 @@ export default function QuantumGateElement(props: Props) {
           ? []
           : [props.isDragging ? "cursor-grabbing" : "cursor-pointer"],
         [props.isDragging ? "opacity-50" : "opacity-100"],
-        props.active ? ["shadow-md", "ring-4", "ring-primary", "ring-opacity-50"] : []
+        props.selected ? ["shadow-md", "ring-4", "ring-primary", "ring-opacity-50"] : []
       ])}
     >
       {
