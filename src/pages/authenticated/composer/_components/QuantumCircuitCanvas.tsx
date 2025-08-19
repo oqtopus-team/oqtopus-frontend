@@ -233,7 +233,6 @@ const handleDragControlQubit = (
     timestep: number,
     part: DropCellPart
   ) => {
-    console.log("I AM DRAGGING")
     if (holdingControlQubit === false) {
       throw new Error("Impossible!");
     }
@@ -309,7 +308,6 @@ const handleDragIn = (
     part: DropCellPart,
     item: DragGateItem | DragMoveGateItem,
   ) => {
-    console.log("I AM DRAGGING IN")
     const effComposed = (() => {
       if (item.type === "MOVE_GATE") {
         return composed.map((w, i) => {
@@ -325,7 +323,6 @@ const handleDragIn = (
     const [newComposed, newHoldingGate, shouldShift] =
       ((): [ComposedProgram, HoldingGate, boolean] => {
         if (hoveredCell && hoveredCell._tag !== "$dummy") {
-          console.log("AS EXPECTED", hoveredCell);
           const checkPos = part == "left"
             ? timestep - 1
             : timestep + 1;
@@ -334,7 +331,6 @@ const handleDragIn = (
             && checkPos >= 0
             && checkPos <= maxDepth - 1
           ) {
-            console.log("1?")
             return [
               [...composed],
               { dropQubitIndex: qubitIndex, dropTimestep: checkPos, part },
@@ -342,7 +338,6 @@ const handleDragIn = (
             ];
           }
           else {
-            console.log("2?")
             // 　空白を入れる
             const insertPos = part == "right" ? timestep + 1 : timestep;
             return [
@@ -369,9 +364,6 @@ const handleDragIn = (
           ];
         }
       })();
-    console.log(newComposed[0][0]?._tag, newComposed[0][1]?._tag, newComposed[0][2]?._tag)
-    console.log(newComposed[1][0]?._tag, newComposed[1][1]?._tag, newComposed[1][2]?._tag)
-    console.log(newComposed[2][0]?._tag, newComposed[2][1]?._tag, newComposed[2][2]?._tag)
     setComposedProgram(newComposed);
     setHoldingGate(newHoldingGate);
     if (shouldShift && draggingFromCanvas.isDragging) {
@@ -444,8 +436,6 @@ const handleDropNewGate = (
   setHoldingControlQubit: (h: HoldingControlQubit) => void,
 ) => {
   const hole = composedProgram[qubitIndex][timestep];
-  console.log("DROP NEW GATE", qubitIndex, timestep, item, {...hole}, { ...composedProgram});
-  console.log("LOL", composedProgram[0][0], composedProgram[0][1], composedProgram[0][2]);
   if (hole && hole._tag !== "$dummy") return;
   const newComposed = [...composedProgram];
   newComposed[qubitIndex][timestep] = dragGateItemToQuantumGate(qubitIndex, item);
@@ -681,7 +671,6 @@ export default (props: Props) => {
 
   const handleDrop = (qubitIndex: number, timestep: number, item: DragGateItem | DragMoveGateItem) => {
     (() => {
-      console.log("HANDLE DROP GATE", item?.type, item)
       switch (item.type) {
         case ItemTypeGate:
           return handleDropNewGate(
@@ -773,10 +762,6 @@ export default (props: Props) => {
       qubitNumber: props.circuit.qubitNumber.valueOf() + 1
     });
   }
-
-  useEffect(() => {
-    // console.log("NEW LIST OF SELECTED GATES", [...selectedGates]);
-  },[selectedGates])
 
   const handleGateElementClick = (qIndex: number, tIndex: number) => {
     if (props.mode == "eraser") {
