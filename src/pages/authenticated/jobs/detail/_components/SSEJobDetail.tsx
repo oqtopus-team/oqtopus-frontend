@@ -34,13 +34,6 @@ export const SuccessViewSSELog: React.FC<Job> = (job: Job) => {
         <Card className={clsx(['col-start-1', 'col-end-3'])}>
           <JobDetailSSELog job_id={job.id} status={job.status} />
         </Card>
-        {/* MitigationInfo */}
-        <Card className={clsx(['col-start-1', 'col-end-3'])}>
-          <JobDetailMitigationInfo
-            mitigationInfo={job.mitigationInfo}
-            maxHeight={nonHistogramPanelHeight}
-          />
-        </Card>
         {/* Result */}
         <Card className={clsx(['col-start-1', 'col-end-3'])}>
           <JobDetailResult
