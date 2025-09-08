@@ -916,7 +916,7 @@ export default (props: Props) => {
             ])}
           >
             {
-              !props.fixedQubitNumber
+              props.fixedQubitNumber === false
                 ? <div
                   className={clsx([
                     ['h-8', 'w-8'],
@@ -925,9 +925,9 @@ export default (props: Props) => {
                     ['hover:bg-primary'],
                     ['cursor-pointer']
                   ])}
-                  onClick={handleRemoveQubitButton}
+                  onClick={handleAddQubitButton}
                 >
-                  <span>-</span>
+                  <span>+</span>
                 </div>
                 : null
             }
@@ -956,7 +956,7 @@ export default (props: Props) => {
             })
             }
             {
-              props.fixedQubitNumber === false
+              !props.fixedQubitNumber
                 ? <div
                   className={clsx([
                     ['h-8', 'w-8'],
@@ -965,9 +965,9 @@ export default (props: Props) => {
                     ['hover:bg-primary'],
                     ['cursor-pointer']
                   ])}
-                  onClick={handleAddQubitButton}
+                  onClick={handleRemoveQubitButton}
                 >
-                  <span>+</span>
+                  <span>-</span>
                 </div>
                 : null
             }
