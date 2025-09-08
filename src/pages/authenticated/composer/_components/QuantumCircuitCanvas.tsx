@@ -735,6 +735,75 @@ export default (props: Props) => {
     });
   }
 
+  const handleRemoveQubitButton = () => {
+    if (props.circuit.qubitNumber.valueOf() > 1) {
+      const lastQubitIndex = props.circuit.qubitNumber.valueOf() - 1;
+
+      const updateGateReferences = (gate: ExtendedGate | undefined): ExtendedGate | undefined => {
+        if (!gate) return undefined;
+
+        switch (gate._tag) {
+          case "cnot":
+            if (gate.control === lastQubitIndex || gate.target === lastQubitIndex) {
+              return undefined;
+            }
+            return {
+              ...gate,
+              control: gate.control > lastQubitIndex ? gate.control - 1 : gate.control,
+              target: gate.target > lastQubitIndex ? gate.target - 1 : gate.target
+            };
+          case "ccnot":
+            if (gate.control1 === lastQubitIndex || gate.control2 === lastQubitIndex || gate.target === lastQubitIndex) {
+              return undefined;
+            }
+            return {
+              ...gate,
+              control1: gate.control1 > lastQubitIndex ? gate.control1 - 1 : gate.control1,
+              control2: gate.control2 > lastQubitIndex ? gate.control2 - 1 : gate.control2,
+              target: gate.target > lastQubitIndex ? gate.target - 1 : gate.target
+            };
+          case "$controlBit":
+          case "$controlWire":
+            // Remove control bits/wires that reference the deleted qubit
+            if (gate.from === lastQubitIndex || gate.to === lastQubitIndex || 
+                (gate.from <= lastQubitIndex && gate.to >= lastQubitIndex)) {
+              return undefined;
+            }
+            return {
+              ...gate,
+              from: gate.from > lastQubitIndex ? gate.from - 1 : gate.from,
+              to: gate.to > lastQubitIndex ? gate.to - 1 : gate.to,
+              target: gate.target > lastQubitIndex ? gate.target - 1 : gate.target
+            };
+          case "$dummy":
+            return {
+              ...gate,
+              target: gate.target > lastQubitIndex ? gate.target - 1 : gate.target
+            };
+          default:
+            if (gate.target === lastQubitIndex) {
+              return undefined;
+            }
+            // Update target reference for qubits with higher indices
+            return {
+              ...gate,
+              target: gate.target > lastQubitIndex ? gate.target - 1 : gate.target
+            };
+        }
+      };
+
+      // Remove the last qubit row and update all gate references
+      const newComposedProgram = composedProgram
+        .slice(0, lastQubitIndex) // Remove the last qubit row
+        .map(qubitRow => 
+          qubitRow.map(gate => updateGateReferences(gate))
+        );
+
+      // Update the composed program and circuit
+      handleComposedProgramUpdated(newComposedProgram, lastQubitIndex);
+    }
+  }
+
   const handleGateElementClick = (qIndex: number, tIndex: number) => {
     if (props.mode == "eraser") {
       handleComposedProgramUpdated(composedProgram.map((w, i) =>
@@ -783,7 +852,7 @@ export default (props: Props) => {
               : w[tIndex];
         });
         handleComposedProgramUpdated(composedProgram, qubitNumber.valueOf());
-        
+
         setHoldingControlQubit({ targetQubitIndex: qIndex, hovered: qIndex, timestep: tIndex, rest: 1 });
         props.toggleMode("control")();
         break;
@@ -846,6 +915,22 @@ export default (props: Props) => {
               ['py-5', 'pl-2'],
             ])}
           >
+            {
+              !props.fixedQubitNumber
+                ? <div
+                  className={clsx([
+                    ['h-8', 'w-8'],
+                    ['flex', 'justify-center', 'items-center'],
+                    ['rounded-full', 'bg-neutral-content', 'text-primary-content'],
+                    ['hover:bg-primary'],
+                    ['cursor-pointer']
+                  ])}
+                  onClick={handleRemoveQubitButton}
+                >
+                  <span>-</span>
+                </div>
+                : null
+            }
             {[...new Array(qubitNumber)].map((_, qIndex) => {
               return (
                 <div
@@ -898,7 +983,7 @@ export default (props: Props) => {
                 gridTemplateColumns: `repeat(${circuitDepth}, 64px)`,
               }}
               className={clsx([
-                ["absolute", "top-0", "left-0", "p-5",],
+                ["absolute", "top-0", "left-0", "p-5", 'mt-8'],
                 ["grid", "grid-flow",],
                 ["z-20", "w-full",],
                 ["transition-all", "duration-300"]
