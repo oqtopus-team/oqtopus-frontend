@@ -35,7 +35,7 @@ export const Button = ({
       <NavLink
         to={props.href}
         className={clsx(
-          ['font-bold', 'rounded'],
+          ['font-bold', 'rounded', 'select-none'],
           [
             color === 'error' && STYLE.color.error,
             color === 'disabled' && STYLE.color.disabled,
@@ -60,7 +60,7 @@ export const Button = ({
     <button
       {...props}
       className={clsx(
-        ['font-bold', 'rounded'],
+        ['font-bold', 'rounded', 'select-none'],
         [
           color === 'error' && STYLE.color.error,
           color === 'disabled' && STYLE.color.disabled,

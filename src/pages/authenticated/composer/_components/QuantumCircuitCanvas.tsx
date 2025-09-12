@@ -923,7 +923,7 @@ export default (props: Props) => {
                     ['flex', 'justify-center', 'items-center'],
                     ['rounded-full', 'bg-neutral-content', 'text-primary-content'],
                     ['hover:bg-primary'],
-                    ['cursor-pointer']
+                    ['cursor-pointer', 'select-none']
                   ])}
                   onClick={handleAddQubitButton}
                 >
@@ -963,7 +963,7 @@ export default (props: Props) => {
                     ['flex', 'justify-center', 'items-center'],
                     ['rounded-full', 'bg-neutral-content', 'text-primary-content'],
                     ['hover:bg-primary'],
-                    ['cursor-pointer']
+                    ['cursor-pointer', 'select-none']
                   ])}
                   onClick={handleRemoveQubitButton}
                 >
@@ -1218,7 +1218,7 @@ export default (props: Props) => {
                 </h1>
 
                 <div
-                  className="ml-auto cursor-pointer rounded-full "
+                  className="ml-auto cursor-pointer rounded-full select-none"
                   onClick={() => setGateViewer(false)}
                 >
                   <img
