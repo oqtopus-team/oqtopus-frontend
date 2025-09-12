@@ -68,6 +68,12 @@ export default function LoginPage() {
     }
   );
 
+  const { termOfService, privacyPolicy }
+    = {
+      termOfService: import.meta.env.VITE_APP_TERM_OF_SERVICE_PATH ?? "",
+      privacyPolicy: import.meta.env.VITE_APP_PRIVACY_POLICY_PATH ?? ""
+    };
+
   return (
     <div className={clsx('w-[300px]', 'pt-8', 'text-sm')}>
       <FormTitle>{t('signin.title')}</FormTitle>
@@ -95,7 +101,10 @@ export default function LoginPage() {
           {t('signin.forgot_password')}
         </NavLink>
         <Spacer className="h-2.5" />
-        <SignUpAgreement />
+        { termOfService !== "" && privacyPolicy !== ""
+          ? <SignUpAgreement termsOfService={termOfService} privacyPolicy={privacyPolicy} />
+          : null
+        }
         <Spacer className="h-3" />
         <Button type="submit" color="secondary" loading={processing}>
           {t('signin.button')}

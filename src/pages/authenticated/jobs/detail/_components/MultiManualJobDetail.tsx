@@ -22,9 +22,6 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
   const [selectedKeyIndex, setSelectedKeyIndex] = useState<string>('0');
   const histogramHeight = useWindowSize().height * 0.5;
   const nonHistogramPanelHeight = useWindowSize().height * 0.9;
-  const hasMitigationInfo: boolean = job.mitigationInfo
-    ? Object.keys(job.mitigationInfo).length > 0
-    : false;
 
   const selectedQASM: string[] = useMemo(() => {
     try {
@@ -49,27 +46,14 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
 
   const options = useMemo(() => {
     try {
-      return [
-        {
-          value: combinedCircuitKey,
-          tabLabel: combinedCircuitKey,
-          heading: combinedCircuitHeading,
-        },
-        ...job.jobInfo.program.map((k, index) => ({
-          value: index.toString(),
-          tabLabel: `${dividedCountsKeyPre} ${index}`,
-          heading: `${dividedCountsHeading} ${index}`,
-        })),
-      ];
+      return job.jobInfo.program.map((k, index) => ({
+        value: index.toString(),
+        tabLabel: `${dividedCountsKeyPre} ${index}`,
+        heading: `${dividedCountsHeading} ${index}`,
+      }));
     } catch (error) {
       console.error('Failed to generate options:', error);
-      return [
-        {
-          value: combinedCircuitKey,
-          tabLabel: combinedCircuitKey,
-          heading: combinedCircuitHeading,
-        },
-      ];
+      return [];
     }
   }, [combinedCircuitKey, job.jobInfo.program]);
 
@@ -127,25 +111,23 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
               null,
               2
             )}
-            heading={`Histogram (${options[Number(selectedKeyIndex)].heading})`}
+            heading={`Histogram (${selectedKeyIndex === combinedCircuitKey ? combinedCircuitKey : options[Number(selectedKeyIndex)].heading})`}
             height={histogramHeight}
             jobId={job.id}
           />
         </Card>
-        {/* MitigationInfo */}
-        {hasMitigationInfo && (
-          <Card className={clsx(['col-start-1', 'col-end-3'])}>
-            <JobDetailMitigationInfo
-              mitigationInfo={job.mitigationInfo}
-              maxHeight={nonHistogramPanelHeight}
-            />
-          </Card>
-        )}
         {/* TranspilerInfo */}
-        <Card className={clsx(['col-start-1', 'col-end-3'])}>
+        <Card className={clsx(['col-start-1', 'col-end-2'])}>
           <JobDetailTranspilerInfo
             transpilerInfo={JSON.stringify(job.transpilerInfo, null, 2)}
             heading="Transpiler Info (Combined)"
+            maxHeight={nonHistogramPanelHeight}
+          />
+        </Card>
+        {/* MitigationInfo */}
+        <Card className={clsx(['col-start-2', 'col-end-3'])}>
+          <JobDetailMitigationInfo
+            mitigationInfo={job.mitigationInfo}
             maxHeight={nonHistogramPanelHeight}
           />
         </Card>
@@ -154,7 +136,7 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
           <JobDetailProgram
             program={selectedQASM}
             maxHeight={nonHistogramPanelHeight}
-            heading={`Program (${options[Number(selectedKeyIndex)].heading})`}
+            heading={`Program (${selectedKeyIndex === combinedCircuitKey ? combinedCircuitKey : options[Number(selectedKeyIndex)].heading})`}
           />
         </Card>
         {/* Transpiled Program */}

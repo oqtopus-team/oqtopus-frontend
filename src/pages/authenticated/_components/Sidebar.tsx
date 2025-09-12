@@ -43,7 +43,6 @@ export const Sidebar = () => {
       name: t('sidebar.nav.composer'),
       path: '/composer',
       icon: <SVGComposer />,
-      disable: true,
     },
     {
       kind: 'navigate',
@@ -129,7 +128,6 @@ export const NavigationBottomBar = () => {
       name: t('sidebar.nav.composer'),
       path: '/composer',
       icon: <SVGComposer />,
-      disable: true,
     },
     {
       kind: 'navigate',

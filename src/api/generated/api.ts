@@ -764,16 +764,16 @@ export interface JobsTranspileResult {
     'transpiled_program': string | null;
     /**
      * 
-     * @type {string}
+     * @type {{ [key: string]: any; }}
      * @memberof JobsTranspileResult
      */
-    'stats': string | null;
+    'stats': { [key: string]: any; } | null;
     /**
      * 
-     * @type {string}
+     * @type {{ [key: string]: any; }}
      * @memberof JobsTranspileResult
      */
-    'virtual_physical_mapping': string | null;
+    'virtual_physical_mapping': { [key: string]: any; } | null;
 }
 /**
  * 
@@ -838,10 +838,12 @@ export const AnnouncementsApiAxiosParamCreator = function (configuration?: Confi
          * @summary Get announcements list from backend
          * @param {string} [offset] offset information
          * @param {string} [limit] Limit information
+         * @param {GetAnnouncementsListOrderEnum} [order] Specify order according to start time
+         * @param {string} [currentTime] Allows to filter the list of announcements to fetch by provided time. If specified only announcements with start_time &lt;&#x3D; current_time and end_time &gt;&#x3D; current_time are returned.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAnnouncementsList: async (offset?: string, limit?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getAnnouncementsList: async (offset?: string, limit?: string, order?: GetAnnouncementsListOrderEnum, currentTime?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/announcements`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -864,6 +866,16 @@ export const AnnouncementsApiAxiosParamCreator = function (configuration?: Confi
 
             if (limit !== undefined) {
                 localVarQueryParameter['limit'] = limit;
+            }
+
+            if (order !== undefined) {
+                localVarQueryParameter['order'] = order;
+            }
+
+            if (currentTime !== undefined) {
+                localVarQueryParameter['current_time'] = (currentTime as any instanceof Date) ?
+                    (currentTime as any).toISOString() :
+                    currentTime;
             }
 
 
@@ -905,11 +917,13 @@ export const AnnouncementsApiFp = function(configuration?: Configuration) {
          * @summary Get announcements list from backend
          * @param {string} [offset] offset information
          * @param {string} [limit] Limit information
+         * @param {GetAnnouncementsListOrderEnum} [order] Specify order according to start time
+         * @param {string} [currentTime] Allows to filter the list of announcements to fetch by provided time. If specified only announcements with start_time &lt;&#x3D; current_time and end_time &gt;&#x3D; current_time are returned.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getAnnouncementsList(offset?: string, limit?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AnnouncementsGetAnnouncementsListResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getAnnouncementsList(offset, limit, options);
+        async getAnnouncementsList(offset?: string, limit?: string, order?: GetAnnouncementsListOrderEnum, currentTime?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AnnouncementsGetAnnouncementsListResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getAnnouncementsList(offset, limit, order, currentTime, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AnnouncementsApi.getAnnouncementsList']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -939,11 +953,13 @@ export const AnnouncementsApiFactory = function (configuration?: Configuration, 
          * @summary Get announcements list from backend
          * @param {string} [offset] offset information
          * @param {string} [limit] Limit information
+         * @param {GetAnnouncementsListOrderEnum} [order] Specify order according to start time
+         * @param {string} [currentTime] Allows to filter the list of announcements to fetch by provided time. If specified only announcements with start_time &lt;&#x3D; current_time and end_time &gt;&#x3D; current_time are returned.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAnnouncementsList(offset?: string, limit?: string, options?: RawAxiosRequestConfig): AxiosPromise<AnnouncementsGetAnnouncementsListResponse> {
-            return localVarFp.getAnnouncementsList(offset, limit, options).then((request) => request(axios, basePath));
+        getAnnouncementsList(offset?: string, limit?: string, order?: GetAnnouncementsListOrderEnum, currentTime?: string, options?: RawAxiosRequestConfig): AxiosPromise<AnnouncementsGetAnnouncementsListResponse> {
+            return localVarFp.getAnnouncementsList(offset, limit, order, currentTime, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -972,15 +988,25 @@ export class AnnouncementsApi extends BaseAPI {
      * @summary Get announcements list from backend
      * @param {string} [offset] offset information
      * @param {string} [limit] Limit information
+     * @param {GetAnnouncementsListOrderEnum} [order] Specify order according to start time
+     * @param {string} [currentTime] Allows to filter the list of announcements to fetch by provided time. If specified only announcements with start_time &lt;&#x3D; current_time and end_time &gt;&#x3D; current_time are returned.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AnnouncementsApi
      */
-    public getAnnouncementsList(offset?: string, limit?: string, options?: RawAxiosRequestConfig) {
-        return AnnouncementsApiFp(this.configuration).getAnnouncementsList(offset, limit, options).then((request) => request(this.axios, this.basePath));
+    public getAnnouncementsList(offset?: string, limit?: string, order?: GetAnnouncementsListOrderEnum, currentTime?: string, options?: RawAxiosRequestConfig) {
+        return AnnouncementsApiFp(this.configuration).getAnnouncementsList(offset, limit, order, currentTime, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
+/**
+ * @export
+ */
+export const GetAnnouncementsListOrderEnum = {
+    Desc: 'DESC',
+    Asc: 'ASC'
+} as const;
+export type GetAnnouncementsListOrderEnum = typeof GetAnnouncementsListOrderEnum[keyof typeof GetAnnouncementsListOrderEnum];
 
 
 /**

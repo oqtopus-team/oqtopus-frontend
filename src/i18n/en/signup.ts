@@ -33,4 +33,5 @@ export default {
     },
     button: 'Send',
   },
+  disclaimer: `Please check <1>the term of use</1> and <3>the private policy</3>, and if you agree, please complete the account registration below.`
 };

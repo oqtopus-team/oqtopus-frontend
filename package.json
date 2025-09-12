@@ -1,6 +1,6 @@
 {
   "name": "oqtopus-frontend",
-  "version": "1.5.0",
+  "version": "1.6.1",
   "private": true,
   "scripts": {
     "dev": "vite",
@@ -26,10 +26,13 @@
     "i18next-browser-languagedetector": "^8.0.4",
     "marked": "^15.0.11",
     "mathjax": "^3.2.2",
+    "qasm-ts": "^2.0.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.1.0",
     "react-apexcharts": "^1.7.0",
     "react-datepicker": "^7.6.0",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^19.1.0",
     "react-force-graph": "1.46.0",
     "react-hook-form": "^7.55.0",

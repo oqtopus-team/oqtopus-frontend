@@ -1,6 +1,11 @@
 import { useContext } from 'react';
 import { userApiContext } from './Provider';
-import { DevicesDeviceInfo, JobsGetJobsResponse, JobsSubmitJobRequest } from '@/api/generated';
+import {
+  DevicesDeviceInfo,
+  GetAnnouncementsListOrderEnum,
+  JobsGetJobsResponse,
+  JobsSubmitJobRequest,
+} from '@/api/generated';
 import { Job, JobSearchParams } from '@/domain/types/Job';
 import { Device } from '@/domain/types/Device';
 import type { RawAxiosRequestConfig } from 'axios';
@@ -9,6 +14,8 @@ interface AnnouncementsApi {
   offset?: string;
   limit?: string;
   options?: RawAxiosRequestConfig;
+  currentTime?: string;
+  order?: GetAnnouncementsListOrderEnum
 }
 
 export const useJobAPI = () => {
@@ -141,8 +148,8 @@ const convertDeviceResult = (device: DevicesDeviceInfo): Device => ({
 export const useAnnouncementsAPI = () => {
   const api = useContext(userApiContext);
 
-  const getAnnouncements = async ({ limit, offset, options }: AnnouncementsApi) => {
-    return api.announcements.getAnnouncementsList(offset, limit, options).then((res) => {
+  const getAnnouncements = async ({ limit, offset, options, order, currentTime }: AnnouncementsApi) => {
+    return api.announcements.getAnnouncementsList(offset, limit, order, currentTime, options).then((res) => {
       if (res.status === 200) {
         return res.data.announcements;
       }

@@ -81,10 +81,14 @@ const apiInstance = new AnnouncementsApi(configuration);
 
 let offset: string; //offset information (optional) (default to undefined)
 let limit: string; //Limit information (optional) (default to undefined)
+let order: 'DESC' | 'ASC'; //Specify order according to start time (optional) (default to 'ASC')
+let currentTime: string; //Allows to filter the list of announcements to fetch by provided time. If specified only announcements with start_time <= current_time and end_time >= current_time are returned. (optional) (default to undefined)
 
 const { status, data } = await apiInstance.getAnnouncementsList(
     offset,
-    limit
+    limit,
+    order,
+    currentTime
 );
 ```
 
@@ -94,6 +98,8 @@ const { status, data } = await apiInstance.getAnnouncementsList(
 |------------- | ------------- | ------------- | -------------|
 | **offset** | [**string**] | offset information | (optional) defaults to undefined|
 | **limit** | [**string**] | Limit information | (optional) defaults to undefined|
+| **order** | [**&#39;DESC&#39; | &#39;ASC&#39;**]**Array<&#39;DESC&#39; &#124; &#39;ASC&#39;>** | Specify order according to start time | (optional) defaults to 'ASC'|
+| **currentTime** | [**string**] | Allows to filter the list of announcements to fetch by provided time. If specified only announcements with start_time &lt;&#x3D; current_time and end_time &gt;&#x3D; current_time are returned. | (optional) defaults to undefined|
 
 
 ### Return type

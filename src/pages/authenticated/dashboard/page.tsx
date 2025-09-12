@@ -42,7 +42,7 @@ export default function Page() {
           'gap-5'
         )}
       >
-        <Card className={clsx(['col-start-1', 'col-end-1'], ['grayscale', 'bg-disable-bg'])}>
+        <Card className={clsx(['col-start-1', 'col-end-1'])}>
           <Composer />
         </Card>
         <Card className={clsx(['col-start-2', 'col-end-3', 'overflow-x-auto'])}>

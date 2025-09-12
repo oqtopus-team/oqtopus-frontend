@@ -647,6 +647,24 @@ paths:
           required: false
           schema:
             type: string
+        - name: order
+          in: query
+          description: Specify order according to start time
+          required: false
+          schema:
+            type: string
+            enum:
+              - DESC
+              - ASC
+            default: ASC
+        - name: current_time
+          in: query
+          description: Allows to filter the list of announcements to fetch by provided time. If specified only announcements with start_time <= current_time and end_time >= current_time are returned.
+          required: false
+          schema:
+            type: string
+            format: date-time
+            example: '2022-10-19T11:45:34Z'
       responses:
         '200':
           description: Return announcements
@@ -979,10 +997,14 @@ components:
           nullable: true
           example: OPENQASM 3; include "stdgates.inc"; qubit[2] _all_qubits; let q = _all_qubits[0:1]; h q[0]; cx q[0], q[1];
         stats:
-          type: string
+          type: object
+          properties: {}
+          additionalProperties: true
           nullable: true
         virtual_physical_mapping:
-          type: string
+          type: object
+          properties: {}
+          additionalProperties: true
           nullable: true
       required:
         - transpiled_program
