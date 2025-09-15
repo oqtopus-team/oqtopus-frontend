@@ -225,14 +225,14 @@ export default function Page() {
         jobId={jobId}
         jobType={jobType}
         busy={busy}
-        mkProgram={() => ({
+        mkProgram={{
           program: renderQasm(
             circuit.qubitNumber.valueOf(),
             circuit.steps
           ),
           qubitNumber: circuit.qubitNumber.valueOf()
-        })}
-        mkOperator={() => renderOperator(observable)}
+        }}
+        mkOperator={renderOperator(observable)}
       />
     </>
   );
