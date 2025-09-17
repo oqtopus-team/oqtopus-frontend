@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import clsx from 'clsx';
 import { ForceGraph2D } from 'react-force-graph';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +7,7 @@ import { JSONCodeBlock } from '@/pages/_components/JSONCodeBlock';
 import { Card } from '@/pages/_components/Card';
 import useWindowSize from '@/pages/_hooks/UseWindowSize';
 import 'simplebar-react/dist/simplebar.min.css';
+import { Button } from '@/pages/_components/Button';
 
 type NodeObject<NodeType = {}> = NodeType & {
   id?: string | number;
@@ -95,6 +96,9 @@ const createEdgeData = (
   }
 };
 
+const MIN_ZOOM = 0.1;
+const MAX_ZOOM = 3;
+
 export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ deviceInfo }) => {
   const { t } = useTranslation();
 
@@ -109,37 +113,33 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
   const [hoveredNodeId, setHoveredNodeId] = useState<string | number | null>(null);
   const [hoveredLinkId, setHoveredLinkId] = useState<string | null>(null);
 
-  useEffect(() => {
-    try {
-      const parsedDeviceInfo = (() => {
-        try {
-          if (!deviceInfo) {
-            setIsValidDeviceInfo(false);
-            return {};
-          }
-          return JSON.parse(deviceInfo);
-        } catch (err) {
-          setIsValidDeviceInfo(false);
-          console.error('Failed to parse device info:', err);
-          return {};
-        }
-      })();
+  // ForceGraph2D not exporting ref types
+  const fgRef = useRef<any>(null);
+  const [zoomLevel, setZoomLevel] = useState<string>('1.00');
 
-      const { nodeData, tempNodeMap } = createNodeData(parsedDeviceInfo.qubits);
-      const { edgeData, tempCouplingMap } = createEdgeData(parsedDeviceInfo.couplings);
+  const [divSize, setDivSize] = useState<{ width: number; height: number }>({
+    width: 0,
+    height: 0,
+  });
+  const [heddingSize, setHeddingSize] = useState<{ width: number; height: number }>({
+    width: 0,
+    height: 0,
+  });
 
-      if (nodeData.length === 0) {
-        setIsValidDeviceInfo(false);
-      }
+  const windowSize = useWindowSize();
+  const divRef = useRef<HTMLDivElement>(null);
+  const heddingRef = useRef<HTMLDivElement>(null);
 
-      setTopologyData({ nodes: normalizePositions(nodeData), links: edgeData });
-      setNodeMap(tempNodeMap);
-      setCouplingMap(tempCouplingMap);
-    } catch (err) {
-      setIsValidDeviceInfo(false);
-      console.error('Failed to update topology data:', err);
+  const strHoveredInfo = JSON.stringify(hoveredInfo);
+
+  const handleZoom = useCallback(() => {
+    if (fgRef.current && typeof fgRef.current.zoom === 'function') {
+      const zoom = fgRef.current.zoom();
+      requestAnimationFrame(() => {
+        setZoomLevel(zoom.toFixed(2));
+      });
     }
-  }, [deviceInfo]);
+  }, []);
 
   const handleHoverNode = (node: NodeObject | null) => {
     try {
@@ -176,18 +176,12 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
     }
   };
 
-  const [divSize, setDivSize] = useState<{ width: number; height: number }>({
-    width: 0,
-    height: 0,
-  });
-  const [heddingSize, setHeddingSize] = useState<{ width: number; height: number }>({
-    width: 0,
-    height: 0,
-  });
+  const handleFitToView = () => {
+    if (fgRef.current) {
+      fgRef.current.zoomToFit(300, 30);
+    }
+  };
 
-  const windowSize = useWindowSize();
-  const divRef = useRef<HTMLDivElement>(null);
-  const heddingRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const updateDivSize = () => {
       try {
@@ -225,7 +219,51 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
     };
   }, [windowSize]);
 
-  const strHoveredInfo = JSON.stringify(hoveredInfo);
+  useEffect(() => {
+    try {
+      const parsedDeviceInfo = (() => {
+        try {
+          if (!deviceInfo) {
+            setIsValidDeviceInfo(false);
+            return {};
+          }
+          return JSON.parse(deviceInfo);
+        } catch (err) {
+          setIsValidDeviceInfo(false);
+          console.error('Failed to parse device info:', err);
+          return {};
+        }
+      })();
+
+      if(!parsedDeviceInfo.qubits || !parsedDeviceInfo.couplings) return;
+
+      const { nodeData, tempNodeMap } = createNodeData(parsedDeviceInfo.qubits);
+      const { edgeData, tempCouplingMap } = createEdgeData(parsedDeviceInfo.couplings);
+
+      if (nodeData.length === 0) {
+        setIsValidDeviceInfo(false);
+      }
+
+      setTopologyData({ nodes: normalizePositions(nodeData), links: edgeData });
+      setNodeMap(tempNodeMap);
+      setCouplingMap(tempCouplingMap);
+    } catch (err) {
+      setIsValidDeviceInfo(false);
+      console.error('Failed to update topology data:', err);
+    }
+  }, [deviceInfo]);
+
+  useEffect(() => {
+    // Delay to ensure the canvas is rendered
+    const timeout = setTimeout(() => {
+      if (fgRef.current && typeof fgRef.current.zoomToFit === 'function') {
+        fgRef.current.zoomToFit(300, 30);
+      }
+    }, 100);
+
+    return () => clearTimeout(timeout);
+  }, []);
+
 
   if (!isValidDeviceInfo) {
     return (
@@ -247,9 +285,49 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
           </SimpleBar>
         )}
       </Card>
-      <Card className={clsx(['col-start-2', 'col-end-3'])}>
+      <Card className={clsx(['col-start-2', 'col-end-3', 'relative'])}>
+        <div style={{ zIndex: 1000, position: 'absolute', bottom: '25px', right: '25px' }}>
+          Zoom: {zoomLevel}x
+        </div>
+        <div
+          style={{
+            marginBottom: '15px',
+            width: '100%',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            background: '#fff',
+          }}
+        >
+          <Button size="small" onClick={handleFitToView}>
+            {t('device.detail.topology_info.fit_to_view')}
+          </Button>
+          <input
+            type="range"
+            min={MIN_ZOOM}
+            max={MAX_ZOOM}
+            step={0.1}
+            value={zoomLevel}
+            onChange={(e) => {
+              if (fgRef.current && typeof fgRef.current.zoom === 'function') {
+                fgRef.current.zoom(e.target.value);
+              }
+            }}
+            style={{
+              width: '200px',
+              height: '4px',
+              borderRadius: '2px',
+              background: '#ddd',
+              outline: 'none',
+              cursor: 'pointer',
+              flex: 1,
+              marginLeft: '10px',
+            }}
+          />
+        </div>
         <div ref={divRef}>
           <ForceGraph2D
+            ref={fgRef}
             graphData={topologyData}
             nodeCanvasObject={(
               node: NodeObject,
@@ -327,6 +405,9 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
             height={divSize.height}
             width={divSize.width}
             backgroundColor={'white'}
+            maxZoom={MAX_ZOOM}
+            onZoom={handleZoom}
+            onZoomEnd={handleZoom}
           />
         </div>
       </Card>
