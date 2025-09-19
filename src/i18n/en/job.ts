@@ -95,8 +95,8 @@ export default {
   form: {
     title: 'Job input form',
     description: 'Submit jobs to be executed on quantum devives.',
-    name_placeholder: 'Example) ○○○',
-    description_placeholder: 'Example) ○○○',
+    name_placeholder: 'Enter job name',
+    description_placeholder: 'Enter job description',
     program_placeholder:
       'Example) OPENQASM 3; include "stdgates.inc"; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;',
     operator_pauli_placeholder: 'Enter the operator (eq: X0X1)',
@@ -104,7 +104,7 @@ export default {
     transpiler_placeholder: 'Example) {}',
     simulator_placeholder: 'Example) {}',
     mitigation_placeholder: 'Example) {}',
-    shots_placeholder: 'Example) ○○○',
+    shots_placeholder: 'Enter number of shots',
     upload_file_button: 'Load file',
     button: 'Submit',
     submit_and_view_job_button: 'Submit and view job',

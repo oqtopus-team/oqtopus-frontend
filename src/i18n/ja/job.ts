@@ -95,8 +95,8 @@ export default {
   form: {
     title: 'Job入力フォーム',
     description: '量子デバイスで実行するジョブを登録できます',
-    name_placeholder: '例）〇〇〇',
-    description_placeholder: '例）〇〇〇',
+    name_placeholder: 'ジョブ名を入力してください',
+    description_placeholder: 'ジョブの説明を入力してください',
     program_placeholder:
       '例）OPENQASM 3; include "stdgates.inc"; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;',
     operator_pauli_placeholder: '演算子のパウリ文字列 (例: X 0 X 1)',
@@ -104,7 +104,7 @@ export default {
     transpiler_placeholder: '例）{}',
     simulator_placeholder: '例）{}',
     mitigation_placeholder: '例）{}',
-    shots_placeholder: '例）4',
+    shots_placeholder: 'ショット数を入力してください',
     upload_file_button: 'ファイル読み込み',
     button: '送信する',
     submit_and_view_job_button: '送信して詳細を確認',

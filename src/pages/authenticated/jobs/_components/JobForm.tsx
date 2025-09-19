@@ -81,7 +81,7 @@ const validationRules = (t: (key: string) => string): yup.ObjectSchema<FormInput
     description: yup.string(),
     shots: yup
       .number()
-      .typeError(t('job.form.error_message.shots_is_number'))
+      .typeError(t('job.form.error_message.shots'))
       .integer(t('job.form.error_message.shots_integer'))
       .min(1, t('job.form.error_message.shots'))
       .required(),
