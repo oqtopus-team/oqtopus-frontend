@@ -1,5 +1,5 @@
-import { ReactElement } from "react";
-import { GateColor, RenderProps } from "./Gates";
+import { ReactElement } from 'react';
+import { GateColor, RenderProps } from './Gates';
 
 const cellSize = 64;
 const gateBlockSize = 40;
@@ -25,11 +25,11 @@ export default function CNOTGate(props: RenderProps): ReactElement {
     <div
       className={styles}
       style={{
-        display: "block",
-        position: "absolute",
+        display: 'block',
+        position: 'absolute',
         maxHeight: baseHeight,
-        left: "50%",
-        transform: "translateX(-50%)",
+        left: '50%',
+        transform: 'translateX(-50%)',
       }}
     >
       <svg
@@ -63,12 +63,13 @@ export default function CNOTGate(props: RenderProps): ReactElement {
     </div>
   ) : (
     <div
+      className={styles}
       style={{
-        display: "block",
-        position: "absolute",
+        display: 'block',
+        position: 'absolute',
         maxHeight: baseHeight,
-        left: "50%",
-        transform: "translateX(-50%)",
+        left: '50%',
+        transform: 'translateX(-50%)',
       }}
     >
       <svg
