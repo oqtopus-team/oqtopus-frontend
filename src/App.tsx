@@ -1,5 +1,5 @@
 import { Suspense, lazy } from 'react';
-import { BrowserRouter, Navigate, Outlet, Route, Routes, useParams } from 'react-router';
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router';
 import { Loader } from '@/pages/_components/Loader';
 import RootLayout from '@/pages/layout';
 import AuthLayout from '@/pages/auth/layout';
@@ -25,7 +25,9 @@ const Dashboard = lazy(async () => await import('@/pages/authenticated/dashboard
 const Composer = lazy(async () => await import('@/pages/authenticated/composer/page'));
 const DeviceList = lazy(async () => await import('@/pages/authenticated/device/page'));
 const DeviceDetail = lazy(async () => await import('@/pages/authenticated/device/detail/page'));
-const Announcements = lazy(async () => await import('@/pages/authenticated/dashboard/_components/Announcements'));
+const Announcements = lazy(
+  async () => await import('@/pages/authenticated/dashboard/_components/Announcements')
+);
 
 export const App: React.FunctionComponent = () => {
   return (
