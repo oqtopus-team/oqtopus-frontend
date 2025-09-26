@@ -1,36 +1,33 @@
-import { JobsOperatorItem, JobsSubmitJobInfo, JobsSubmitJobRequest } from "@/api/generated";
-import { Device } from "@/domain/types/Device";
-import { JobTypeType } from "@/domain/types/Job";
-import clsx from "clsx"
-import { ReactNode, useEffect, useState } from "react"
-import { useTranslation } from "react-i18next"
+import { JobsOperatorItem, JobsSubmitJobInfo, JobsSubmitJobRequest } from '@/api/generated';
+import { Device } from '@/domain/types/Device';
+import { JobTypeType } from '@/domain/types/Job';
+import clsx from 'clsx';
+import { ReactNode, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { JobForm } from '@/pages/authenticated/jobs/_components/JobForm';
 
-export type TabPanelItem = { id: string; label: string; disabled: boolean; };
+export type TabPanelItem = { id: string; label: string; disabled: boolean };
+
 interface TabPanelsProps {
   tabItems: TabPanelItem[];
   tabContent: (item: TabPanelItem) => ReactNode;
 }
 
 export const TabPanels = (props: TabPanelsProps) => {
-  const [activeTab, setActiveTab] = useState<string | null>(props.tabItems[0]?.id)
+  const [activeTab, setActiveTab] = useState<string | null>(props.tabItems[0]?.id);
   const handleTabItemClick = (tabId: string) => () => {
-    setActiveTab(tabId)
-  }
+    setActiveTab(tabId);
+  };
   const renderContent: () => ReactNode = (() => {
-    const h = props.tabItems.find(item => item.id == activeTab);
+    const h = props.tabItems.find((item) => item.id == activeTab);
     if (h === undefined) {
-      return () => <></>
+      return () => <></>;
     }
     return () => props.tabContent(h);
   })();
   return (
     <div>
-      <div
-        className={clsx([
-          ['flex', 'items-center', 'justify-start'],
-        ])}
-      >
+      <div className={clsx([['flex', 'items-center', 'justify-start']])}>
         {props.tabItems.map((tabItem, i) => {
           return (
             <div
@@ -43,10 +40,10 @@ export const TabPanels = (props: TabPanelsProps) => {
                 tabItem.disabled
                   ? ['bg-disable-bg', 'text-disable-content']
                   : tabItem.id === activeTab
-                    ? ['bg-base-card', 'text-primary',]
+                    ? ['bg-base-card', 'text-primary']
                     : ['bg-gray-bg'],
               ])}
-              onClick={tabItem.disabled ? () => { } : handleTabItemClick(tabItem.id)}
+              onClick={tabItem.disabled ? () => {} : handleTabItemClick(tabItem.id)}
               key={`tab-${i}`}
             >
               <div
@@ -60,7 +57,7 @@ export const TabPanels = (props: TabPanelsProps) => {
                 <span>{tabItem.label}</span>
               </div>
             </div>
-          )
+          );
         })}
         <div
           className={clsx([
@@ -71,29 +68,26 @@ export const TabPanels = (props: TabPanelsProps) => {
             'border-t-0',
             'border-x-0',
           ])}
-        >
-
-        </div>
+        ></div>
       </div>
       <div
         className={clsx([
-
           ['w-full, p-5', 'rounded', 'rounded-t-none'],
-          ['border', 'border-t-0', 'border-b-neutral-content', 'border-x-neutral-content']
+          ['border', 'border-t-0', 'border-b-neutral-content', 'border-x-neutral-content'],
         ])}
       >
         {renderContent()}
       </div>
     </div>
-  )
-}
+  );
+};
 
 export interface ControlPanelProps {
   jobType: JobTypeType;
   devices: Device[];
   busy: boolean;
   jobId: null | string;
-  mkProgram: { program: string, qubitNumber: number };
+  mkProgram: { program: string; qubitNumber: number };
   mkOperator: JobsOperatorItem[];
   onSubmit: (req: JobsSubmitJobRequest) => Promise<void>;
 }
@@ -101,24 +95,28 @@ export interface ControlPanelProps {
 export default (props: ControlPanelProps) => {
   const { t } = useTranslation();
 
-  const tabItems = ["exec", "siml"]
-    .map(id => ({
-      id,
-      label: t(`composer.control_panel.${id}.tab_label`),
-      disabled: id == "siml"
-    }));
+  const tabItems = ['exec', 'siml'].map((id) => ({
+    id,
+    label: t(`composer.control_panel.${id}.tab_label`),
+    disabled: id == 'siml',
+  }));
   return (
     <>
       <TabPanels
         tabItems={tabItems}
         tabContent={(item) => {
           switch (item.id) {
-            case "exec":
+            case 'exec':
               return (
-                <JobForm mkProgram={props.mkProgram} mkOperator={props.mkOperator} isAdvancedSettingsOpen={false}/>
-              )
-            case "siml":
-              return <></>
+                <JobForm
+                  mkProgram={props.mkProgram}
+                  mkOperator={props.mkOperator}
+                  isAdvancedSettingsOpen={false}
+                  displayFields={{ program: false }}
+                />
+              );
+            case 'siml':
+              return <></>;
             default:
               return null;
           }
@@ -126,4 +124,4 @@ export default (props: ControlPanelProps) => {
       />
     </>
   );
-}
+};

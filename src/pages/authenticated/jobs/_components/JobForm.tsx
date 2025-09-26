@@ -100,14 +100,18 @@ const validationRules = (t: (key: string) => string): yup.ObjectSchema<FormInput
 interface JobFormProps {
   mkProgram?: { program: string; qubitNumber: number };
   mkOperator?: JobsOperatorItem[];
-  isAdvancedSettingsOpen?: boolean
+  isAdvancedSettingsOpen?: boolean;
+  displayFields: {
+    program: boolean;
+  };
 }
 
-export const JobForm = (props: JobFormProps) => {
+export const JobForm = (componentProps: JobFormProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { getDevices } = useDeviceAPI();
   const { submitJob } = useJobAPI();
+  const { displayFields = { program: true }, ...props } = componentProps;
 
   const {
     handleSubmit,
@@ -405,43 +409,46 @@ export const JobForm = (props: JobFormProps) => {
               paddingRight: 0,
             }}
           >
-            <>
-              <div className={clsx('flex', 'justify-between')}>
-                <p className={clsx('font-bold', 'text-primary')}>program</p>
-                <Select
+            {displayFields?.program && (
+              <>
+                <div className={clsx('flex', 'justify-between')}>
+                  <p className={clsx('font-bold', 'text-primary')}>program</p>
+                  <Select
+                    disabled={Boolean(props.mkProgram?.program)}
+                    labelLeft="sample program"
+                    {...register('programType')}
+                    onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                      handleProgramTypeChange(e.target.value as ProgramType);
+                    }}
+                    errorMessage={errors.programType && errors.programType.message}
+                    size="xs"
+                  >
+                    {PROGRAM_TYPES.map((oneProgramType) => (
+                      <option key={oneProgramType} value={oneProgramType}>
+                        {oneProgramType}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+                <Spacer className="h-2" />
+
+                {/* programs */}
+                <TextArea
                   disabled={Boolean(props.mkProgram?.program)}
-                  labelLeft="sample program"
-                  {...register('programType')}
-                  onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                    handleProgramTypeChange(e.target.value as ProgramType);
-                  }}
-                  errorMessage={errors.programType && errors.programType.message}
-                  size="xs"
-                >
-                  {PROGRAM_TYPES.map((oneProgramType) => (
-                    <option key={oneProgramType} value={oneProgramType}>
-                      {oneProgramType}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-              <Spacer className="h-2" />
-            </>
-            {/* programs */}
-            <TextArea
-              disabled={Boolean(props.mkProgram?.program)}
-              className={clsx('h-[16rem]')}
-              placeholder={t('job.form.program_placeholder')}
-              {...register('program')}
-              errorMessage={errors.program && errors.program.message}
-            />
-            <ConfirmModal
-              show={deleteModalShow}
-              onHide={cancelProgramTypeChange}
-              title={t('job.list.modal.title')}
-              message={t('job.form.modal.overwrite_program')}
-              onConfirm={confirmProgramTypeChange}
-            />
+                  className={clsx('h-[16rem]')}
+                  placeholder={t('job.form.program_placeholder')}
+                  {...register('program')}
+                  errorMessage={errors.program && errors.program.message}
+                />
+                <ConfirmModal
+                  show={deleteModalShow}
+                  onHide={cancelProgramTypeChange}
+                  title={t('job.list.modal.title')}
+                  message={t('job.form.modal.overwrite_program')}
+                  onConfirm={confirmProgramTypeChange}
+                />
+              </>
+            )}
             <Spacer className="h-5" />
             {/* operator */}
             {jobType === 'estimation' && (
