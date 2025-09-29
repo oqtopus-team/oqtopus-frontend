@@ -1,5 +1,5 @@
 export const supportedGates = [
-  //   "i",
+  'i',
   'x',
   'y',
   'z',

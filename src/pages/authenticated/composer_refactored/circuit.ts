@@ -31,14 +31,25 @@ export class QuantumCircuitService {
   private _selectedGates = new Reactive<RealComposerGate[]>([]);
   private prevHoverCoords: { row: number; column: number } = { row: -1, column: -1 };
 
+  private handleRemoveGate = removeGate;
+  private handleAddGate = addGate;
+
   constructor(
     rows = 4,
     columns = 20,
     supportedGates: ReadonlyArray<QuantumGate['_tag']>,
-    useBellSampling = false
+    useBellSampling = false,
+    // it allows to place gate freely in any place on circuit, without triggering move back and move up
+    // it should only be used when we don't deal with multi-qubit gates (like in e.g. observable composer)
+    allowFreeGatePlacement = false
   ) {
     this._circuit = new Reactive(createEmptyCircuit(rows, columns));
     this._supportedGates = [...supportedGates];
+
+    if (allowFreeGatePlacement) {
+      this.handleRemoveGate = removeGateWithFreePlacementAllowed;
+      this.handleAddGate = addGateWithFreePlacementAllowed;
+    }
 
     if (useBellSampling) {
       this.addBellSampling();
@@ -138,7 +149,7 @@ export class QuantumCircuitService {
       if (!isPartOfMultiQubitGate(gate)) continue;
 
       gate = getBaseGate(this.circuit, gate);
-      removeGate(this.circuit, gate);
+      this.handleRemoveGate(this.circuit, gate);
     }
 
     this._circuit.value = [...this.circuit.slice(0, -1)];
@@ -174,11 +185,11 @@ export class QuantumCircuitService {
     const targets = newTargets;
     const controls = newControls;
 
-    removeGate(this.circuit, g);
+    this.handleRemoveGate(this.circuit, g);
 
     const row = Math.min(...targets, ...controls);
     g = { ...g, row, targets, controls };
-    addGate(this.circuit, g, () => {});
+    this.handleAddGate(this.circuit, g, () => {});
 
     this._circuit.value = [...this.circuit];
     this.reselectGates();
@@ -197,20 +208,20 @@ export class QuantumCircuitService {
 
     this._draggedGateIds.value = [g.id];
 
-    if (!isNew) removeGate(this.circuit, g);
+    if (!isNew) this.handleRemoveGate(this.circuit, g);
 
     const rowDiff = row - g.row;
     const targets = g.targets.map((t) => t + rowDiff);
     const controls = g.controls.map((c) => c + rowDiff);
     g = { ...g, row, column, controls, targets };
 
-    addGate(this.circuit, g, cb);
+    this.handleAddGate(this.circuit, g, cb);
     this._circuit.value = [...this.circuit];
   }
 
   removeGate(g: ComposerGate) {
     if (isDummyGate(g)) return;
-    removeGate(this.circuit, g);
+    this.handleRemoveGate(this.circuit, g);
     this._circuit.value = [...this.circuit];
   }
 
@@ -228,7 +239,7 @@ export class QuantumCircuitService {
     for (let i = 0; i < gatesCopies.length; i++) {
       const gate = gatesCopies[i];
 
-      addGate(this.circuit, gate, (row, column) => {
+      this.handleAddGate(this.circuit, gate, (row, column) => {
         if (gate.column === column) return;
 
         // if gate has been inserted in different column, then we update columns of all following gates
@@ -247,8 +258,8 @@ export class QuantumCircuitService {
 
   private addBellSampling() {
     // h q[0]; cx q[0], q[1];
-    addGate(this.circuit, createComposerGate('h', 0, 0), () => {});
-    addGate(this.circuit, createComposerGate('cx', 0, 1), () => {});
+    this.handleAddGate(this.circuit, createComposerGate('h', 0, 0), () => {});
+    this.handleAddGate(this.circuit, createComposerGate('cx', 0, 1), () => {});
   }
 }
 
@@ -264,6 +275,19 @@ export function createEmptyCircuit(rows: number, columns: number): QuantumCircui
   }
 
   return circuit;
+}
+
+function addGateWithFreePlacementAllowed(
+  circuit: QuantumCircuit,
+  g: RealComposerGate,
+  onInsert: GateMoveCallback
+) {
+  circuit[g.row][g.column] = g;
+  onInsert(g.row, g.column, g.targets, g.controls);
+}
+
+function removeGateWithFreePlacementAllowed(circuit: QuantumCircuit, g: RealComposerGate) {
+  circuit[g.row][g.column] = emptyCell(g.row, g.column);
 }
 
 function addGate(circuit: QuantumCircuit, g: RealComposerGate, onInsert: GateMoveCallback) {

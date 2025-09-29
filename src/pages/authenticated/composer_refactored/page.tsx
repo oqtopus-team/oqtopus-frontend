@@ -14,43 +14,46 @@ import { Device } from '@/domain/types/Device';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { generateQASMCode } from './qasm';
-import { supportedGates } from './gates';
-// import ObservableComposer from './_components/ObservableComposer';
-// import { Observable } from './observable';
+import { QuantumGate, supportedGates } from './gates';
+import ObservableComposer from './_components/ObservableComposer';
+import { Observable } from './observable';
 
-// export const bellSampling: QuantumCircuit = {
-//   qubitNumber: 2,
-//   steps: [GateH(0), GateCNOT(0, 1)],
-// };
+const renderOperator = (obs: Observable): JobsOperatorItem[] => {
+  return [...new Array(obs.operators.length)].map((_, i) => {
+    return {
+      coeff: obs.coeffs[i],
+      pauli: obs.operators[i].reduce((prev, gate, j) => {
+        switch (gate._tag) {
+          case 'x':
+          case 'y':
+          case 'z':
+            return `${prev}${gate._tag.toUpperCase()}${j}`;
 
-// const renderOperator = (obs: Observable): JobsOperatorItem[] => {
-//   return [...new Array(obs.operators.length)].map((_, i) => {
-//     return {
-//       coeff: obs.coeffs[i],
-//       pauli: obs.operators[i].reduce((prev, gate, j) => {
-//         switch (gate._tag as unknown) {
-//           case "x":
-//           case "y":
-//           case "z":
-//             return `${prev}${gate._tag.toUpperCase()}${j}`;
+          case 'emptyCell':
+          case 'i':
+            return `${prev}I${j}`;
+          default:
+            throw new Error('Unexpected gate in the operator!');
+        }
+      }, ''),
+    };
+  });
+};
 
-//           case "$dummy":
-//           case "i":
-//             return `${prev}I${j}`;
-//           default:
-//             throw new Error("Unexpected gate in the operator!");
-//         }
-//       }, ""),
-//     };
-//   });
-// };
+const composerSupportedGates: QuantumGate['_tag'][] = supportedGates.filter((tag) => tag !== 'i');
+const observableSupportedGates: QuantumGate['_tag'][] = ['i', 'x', 'y', 'z'];
+
 export default function Page() {
   const { t } = useTranslation();
   useDocumentTitle(t('composer.title'));
   const [jobType, setJobType] = useState<JobTypeType>('sampling');
 
-  const [circuitService] = useState(new QuantumCircuitService(2, 20, supportedGates, true));
+  const [circuitService] = useState(new QuantumCircuitService(2, 20, composerSupportedGates, true));
   const [circuit, setCircuit] = useState(circuitService.circuit);
+  const [observableCircuitService] = useState(
+    new QuantumCircuitService(2, 10, observableSupportedGates, false, true)
+  );
+
   const [busy, setBusy] = useState(false);
 
   const { getDevices } = useDeviceAPI();
@@ -58,11 +61,10 @@ export default function Page() {
 
   const [devices, setDevices] = useState<Device[]>([]);
 
-  // const [observable, setObservable] = useState<Observable>({ //TODO: prepare observable circuit service and add ctx provider
-  //   qubitNumber: bellSampling.qubitNumber,
-  //   coeffs: [],
-  //   operators: [],
-  // });
+  const [observable, setObservable] = useState<Observable>({
+    operators: [],
+    coeffs: [],
+  });
 
   const [jobId, setJobId] = useState<null | string>(null);
 
@@ -73,27 +75,21 @@ export default function Page() {
     setBusy(false);
   };
 
-  useEffect(() => circuitService.onCircuitChange(setCircuit), []);
+  useEffect(() => {
+    return circuitService.onCircuitChange((c) => {
+      if (c.length !== observableCircuitService.circuit.length) {
+        const hasMoreQubitsThanObservable = c.length > observableCircuitService.circuit.length;
 
-  // useEffect(() => {
-  //   const nqubits = observable.qubitNumber;
-  //   if (circuit.qubitNumber > nqubits) {
-  //     setObservable({
-  //       qubitNumber: circuit.qubitNumber,
-  //       coeffs: observable.coeffs,
-  //       operators: observable.operators.map((pauli) => [
-  //         ...pauli,
-  //         ...[...new Array(circuit.qubitNumber - nqubits)].map((_, i) => GateI(i)),
-  //       ]),
-  //     });
-  //   } else if (circuit.qubitNumber < nqubits) {
-  //     setObservable({
-  //       qubitNumber: circuit.qubitNumber,
-  //       coeffs: observable.coeffs,
-  //       operators: observable.operators.map((pauli) => pauli.slice(0, circuit.qubitNumber)),
-  //     });
-  //   }
-  // }, [circuit]);
+        while (c.length !== observableCircuitService.circuit.length) {
+          hasMoreQubitsThanObservable
+            ? observableCircuitService.addQubit()
+            : observableCircuitService.removeQubit();
+        }
+      }
+
+      setCircuit(c);
+    });
+  }, []);
 
   useLayoutEffect(() => {
     fetchDevices();
@@ -111,14 +107,6 @@ export default function Page() {
       setBusy(false);
     }
   };
-
-  // const handleCircuitUpdate = (newCircuit: QuantumCircuit) => {
-  //   setCircuit(newCircuit);
-  // };
-
-  // const handleObservableUpdate = (newObservable: Observable) => {
-  //   setObservable(newObservable);
-  // };
 
   return (
     <>
@@ -153,10 +141,9 @@ export default function Page() {
           <hr className="text-neutral-content"></hr>
           <h2 className="text-primary text-xl font-bold my-4">{t('composer.observable.title')}</h2>
           <div className="my-6">
-            {/* <ObservableComposer
-              observable={observable}
-              onObservableUpdate={handleObservableUpdate}
-            /> */}
+            <circuitContext.Provider value={observableCircuitService}>
+              <ObservableComposer observable={observable} onObservableUpdate={setObservable} />
+            </circuitContext.Provider>
           </div>
         </>
       ) : null}
@@ -171,10 +158,7 @@ export default function Page() {
           program: generateQASMCode(circuit),
           qubitNumber: circuit.length,
         })}
-        // mkOperator={() => renderOperator(observable)} //TODO
-        mkOperator={() => {
-          return 0 as any;
-        }}
+        mkOperator={() => renderOperator(observable)}
       />
     </>
   );

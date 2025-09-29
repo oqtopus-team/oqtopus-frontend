@@ -1,18 +1,18 @@
-import { createQuantumGate, GateTag, QuantumGate } from "./gates";
-import { GateRenderingBlock, gateRenderingBlockMap } from "./gates_rendering/Gates";
+import { createQuantumGate, GateTag, QuantumGate } from './gates';
+import { GateRenderingBlock, gateRenderingBlockMap } from './gates_rendering/Gates';
 
-export type Mode = "normal" | "eraser" | "control";
+export type Mode = 'normal' | 'eraser' | 'control';
 
-export const ItemTypeNewGate = "NEW_GATE" as const;
-export const ItemTypeMoveGate = "MOVE_GATE" as const;
+export const ItemTypeNewGate = 'NEW_GATE' as const;
+export const ItemTypeMoveGate = 'MOVE_GATE' as const;
 
-type EmptyCellGate = { _tag: "emptyCell" };
-type MultiRowGatePart = { _tag: "multiRowGateBlock" | "multiRowGateEmptyBlock"; baseId: number };
+type EmptyCellGate = { _tag: 'emptyCell' };
+type MultiRowGatePart = { _tag: 'multiRowGateBlock' | 'multiRowGateEmptyBlock'; baseId: number };
 
-export const nonInteractiveGates: ComposerGate["_tag"][] = [
-  "emptyCell",
-  "multiRowGateBlock",
-  "multiRowGateEmptyBlock",
+export const nonInteractiveGates: ComposerGate['_tag'][] = [
+  'emptyCell',
+  'multiRowGateBlock',
+  'multiRowGateEmptyBlock',
 ];
 
 type ComposerObject = {
@@ -57,12 +57,12 @@ export function createComposerGate(tag: GateTag, row: number, column: number): R
   };
 
   switch (quantumGate._tag) {
-    case "cx":
-    case "cz":
+    case 'cx':
+    case 'cz':
       gate.controls.push(row);
       gate.targets.push(row + 1);
       break;
-    case "swap":
+    case 'swap':
       gate.targets.push(row, row + 1);
       break;
     default:
@@ -84,7 +84,7 @@ export function copyGate(g: RealComposerGate): RealComposerGate {
 
 export function emptyCell(row: number, column: number): ComposerGate {
   return {
-    _tag: "emptyCell",
+    _tag: 'emptyCell',
     id: generateID.next().value,
     row,
     column,
@@ -93,7 +93,7 @@ export function emptyCell(row: number, column: number): ComposerGate {
 
 export function multiQubitGateBlock(baseId: number, row: number, column: number): ComposerGate {
   return {
-    _tag: "multiRowGateBlock",
+    _tag: 'multiRowGateBlock',
     id: generateID.next().value,
     baseId,
     row,
@@ -107,7 +107,7 @@ export function multiQubitGateEmptyBlock(
   column: number
 ): ComposerGate {
   return {
-    _tag: "multiRowGateEmptyBlock",
+    _tag: 'multiRowGateEmptyBlock',
     id: generateID.next().value,
     baseId,
     row,
@@ -121,10 +121,10 @@ export function isDummyGate(g: ComposerGate): g is DummyComposerGate {
 
 export function isPartOfMultiQubitGate(g: ComposerGate): boolean {
   switch (g._tag) {
-    case "emptyCell":
+    case 'emptyCell':
       return false;
-    case "multiRowGateBlock":
-    case "multiRowGateEmptyBlock":
+    case 'multiRowGateBlock':
+    case 'multiRowGateEmptyBlock':
       return true;
     default:
       return g.targets.length + g.controls.length > 1;
@@ -133,7 +133,7 @@ export function isPartOfMultiQubitGate(g: ComposerGate): boolean {
 
 export function getMaxGateRow(g: RealComposerGate): number {
   if (g.targets.length === 0 && g.controls.length === 0) {
-    throw new Error("composer gate must have at least one control or target");
+    throw new Error('composer gate must have at least one control or target');
   }
 
   return Math.max(...g.targets, ...g.controls);
