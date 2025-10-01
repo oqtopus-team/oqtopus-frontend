@@ -3,32 +3,107 @@ import { userApiContext } from './Provider';
 import {
   DevicesDeviceInfo,
   GetAnnouncementsListOrderEnum,
-  JobsGetJobsResponse,
+  JobsJobBase,
+  JobsJobInfo,
+  JobsJobInfoUploadPresignedURL,
+  JobsRegisterJobResponse,
   JobsSubmitJobRequest,
 } from '@/api/generated';
-import { Job, JobSearchParams } from '@/domain/types/Job';
+import { Job, JobS3Data, JobSearchParams } from '@/domain/types/Job';
 import { Device } from '@/domain/types/Device';
 import type { RawAxiosRequestConfig } from 'axios';
+import axios from 'axios';
+import JSZip from 'jszip';
 
 interface AnnouncementsApi {
   offset?: string;
   limit?: string;
   options?: RawAxiosRequestConfig;
   currentTime?: string;
-  order?: GetAnnouncementsListOrderEnum
+  order?: GetAnnouncementsListOrderEnum;
+}
+
+async function convertZipBlobToObject(zipBlob: Blob) {
+  const zip = await JSZip.loadAsync(zipBlob);
+  const [_, file] = Object.entries(zip.files)[0] ?? []; // we assume we have exactly 1 file inside ZIP
+
+  if (!file) return;
+
+  const fileContent = await file.async('string');
+  return JSON.parse(fileContent);
 }
 
 export const useJobAPI = () => {
   const api = useContext(userApiContext);
+
+  const registerJob = (): Promise<JobsRegisterJobResponse> => {
+    return api.job.registerJobId().then((res) => res.data);
+  };
+
+  const uploadJobToS3 = async (
+    presigned_url: JobsJobInfoUploadPresignedURL,
+    jobFile: File,
+    setUploadProgressPercent?: (progress: number) => void
+  ): Promise<void> => {
+    const { url, fields } = presigned_url;
+    if (!url || !fields) throw new Error('missing presigned URL data');
+
+    const formData = new FormData();
+    for (const [k, v] of Object.entries(fields)) {
+      if (!v) continue;
+      formData.append(k, v);
+    }
+
+    formData.append('file', jobFile);
+    const response = await axios.post(url, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress(progressEvent) {
+        if (!progressEvent.total) return;
+        const progressPercent = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+        setUploadProgressPercent?.(progressPercent);
+      },
+    });
+  };
+
+  const retrieveJobFiles = async (jobInfo: JobsJobInfo): Promise<JobS3Data> => {
+    const { input, transpile_result, result, combined_program } = jobInfo;
+    const jobS3Data: JobS3Data = {
+      input: await axios
+        .get(input, { responseType: 'blob' })
+        .then((r) => convertZipBlobToObject(r.data)),
+    };
+
+    if (transpile_result) {
+      jobS3Data.transpileResult = await axios
+        .get(transpile_result, { responseType: 'blob' })
+        .then((r) => convertZipBlobToObject(r.data))
+        .then((o) => o.transpile_result);
+    }
+    if (result) {
+      jobS3Data.result = await axios
+        .get(result, { responseType: 'blob' })
+        .then((r) => convertZipBlobToObject(r.data))
+        .then((o) => o.result);
+    }
+    if (combined_program) {
+      jobS3Data.combinedProgram = await axios
+        .get(combined_program, { responseType: 'blob' })
+        .then((r) => convertZipBlobToObject(r.data))
+        .then((o) => o.combined_program);
+    }
+
+    return jobS3Data;
+  };
 
   /**
    * @returns Promise job id
    */
   const submitJob = async (
     // TODO: fix invalid oas schema (invalid fields: status, created_at, updated_at)
+    job_id: string,
     job: JobsSubmitJobRequest
   ): Promise<string /* job id */> => {
-    return api.job.submitJob(job).then((res) => res.data.job_id);
+    return api.job.submitJob(job_id, job).then((res) => res.data.message);
   };
 
   const getLatestJobs = async (
@@ -67,31 +142,40 @@ export const useJobAPI = () => {
   };
 
   const getSselog = async (
-    job_id: string
+    sselogFileURL: string
   ): Promise<{ file: string | null; file_name: string | null; status: number }> => {
-    return api.job
-      .getSselog(job_id)
-      .then((res) => {
-        return {
-          file: res.data.file ?? null,
-          file_name: res.data.file_name ?? null,
-          status: res.status,
-        };
-      })
-      .catch((error) => {
-        console.log(error);
-        return {
-          file: null,
-          file_name: null,
-          status: error.response.status,
-        };
-      });
+    try {
+      const res = await axios.get(sselogFileURL, { responseType: 'blob' });
+      const object = await convertZipBlobToObject(res.data);
+
+      return {
+        file: object.sselog.file,
+        file_name: object.sselog.file_name,
+        status: res.status,
+      };
+    } catch (error: any) {
+      return {
+        file: null,
+        file_name: null,
+        status: error.response.status,
+      };
+    }
   };
 
-  return { submitJob, getLatestJobs, getJob, cancelJob, deleteJob, getSselog };
+  return {
+    registerJob,
+    uploadJobToS3,
+    retrieveJobFiles,
+    submitJob,
+    getLatestJobs,
+    getJob,
+    cancelJob,
+    deleteJob,
+    getSselog,
+  };
 };
 
-const convertJobResult = (job: JobsGetJobsResponse): Job => ({
+const convertJobResult = (job: JobsJobBase): Job => ({
   id: job.job_id ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   name: job.name ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   description: job.description,
@@ -148,13 +232,21 @@ const convertDeviceResult = (device: DevicesDeviceInfo): Device => ({
 export const useAnnouncementsAPI = () => {
   const api = useContext(userApiContext);
 
-  const getAnnouncements = async ({ limit, offset, options, order, currentTime }: AnnouncementsApi) => {
-    return api.announcements.getAnnouncementsList(offset, limit, order, currentTime, options).then((res) => {
-      if (res.status === 200) {
-        return res.data.announcements;
-      }
-      return null;
-    });
+  const getAnnouncements = async ({
+    limit,
+    offset,
+    options,
+    order,
+    currentTime,
+  }: AnnouncementsApi) => {
+    return api.announcements
+      .getAnnouncementsList(offset, limit, order, currentTime, options)
+      .then((res: any) => {
+        if (res.status === 200) {
+          return res.data.announcements;
+        }
+        return null;
+      });
   };
 
   return { getAnnouncements };

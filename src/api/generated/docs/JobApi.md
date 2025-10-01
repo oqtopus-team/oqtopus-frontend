@@ -8,9 +8,9 @@ All URIs are relative to *http://localhost:8080*
 |[**deleteJob**](#deletejob) | **DELETE** /jobs/{job_id} | Delete job|
 |[**getJob**](#getjob) | **GET** /jobs/{job_id} | Get selected job|
 |[**getJobStatus**](#getjobstatus) | **GET** /jobs/{job_id}/status | Get selected job\&#39;s status|
-|[**getSselog**](#getsselog) | **GET** /jobs/{job_id}/sselog | Get SSE log file|
 |[**listJobs**](#listjobs) | **GET** /jobs | List all quantum jobs|
-|[**submitJob**](#submitjob) | **POST** /jobs | Submit a quantum job|
+|[**registerJobId**](#registerjobid) | **POST** /jobs | Register new job|
+|[**submitJob**](#submitjob) | **POST** /jobs/{job_id}/submit | Complete submission of a quantum job|
 
 # **cancelJob**
 > SuccessSuccessResponse cancelJob()
@@ -121,7 +121,7 @@ const { status, data } = await apiInstance.deleteJob(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getJob**
-> JobsJobDef getJob()
+> GetJob200Response getJob()
 
 Get selected job
 
@@ -152,7 +152,7 @@ const { status, data } = await apiInstance.getJob(
 
 ### Return type
 
-**JobsJobDef**
+**GetJob200Response**
 
 ### Authorization
 
@@ -228,63 +228,8 @@ const { status, data } = await apiInstance.getJobStatus(
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **getSselog**
-> JobsGetSselogResponse getSselog()
-
-Get SSE log file of selected job
-
-### Example
-
-```typescript
-import {
-    JobApi,
-    Configuration
-} from './api';
-
-const configuration = new Configuration();
-const apiInstance = new JobApi(configuration);
-
-let jobId: string; //Job identifier (default to undefined)
-
-const { status, data } = await apiInstance.getSselog(
-    jobId
-);
-```
-
-### Parameters
-
-|Name | Type | Description  | Notes|
-|------------- | ------------- | ------------- | -------------|
-| **jobId** | [**string**] | Job identifier | defaults to undefined|
-
-
-### Return type
-
-**JobsGetSselogResponse**
-
-### Authorization
-
-[BearerAuth](../README.md#BearerAuth)
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
-
-### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-|**200** | Return SSE log file |  -  |
-|**400** | Bad Request |  -  |
-|**401** | Unauthorized |  -  |
-|**404** | Not Found |  -  |
-|**500** | Internal Server Error |  -  |
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
 # **listJobs**
-> Array<JobsGetJobsResponse> listJobs()
+> Array<JobsJobBase> listJobs()
 
 By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time or search text with \'start_time\', \'end_time\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
 
@@ -302,7 +247,7 @@ const apiInstance = new JobApi(configuration);
 let fields: string; //Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response. (optional) (default to undefined)
 let startTime: string; //Allows to filter the list of jobs to fetch by creation time. If specified only jobs with creation time  (createdAt property) >= start_time are returned. (optional) (default to undefined)
 let endTiime: string; //Allows to filter the list of jobs to fetch by to creation time. If specified only jobs with creation time (createdAt property) <= end_time are returned. (optional) (default to undefined)
-let q: string; //Allows to filter the list of jobs to fetch by job\'s id, name and description. If specified only jobs which id, name or description contains specified search string are returned. (optional) (default to undefined)
+let q: string; //Allows to filter the list of jobs to fetch by job\'s name and description. If specified only jobs which name or description contains specified search string are returned. (optional) (default to undefined)
 let page: number; //Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned. (optional) (default to 1)
 let size: number; //Configure number of jobs per page (optional) (default to 10)
 let order: 'DESC' | 'ASC'; //Specify jobs order according to creation time (createdAt property) (optional) (default to 'ASC')
@@ -325,7 +270,7 @@ const { status, data } = await apiInstance.listJobs(
 | **fields** | [**string**] | Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response. | (optional) defaults to undefined|
 | **startTime** | [**string**] | Allows to filter the list of jobs to fetch by creation time. If specified only jobs with creation time  (createdAt property) &gt;&#x3D; start_time are returned. | (optional) defaults to undefined|
 | **endTiime** | [**string**] | Allows to filter the list of jobs to fetch by to creation time. If specified only jobs with creation time (createdAt property) &lt;&#x3D; end_time are returned. | (optional) defaults to undefined|
-| **q** | [**string**] | Allows to filter the list of jobs to fetch by job\&#39;s id, name and description. If specified only jobs which id, name or description contains specified search string are returned. | (optional) defaults to undefined|
+| **q** | [**string**] | Allows to filter the list of jobs to fetch by job\&#39;s name and description. If specified only jobs which name or description contains specified search string are returned. | (optional) defaults to undefined|
 | **page** | [**number**] | Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned. | (optional) defaults to 1|
 | **size** | [**number**] | Configure number of jobs per page | (optional) defaults to 10|
 | **order** | [**&#39;DESC&#39; | &#39;ASC&#39;**]**Array<&#39;DESC&#39; &#124; &#39;ASC&#39;>** | Specify jobs order according to creation time (createdAt property) | (optional) defaults to 'ASC'|
@@ -333,7 +278,7 @@ const { status, data } = await apiInstance.listJobs(
 
 ### Return type
 
-**Array<JobsGetJobsResponse>**
+**Array<JobsJobBase>**
 
 ### Authorization
 
@@ -348,15 +293,61 @@ const { status, data } = await apiInstance.listJobs(
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Return a list of submitted quantum jobs |  -  |
+|**200** | Return a list of quantum jobs |  -  |
+|**401** | Unauthorized |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **registerJobId**
+> JobsRegisterJobResponse registerJobId()
+
+Register new job and generate a presigned URL to upload job information (`jobs.S3SubmitJobInfo`) to OQTOPUS cloud.
+
+### Example
+
+```typescript
+import {
+    JobApi,
+    Configuration
+} from './api';
+
+const configuration = new Configuration();
+const apiInstance = new JobApi(configuration);
+
+const { status, data } = await apiInstance.registerJobId();
+```
+
+### Parameters
+This endpoint does not have any parameters.
+
+
+### Return type
+
+**JobsRegisterJobResponse**
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | Return new job_id and presigned URL for job information upload |  -  |
+|**400** | Bad Request |  -  |
 |**401** | Unauthorized |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **submitJob**
-> JobsSubmitJobResponse submitJob()
+> SuccessSuccessResponse submitJob()
 
-Submit a quantum job
+Complete submission of a previously registered quantum job.  job_id must be created via \'POST /jobs\' request.  Submit job information (`jobs.S3SubmitJobInfo`) must be formerly uploaded to OQTOPUS cloud using presigned URL received in \'POST /jobs\' response.
 
 ### Example
 
@@ -370,9 +361,11 @@ import {
 const configuration = new Configuration();
 const apiInstance = new JobApi(configuration);
 
+let jobId: string; //Job identifier (default to undefined)
 let jobsSubmitJobRequest: JobsSubmitJobRequest; //Quantum job to be submitted (optional)
 
 const { status, data } = await apiInstance.submitJob(
+    jobId,
     jobsSubmitJobRequest
 );
 ```
@@ -382,11 +375,12 @@ const { status, data } = await apiInstance.submitJob(
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
 | **jobsSubmitJobRequest** | **JobsSubmitJobRequest**| Quantum job to be submitted | |
+| **jobId** | [**string**] | Job identifier | defaults to undefined|
 
 
 ### Return type
 
-**JobsSubmitJobResponse**
+**SuccessSuccessResponse**
 
 ### Authorization
 

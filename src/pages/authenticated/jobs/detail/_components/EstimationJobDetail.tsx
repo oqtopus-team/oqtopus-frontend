@@ -1,5 +1,5 @@
 import { Card } from '@/pages/_components/Card';
-import { Job } from '@/domain/types/Job';
+import { Job, JobWithS3Data } from '@/domain/types/Job';
 import clsx from 'clsx';
 import { JobDetailBasicInfo } from './panels/JobDetailBasicInfo';
 import { JobDetailMitigationInfo } from './panels/JobDetailMitigationInfo';
@@ -11,7 +11,7 @@ import { JobDetailProgram } from './panels/JobDetailProgram';
 import { JobDetailTranspiledProgram } from './panels/JobDetailTranspiledProgram';
 import { JobDetailTranspilerInfo } from './panels/JobDetailTranspilerInfo';
 
-export const SuccessViewEstimation: React.FC<Job> = (job: Job) => {
+export const SuccessViewEstimation: React.FC<JobWithS3Data> = (job: JobWithS3Data) => {
   const nonHistogramPanelHeight = useWindowSize().height * 0.9;
 
   return (
@@ -31,12 +31,12 @@ export const SuccessViewEstimation: React.FC<Job> = (job: Job) => {
             runningAt={job.runningAt}
             endedAt={job.endedAt}
             executionTime={job.executionTime}
-            message={job.jobInfo?.message}
+            message={job.jobInfo.message}
           />
         </Card>
         {/* Expectation */}
         <Card className={clsx(['col-start-1', 'col-end-3'])}>
-          <JobDetailExpectation expectationValue={job.jobInfo.result?.estimation?.exp_value} />
+          <JobDetailExpectation expectationValue={job.result?.estimation?.exp_value} />
         </Card>
         {/* TranspilerInfo */}
         <Card className={clsx(['col-start-1', 'col-end-2'])}>
@@ -54,26 +54,23 @@ export const SuccessViewEstimation: React.FC<Job> = (job: Job) => {
         </Card>
         {/* QASM */}
         <Card className={clsx(['col-start-1', 'col-end-2'])}>
-          <JobDetailProgram program={job.jobInfo.program} maxHeight={nonHistogramPanelHeight} />
+          <JobDetailProgram program={job.input.program} maxHeight={nonHistogramPanelHeight} />
         </Card>
         {/* Transpiled QASM */}
         <Card className={clsx(['col-start-2', 'col-end-3'])}>
           <JobDetailTranspiledProgram
-            transpiledProgram={job.jobInfo.transpile_result?.transpiled_program ?? ''}
+            transpiledProgram={job.transpileResult?.transpiled_program ?? ''}
             maxHeight={nonHistogramPanelHeight}
           />
         </Card>
         {/* Result */}
         <Card className={clsx(['col-start-1', 'col-end-2'])}>
-          <JobDetailResult
-            result={job.jobInfo.result?.estimation}
-            maxHeight={nonHistogramPanelHeight}
-          />
+          <JobDetailResult result={job.result?.estimation} maxHeight={nonHistogramPanelHeight} />
         </Card>
         {/* Transpile Result */}
-        {job.jobInfo.transpile_result && (
+        {job.transpileResult && (
           <Card className={clsx(['col-start-2', 'col-end-3'])}>
-            <JobDetailTranspileResult transpileResult={job.jobInfo.transpile_result} />
+            <JobDetailTranspileResult transpileResult={job.transpileResult} />
           </Card>
         )}
       </div>

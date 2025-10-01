@@ -1,43 +1,39 @@
-import { JobsOperatorItem, JobsSubmitJobInfo, JobsSubmitJobRequest } from "@/api/generated";
-import { Device } from "@/domain/types/Device";
-import { JobTypeType } from "@/domain/types/Job";
-import { Accordion } from "@/pages/_components/Accordion";
-import { Button } from "@/pages/_components/Button";
-import { Input } from "@/pages/_components/Input";
-import { Select } from "@/pages/_components/Select";
-import { Spacer } from "@/pages/_components/Spacer";
-import { TextArea } from "@/pages/_components/TextArea";
-import clsx from "clsx"
-import { ReactNode, useEffect, useState } from "react"
-import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router";
+import { JobsS3OperatorItem, JobsS3SubmitJobInfo, JobsSubmitJobRequest } from '@/api/generated';
+import { Device } from '@/domain/types/Device';
+import { JobTypeType } from '@/domain/types/Job';
+import { Accordion } from '@/pages/_components/Accordion';
+import { Button } from '@/pages/_components/Button';
+import { Input } from '@/pages/_components/Input';
+import { Select } from '@/pages/_components/Select';
+import { Spacer } from '@/pages/_components/Spacer';
+import { TextArea } from '@/pages/_components/TextArea';
+import clsx from 'clsx';
+import { ReactNode, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 
-export type TabPanelItem = { id: string; label: string; disabled: boolean; };
+export type TabPanelItem = { id: string; label: string; disabled: boolean };
 interface TabPanelsProps {
   tabItems: TabPanelItem[];
   tabContent: (item: TabPanelItem) => ReactNode;
 }
 
 export const TabPanels = (props: TabPanelsProps) => {
-  const [activeTab, setActiveTab] = useState<string | null>(props.tabItems[0]?.id)
+  const [activeTab, setActiveTab] = useState<string | null>(props.tabItems[0]?.id);
   const handleTabItemClick = (tabId: string) => () => {
-    setActiveTab(tabId)
-  }
+    setActiveTab(tabId);
+  };
   const renderContent: () => ReactNode = (() => {
-    const h = props.tabItems.find(item => item.id == activeTab);
+    const h = props.tabItems.find((item) => item.id == activeTab);
     if (h === undefined) {
-      return () => <></>
+      return () => <></>;
     }
     return () => props.tabContent(h);
   })();
   return (
     <div>
-      <div
-        className={clsx([
-          ['flex', 'items-center', 'justify-start'],
-        ])}
-      >
+      <div className={clsx([['flex', 'items-center', 'justify-start']])}>
         {props.tabItems.map((tabItem, i) => {
           return (
             <div
@@ -50,10 +46,10 @@ export const TabPanels = (props: TabPanelsProps) => {
                 tabItem.disabled
                   ? ['bg-disable-bg', 'text-disable-content']
                   : tabItem.id === activeTab
-                    ? ['bg-base-card', 'text-primary',]
+                    ? ['bg-base-card', 'text-primary']
                     : ['bg-gray-bg'],
               ])}
-              onClick={tabItem.disabled ? () => { } : handleTabItemClick(tabItem.id)}
+              onClick={tabItem.disabled ? () => {} : handleTabItemClick(tabItem.id)}
               key={`tab-${i}`}
             >
               <div
@@ -67,7 +63,7 @@ export const TabPanels = (props: TabPanelsProps) => {
                 <span>{tabItem.label}</span>
               </div>
             </div>
-          )
+          );
         })}
         <div
           className={clsx([
@@ -78,49 +74,45 @@ export const TabPanels = (props: TabPanelsProps) => {
             'border-t-0',
             'border-x-0',
           ])}
-        >
-
-        </div>
+        ></div>
       </div>
       <div
         className={clsx([
-
           ['w-full, p-5', 'rounded', 'rounded-t-none'],
-          ['border', 'border-t-0', 'border-b-neutral-content', 'border-x-neutral-content']
+          ['border', 'border-t-0', 'border-b-neutral-content', 'border-x-neutral-content'],
         ])}
       >
         {renderContent()}
       </div>
     </div>
-  )
-}
+  );
+};
 
 export interface ControlPanelProps {
   jobType: JobTypeType;
   devices: Device[];
   busy: boolean;
   jobId: null | string;
-  mkProgram: () => { program: string, qubitNumber: number };
-  mkOperator: () => JobsOperatorItem[];
-  onSubmit: (req: JobsSubmitJobRequest) => Promise<void>;
+  mkProgram: () => { program: string; qubitNumber: number };
+  mkOperator: () => JobsS3OperatorItem[];
+  onSubmit: (req: JobsSubmitJobRequest, jobS3Info: JobsS3SubmitJobInfo) => Promise<void>;
 }
 
 export default (props: ControlPanelProps) => {
   const { t } = useTranslation();
 
-  const tabItems = ["exec", "siml"]
-    .map(id => ({
-      id,
-      label: t(`composer.control_panel.${id}.tab_label`),
-      disabled: id == "siml"
-    }));
+  const tabItems = ['exec', 'siml'].map((id) => ({
+    id,
+    label: t(`composer.control_panel.${id}.tab_label`),
+    disabled: id == 'siml',
+  }));
   return (
     <>
       <TabPanels
         tabItems={tabItems}
         tabContent={(item) => {
           switch (item.id) {
-            case "exec":
+            case 'exec':
               return (
                 <ControlPanelExecution
                   jobType={props.jobType}
@@ -132,9 +124,9 @@ export default (props: ControlPanelProps) => {
                   onSubmit={props.onSubmit}
                   key="control-panel-exec"
                 />
-              )
-            case "siml":
-              return <></>
+              );
+            case 'siml':
+              return <></>;
             default:
               return null;
           }
@@ -142,8 +134,7 @@ export default (props: ControlPanelProps) => {
       />
     </>
   );
-}
-
+};
 
 interface ExecutionFormInput {
   name: string;
@@ -159,23 +150,23 @@ interface ControlPanelExecutionProps {
   jobType: JobTypeType;
   busy: boolean;
   jobId: null | string;
-  mkProgram: () => { program: string, qubitNumber: number };
-  mkOperator: () => JobsOperatorItem[];
-  onSubmit: (req: JobsSubmitJobRequest) => Promise<void>;
+  mkProgram: () => { program: string; qubitNumber: number };
+  mkOperator: () => JobsS3OperatorItem[];
+  onSubmit: (req: JobsSubmitJobRequest, jobS3Info: JobsS3SubmitJobInfo) => Promise<void>;
 }
 
-type TranspilerOption = (keyof typeof transpilerOptions) | "custom";
-type MitigationOption = (keyof typeof mitigationOptions);
+type TranspilerOption = keyof typeof transpilerOptions | 'custom';
+type MitigationOption = keyof typeof mitigationOptions;
 
 const transpilerOptions = {
-  default: { transpiler_lib: "qiskit", transpiler_options: { optimization_level: 2 } },
+  default: { transpiler_lib: 'qiskit', transpiler_options: { optimization_level: 2 } },
   none: { transpiler_lib: null },
 };
 
 const mitigationOptions = {
   none: {},
-  ro_pseudo_inverse: { readout: "pseudo_inverse" }
-}
+  ro_pseudo_inverse: { readout: 'pseudo_inverse' },
+};
 
 export const ControlPanelExecution = (props: ControlPanelExecutionProps) => {
   const { t } = useTranslation();
@@ -190,41 +181,45 @@ export const ControlPanelExecution = (props: ControlPanelExecutionProps) => {
     trigger,
   } = useForm<ExecutionFormInput>({
     defaultValues: {
-      name: "",
-      description: "",
-      device_id: "",
+      name: '',
+      description: '',
+      device_id: '',
       shots: 1000,
-      transpiler_option: "default",
-      mitigation_option: "ro_pseudo_inverse",
+      transpiler_option: 'default',
+      mitigation_option: 'ro_pseudo_inverse',
     },
   });
 
   const [showMoreOptions, setShowMoreOptions] = useState(false);
-  const [transpilerInfoInput, setTranspilerInfoInput] = useState("")
-  const [simulatorInfoInput, setSimulatorInfoInput] = useState("{}")
-  const [transpilerInfo, setTranspilerInfo] = useState<Record<string, any>>(transpilerOptions.default);
+  const [transpilerInfoInput, setTranspilerInfoInput] = useState('');
+  const [simulatorInfoInput, setSimulatorInfoInput] = useState('{}');
+  const [transpilerInfo, setTranspilerInfo] = useState<Record<string, any>>(
+    transpilerOptions.default
+  );
   const [simulatorInfo, setSimulatorInfo] = useState<Record<string, any>>({});
-  const [mitigationInfo, setMitigationInfo] = useState<Record<string, any>>(mitigationOptions.ro_pseudo_inverse);
+  const [mitigationInfo, setMitigationInfo] = useState<Record<string, any>>(
+    mitigationOptions.ro_pseudo_inverse
+  );
 
   const [advancedOptionsErrors, setAdvancedOptionsErrors] = useState({
-    transpilerInfo: "",
-    simulatorInfo: ""
+    transpilerInfo: '',
+    simulatorInfo: '',
   });
 
   const formValues = watch();
 
   useEffect(() => {
-    const availableDevice = props.devices.find((device) => device.status === "available");
+    const availableDevice = props.devices.find((device) => device.status === 'available');
 
     if (availableDevice) {
-      setValue("device_id", availableDevice.id ?? undefined);
+      setValue('device_id', availableDevice.id ?? undefined);
     }
   }, [props.devices]);
 
   useEffect(() => {
-    if (formValues.transpiler_option !== "custom") {
+    if (formValues.transpiler_option !== 'custom') {
       setTranspilerInfo(transpilerOptions[formValues.transpiler_option]);
-      setTranspilerInfoInput(JSON.stringify(transpilerOptions[formValues.transpiler_option]))
+      setTranspilerInfoInput(JSON.stringify(transpilerOptions[formValues.transpiler_option]));
     }
   }, [formValues.transpiler_option]);
 
@@ -233,56 +228,55 @@ export const ControlPanelExecution = (props: ControlPanelExecutionProps) => {
   }, [formValues.mitigation_option]);
 
   const handleClickSubmit = async (form: ExecutionFormInput) => {
-    const mkJobInfo = (): [JobsSubmitJobInfo, number] => {
+    const mkJobInfo = (): [JobsS3SubmitJobInfo, number] => {
       const { program, qubitNumber } = props.mkProgram();
       switch (props.jobType) {
-        case "sampling":
+        case 'sampling':
           return [
             {
               program: [program],
             },
-            qubitNumber
+            qubitNumber,
           ];
-        case "estimation":
+        case 'estimation':
           return [
             {
               program: [program],
               operator: props.mkOperator(),
             },
-            qubitNumber
+            qubitNumber,
           ];
       }
     };
     const [submitJobInfo, qubitNumber] = mkJobInfo();
 
-    const selectedDevice = props.devices.find(d => d.id === form.device_id);
+    const selectedDevice = props.devices.find((d) => d.id === form.device_id);
     if (!selectedDevice) {
-      alert("Select an available device!");
+      alert('Select an available device!');
       return;
     }
 
     if (qubitNumber > selectedDevice.nQubits) {
-      alert(`The device ${selectedDevice.id} supports quantum circuits of ${selectedDevice.nQubits} qubits or fewer.`)
+      alert(
+        `The device ${selectedDevice.id} supports quantum circuits of ${selectedDevice.nQubits} qubits or fewer.`
+      );
     }
 
-    if (Object.values(errors).every(e => e === undefined)) {
-
-
+    if (Object.values(errors).every((e) => e === undefined)) {
       const req: JobsSubmitJobRequest = {
         name: form.name,
         description: form.description,
         device_id: form.device_id,
-        job_info: submitJobInfo,
         job_type: props.jobType,
         shots: form.shots,
         transpiler_info: transpilerInfo,
         mitigation_info: mitigationInfo,
-        simulator_info: simulatorInfo
+        simulator_info: simulatorInfo,
       };
 
-      props.onSubmit(req);
+      props.onSubmit(req, submitJobInfo);
     }
-  }
+  };
   return (
     <>
       <div className="flex flex-col gap-5">
@@ -290,54 +284,46 @@ export const ControlPanelExecution = (props: ControlPanelExecutionProps) => {
           <Input
             autoFocus
             placeholder={t('composer.control_panel.exec.name_placeholder')}
-            label={t("composer.control_panel.exec.job_name")}
+            label={t('composer.control_panel.exec.job_name')}
             {...register('name')}
           />
-
         </div>
 
         <div className="w-1/2">
           <Input
             autoFocus
             placeholder={t('composer.control_panel.exec.desc_placeholder')}
-            label={t("composer.control_panel.exec.job_desc")}
+            label={t('composer.control_panel.exec.job_desc')}
             {...register('description')}
           />
         </div>
 
         <div className="flex gap-12 w-1/2">
           <div className="w-1/2">
-
             <Input
               autoFocus
               placeholder={t('composer.control_panel.exec.shots_placeholder')}
-              label={t("composer.control_panel.exec.shots")}
+              label={t('composer.control_panel.exec.shots')}
               {...register('shots')}
-
             />
           </div>
 
           <div className="w-1/2">
             <Select
-              label={t("composer.control_panel.exec.device_id")}
-              {...register("device_id")}
+              label={t('composer.control_panel.exec.device_id')}
+              {...register('device_id')}
               value={undefined}
               errorMessage={errors.device_id?.message}
             >
-              {props.devices.map((device) =>
+              {props.devices.map((device) => (
                 <>
-                  <option
-                    disabled={device.status === 'unavailable'}
-                    key={device.id}
-                  >
+                  <option disabled={device.status === 'unavailable'} key={device.id}>
                     {device.id}
                   </option>
                 </>
-              )}
+              ))}
             </Select>
           </div>
-
-
         </div>
       </div>
 
@@ -347,53 +333,50 @@ export const ControlPanelExecution = (props: ControlPanelExecutionProps) => {
         <div
           className="text-link cursor-pointer text-nowrap flex items-center"
           onClick={() => {
-            setShowMoreOptions(!showMoreOptions)
+            setShowMoreOptions(!showMoreOptions);
           }}
         >
           <span>Advanced Options</span>
-          <span className={clsx([
-            ["w-10", "h-10", "flex", "justify-center", "items-center"],
-            ["origin-center", "transition-all", "duration-200"],
-            [showMoreOptions ? "rotate-90" : "-rotate-90"]
-          ])}>
-            <img
-              src="/img/common/sidebar_arrow.svg"
-            />
+          <span
+            className={clsx([
+              ['w-10', 'h-10', 'flex', 'justify-center', 'items-center'],
+              ['origin-center', 'transition-all', 'duration-200'],
+              [showMoreOptions ? 'rotate-90' : '-rotate-90'],
+            ])}
+          >
+            <img src="/img/common/sidebar_arrow.svg" />
           </span>
         </div>
         <hr className="w-full text-neutral-content m-3" />
       </div>
-      <Accordion isOpen={showMoreOptions} >
+      <Accordion isOpen={showMoreOptions}>
         <div className="flex items-center justify-between mb-4">
           <p>Transpiler option</p>
-          <Select
-            {...register("transpiler_option")}
-          >
+          <Select {...register('transpiler_option')}>
             <option value="default">default</option>
             <option value="none">none</option>
             <option value="custom">custom</option>
           </Select>
         </div>
-        <Accordion isOpen={formValues.transpiler_option === "custom"}>
+        <Accordion isOpen={formValues.transpiler_option === 'custom'}>
           <TextArea
             errorMessage={advancedOptionsErrors.transpilerInfo}
             value={transpilerInfoInput}
             onChange={(event) => {
-              const value = event.target.value
+              const value = event.target.value;
               setTranspilerInfoInput(value);
               try {
                 const parsedValue = JSON.parse(value);
                 setTranspilerInfo(parsedValue);
                 setAdvancedOptionsErrors({
                   ...advancedOptionsErrors,
-                  transpilerInfo: ""
-                })
-              }
-              catch (_) {
+                  transpilerInfo: '',
+                });
+              } catch (_) {
                 setAdvancedOptionsErrors({
                   ...advancedOptionsErrors,
-                  transpilerInfo: "Please set a valid JSON value."
-                })
+                  transpilerInfo: 'Please set a valid JSON value.',
+                });
               }
             }}
           />
@@ -403,7 +386,7 @@ export const ControlPanelExecution = (props: ControlPanelExecutionProps) => {
 
         <div className="flex items-center justify-between">
           <p>Mitigation option</p>
-          <Select {...register("mitigation_option")}>
+          <Select {...register('mitigation_option')}>
             <option value="ro_pseudo_inverse">readout pseudo inverse</option>
             <option value="none">none</option>
           </Select>
@@ -417,28 +400,26 @@ export const ControlPanelExecution = (props: ControlPanelExecutionProps) => {
             errorMessage={advancedOptionsErrors.simulatorInfo}
             value={simulatorInfoInput}
             onChange={(event) => {
-              const value = event.target.value
+              const value = event.target.value;
               setSimulatorInfoInput(value);
               try {
                 const parsedValue = JSON.parse(value);
                 setSimulatorInfo(parsedValue);
                 setAdvancedOptionsErrors({
                   ...advancedOptionsErrors,
-                  simulatorInfo: ""
-                })
-              }
-              catch (_) {
+                  simulatorInfo: '',
+                });
+              } catch (_) {
                 setAdvancedOptionsErrors({
                   ...advancedOptionsErrors,
-                  simulatorInfo: "Please set a valid JSON value."
-                })
+                  simulatorInfo: 'Please set a valid JSON value.',
+                });
               }
             }}
           />
         </div>
         <Spacer className="h-6" />
         <hr className="w-full text-neutral-content" />
-
       </Accordion>
 
       <Spacer className="h-6" />
@@ -454,22 +435,22 @@ export const ControlPanelExecution = (props: ControlPanelExecutionProps) => {
             {t('composer.control_panel.exec.submit')}
           </Button>
 
-          {props.jobId !== null
-            ? <div
+          {props.jobId !== null ? (
+            <div
               className="flex items-center gap-4 text-link cursor-pointer"
               onClick={() => {
                 navigate(`/jobs/${props.jobId}`);
               }}
             >
+              <span>{t('composer.control_panel.exec.see_result')}</span>
               <span>
-                {t("composer.control_panel.exec.see_result")}
+                {'('}Job ID: {props.jobId}
+                {')'}
               </span>
-              <span>{'('}Job ID: {props.jobId}{')'}</span>
             </div>
-            : null
-          }
+          ) : null}
         </div>
       </div>
     </>
   );
-}
+};

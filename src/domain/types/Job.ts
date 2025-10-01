@@ -1,4 +1,11 @@
-import { JobsJobInfo } from '@/api/generated';
+import {
+  JobsJobInfo,
+  JobsS3JobResult,
+  JobsS3OperatorItem,
+  JobsS3SubmitJobInfo,
+  JobsS3TranspileResult,
+} from '@/api/generated';
+import { off } from 'process';
 
 export const JOB_STATUSES = [
   'submitted',
@@ -6,6 +13,7 @@ export const JOB_STATUSES = [
   'running',
   'succeeded',
   'failed',
+  'registered',
   'cancelled',
   'unknown',
 ] as const;
@@ -94,6 +102,19 @@ export interface Job {
   executionTime: number;
 }
 
+export type JobS3Data = {
+  input: JobsS3SubmitJobInfo;
+  transpileResult?: JobsS3TranspileResult;
+  result?: JobsS3JobResult;
+  combinedProgram?: string;
+};
+
+export type JobS3Files = {
+  [K in keyof JobS3Data]: File;
+};
+
+export type JobWithS3Data = Job & JobS3Data;
+
 export interface JobSearchParams {
   query?: string; // id, name or description query string
   status?: JobStatusType;
@@ -125,7 +146,7 @@ export interface JobFileData {
 
 export interface JobFileDataInfo {
   program: string[];
-  operator?: OperatorItem[];
+  operator?: JobsS3OperatorItem[];
 }
 
 export type OperatorItem = { pauli: string; coeff: number };

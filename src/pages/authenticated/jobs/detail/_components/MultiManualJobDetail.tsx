@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Card } from '@/pages/_components/Card';
-import { Job } from '@/domain/types/Job';
+import { JobWithS3Data } from '@/domain/types/Job';
 import clsx from 'clsx';
 import { JobDetailBasicInfo } from './panels/JobDetailBasicInfo';
 import { JobDetailProgram } from './panels/JobDetailProgram';
@@ -18,7 +18,7 @@ const combinedCircuitHeading = 'Combined';
 const dividedCountsKeyPre = 'Program index';
 const dividedCountsHeading = 'Index';
 
-export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
+export const SuccessViewMultiManual: React.FC<JobWithS3Data> = (job: JobWithS3Data) => {
   const [selectedKeyIndex, setSelectedKeyIndex] = useState<string>('0');
   const histogramHeight = useWindowSize().height * 0.5;
   const nonHistogramPanelHeight = useWindowSize().height * 0.9;
@@ -26,12 +26,12 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
   const selectedQASM: string[] = useMemo(() => {
     try {
       if (selectedKeyIndex === combinedCircuitKey) {
-        if (job.jobInfo?.combined_program == null) {
+        if (job.combinedProgram == null) {
           return [];
         }
-        return [job.jobInfo?.combined_program];
+        return [job.combinedProgram];
       }
-      const programs = job.jobInfo?.program;
+      const programs = job.input.program;
       const index = Number(selectedKeyIndex);
       if (!isNaN(index) && programs && programs[index] !== undefined) {
         return [programs[index]];
@@ -42,11 +42,11 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
       console.error('Failed to get selected QASM:', error);
     }
     return [];
-  }, [selectedKeyIndex, job.jobInfo?.combined_program, job.jobInfo?.program]);
+  }, [selectedKeyIndex, job.combinedProgram, job.input.program]);
 
   const options = useMemo(() => {
     try {
-      return job.jobInfo.program.map((k, index) => ({
+      return job.input.program.map((k, index) => ({
         value: index.toString(),
         tabLabel: `${dividedCountsKeyPre} ${index}`,
         heading: `${dividedCountsHeading} ${index}`,
@@ -55,7 +55,7 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
       console.error('Failed to generate options:', error);
       return [];
     }
-  }, [combinedCircuitKey, job.jobInfo.program]);
+  }, [combinedCircuitKey, job.input.program]);
 
   return (
     <>
@@ -74,7 +74,7 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
             runningAt={job.runningAt}
             endedAt={job.endedAt}
             executionTime={job.executionTime}
-            message={job.jobInfo?.message}
+            message={job.jobInfo.message}
           />
         </Card>
         {/* Tabs */}
@@ -90,7 +90,7 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
         >
           <JobDetailMultiManualTabs
             combinedCircuitKey={combinedCircuitKey}
-            programs={job.jobInfo?.program ?? []}
+            programs={job.input.program ?? []}
             selectedKeyIndex={selectedKeyIndex}
             options={options}
             onChange={setSelectedKeyIndex}
@@ -101,16 +101,8 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
           <JobDetailMultiManualHistogram
             combinedCircuitKey={combinedCircuitKey}
             pullDownKey={selectedKeyIndex}
-            combinedCircuitCountsJson={JSON.stringify(
-              job.jobInfo.result?.sampling?.counts,
-              null,
-              2
-            )}
-            dividedCircuitCountsJson={JSON.stringify(
-              job.jobInfo.result?.sampling?.divided_counts,
-              null,
-              2
-            )}
+            combinedCircuitCountsJson={JSON.stringify(job.result?.sampling?.counts, null, 2)}
+            dividedCircuitCountsJson={JSON.stringify(job.result?.sampling?.divided_counts, null, 2)}
             heading={`Histogram (${selectedKeyIndex === combinedCircuitKey ? combinedCircuitKey : options[Number(selectedKeyIndex)].heading})`}
             height={histogramHeight}
             jobId={job.id}
@@ -142,7 +134,7 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
         {/* Transpiled Program */}
         <Card className={clsx(['col-start-2', 'col-end-3'])}>
           <JobDetailTranspiledProgram
-            transpiledProgram={job.jobInfo.transpile_result?.transpiled_program ?? ''}
+            transpiledProgram={job.transpileResult?.transpiled_program ?? ''}
             heading="Transpiler Program (Combined)"
             maxHeight={nonHistogramPanelHeight}
           />
@@ -150,16 +142,16 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
         {/* Result */}
         <Card className={clsx(['col-start-1', 'col-end-2'])}>
           <JobDetailResult
-            result={job.jobInfo.result?.sampling}
+            result={job.result?.sampling}
             heading="Result (Combined)"
             maxHeight={nonHistogramPanelHeight}
           />
         </Card>
         {/* Transpile Result */}
-        {job.jobInfo.transpile_result && (
+        {job.transpileResult && (
           <Card className={clsx(['col-start-2', 'col-end-3'])}>
             <JobDetailTranspileResult
-              transpileResult={job.jobInfo.transpile_result}
+              transpileResult={job.transpileResult}
               heading="Transpile Result (Combined)"
             />
           </Card>

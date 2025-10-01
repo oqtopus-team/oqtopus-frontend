@@ -61,6 +61,8 @@ export default {
     },
     program: {
       nodata: 'データが存在しません',
+      too_large_to_fully_display:
+        'Program is too large to be fully displayed. Please download the job to view it.',
     },
     transpiled_program: {
       nodata: 'データが存在しません',
@@ -109,9 +111,24 @@ export default {
     button: '送信する',
     submit_and_view_job_button: '送信して詳細を確認',
     submitting: 'リクエストを処理中...',
+    job_info_provider_selector: 'Select method for providing job info',
+    job_info_provider_file: 'Upload file',
+    job_info_provider_input: 'Enter manually',
+    upload_job_info: {
+      choose_file: 'Choose File',
+      no_file_chosen: 'No file chosen',
+    },
+    job_upload_progress_modal: {
+      title: 'Job Upload',
+      register_job: 'Register job',
+      upload_job_info: 'Upload job info',
+      submit_job: 'Submit job',
+      job_upload_completed: 'Job upload completed',
+    },
     toast: {
       success: '成功: ジョブが正常に送信されました',
       error: '失敗: ジョブの送信に失敗しました',
+      register_error: 'Failed to submit job, no job URL received',
     },
     error_message: {
       name: 'Job名を入力してください',
@@ -125,6 +142,7 @@ export default {
         pauli_empty: 'Pauliフィールドを空にすることはできません',
         coeff_required: '係数フィールドは必須です',
       },
+      job_info_must_be_zip_file: 'Please upload correct job info zip file',
       invalid_json: '正しいJSON形式で入力してください',
     },
   },
