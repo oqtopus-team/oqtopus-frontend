@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import { ReactElement, ReactNode, RefObject, useContext, useEffect, useRef } from 'react';
-import { useDrag, useDrop, XYCoord } from 'react-dnd';
+import { DropTargetMonitor, useDrag, useDrop, XYCoord } from 'react-dnd';
 import {
   ComposerGate,
   DragGateItem,
@@ -13,7 +13,7 @@ import {
 import './Composer.css';
 import { circuitContext } from '../circuit';
 import { GATE_CELL_SIZE } from '../gates_rendering/Gates';
-import { isMultiQubitGate } from '../gates';
+import { isCustomGate, isMultiQubitGate } from '../gates';
 
 interface Props {
   gate: ComposerGate;
@@ -33,35 +33,13 @@ export default function QuantumGateElement(props: Props) {
   const [, drop] = useDrop<DragGateItem>({
     accept: [ItemTypeNewGate, ItemTypeMoveGate],
     hover(item, monitor) {
-      const { gate, isCreated } = item;
-      let actualRow = determineCurrentRow(props.row, monitor.getClientOffset());
-
-      if (isMultiQubitGate(gate)) {
-        actualRow = determineFirstRow(
-          actualRow,
-          monitor.getSourceClientOffset(),
-          monitor.getClientOffset()
-        );
+      if (!circuitService.allowFreeGatePlacement) {
+        handleMoveGate(item, monitor);
       }
-
-      if (!isCreated) {
-        circuitService.moveGate(
-          gate,
-          actualRow,
-          props.column,
-          (row, column, targets, controls) => {
-            item.isCreated = true;
-            item.gate = { ...gate, row, column, targets, controls } as any;
-          },
-          true
-        );
-      } else {
-        circuitService.moveGate(gate, actualRow, props.column, (row, column, targets, controls) => {
-          item.gate.row = row;
-          item.gate.column = column;
-          item.gate.targets = targets;
-          item.gate.controls = controls;
-        });
+    },
+    drop(item, monitor) {
+      if (circuitService.allowFreeGatePlacement) {
+        handleMoveGate(item, monitor);
       }
     },
   });
@@ -91,6 +69,39 @@ export default function QuantumGateElement(props: Props) {
   const isGateDragged = circuitService.draggedGateIds.some((id) => gate.id === id);
 
   drag(drop(ref));
+
+  function handleMoveGate(item: DragGateItem, monitor: DropTargetMonitor) {
+    const { gate, isCreated } = item;
+    let actualRow = determineCurrentRow(props.row, monitor.getClientOffset());
+
+    if (isMultiQubitGate(gate)) {
+      actualRow = determineFirstRow(
+        actualRow,
+        monitor.getSourceClientOffset(),
+        monitor.getClientOffset()
+      );
+    }
+
+    if (!isCreated) {
+      circuitService.moveGate(
+        gate,
+        actualRow,
+        props.column,
+        (row, column, targets, controls) => {
+          item.isCreated = true;
+          item.gate = { ...gate, row, column, targets, controls } as any;
+        },
+        true
+      );
+    } else {
+      circuitService.moveGate(gate, actualRow, props.column, (row, column, targets, controls) => {
+        item.gate.row = row;
+        item.gate.column = column;
+        item.gate.targets = targets;
+        item.gate.controls = controls;
+      });
+    }
+  }
 
   /**
    * When dragging multi-row gate and we start dragging from parts of the gate that are on the further rows
@@ -145,6 +156,7 @@ export default function QuantumGateElement(props: Props) {
             ? ['shadow-md', 'rounded', 'ring-4', 'ring-primary', 'ring-opacity-50']
             : []
         ),
+        customTag: isCustomGate(gate) ? gate.customTag : undefined,
       });
 
     return (

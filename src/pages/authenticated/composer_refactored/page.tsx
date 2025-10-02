@@ -155,7 +155,7 @@ export default function Page() {
         jobType={jobType}
         busy={busy}
         mkProgram={() => ({
-          program: generateQASMCode(circuit),
+          program: generateQASMCode(circuit, Object.values(circuitService.customGates)),
           qubitNumber: circuit.length,
         })}
         mkOperator={() => renderOperator(observable)}

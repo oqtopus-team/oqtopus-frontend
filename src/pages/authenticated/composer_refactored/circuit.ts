@@ -15,6 +15,7 @@ import {
   RealComposerGate,
 } from './composer';
 import { isMultiQubitGate, QuantumGate } from './gates';
+import { collectAllGatesFromCustomGate, GateDefinition } from './custom_gates';
 
 export type QuantumCircuit = ComposerGate[][];
 
@@ -26,11 +27,15 @@ export class QuantumCircuitService {
   private _circuit: Reactive<QuantumCircuit>;
   private _supportedGates: ReadonlyArray<QuantumGate['_tag']>;
   private _mode: Reactive<Mode> = new Reactive<Mode>('normal');
+  private _customGates: Record<string, GateDefinition> = {};
 
   private _draggedGateIds = new Reactive<number[]>([]);
   private _selectedGates = new Reactive<RealComposerGate[]>([]);
   private prevHoverCoords: { row: number; column: number } = { row: -1, column: -1 };
 
+  // it allows to place gate freely in any place on circuit, without triggering move back and move up
+  // it should only be used when we don't deal with multi-qubit gates (like in e.g. observable composer)
+  private _allowFreeGatePlacement = false;
   private handleRemoveGate = removeGate;
   private handleAddGate = addGate;
 
@@ -39,13 +44,12 @@ export class QuantumCircuitService {
     columns = 20,
     supportedGates: ReadonlyArray<QuantumGate['_tag']>,
     useBellSampling = false,
-    // it allows to place gate freely in any place on circuit, without triggering move back and move up
-    // it should only be used when we don't deal with multi-qubit gates (like in e.g. observable composer)
     allowFreeGatePlacement = false
   ) {
     this._circuit = new Reactive(createEmptyCircuit(rows, columns));
     this._supportedGates = [...supportedGates];
 
+    this._allowFreeGatePlacement = allowFreeGatePlacement;
     if (allowFreeGatePlacement) {
       this.handleRemoveGate = removeGateWithFreePlacementAllowed;
       this.handleAddGate = addGateWithFreePlacementAllowed;
@@ -72,6 +76,10 @@ export class QuantumCircuitService {
     return this._mode.value;
   }
 
+  get customGates(): Record<string, GateDefinition> {
+    return this._customGates;
+  }
+
   get draggedGateIds(): number[] {
     return this._draggedGateIds.value;
   }
@@ -82,6 +90,10 @@ export class QuantumCircuitService {
 
   set selectedGates(gates: RealComposerGate[]) {
     this._selectedGates.value = gates.sort(compareGates);
+  }
+
+  get allowFreeGatePlacement(): boolean {
+    return this._allowFreeGatePlacement;
   }
 
   onCircuitChange(cb: ReactiveCallback<QuantumCircuit>): Unsubscribe {
@@ -253,6 +265,63 @@ export class QuantumCircuitService {
       });
     }
 
+    this._circuit.value = [...this.circuit];
+  }
+
+  groupSelectedGates(def: GateDefinition) {
+    if (this.selectedGates.length < 2) return;
+    this.customGates[def.name] = def;
+
+    const gates = [...this.selectedGates].sort((g1, g2) => compareGates(g2, g1));
+    const occupiedRows = Array.from(
+      new Set<number>(gates.map((g) => getNonEmptyGatesRows(g)).flat())
+    ).sort((r1, r2) => r1 - r2);
+
+    const firstColumn = gates[gates.length - 1].column;
+    const firstRow = occupiedRows[0];
+
+    gates.forEach((g) => this.handleRemoveGate(this.circuit, g));
+
+    const gate: RealComposerGate = {
+      ...createComposerGate('$custom_gate', firstRow, firstColumn),
+      _tag: '$custom_gate',
+      customTag: def.name,
+      targets: occupiedRows,
+    };
+    this.handleAddGate(this.circuit, gate, () => {});
+
+    this.selectedGates = [];
+    this.circuit = [...this.circuit];
+  }
+
+  ungroupSelectedGates() {
+    const gates = this.selectedGates.filter((g) => g._tag === '$custom_gate').reverse();
+
+    gates.forEach((g) => this.handleRemoveGate(this.circuit, g));
+    const gatesToAdd = gates
+      .reverse()
+      .map((g) => {
+        return this.customGates[g.customTag]
+          ? collectAllGatesFromCustomGate(g, this.customGates[g.customTag])
+          : [];
+      })
+      .flat();
+
+    for (let i = 0; i < gatesToAdd.length; ++i) {
+      const gate = gatesToAdd[i];
+      this.handleAddGate(this.circuit, gate, (row, column) => {
+        // if gate has been inserted in different column, then we update columns of all following gates
+        // that share at least one row with that gate
+        for (let j = i + 1; j < gatesToAdd.length; ++j) {
+          const nextGate = gatesToAdd[j];
+          if (!isGateOnRow(nextGate, row)) continue;
+          const distanceBetweenGates = nextGate.column - gate.column;
+          gatesToAdd[j].column = column + distanceBetweenGates;
+        }
+      });
+    }
+
+    this.selectedGates = [];
     this._circuit.value = [...this.circuit];
   }
 
@@ -855,6 +924,18 @@ function appendEmptyGatesAtTheEndOfRows(circuit: QuantumCircuit) {
     circuit[i][rowLength] = emptyCell(i, rowLength);
     circuit[i][rowLength + 1] = emptyCell(i, rowLength + 1);
   }
+}
+
+// It returns all rows that gate occupies which are not empty (all but multiRowEmptyBlock parts)
+export function getNonEmptyGatesRows(gate: RealComposerGate): Array<number> {
+  if (gate._tag !== 'barrier') {
+    const firstRow = Math.min(...gate.targets, ...gate.controls);
+    const lastRow = Math.max(...gate.targets, ...gate.controls);
+
+    return Array.from({ length: lastRow - firstRow + 1 }, (_, index) => firstRow + index);
+  }
+
+  return [...gate.controls, ...gate.targets];
 }
 
 // gets the main gate of the multi-row gate. It is always the top part of the gate.

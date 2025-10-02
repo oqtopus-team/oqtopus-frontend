@@ -4,6 +4,7 @@ import Barrier from './Barrier';
 import CNOTGate from './CNOTGate';
 import CZGate from './CZGate';
 import SwapGate from './SwapGate';
+import CustomGate from './CustomGate';
 
 export const GATE_CELL_SIZE = 64;
 export const GATE_BLOCK_SIZE = 40;
@@ -13,9 +14,15 @@ export enum GateColor {
   GATE_ATOMIC = '#5179d5',
   GATE_CONTROLLED = '#8255a7',
   GATE_PARAMETRIZED = '#c13c3c',
+  GATE_CUSTOM = '#000',
 }
 
-export type RenderProps = { targets: number[]; controls: number[]; styles: string };
+export type RenderProps = {
+  targets: number[];
+  controls: number[];
+  styles: string;
+  customTag?: string;
+};
 
 export type GateRenderingBlock = Readonly<
   {
@@ -185,5 +192,13 @@ export const gateRenderingBlockMap: Record<GateTag, GateRenderingBlock> = {
     hasBorder: true,
     palletteItem: <img style={{ padding: 4 }} className="p-2" src={`/img/composer/barrier.svg`} />,
     renderComposerItem: Barrier,
+  },
+  $custom_gate: {
+    label: 'Custom Gate',
+    name: 'Custom Gate',
+    backgroundColor: GateColor.GATE_CUSTOM,
+    hasBorder: false,
+    palletteItem: null,
+    renderComposerItem: CustomGate,
   },
 };

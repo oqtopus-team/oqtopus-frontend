@@ -19,9 +19,10 @@ export const supportedGates = [
   'barrier',
 ] as const;
 
-export type GateTag = (typeof supportedGates)[number];
+export type CustomGateTag = '$custom_gate';
+export type GateTag = (typeof supportedGates)[number] | CustomGateTag;
 export type ParametrizedGateTag = Extract<GateTag, 'rx' | 'ry' | 'rz'>;
-export type RegularGateTag = Exclude<GateTag, ParametrizedGateTag>;
+export type RegularGateTag = Exclude<GateTag, ParametrizedGateTag | CustomGateTag>;
 
 type BaseQuantumGate = {
   readonly _tag: GateTag;
@@ -38,9 +39,15 @@ type ParametrizedQuantumGate = BaseQuantumGate & {
   rotationAngle: number;
 };
 
-export type QuantumGate = RegularQuantumGate | ParametrizedQuantumGate;
+type CustomQuantumGate = BaseQuantumGate & {
+  readonly _tag: CustomGateTag;
+  customTag: string;
+};
+
+export type QuantumGate = RegularQuantumGate | ParametrizedQuantumGate | CustomQuantumGate;
 
 export const parametrizedGates: ParametrizedGateTag[] = ['rx', 'ry', 'rz'];
+export const controlledGates: GateTag[] = ['cx', 'cz'];
 
 export function createQuantumGate(tag: GateTag): QuantumGate {
   if (tag === 'rx' || tag === 'ry' || tag === 'rz') {
@@ -49,6 +56,13 @@ export function createQuantumGate(tag: GateTag): QuantumGate {
       targets: [],
       controls: [],
       rotationAngle: Math.PI / 2,
+    };
+  } else if (tag === '$custom_gate') {
+    return {
+      _tag: tag,
+      customTag: '',
+      targets: [],
+      controls: [],
     };
   } else {
     return {
@@ -61,6 +75,10 @@ export function createQuantumGate(tag: GateTag): QuantumGate {
 
 export function isParametrizedGate(g: QuantumGate): g is ParametrizedQuantumGate {
   return parametrizedGates.includes(g._tag as ParametrizedGateTag);
+}
+
+export function isCustomGate(g: QuantumGate): g is CustomQuantumGate {
+  return g._tag === '$custom_gate';
 }
 
 export function isMultiQubitGate(g: QuantumGate): boolean {

@@ -5,7 +5,9 @@ import QuantumCircuitGateCell from './QuantumCircuitGateCell';
 import { isDummyGate, RealComposerGate } from '../composer';
 import { Button } from '@/pages/_components/Button';
 import { RxCopy } from 'react-icons/rx';
+import { FaObjectGroup, FaObjectUngroup } from 'react-icons/fa';
 import QuantumGateViewer from './QuantumGateViewer';
+import { CustomGateModal } from './CustomGateModal';
 
 export const staticCircuitProps = (): Props => ({
   fixedQubitNumber: true,
@@ -32,6 +34,7 @@ export default (props: Props) => {
     selectedGates.length === 1 ? selectedGates[1] : undefined
   );
   const [mode, setMode] = useState(circuitService.mode);
+  const [isCustomGateModalOpen, setIsCustomGateModalOpen] = useState(false);
 
   useEffect(() => {
     return circuitService.onCircuitChange((c) => {
@@ -72,137 +75,186 @@ export default (props: Props) => {
   //   }
   // };
 
+  const canGroupGates = circuitService.selectedGates.length >= 2;
+  const canUngroupGates = circuitService.selectedGates.some((g) => g._tag === '$custom_gate');
+
   return (
-    <div>
-      <div className={clsx([['flex'], [!gateViewer ? 'gap-0' : 'gap-3']])}>
-        <div
-          className={clsx([
-            ['relative', 'min-h-64', 'my-5'],
-            ['transition-all'],
-            !gateViewer ? ['w-full'] : ['w-[calc(60%-24px)]'],
-            ['overflow-auto'],
-            ['border', 'border-neutral-content', 'rounded-sm'],
-          ])}
-        >
-          <div className={clsx([['flex']])}>
-            <div className={clsx([['py-5', 'pl-2']])}>
-              {circuit.map((circuitRow, row) => (
-                <div
-                  className={clsx([
-                    ['h-[64px]', 'w-8'],
-                    ['flex', 'justify-center', 'items-center'],
-                  ])}
-                  key={row}
-                  onClick={() => circuitService.removeEmptyQubit(row)}
-                >
-                  <span
+    <>
+      <div>
+        <div className={clsx([['flex'], [!gateViewer ? 'gap-0' : 'gap-3']])}>
+          <div
+            className={clsx([
+              ['relative', 'min-h-64', 'my-5'],
+              ['transition-all'],
+              !gateViewer ? ['w-full'] : ['w-[calc(60%-24px)]'],
+              ['overflow-auto'],
+              ['border', 'border-neutral-content', 'rounded-sm'],
+            ])}
+          >
+            <div className={clsx([['flex']])}>
+              <div className={clsx([['py-5', 'pl-2']])}>
+                {circuit.map((circuitRow, row) => (
+                  <div
                     className={clsx([
-                      mode === 'eraser'
-                        ? circuitRow.every((x) => x === undefined || x._tag == 'emptyCell')
-                          ? ['text-neutral-content hover:text-status-job-failed']
-                          : ['text-disable-bg']
-                        : [],
+                      ['h-[64px]', 'w-8'],
+                      ['flex', 'justify-center', 'items-center'],
                     ])}
+                    key={row}
+                    onClick={() => circuitService.removeEmptyQubit(row)}
                   >
-                    q{row}
-                  </span>
-                </div>
-              ))}
-              {props.fixedQubitNumber === false ? (
+                    <span
+                      className={clsx([
+                        mode === 'eraser'
+                          ? circuitRow.every((x) => x === undefined || x._tag == 'emptyCell')
+                            ? ['text-neutral-content hover:text-status-job-failed']
+                            : ['text-disable-bg']
+                          : [],
+                      ])}
+                    >
+                      q{row}
+                    </span>
+                  </div>
+                ))}
+                {props.fixedQubitNumber === false ? (
+                  <div
+                    className={clsx([
+                      ['h-8', 'w-8'],
+                      ['flex', 'justify-center', 'items-center'],
+                      ['rounded-full', 'bg-neutral-content', 'text-primary-content'],
+                      ['hover:bg-primary'],
+                      ['cursor-pointer'],
+                    ])}
+                    onClick={() => circuitService.addQubit()}
+                  >
+                    <span>+</span>
+                  </div>
+                ) : null}
+              </div>
+              <div className={clsx([['relative', 'h-full', 'w-full']])}>
                 <div
+                  ref={circuitGridRef}
+                  style={{
+                    gridTemplateRows: `repeat(${qubitNumber}, 64px)`,
+                    gridTemplateColumns: `repeat(${circuitDepth}, 64px)`,
+                  }}
                   className={clsx([
-                    ['h-8', 'w-8'],
-                    ['flex', 'justify-center', 'items-center'],
-                    ['rounded-full', 'bg-neutral-content', 'text-primary-content'],
-                    ['hover:bg-primary'],
-                    ['cursor-pointer'],
+                    ['absolute', 'top-0', 'left-0', 'm-5'],
+                    ['grid', 'grid-flow'],
+                    ['w-full'],
+                    ['transition-all', 'duration-300'],
                   ])}
-                  onClick={() => circuitService.addQubit()}
                 >
-                  <span>+</span>
+                  {circuit.map((circuitRow, row) => {
+                    return circuitRow.map((gate, column) => {
+                      return (
+                        <div
+                          className={clsx(['relative', 'w-full', 'h-full'])}
+                          key={`cell-q${row}-t${column}`}
+                          style={{ zIndex: !isDummyGate(gate) ? '1' : '0' }}
+                        >
+                          <div
+                            className={clsx([
+                              'absolute',
+                              'top-0',
+                              'left-0',
+                              'w-full',
+                              'h-full',
+                              'z-20',
+                              'flex',
+                              'items-center',
+                              'justify-center',
+                            ])}
+                          >
+                            <QuantumCircuitGateCell
+                              gate={gate}
+                              row={row}
+                              column={column}
+                              circuitGrid={circuitGridRef}
+                              static={props.static}
+                              selected={selectedGates.some((g) => g.id === gate.id)}
+                              key={`q${row}-t${column}`}
+                            />
+                          </div>
+                          <div
+                            className={clsx([
+                              ['absolute', 'top-0', 'left-0'],
+                              ['z-10'],
+                              ['w-full', 'h-full'],
+                              ['flex', 'justify-center', 'items-center'],
+                            ])}
+                          >
+                            <div className={clsx([['w-full', 'h-1'], ['bg-neutral-content']])} />
+                          </div>
+                        </div>
+                      );
+                    });
+                  })}
                 </div>
-              ) : null}
-            </div>
-            <div className={clsx([['relative', 'h-full', 'w-full']])}>
-              <div
-                ref={circuitGridRef}
-                style={{
-                  gridTemplateRows: `repeat(${qubitNumber}, 64px)`,
-                  gridTemplateColumns: `repeat(${circuitDepth}, 64px)`,
-                }}
-                className={clsx([
-                  ['absolute', 'top-0', 'left-0', 'm-5'],
-                  ['grid', 'grid-flow'],
-                  ['w-full'],
-                  ['transition-all', 'duration-300'],
-                ])}
-              >
-                {circuit.map((circuitRow, row) => {
-                  return circuitRow.map((gate, column) => {
-                    return (
-                      <div
-                        className={clsx(['relative', 'w-full', 'h-full'])}
-                        key={`cell-q${row}-t${column}`}
-                        style={{ zIndex: !isDummyGate(gate) ? '10000' : '0' }}
-                      >
-                        <div
-                          className={clsx([
-                            'absolute',
-                            'top-0',
-                            'left-0',
-                            'w-full',
-                            'h-full',
-                            'z-20',
-                            'flex',
-                            'items-center',
-                            'justify-center',
-                          ])}
-                        >
-                          <QuantumCircuitGateCell
-                            gate={gate}
-                            row={row}
-                            column={column}
-                            circuitGrid={circuitGridRef}
-                            static={props.static}
-                            selected={selectedGates.some((g) => g.id === gate.id)}
-                            key={`q${row}-t${column}`}
-                          />
-                        </div>
-                        <div
-                          className={clsx([
-                            ['absolute', 'top-0', 'left-0'],
-                            ['z-10'],
-                            ['w-full', 'h-full'],
-                            ['flex', 'justify-center', 'items-center'],
-                          ])}
-                        >
-                          <div className={clsx([['w-full', 'h-1'], ['bg-neutral-content']])} />
-                        </div>
-                      </div>
-                    );
-                  });
-                })}
               </div>
             </div>
+            <div>
+              <div></div>
+            </div>
           </div>
-          <div>
-            <div></div>
-          </div>
+          <QuantumGateViewer gateViewer={gateViewer} setGateViewer={setGateViewer} />
         </div>
-        <QuantumGateViewer gateViewer={gateViewer} setGateViewer={setGateViewer} />
+        <div className={clsx('flex', 'flex-row', 'gap-2')}>
+          <Button
+            color="secondary"
+            style={{ marginBottom: '1.25rem' }}
+            onClick={() => circuitService.duplicateSelectedGates()}
+          >
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: '0.25rem',
+              }}
+            >
+              <RxCopy />
+              Duplicate
+            </div>
+          </Button>
+          <Button
+            color={canGroupGates ? 'secondary' : 'disabled'}
+            disabled={!canGroupGates}
+            style={{ marginBottom: '1.25rem' }}
+            onClick={() => setIsCustomGateModalOpen(true)}
+          >
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: '0.25rem',
+              }}
+            >
+              <FaObjectGroup />
+              Group
+            </div>
+          </Button>
+          <Button
+            color={canUngroupGates ? 'secondary' : 'disabled'}
+            disabled={!canUngroupGates}
+            style={{ marginBottom: '1.25rem' }}
+            onClick={() => circuitService.ungroupSelectedGates()}
+          >
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: '0.25rem',
+              }}
+            >
+              <FaObjectUngroup />
+              Ungroup
+            </div>
+          </Button>
+        </div>
       </div>
-      <Button
-        color="secondary"
-        style={{ marginBottom: '1.25rem' }}
-        onClick={() => circuitService.duplicateSelectedGates()}
-      >
-        <div
-          style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '0.25rem' }}
-        >
-          <RxCopy />
-          Duplicate
-        </div>
-      </Button>
-    </div>
+      <CustomGateModal isOpen={isCustomGateModalOpen} setIsOpen={setIsCustomGateModalOpen} />
+    </>
   );
 };
