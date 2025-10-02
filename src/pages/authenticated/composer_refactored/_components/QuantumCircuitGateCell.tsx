@@ -13,12 +13,10 @@ export interface Props {
 }
 
 export default (props: Props) => {
-  const ref = useRef<HTMLDivElement>(null);
   const { gate } = props;
 
   return (
     <div
-      ref={ref}
       className={clsx([
         ['w-full', 'h-full', 'flex', 'items-center', 'justify-center'],
         ['relative'],

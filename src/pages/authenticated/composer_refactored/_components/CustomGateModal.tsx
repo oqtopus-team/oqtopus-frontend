@@ -66,7 +66,7 @@ export function CustomGateModal({ isOpen, setIsOpen }: Props): ReactElement {
   function mapGatesToGateDefinitionParams(): [string[], GateParams[]] | undefined {
     // collect all rows occupied by selected gates
     const rows = new Set<number>(
-      circuitService.selectedGates.map((g) => getNonEmptyGatesRows(g)).flat()
+      circuitService.selectedGates.map((g) => [...g.controls, ...g.targets]).flat()
     );
 
     const rowParamMap = mapCustomGateRowsToParamsNames(rows);

@@ -275,7 +275,7 @@ export class QuantumCircuitService {
 
     const gates = [...this.selectedGates].sort((g1, g2) => compareGates(g2, g1));
     const occupiedRows = Array.from(
-      new Set<number>(gates.map((g) => getNonEmptyGatesRows(g)).flat())
+      new Set<number>(gates.map((g) => [...g.controls, ...g.targets]).flat())
     ).sort((r1, r2) => r1 - r2);
 
     const firstColumn = gates[gates.length - 1].column;
