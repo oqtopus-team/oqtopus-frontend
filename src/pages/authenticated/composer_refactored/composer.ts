@@ -7,6 +7,11 @@ export const ItemTypeNewGate = 'NEW_GATE' as const;
 export const ItemTypeMoveGate = 'MOVE_GATE' as const;
 
 type EmptyCellGate = { _tag: 'emptyCell' };
+
+// multiRowGateBlock is used for all cells (except main gate cell) occupied by any gate's control or target
+// or the wire connecting controls and targets of the given gate
+//
+// multiRowGateEmptyBlock is used specifically for empty spots between barrier targets
 type MultiRowGatePart = { _tag: 'multiRowGateBlock' | 'multiRowGateEmptyBlock'; baseId: number };
 
 export const nonInteractiveGates: ComposerGate['_tag'][] = [

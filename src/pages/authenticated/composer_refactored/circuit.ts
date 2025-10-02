@@ -363,24 +363,24 @@ function removeGateWithFreePlacementAllowed(circuit: QuantumCircuit, g: RealComp
 function addGate(circuit: QuantumCircuit, g: RealComposerGate, onInsert: GateMoveCallback) {
   appendEmptyGatesAtTheEndOfRows(circuit);
 
-  // we will look for first cell to which we can put the gate
-  // also, in case we move multi-row gate, we assign its head to base gate
+  // we will look for first column to which we can put the gate
+  // also, in case we move multi-qubit gate, we assign its head to base gate
   // as insert will handle inserting whole multi-row gate
-  let finalCell: number | undefined = g.column;
+  let finalColumn: number | undefined = g.column;
   let finalRow = g.row;
   let baseGate = g;
 
   if (isMultiQubitGate(g)) {
-    finalCell = getFirstColumnToWhichCanMoveNewMultiRowGate(circuit, g, g.row, g.column);
+    finalColumn = getFirstColumnToWhichCanMoveNewMultiQubitGate(circuit, g, g.row, g.column);
   } else {
-    finalCell = getFirstColumnToWhichCanMoveNewGate(circuit, g.row, g.column)[0];
+    finalColumn = getFirstColumnToWhichCanMoveNewGate(circuit, g.row, g.column)[0];
   }
 
-  if (finalCell === undefined) {
+  if (finalColumn === undefined) {
     return;
   }
 
-  insertGate(circuit, baseGate, finalRow, finalCell, onInsert);
+  insertGate(circuit, baseGate, finalRow, finalColumn, onInsert);
 }
 
 function removeGate(circuit: QuantumCircuit, g: RealComposerGate) {
@@ -406,7 +406,7 @@ function insertGate(
   onInsert: GateMoveCallback
 ) {
   if (isMultiQubitGate(g)) {
-    insertMultiRowGate(circuit, g, row, column, onInsert);
+    insertMultiQubitGate(circuit, g, row, column, onInsert);
   } else {
     // recursively we move element at given position forward, such recursive call results in whole row moved
     if (circuit[row][column] !== undefined && circuit[row][column]._tag !== 'emptyCell') {
@@ -419,8 +419,8 @@ function insertGate(
   ensureNoGateCanBeMovedBack(circuit, column);
 }
 
-// it is used because in some cases when we have gates after partial height gate, then when this partial height gate
-// is moved up, there is sometimes possibility to move back some gates before the partial height gate.
+// it is used because in some cases when we have gates after multiRowGateEmptyBlock, then when this multiRowGateEmptyBlock
+// is moved up, there is sometimes possibility to move back some gates before the multiRowGateEmptyBlock gate.
 function ensureNoGateCanBeMovedBack(circuit: QuantumCircuit, column: number) {
   for (let row = 0; row < circuit.length; ++row) {
     if (circuit[row][column + 1] !== undefined && circuit[row][column + 2] !== undefined) {
@@ -429,7 +429,7 @@ function ensureNoGateCanBeMovedBack(circuit: QuantumCircuit, column: number) {
   }
 }
 
-function insertMultiRowGate(
+function insertMultiQubitGate(
   circuit: QuantumCircuit,
   g: RealComposerGate,
   row: number,
@@ -448,11 +448,6 @@ function insertMultiRowGate(
   circuit[row][column] = { ...g, row, column };
 
   for (let r = row + 1; r <= maxRow; ++r) {
-    // if (g._tag === "barrier" && !hasQubitOnRow(g, r)) {
-    //   circuit[r][column] = multiQubitGateEmptyBlock(g.id, r, column);
-    // } else {
-    //   circuit[r][column] = multiQubitGateBlock(g.id, r, column);
-    // }
     insertGatePart(circuit, g, r, column);
   }
 
@@ -472,13 +467,13 @@ export function insertGatePart(
   }
 }
 
-function getFirstColumnToWhichCanMoveNewMultiRowGate(
+function getFirstColumnToWhichCanMoveNewMultiQubitGate(
   circuit: QuantumCircuit,
   g: RealComposerGate,
   row: number,
   column: number
 ): number | undefined {
-  const qubitRows = [...g.targets, ...g.controls];
+  const qubitRows = getNonEmptyGatesRows(g);
   const maxRow = getMaxGateRow(g);
 
   const rowsFirstColumn: Array<number> = [];
@@ -511,8 +506,8 @@ function getFirstColumnToWhichCanMoveNewGate(
   const result: Array<number> = [];
 
   for (let c = column; c >= 0; --c) {
-    // can't place at partial gate height with the exception when we have two partial heights column by column, then we
-    // can place it between them. If we want to insert gate on the cell where partial height is and there is no partial
+    // can't place at multiRowGateEmptyBlock with the exception when we have two multiRowGateEmptyBlock column by column, then we
+    // can place it between them. If we want to insert gate on the column where multiRowGateEmptyBlock is and there is no partial
     // height behind it, then we can place it in one column after
     const currColumnGate = circuit[row][c];
     const prevColumnGate = circuit[row][c - 1];
@@ -521,12 +516,12 @@ function getFirstColumnToWhichCanMoveNewGate(
       prevColumnGate?._tag !== 'emptyCell' &&
       prevColumnGate?._tag !== 'multiRowGateEmptyBlock'
     ) {
-      // in case the gate is part of multi-row gate we need to check if we can move the gate at which we are hovering
-      // it is possible only if any non-height row of both of those two gates intersect with each other
+      // in case the gate is part of multi-qubit gate, we need to check if we can move the gate at which we are hovering
+      // it is possible only if any non-empty row of both of those two gates intersect with each other
       // if so we add current column, otherwise we force the gate to be added one column after current one
       baseRow !== undefined &&
       baseGate &&
-      areNonHeightRowsIntersecting(circuit, baseGate, baseRow, column)
+      areNonEmptyRowsIntersecting(circuit, baseGate, baseRow, column)
         ? result.push(c)
         : result.push(c + 1);
 
@@ -535,12 +530,12 @@ function getFirstColumnToWhichCanMoveNewGate(
     }
 
     // we look for first column at which we may place the gate. So we check if column before current one
-    // is not empty. If so then we add current column. However in case we encounter partial height, we have
+    // is not empty. If so then we add current column. However in case we encounter multiRowGateEmptyBlock, we have
     // to check columns before the prevColumnGate.
     if (prevColumnGate?._tag !== 'emptyCell') {
       if (prevColumnGate?._tag === 'multiRowGateEmptyBlock') {
-        // when c-1 is partial gate height, then we check if in column c-2 is non empty gate that is also
-        // not a partial gate height. If so then we can place current gate at current column.
+        // when c-1 is multiRowGateEmptyBlock, then we check if in column c-2 is non empty gate that is also
+        // not a multiRowGateEmptyBlock. If so then we can place current gate at current column.
         if (
           circuit[row][c - 2]?._tag !== 'emptyCell' &&
           circuit[row][c - 2]?._tag !== 'multiRowGateEmptyBlock'
@@ -564,14 +559,14 @@ function getFirstColumnToWhichCanMoveNewGate(
   return result.reverse();
 }
 
-// verify if there is an intersection of any non-height row of the gate we drag and the gate we are hovering at
-function areNonHeightRowsIntersecting(
+// verify if there is an intersection of any non-empty row of the gate we drag and the gate we are hovering at
+function areNonEmptyRowsIntersecting(
   circuit: QuantumCircuit,
   g: RealComposerGate,
   row: number,
   column: number
 ): boolean | undefined {
-  const qubitRows = [...g.targets, ...g.controls];
+  const qubitRows = getNonEmptyGatesRows(g);
   const maxRow = getMaxGateRow(g);
 
   // check the column at which we hover
@@ -580,12 +575,12 @@ function areNonHeightRowsIntersecting(
       ? getBaseGate(circuit, circuit[r][column])
       : circuit[r][column];
 
-    if (isDummyGate(currentCellGate)) return; //TODO: verify
+    if (isDummyGate(currentCellGate)) return;
 
-    const currentGateNonHeightRows = [...currentCellGate.targets, ...currentCellGate.controls];
-    if (!currentGateNonHeightRows) return;
+    const currentGateNonEmptyRows = getNonEmptyGatesRows(currentCellGate);
+    if (!currentGateNonEmptyRows) return;
 
-    const qubitRowsIntersection = currentGateNonHeightRows.some((r) => qubitRows.includes(r));
+    const qubitRowsIntersection = currentGateNonEmptyRows.some((r) => qubitRows.includes(r));
     if (!qubitRowsIntersection) return false;
   }
 
@@ -602,7 +597,7 @@ function moveBack(
   cell: number,
   moveWholeRow = false
 ) {
-  let finalCell: number | undefined = cell;
+  let finalColumn: number | undefined = cell;
   let finalRow = row;
   let baseGate: RealComposerGate | undefined = undefined;
 
@@ -612,18 +607,18 @@ function moveBack(
     baseGate = getBaseGate(circuit, g);
     finalRow = baseGate.row;
 
-    finalCell = getFirstColumnToWhichCanMoveBackMultiRow(circuit, baseGate, finalRow, cell);
+    finalColumn = getFirstColumnToWhichCanMoveBackMultiQubit(circuit, baseGate, finalRow, cell);
   } else {
-    finalCell = getColumnsToWhichCanMoveBack(circuit, row, cell)[0];
+    finalColumn = getColumnsToWhichCanMoveBack(circuit, row, cell)[0];
   }
 
-  if (finalCell === undefined) {
-    // if multi-qubit gate is not moved and the gate part in this row is empty block, then it is possible
-    // that some other elements in next columns will be able to move back before the empty bloc,
+  if (finalColumn === undefined) {
+    // if multi-qubit gate is not moved and the gate part in this row is multiRowGateEmptyBlock, then it is possible
+    // that some other elements in next columns will be able to move back before the multiRowGateEmptyBlock,
     // so we leave current gate as is and recursively move back following gates
     //
-    // ?we also enable this when we check if any gates can be moved back after inserting new gate. Then the
-    // ?moveWholeRow variable is set to true
+    // we also enable this when we check if any gates can be moved back after inserting new gate. Then the
+    // moveWholeRow variable is set to true
     if (g._tag === 'multiRowGateEmptyBlock' || moveWholeRow) {
       // recursively we move next element back by one, such recursive call results in whole row moved
       if (circuit[g.row][g.column + 1] !== undefined) {
@@ -634,10 +629,10 @@ function moveBack(
   }
 
   if (baseGate && isMultiQubitGate(baseGate)) {
-    moveMultiQubitGateBack(circuit, baseGate, finalRow, finalCell, moveWholeRow);
+    moveMultiQubitGateBack(circuit, baseGate, finalRow, finalColumn, moveWholeRow);
   } else {
     circuit[g.row][g.column] = emptyCell(g.row, g.column);
-    circuit[finalRow][finalCell] = { ...g, row: finalRow, column: finalCell };
+    circuit[finalRow][finalColumn] = { ...g, row: finalRow, column: finalColumn };
 
     // recursively we move next element back by one, such recursive call results in whole row moved
     if (circuit[g.row][g.column + 1] !== undefined) {
@@ -665,9 +660,9 @@ function moveMultiQubitGateBack(
     const gateAtNewPosition = circuit[r][column];
 
     if (g._tag === 'barrier' && !hasQubitOnRow(g, r)) {
-      // unlike other gates types, in case of multi-qubit gate empty block there is possibility
+      // unlike other gates types, in case of multiRowGateEmptyBlock there is possibility
       // that on new position of gate that is moved back, we will encounter some non-empty gate.
-      // In that case we just move them up after the multi-qubit gate empty block
+      // In that case we just move them up after the multiRowGateEmptyBlock
       if (gateAtNewPosition !== undefined && gateAtNewPosition._tag !== 'emptyCell') {
         moveUp(circuit, gateAtNewPosition, r, column + 1);
       }
@@ -684,13 +679,13 @@ function moveMultiQubitGateBack(
   }
 }
 
-function getFirstColumnToWhichCanMoveBackMultiRow(
+function getFirstColumnToWhichCanMoveBackMultiQubit(
   circuit: QuantumCircuit,
   g: RealComposerGate,
   row: number,
   cell: number
 ): number | undefined {
-  const qubitRows = [...g.targets, ...g.controls];
+  const qubitRows = getNonEmptyGatesRows(g);
   const maxRow = getMaxGateRow(g);
 
   const allRowsResult: Array<{ row: number; results: Array<number> }> = [];
@@ -707,7 +702,7 @@ function getFirstColumnToWhichCanMoveBackMultiRow(
 
   if (nonHeightResultsCommonRows.length > 0) return nonHeightResultsCommonRows[0];
 
-  // find only those columns that occurs for each partial gate row
+  // find only those columns that repeat for each gate's row
   // and then return first column
   return allRowsResult[0].results.filter((column) =>
     allRowsResult.every(({ results }) => results.includes(column))
@@ -725,9 +720,9 @@ function getColumnsToWhichCanMoveBack(
   for (let c = cell; c >= 0; c--) {
     const currentGate = circuit[row][c];
 
-    // if partial height we check whether the element behind is not empty
-    // if it is not empty and not partial gate height, then we break, because we cannot move gate back to this column
-    // if not, then we continue, because gate might be moved behind the multi-row height
+    // if multiRowGateEmptyBlock we check whether the element behind is not empty
+    // if it is neither empty nor multiRowGateEmptyBlock then we break, because we cannot move gate back to this column
+    // if not, then we continue, because gate might be moved behind the multiRowGateEmptyBlock
     if (currentGate?._tag === 'multiRowGateEmptyBlock') {
       if (
         circuit[row][c - 1]?._tag !== 'emptyCell' &&
@@ -739,7 +734,7 @@ function getColumnsToWhichCanMoveBack(
       }
     }
 
-    // if gate that we are trying to move up is partial height, then it is possible that it can move before
+    // if gate that we are trying to move up is multiRowGateEmptyBlock, then it is possible that it can move before
     // encountered non-empty gate, that is why we continue here in such case
     if (circuit[row][c]?._tag !== 'emptyCell') {
       if (isMultiQubitGateEmptyBlock) continue;
@@ -763,26 +758,31 @@ function moveUp(circuit: QuantumCircuit, g: ComposerGate, row: number, column: n
   let finalRow = row;
   let baseGate: RealComposerGate | undefined = undefined;
 
-  // if gate is part of controlled gate, then we want to take base gate
+  // if gate is part of multi-qubit gate, then we want to take base gate
   // because the move logic is based on the base gate
   if (isPartOfMultiQubitGate(g)) {
     baseGate = getBaseGate(circuit, g);
     if (!baseGate) return;
     finalRow = baseGate.row;
 
-    finalColumn = getFirstColumnToWhichCanMoveUpMultiRow(circuit, baseGate, finalRow, finalColumn);
+    finalColumn = getFirstColumnToWhichCanMoveUpMultiQubit(
+      circuit,
+      baseGate,
+      finalRow,
+      finalColumn
+    );
     if (finalColumn === undefined) return;
 
     const isMovingMoreThanOneColumn = finalColumn - g.column > 1;
 
-    moveMultiRowUp(circuit, baseGate, finalRow, finalColumn, isMovingMoreThanOneColumn);
+    moveMultiQubitUp(circuit, baseGate, finalRow, finalColumn, isMovingMoreThanOneColumn);
   } else {
     finalColumn = getColumnToWhichCanMoveUp(circuit, finalRow, finalColumn);
     if (finalColumn === undefined) return;
     const isMovingMoreThanOneColumn = finalColumn - g.column > 1;
     let nextCellToMove = finalColumn;
     if (isMovingMoreThanOneColumn) {
-      // in case of the next gate being partial height, we don't want to move that gate
+      // in case of the next gate being multiRowGateEmptyBlock, we don't want to move that gate
       // so in that case we will move gate from cell + 2
       nextCellToMove =
         circuit[g.row][g.column + 1]?._tag === 'multiRowGateEmptyBlock'
@@ -796,18 +796,16 @@ function moveUp(circuit: QuantumCircuit, g: ComposerGate, row: number, column: n
     circuit[g.row][g.column] = emptyCell(g.row, g.column);
     circuit[finalRow][finalColumn] = { ...g, row: finalRow, column: finalColumn };
   }
-
-  // addGateRowsToMovedRows(g, circuit);
 }
 
-function moveMultiRowUp(
+function moveMultiQubitUp(
   circuit: QuantumCircuit,
   g: RealComposerGate,
   row: number,
   column: number,
   isMovingMoreThanOneColumn = false
 ) {
-  const qubitRows = [...g.targets, ...g.controls];
+  const qubitRows = getNonEmptyGatesRows(g);
   const maxRow = getMaxGateRow(g);
 
   for (let r = g.row; r <= maxRow; ++r) {
@@ -818,7 +816,7 @@ function moveMultiRowUp(
 
     let nextCellToMove = column;
     if (isMovingMoreThanOneColumn) {
-      // in case of the next gate being partial height, we don't want to move that gate
+      // in case of the next gate being multiRowGateEmptyBlock, we don't want to move that gate
       // so in that case we will move gate from cell + 2
       nextCellToMove =
         circuit[r][g.column + 1]?._tag === 'multiRowGateEmptyBlock' ? g.column + 2 : g.column + 1;
@@ -840,13 +838,12 @@ function moveMultiRowUp(
   }
 }
 
-//TODO: adjust comments
 // Usually, when we move up, it is enough to move gate to the new column (which is one column after its previous one)
-// However, when we encounter multi-qubit gate empty block, it is possible that we will have to move the given gate up by
+// However, when we encounter multiRowGateEmptyBlock, it is possible that we will have to move the given gate up by
 // one more column to place it after gate with empty block. It happens when there is no row in which there are
-// non-height gate parts of both gates, because only then can we also move up multi-row gate with partial height
+// non-empty gate parts of both gates, because only then can we also move up multi-qubit gate with multiRowGateEmptyBlock
 // gate we encountered.
-function getFirstColumnToWhichCanMoveUpMultiRow(
+function getFirstColumnToWhichCanMoveUpMultiQubit(
   circuit: QuantumCircuit,
   g: RealComposerGate,
   row: number,
@@ -858,7 +855,7 @@ function getFirstColumnToWhichCanMoveUpMultiRow(
 
   for (let r = row; r <= maxRow; ++r) {
     if (circuit[r][column]._tag === 'multiRowGateEmptyBlock') {
-      // in case we encounter partial height and the gate before is also height, we want to place
+      // in case we encounter multiRowGateEmptyBlock and the gate before is also multiRowGateEmptyBlock, we want to place
       // new gate in between them, so we do not add this gate here, which will result in moving up
       // of the encountered gate
       if (!isMovingFromColumnBefore && circuit[r][column - 1]._tag === 'multiRowGateEmptyBlock') {
@@ -869,20 +866,20 @@ function getFirstColumnToWhichCanMoveUpMultiRow(
     }
   }
 
-  // if no partial height in new row, then we can simply move up by one;
+  // if no multiRowGateEmptyBlock in new row, then we can simply move up by one;
   if (gateEmptyRows.length === 0) return column;
 
-  const newGateQubitRows = [...g.targets, ...g.controls];
+  const newGateQubitRows = getNonEmptyGatesRows(g);
   if (!newGateQubitRows) return column;
 
-  // we loop each row at which we encountered partial gate height, get base gate and verify if new gate
-  // non-height elements overlap with non-height elements of the multi-row gate we encountered. If there
-  // is no overlap of non-height elements we have to move new gate by one more column than we wanted.
-  // Otherwise, if for each row with height we will find overlap, then we simply return the cell we intended
+  // we loop each row at which we encountered multiRowGateEmptyBlock, get base gate and verify if new gate's
+  // non-empty elements overlap with non-empty elements of the multi-qubit gate we encountered. If there
+  // is no overlap of non-empty elements we have to move new gate by one more column than we wanted.
+  // Otherwise, if for each row with multiRowGateEmptyBlock we will find overlap, then we simply return the cell we intended
   // to move the new gate to in the first place.
   for (const r of gateEmptyRows) {
     const currentGate = getBaseGate(circuit, circuit[r][column]);
-    const currentGateQubitRows = [...currentGate.targets, ...currentGate.controls];
+    const currentGateQubitRows = getNonEmptyGatesRows(currentGate);
 
     const overlap = currentGateQubitRows.some((r) => newGateQubitRows.includes(r));
     if (!overlap) {
@@ -893,7 +890,7 @@ function getFirstColumnToWhichCanMoveUpMultiRow(
   return column;
 }
 
-// when moving up one-row gate when we encounter multi-qubit gate empty block we simply
+// when moving up one-row gate when we encounter multiRowGateEmptyBlock we simply
 // move the gate by one more column, otherwise we move it to the column we intended to in the first place
 function getColumnToWhichCanMoveUp(circuit: QuantumCircuit, row: number, column: number): number {
   return circuit[row][column]?._tag === 'multiRowGateEmptyBlock' ? column + 1 : column;
@@ -928,6 +925,8 @@ function appendEmptyGatesAtTheEndOfRows(circuit: QuantumCircuit) {
 }
 
 // It returns all rows that gate occupies which are not empty (all but multiRowEmptyBlock parts)
+// for example for CZ gate we treat the wire connecting its control and target also as non-empty row
+// in case of barrier however, the row without controls and targets is visually empty, so we do not include it multiRowEmptyBlock
 export function getNonEmptyGatesRows(gate: RealComposerGate): Array<number> {
   if (gate._tag !== 'barrier') {
     const firstRow = Math.min(...gate.targets, ...gate.controls);
@@ -939,7 +938,7 @@ export function getNonEmptyGatesRows(gate: RealComposerGate): Array<number> {
   return [...gate.controls, ...gate.targets];
 }
 
-// gets the main gate of the multi-row gate. It is always the top part of the gate.
+// gets the main gate of the multi-qubit gate. It is always the top part of the gate.
 function getBaseGate(circuit: QuantumCircuit, g: ComposerGate): RealComposerGate {
   switch (g._tag) {
     case 'emptyCell':
