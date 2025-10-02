@@ -33,12 +33,12 @@ export default function QuantumGateElement(props: Props) {
   const [, drop] = useDrop<DragGateItem>({
     accept: [ItemTypeNewGate, ItemTypeMoveGate],
     hover(item, monitor) {
-      if (!circuitService.allowFreeGatePlacement) {
+      if (!circuitService.isObservableCircuit) {
         handleMoveGate(item, monitor);
       }
     },
     drop(item, monitor) {
-      if (circuitService.allowFreeGatePlacement) {
+      if (circuitService.isObservableCircuit) {
         handleMoveGate(item, monitor);
       }
     },

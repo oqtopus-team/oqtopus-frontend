@@ -50,7 +50,9 @@ export default (props: Props) => {
   useEffect(() => {
     return circuitService.onSelectedGatesChange((gates) => {
       setSelectedGates(gates);
-      setGateViewer(gates.length === 1 ? gates[0] : undefined);
+      if (!circuitService.isObservableCircuit) {
+        setGateViewer(gates.length === 1 ? gates[0] : undefined);
+      }
     });
   }, []);
 
@@ -197,63 +199,67 @@ export default (props: Props) => {
               <div></div>
             </div>
           </div>
-          <QuantumGateViewer gateViewer={gateViewer} setGateViewer={setGateViewer} />
+          {!circuitService.isObservableCircuit && (
+            <QuantumGateViewer gateViewer={gateViewer} setGateViewer={setGateViewer} />
+          )}
         </div>
-        <div className={clsx('flex', 'flex-row', 'gap-2')}>
-          <Button
-            color="secondary"
-            style={{ marginBottom: '1.25rem' }}
-            onClick={() => circuitService.duplicateSelectedGates()}
-          >
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: '0.25rem',
-              }}
+        {!circuitService.isObservableCircuit && (
+          <div className={clsx('flex', 'flex-row', 'gap-2')}>
+            <Button
+              color="secondary"
+              style={{ marginBottom: '1.25rem' }}
+              onClick={() => circuitService.duplicateSelectedGates()}
             >
-              <RxCopy />
-              Duplicate
-            </div>
-          </Button>
-          <Button
-            color={canGroupGates ? 'secondary' : 'disabled'}
-            disabled={!canGroupGates}
-            style={{ marginBottom: '1.25rem' }}
-            onClick={() => setIsCustomGateModalOpen(true)}
-          >
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: '0.25rem',
-              }}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: '0.25rem',
+                }}
+              >
+                <RxCopy />
+                Duplicate
+              </div>
+            </Button>
+            <Button
+              color={canGroupGates ? 'secondary' : 'disabled'}
+              disabled={!canGroupGates}
+              style={{ marginBottom: '1.25rem' }}
+              onClick={() => setIsCustomGateModalOpen(true)}
             >
-              <FaObjectGroup />
-              Group
-            </div>
-          </Button>
-          <Button
-            color={canUngroupGates ? 'secondary' : 'disabled'}
-            disabled={!canUngroupGates}
-            style={{ marginBottom: '1.25rem' }}
-            onClick={() => circuitService.ungroupSelectedGates()}
-          >
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: '0.25rem',
-              }}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: '0.25rem',
+                }}
+              >
+                <FaObjectGroup />
+                Group
+              </div>
+            </Button>
+            <Button
+              color={canUngroupGates ? 'secondary' : 'disabled'}
+              disabled={!canUngroupGates}
+              style={{ marginBottom: '1.25rem' }}
+              onClick={() => circuitService.ungroupSelectedGates()}
             >
-              <FaObjectUngroup />
-              Ungroup
-            </div>
-          </Button>
-        </div>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: '0.25rem',
+                }}
+              >
+                <FaObjectUngroup />
+                Ungroup
+              </div>
+            </Button>
+          </div>
+        )}
       </div>
       <CustomGateModal isOpen={isCustomGateModalOpen} setIsOpen={setIsCustomGateModalOpen} />
     </>

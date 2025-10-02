@@ -34,9 +34,7 @@ export class QuantumCircuitService {
   private _selectedGates = new Reactive<RealComposerGate[]>([]);
   private prevHoverCoords: { row: number; column: number } = { row: -1, column: -1 };
 
-  // it allows to place gate freely in any place on circuit, without triggering move back and move up
-  // it should only be used when we don't deal with multi-qubit gates (like in e.g. observable composer)
-  private _allowFreeGatePlacement = false;
+  private _isObservableCircuit = false;
   private handleRemoveGate = removeGate;
   private handleAddGate = addGate;
 
@@ -45,13 +43,15 @@ export class QuantumCircuitService {
     columns = 20,
     supportedGates: ReadonlyArray<QuantumGate['_tag']>,
     useBellSampling = false,
-    allowFreeGatePlacement = false
+    isObservableCircuit = false
   ) {
     this._circuit = new Reactive(createEmptyCircuit(rows, columns));
     this._supportedGates = [...supportedGates];
 
-    this._allowFreeGatePlacement = allowFreeGatePlacement;
-    if (allowFreeGatePlacement) {
+    this._isObservableCircuit = isObservableCircuit;
+    if (isObservableCircuit) {
+      // in observable circuit we allow to place gate freely in any place on circuit, without triggering
+      // move back and move up. It should only be used when we don't deal with multi-qubit gates
       this.handleRemoveGate = removeGateWithFreePlacementAllowed;
       this.handleAddGate = addGateWithFreePlacementAllowed;
     }
@@ -93,8 +93,8 @@ export class QuantumCircuitService {
     this._selectedGates.value = gates.sort(compareGates);
   }
 
-  get allowFreeGatePlacement(): boolean {
-    return this._allowFreeGatePlacement;
+  get isObservableCircuit(): boolean {
+    return this._isObservableCircuit;
   }
 
   onCircuitChange(cb: ReactiveCallback<QuantumCircuit>): Unsubscribe {
