@@ -1,8 +1,5 @@
-import { GateColor, RenderProps } from "./Gates";
-
-const cellSize = 64;
-const gateBlockSize = 40;
-const diff = cellSize - gateBlockSize;
+import { cellBlockDiff, cellSize, gateBlockSize } from './constants';
+import { GateColor, RenderProps } from './Gates';
 
 export default function SwapGate({ targets, styles }: RenderProps) {
   const gateColor = GateColor.GATE_CONTROLLED;
@@ -10,7 +7,7 @@ export default function SwapGate({ targets, styles }: RenderProps) {
   const height = Math.abs(targets[1] - targets[0]) + 1;
   const cellMiddle = gateBlockSize / 2;
   const totalOffset = cellSize * (height - 1);
-  const baseHeight = cellSize * height - diff;
+  const baseHeight = cellSize * height - cellBlockDiff;
 
   const y1 = cellMiddle;
   const y2 = y1 + totalOffset;
@@ -18,7 +15,7 @@ export default function SwapGate({ targets, styles }: RenderProps) {
   return (
     <div
       className={styles}
-      style={{ display: "block", position: "relative", maxHeight: baseHeight }}
+      style={{ display: 'block', position: 'relative', maxHeight: baseHeight }}
     >
       <svg
         width="40"

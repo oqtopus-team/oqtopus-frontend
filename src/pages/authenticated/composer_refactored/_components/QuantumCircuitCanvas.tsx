@@ -8,6 +8,7 @@ import { RxCopy } from 'react-icons/rx';
 import { FaObjectGroup, FaObjectUngroup } from 'react-icons/fa';
 import QuantumGateViewer from './QuantumGateViewer';
 import { CustomGateModal } from './CustomGateModal';
+import { cellSize } from '../gates_rendering/constants';
 
 export const staticCircuitProps = (): Props => ({
   fixedQubitNumber: true,
@@ -134,8 +135,8 @@ export default (props: Props) => {
                 <div
                   ref={circuitGridRef}
                   style={{
-                    gridTemplateRows: `repeat(${qubitNumber}, 64px)`,
-                    gridTemplateColumns: `repeat(${circuitDepth}, 64px)`,
+                    gridTemplateRows: `repeat(${qubitNumber}, ${cellSize}px)`,
+                    gridTemplateColumns: `repeat(${circuitDepth}, ${cellSize}px)`,
                   }}
                   className={clsx([
                     ['absolute', 'top-0', 'left-0', 'm-5'],

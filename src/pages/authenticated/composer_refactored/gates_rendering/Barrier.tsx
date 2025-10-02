@@ -1,15 +1,12 @@
-import { RenderProps } from "./Gates";
-
-const cellSize = 64;
-const gateBlockSize = 40;
-const diff = cellSize - gateBlockSize;
+import { cellBlockDiff, cellSize } from './constants';
+import { RenderProps } from './Gates';
 
 export default function Barrier({ targets, styles }: RenderProps) {
   const minRow = Math.min(...targets);
   const maxRow = Math.max(...targets);
   const height = maxRow - minRow + 1;
   const totalOffset = (height - 1) * cellSize;
-  const baseHeight = cellSize + totalOffset - diff;
+  const baseHeight = cellSize + totalOffset - cellBlockDiff;
 
   const relativeRows = targets.map((t) => t - minRow);
 
@@ -17,11 +14,11 @@ export default function Barrier({ targets, styles }: RenderProps) {
     <div
       className={styles}
       style={{
-        display: "block",
-        position: "absolute",
+        display: 'block',
+        position: 'absolute',
         maxHeight: baseHeight,
-        left: "50%",
-        transform: "translateX(-50%)",
+        left: '50%',
+        transform: 'translateX(-50%)',
       }}
     >
       <svg

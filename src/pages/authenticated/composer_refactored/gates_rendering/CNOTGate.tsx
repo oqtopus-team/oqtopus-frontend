@@ -1,9 +1,6 @@
 import { ReactElement } from 'react';
 import { GateColor, RenderProps } from './Gates';
-
-const cellSize = 64;
-const gateBlockSize = 40;
-const diff = cellSize - gateBlockSize;
+import { cellBlockDiff, cellSize, gateBlockSize } from './constants';
 
 export default function CNOTGate(props: RenderProps): ReactElement {
   const gateColor = GateColor.GATE_CONTROLLED;
@@ -16,7 +13,7 @@ export default function CNOTGate(props: RenderProps): ReactElement {
 
   const cellMiddle = gateBlockSize / 2;
   const totalOffset = cellSize * (height - 1);
-  const baseHeight = cellSize * height - diff;
+  const baseHeight = cellSize * height - cellBlockDiff;
 
   const y1 = cellMiddle;
   const y2 = y1 + totalOffset;

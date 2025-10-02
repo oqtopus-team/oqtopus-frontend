@@ -1,9 +1,6 @@
-import { ReactElement } from "react";
-import { GateColor, RenderProps } from "./Gates";
-
-const cellSize = 64;
-const gateBlockSize = 40;
-const diff = cellSize - gateBlockSize;
+import { ReactElement } from 'react';
+import { GateColor, RenderProps } from './Gates';
+import { cellBlockDiff, cellSize, gateBlockSize } from './constants';
 
 export default function CZGate(props: RenderProps): ReactElement {
   const gateColor = GateColor.GATE_CONTROLLED;
@@ -15,17 +12,17 @@ export default function CZGate(props: RenderProps): ReactElement {
 
   const cellMiddle = gateBlockSize / 2;
   const totalOffset = cellSize * (height - 1);
-  const baseHeight = cellSize * height - diff;
+  const baseHeight = cellSize * height - cellBlockDiff;
 
   return (
     <div
       className={styles}
       style={{
-        display: "block",
-        position: "absolute",
+        display: 'block',
+        position: 'absolute',
         maxHeight: baseHeight,
-        left: "50%",
-        transform: "translateX(-50%)",
+        left: '50%',
+        transform: 'translateX(-50%)',
       }}
     >
       <svg

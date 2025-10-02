@@ -1,10 +1,6 @@
-import clsx from 'clsx';
 import { paramNameGenerator } from '../custom_gates';
+import { cellBlockDiff, cellSize } from './constants';
 import { GateColor, RenderProps } from './Gates';
-
-const cellSize = 64;
-const gateBlockSize = 40;
-const diff = cellSize - gateBlockSize;
 
 export default function CustomGate({ targets, customTag, styles }: RenderProps) {
   if (!customTag) return null;
@@ -24,7 +20,7 @@ export default function CustomGate({ targets, customTag, styles }: RenderProps) 
     <div
       className={styles}
       style={{
-        height: height * cellSize - diff,
+        height: height * cellSize - cellBlockDiff,
         backgroundColor: GateColor.GATE_CUSTOM,
         borderRadius: '0.25rem',
         padding: '0px 2px',
