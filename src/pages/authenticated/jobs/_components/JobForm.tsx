@@ -130,8 +130,8 @@ interface JobFormProps {
   mkProgram?: Program;
   mkOperator?: JobsOperatorItem[];
   isAdvancedSettingsOpen?: boolean;
-  displayFields: {
-    program: boolean;
+  displayFields?: {
+    program?: boolean;
   };
 }
 
