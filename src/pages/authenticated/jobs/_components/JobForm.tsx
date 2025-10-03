@@ -36,7 +36,7 @@ import { JobsJobType, JobsOperatorItem } from '@/api/generated';
 import * as yup from 'yup';
 import { Device } from '@/domain/types/Device';
 import { toast } from 'react-toastify';
-import i18next from 'i18next';
+import i18next, { TFunction } from 'i18next';
 
 interface FormInput {
   name: string;
@@ -52,6 +52,13 @@ interface FormInput {
   mitigationEnabled: boolean;
   mitigation?: string;
   operator: JobsOperatorItem[];
+}
+
+type Program = { program: string; qubitNumber: number };
+
+interface YupContext {
+  mkProgram: Program;
+  devices: Device[];
 }
 
 const isJsonParsable = (value: string | undefined): boolean => {
@@ -75,7 +82,7 @@ const operatorItemSchema = (t: (key: string) => string) =>
     coeff: yup.number().required(t('job.form.error_message.operator.coeff_required')),
   });
 
-const validationRules = (t: (key: string) => string): yup.ObjectSchema<FormInput> =>
+const validationRules = (t: TFunction<'translation', undefined>): yup.ObjectSchema<FormInput> =>
   yup.object({
     name: yup.string().required(t('job.form.error_message.name')),
     description: yup.string(),
@@ -85,7 +92,29 @@ const validationRules = (t: (key: string) => string): yup.ObjectSchema<FormInput
       .integer(t('job.form.error_message.shots_integer'))
       .min(1, t('job.form.error_message.shots'))
       .required(),
-    deviceId: yup.string().required(t('job.form.error_message.device')),
+    deviceId: yup
+      .string()
+      .required(t('job.form.error_message.device'))
+      .test('check-qubits', function (value) {
+        const { mkProgram, devices } = (this.options.context || {}) as YupContext;
+
+        if (!value || !mkProgram?.qubitNumber || !devices) return true;
+
+        const selectedDevice = devices.find((d) => d.id === value);
+
+        if (!selectedDevice) return true;
+
+        if (mkProgram.qubitNumber > selectedDevice.nQubits) {
+          return this.createError({
+            message: t('job.form.error_message.deviceInsufficientQubits', {
+              deviceQubits: selectedDevice.nQubits,
+              programQubits: mkProgram.qubitNumber,
+            }),
+          });
+        }
+
+        return true;
+      }),
     type: yup.mixed<JobsJobType>().required(t('job.form.error_message.type')),
     programType: yup.mixed<ProgramType>().required(),
     program: yup.string().required(t('job.form.error_message.program')),
@@ -98,7 +127,7 @@ const validationRules = (t: (key: string) => string): yup.ObjectSchema<FormInput
   });
 
 interface JobFormProps {
-  mkProgram?: { program: string; qubitNumber: number };
+  mkProgram?: Program;
   mkOperator?: JobsOperatorItem[];
   isAdvancedSettingsOpen?: boolean;
   displayFields: {
@@ -112,6 +141,7 @@ export const JobForm = (componentProps: JobFormProps) => {
   const { getDevices } = useDeviceAPI();
   const { submitJob } = useJobAPI();
   const { displayFields = { program: true }, ...props } = componentProps;
+  const [devices, setDevices] = useState<Device[]>([]);
 
   const {
     handleSubmit,
@@ -123,6 +153,10 @@ export const JobForm = (componentProps: JobFormProps) => {
   } = useForm<FormInput>({
     mode: 'onChange',
     resolver: yupResolver(validationRules(t)),
+    context: {
+      devices: devices,
+      mkProgram: props.mkProgram,
+    },
     defaultValues: {
       name: '',
       description: '',
@@ -138,8 +172,6 @@ export const JobForm = (componentProps: JobFormProps) => {
       simulator: '{}',
     },
   });
-
-  const [devices, setDevices] = useState<Device[]>([]);
 
   const [transpilerType, transpiler, mitigationEnabled, mitigation, program, jobType, operator] =
     watch([

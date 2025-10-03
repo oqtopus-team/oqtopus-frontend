@@ -125,6 +125,7 @@ export default {
         pauli_empty: 'Pauliフィールドを空にすることはできません',
         coeff_required: '係数フィールドは必須です',
       },
+      deviceInsufficientQubits: "このデバイスは{{deviceQubits}}量子ビットのみをサポートしていますが、プログラムには{{programQubits}}量子ビットが必要です",
       invalid_json: '正しいJSON形式で入力してください',
     },
   },
