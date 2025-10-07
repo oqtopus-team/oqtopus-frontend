@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import { circuitContext } from '../circuit';
 import { RealComposerGate } from '../composer';
 import clsx from 'clsx';
-import QuantumGateElement from './QuantumGateElement';
 import { Spacer } from '@/pages/_components/Spacer';
 import { Checkbox, FormControlLabel, Slider, Stack } from '@mui/material';
 import { Input } from '@/pages/_components/Input';
@@ -34,27 +33,27 @@ export default function QuantumGateViewer({ gateViewer, setGateViewer }: Quantum
 
     return (
       <Stack spacing={2}>
-        {gateViewer.targets.map((t, idx) => (
+        {gateViewer.targets.map((target, idx) => (
           <Select
             key={idx}
-            label={`Target qubit index(${idx + 1})`}
-            value={t}
+            label={`${t('composer.gate_viewer.target_qubit')}(${idx + 1})`}
+            value={target}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               let newTargets = [...gateViewer.targets];
               let newControls = [...gateViewer.controls];
 
               const newTarget = Number(e.target.value);
-              if (newTarget === t) return;
+              if (newTarget === target) return;
 
               const sameQubitTargetIdx = gateViewer.targets.findIndex(
                 (target) => target === newTarget
               );
-              if (sameQubitTargetIdx !== -1) newTargets[sameQubitTargetIdx] = t;
+              if (sameQubitTargetIdx !== -1) newTargets[sameQubitTargetIdx] = target;
 
               const sameQubitControlIdx = gateViewer.controls.findIndex(
                 (control) => control === newTarget
               );
-              if (sameQubitControlIdx !== -1) newControls[sameQubitControlIdx] = t;
+              if (sameQubitControlIdx !== -1) newControls[sameQubitControlIdx] = target;
 
               newTargets[idx] = newTarget;
               circuitService.updateControlsTargets(gateViewer, newTargets, newControls);
@@ -67,27 +66,27 @@ export default function QuantumGateViewer({ gateViewer, setGateViewer }: Quantum
             ))}
           </Select>
         ))}
-        {gateViewer.controls.map((c, idx) => (
+        {gateViewer.controls.map((control, idx) => (
           <Select
             key={idx}
-            label={`Control qubit index(${idx + 1})`}
-            value={c}
+            label={`${t('composer.gate_viewer.control_qubit')}(${idx + 1})`}
+            value={control}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               let newTargets = [...gateViewer.targets];
               let newControls = [...gateViewer.controls];
 
               const newControl = Number(e.target.value);
-              if (newControl === c) return;
+              if (newControl === control) return;
 
               const sameQubitTargetIdx = gateViewer.targets.findIndex(
                 (target) => target === newControl
               );
-              if (sameQubitTargetIdx !== -1) newTargets[sameQubitTargetIdx] = c;
+              if (sameQubitTargetIdx !== -1) newTargets[sameQubitTargetIdx] = control;
 
               const sameQubitControlIdx = gateViewer.controls.findIndex(
                 (control) => control === newControl
               );
-              if (sameQubitControlIdx !== -1) newControls[sameQubitControlIdx] = c;
+              if (sameQubitControlIdx !== -1) newControls[sameQubitControlIdx] = control;
 
               newControls[idx] = newControl;
               circuitService.updateControlsTargets(gateViewer, newTargets, newControls);
@@ -139,7 +138,7 @@ export default function QuantumGateViewer({ gateViewer, setGateViewer }: Quantum
     return (
       <div className="w-full mt-5">
         <div className="grid grid-cols-12 gap-3 items-center justify-center">
-          <div className="sm:col-span-12 col-span-12">Param</div>
+          <div className="sm:col-span-12 col-span-12">{t('composer.gate_viewer.param')}</div>
           <div className="sm:col-span-8 col-span-12 px-3">
             <div className="flex flex-col">
               <Slider

@@ -9,6 +9,7 @@ import { FaObjectGroup, FaObjectUngroup } from 'react-icons/fa';
 import QuantumGateViewer from './QuantumGateViewer';
 import { CustomGateModal } from './CustomGateModal';
 import { cellSize } from '../gates_rendering/constants';
+import { useTranslation } from 'react-i18next';
 
 export const staticCircuitProps = (): Props => ({
   fixedQubitNumber: true,
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export default (props: Props) => {
+  const { t } = useTranslation();
   const circuitService = useContext(circuitContext);
   const circuitGridRef = useRef<HTMLDivElement>(null);
 
@@ -56,28 +58,6 @@ export default (props: Props) => {
     });
   }, []);
 
-  // useEffect(() => {
-  //   if (holdingControlQuit === false) {
-  //     props.toggleMode("normal")();
-  //   } else {
-  //     if (props.mode !== "control") {
-  //       props.toggleMode("control")();
-  //     }
-  //   }
-  // }, [holdingControlQuit]);
-
-  // const handleQubitClick = (qIndex: number) => {
-  //   const wire = composedProgram[qIndex];
-  //   if (props.mode === "eraser") {
-  //     if (wire.every((g) => g === undefined || g._tag === "$dummy")) {
-  //       handleComposedProgramUpdated(
-  //         [...composedProgram.slice(0, qIndex), ...composedProgram.slice(qIndex + 1)],
-  //         composedProgram.length - 1
-  //       );
-  //     }
-  //   }
-  // };
-
   const canGroupGates = circuitService.selectedGates.length >= 2;
   const canUngroupGates = circuitService.selectedGates.some((g) => g._tag === '$custom_gate');
 
@@ -96,6 +76,21 @@ export default (props: Props) => {
           >
             <div className={clsx([['flex']])}>
               <div className={clsx([['py-5', 'pl-2']])}>
+                {props.fixedQubitNumber === false ? (
+                  <button
+                    className={clsx([
+                      ['h-8', 'w-8'],
+                      ['flex', 'justify-center', 'items-center'],
+                      ['rounded-full', 'bg-neutral-content', 'text-primary-content'],
+                      ['hover:bg-primary', 'disabled:bg-neutral-content'],
+                      ['cursor-pointer', 'disabled:cursor-default'],
+                    ])}
+                    disabled={qubitNumber <= 1}
+                    onClick={() => circuitService.removeQubit()}
+                  >
+                    <span>-</span>
+                  </button>
+                ) : null}
                 {circuit.map((circuitRow, row) => (
                   <div
                     className={clsx([
@@ -119,7 +114,7 @@ export default (props: Props) => {
                   </div>
                 ))}
                 {props.fixedQubitNumber === false ? (
-                  <div
+                  <button
                     className={clsx([
                       ['h-8', 'w-8'],
                       ['flex', 'justify-center', 'items-center'],
@@ -130,7 +125,7 @@ export default (props: Props) => {
                     onClick={() => circuitService.addQubit()}
                   >
                     <span>+</span>
-                  </div>
+                  </button>
                 ) : null}
               </div>
               <div className={clsx([['relative', 'h-full', 'w-full']])}>
@@ -141,7 +136,7 @@ export default (props: Props) => {
                     gridTemplateColumns: `repeat(${circuitDepth}, ${cellSize}px)`,
                   }}
                   className={clsx([
-                    ['absolute', 'top-0', 'left-0', 'm-5'],
+                    ['absolute', 'top-0', 'left-0', 'm-5', 'mt-[52px]'],
                     ['grid', 'grid-flow'],
                     ['w-full'],
                     ['transition-all', 'duration-300'],
@@ -219,7 +214,7 @@ export default (props: Props) => {
                 }}
               >
                 <RxCopy />
-                Duplicate
+                {t('composer.actions.duplicate')}
               </div>
             </Button>
             <Button
@@ -237,7 +232,7 @@ export default (props: Props) => {
                 }}
               >
                 <FaObjectGroup />
-                Group
+                {t('composer.actions.group')}
               </div>
             </Button>
             <Button
@@ -255,7 +250,7 @@ export default (props: Props) => {
                 }}
               >
                 <FaObjectUngroup />
-                Ungroup
+                {t('composer.actions.ungroup')}
               </div>
             </Button>
           </div>

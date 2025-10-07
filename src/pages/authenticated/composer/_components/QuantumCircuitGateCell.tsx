@@ -1,4 +1,4 @@
-import { RefObject, useRef } from 'react';
+import { RefObject } from 'react';
 import QuantumGateElement from './QuantumGateElement';
 import clsx from 'clsx';
 import { ComposerGate } from '../composer';

@@ -6,7 +6,7 @@ import QuantumCircuitComposer from './_components/QuantumCircuitComposer';
 import ControlPanel from './_components/ControlPanel';
 import { JobsOperatorItem, JobsSubmitJobRequest } from '@/api/generated';
 import { useEffect, useLayoutEffect, useState } from 'react';
-import { circuitContext, QuantumCircuit, QuantumCircuitService } from './circuit';
+import { circuitContext, QuantumCircuitService } from './circuit';
 import { JobTypeType } from '@/domain/types/Job';
 import ToolPalette from './_components/ToolPalette';
 import { useDeviceAPI, useJobAPI } from '@/backend/hook';

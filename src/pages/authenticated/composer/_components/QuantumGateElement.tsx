@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import { ReactElement, ReactNode, RefObject, useContext, useEffect, useRef } from 'react';
+import { ReactNode, RefObject, useContext, useEffect, useRef } from 'react';
 import { DropTargetMonitor, useDrag, useDrop, XYCoord } from 'react-dnd';
 import {
   ComposerGate,

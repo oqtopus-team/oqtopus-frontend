@@ -1,6 +1,6 @@
 import { ReactElement, useContext, useEffect, useRef, useState } from 'react';
 
-import { circuitContext, getNonEmptyGatesRows } from '../circuit';
+import { circuitContext } from '../circuit';
 import {
   createGateParams,
   GateDefinition,
@@ -14,6 +14,7 @@ import { supportedGates } from '../gates';
 import clsx from 'clsx';
 import { Card } from '@/pages/_components/Card';
 import { Spacer } from '@/pages/_components/Spacer';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   isOpen: boolean;
@@ -21,6 +22,7 @@ type Props = {
 };
 
 export function CustomGateModal({ isOpen, setIsOpen }: Props): ReactElement {
+  const { t } = useTranslation();
   const circuitService = useContext(circuitContext);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -79,14 +81,12 @@ export function CustomGateModal({ isOpen, setIsOpen }: Props): ReactElement {
     const { value } = event.target;
 
     if (!isGateNameValid(value)) {
-      setNameError(
-        'A gate name must start with a letter or an underscore. It must consist only of letters, numbers, and underscores.'
-      );
+      setNameError(t('composer.custom_gate_modal.invalid_gate_name_format'));
     } else if (
       supportedGates.some((gateTag) => gateTag === value) ||
       circuitService.customGates[value]
     ) {
-      setNameError('Gate with provided name is already defined.');
+      setNameError(t('composer.custom_gate_modal.gate_already_defined'));
     } else {
       nameError && setNameError(undefined);
     }
@@ -133,10 +133,12 @@ export function CustomGateModal({ isOpen, setIsOpen }: Props): ReactElement {
       )}
     >
       <Card className={clsx('w-[400px]', 'max-w-[100%]', 'text-xg')}>
-        <h1 className={clsx('text-xl', 'font-bold', 'text-primary')}>Create custom gate</h1>
+        <h1 className={clsx('text-xl', 'font-bold', 'text-primary')}>
+          {t('composer.custom_gate_modal.title')}
+        </h1>
         <Spacer className={'h-4'} />
         <section>
-          <label>Provide name for custom gate:</label>
+          <label>{t('composer.custom_gate_modal.gate_name_input_label')}</label>
           <Spacer className={'h-2'} />
           <Input
             type="text"
@@ -155,13 +157,13 @@ export function CustomGateModal({ isOpen, setIsOpen }: Props): ReactElement {
         />
         <Spacer className={'h-4'} />
         <section className={clsx('w-full', 'flex', 'flex-row', 'justify-around')}>
-          <Button onClick={() => setIsOpen(false)}>Cancel</Button>
+          <Button onClick={() => setIsOpen(false)}>{t('composer.custom_gate_modal.cancel')}</Button>
           <Button
             color={canCreateGate ? 'secondary' : 'disabled'}
             onClick={createCustomGate}
             disabled={!canCreateGate}
           >
-            Create
+            {t('composer.custom_gate_modal.create')}
           </Button>
         </section>
       </Card>

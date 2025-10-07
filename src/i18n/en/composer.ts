@@ -16,6 +16,9 @@ export default {
   gate_viewer: {
     title: "Gate Viewer",
     update: "Update",
+    param: "Param",
+    control_qubit: "Control qubit index",
+    target_qubit: "Target qubit index"
   },
   control_panel: {
     exec: {
@@ -35,6 +38,21 @@ export default {
     },
     settings: {
       tab_label: "Settings",
+    }
+  },
+  actions: {
+    duplicate: "Duplicate",
+    group: "Group",
+    ungroup: "Ungroup"
+  },
+  custom_gate_modal: {
+    title: "Create custom gate",
+    gate_name_input_label: "Provide name for custom gate:",
+    create: "Create",
+    cancel: "Cancel",
+    errors: {
+      invalid_gate_name_format: "A gate name must start with a letter or an underscore. It must consist only of letters, numbers, and underscores.",
+      gate_already_defined: "Gate with provided name is already defined."
     }
   }
 };
