@@ -194,11 +194,11 @@ export default (props: Props) => {
               <div></div>
             </div>
           </div>
-          {!circuitService.isObservableCircuit && (
+          {!circuitService.isObservableCircuit && !props.static && (
             <QuantumGateViewer gateViewer={gateViewer} setGateViewer={setGateViewer} />
           )}
         </div>
-        {!circuitService.isObservableCircuit && (
+        {!circuitService.isObservableCircuit && !props.static && (
           <div className={clsx('flex', 'flex-row', 'gap-2')}>
             <Button
               color="secondary"
