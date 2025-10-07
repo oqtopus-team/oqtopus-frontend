@@ -6,107 +6,54 @@ import QuantumCircuitComposer from './_components/QuantumCircuitComposer';
 import ControlPanel from './_components/ControlPanel';
 import { JobsOperatorItem, JobsSubmitJobRequest } from '@/api/generated';
 import { useEffect, useLayoutEffect, useState } from 'react';
-import { allGates, GateCNOT, GateH, GateI, QuantumGate } from './gates';
-import { QuantumCircuit } from './circuit';
+import { circuitContext, QuantumCircuit, QuantumCircuitService } from './circuit';
 import { JobTypeType } from '@/domain/types/Job';
 import ToolPalette from './_components/ToolPalette';
 import { useDeviceAPI, useJobAPI } from '@/backend/hook';
 import { Device } from '@/domain/types/Device';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { ExtendedGate } from './composer';
+import { generateQASMCode } from './qasm';
+import { QuantumGate, supportedGates } from './gates';
 import ObservableComposer from './_components/ObservableComposer';
 import { Observable } from './observable';
 
-export const bellSampling: QuantumCircuit = {
-  qubitNumber: 2,
-  steps: [
-    GateH(0),
-    GateCNOT(0, 1),
-  ]
-};
-
-const renderQasm = (qubitNumber: number, steps: ExtendedGate[]): string => {
-  const declareQubits = `qubit[${qubitNumber}] q;`;
-  const declareBits = `bit[${qubitNumber}] c;`;
-  const qasmPart = steps.reduce((acc, gate) => {
-    const appender = (() => {
-      switch (gate._tag) {
-        case "$controlBit":
-        case "$controlWire":
-        case "$dummy":
-          return "";
-        case "h":
-        case "s":
-        case "t":
-        case "x":
-        case "y":
-        case "z":
-        case "i":
-        case 'sdg':
-        case 'tdg':
-        case 'sx':
-        case "barrier":
-          return `${gate._tag} q[${gate.target}];`;
-        case "cnot":
-        case 'cz':
-        case "swap":
-          return `cx q[${gate.control}], q[${gate.target}];`
-        case "rx":
-        case "ry":
-        case "rz":
-          return `${gate._tag}(${gate.arg}) q[${gate.target}];`
-        default:
-          throw new Error("Unsupported gate: " + gate._tag);
-      }
-    })();
-    return appender == "" ? acc : acc + "\n" + appender
-  }, "");
-
-  const measurementPart = "c = measure q;"
-  const moduleHeader = `// Sent from OQTOPUS composer
-// ${JSON.stringify({ qubitNumber, steps: steps.filter(g => g !== undefined && g._tag !== "$dummy") })}
-  `;
-  return `${moduleHeader}
-  OPENQASM 3;
-include "stdgates.inc";
-${declareQubits}
-${declareBits}
-${qasmPart}
-
-${measurementPart}
-`;
-};
-
 const renderOperator = (obs: Observable): JobsOperatorItem[] => {
-  return [...new Array(obs.operators.length)]
-    .map((_, i) => {
-      return {
-        coeff: obs.coeffs[i],
-        pauli: obs.operators[i].reduce((prev, gate, j) => {
-          switch (gate._tag as unknown) {
-            case "x":
-            case "y":
-            case "z":
-              return `${prev}${gate._tag.toUpperCase()}${j}`;
+  return [...new Array(obs.operators.length)].map((_, i) => {
+    return {
+      coeff: obs.coeffs[i],
+      pauli: obs.operators[i].reduce((prev, gate, j) => {
+        switch (gate._tag) {
+          case 'x':
+          case 'y':
+          case 'z':
+            return `${prev}${gate._tag.toUpperCase()}${j}`;
 
-            case "$dummy":
-            case "i":
-              return `${prev}I${j}`;
-            default:
-              throw new Error("Unexpected gate in the operator!");
-          }
-        }, "")
-      }
-    })
+          case 'emptyCell':
+          case 'i':
+            return `${prev}I${j}`;
+          default:
+            throw new Error('Unexpected gate in the operator!');
+        }
+      }, ''),
+    };
+  });
+};
 
-}
+const composerSupportedGates: QuantumGate['_tag'][] = supportedGates.filter((tag) => tag !== 'i');
+const observableSupportedGates: QuantumGate['_tag'][] = ['i', 'x', 'y', 'z'];
+
 export default function Page() {
   const { t } = useTranslation();
   useDocumentTitle(t('composer.title'));
-  const [jobType, setJobType] = useState<JobTypeType>("sampling");
+  const [jobType, setJobType] = useState<JobTypeType>('sampling');
 
-  const [circuit, setCircuit] = useState(bellSampling);
+  const [circuitService] = useState(new QuantumCircuitService(2, 20, composerSupportedGates, true));
+  const [circuit, setCircuit] = useState(circuitService.circuit);
+  const [observableCircuitService] = useState(
+    new QuantumCircuitService(2, 10, observableSupportedGates, false, true)
+  );
+
   const [busy, setBusy] = useState(false);
 
   const { getDevices } = useDeviceAPI();
@@ -115,9 +62,8 @@ export default function Page() {
   const [devices, setDevices] = useState<Device[]>([]);
 
   const [observable, setObservable] = useState<Observable>({
-    qubitNumber: bellSampling.qubitNumber,
+    operators: [],
     coeffs: [],
-    operators: []
   });
 
   const [jobId, setJobId] = useState<null | string>(null);
@@ -130,25 +76,20 @@ export default function Page() {
   };
 
   useEffect(() => {
-    const nqubits = observable.qubitNumber;
-    if (circuit.qubitNumber > nqubits) {
-      setObservable({
-        qubitNumber: circuit.qubitNumber,
-        coeffs: observable.coeffs,
-        operators: observable.operators.map(pauli => [
-          ...pauli,
-          ...[...new Array(circuit.qubitNumber - nqubits)].map((_, i) => GateI(i))
-        ])
-      });
-    }
-    else if (circuit.qubitNumber < nqubits) {
-      setObservable({
-        qubitNumber: circuit.qubitNumber,
-        coeffs: observable.coeffs,
-        operators: observable.operators.map(pauli => pauli.slice(0, circuit.qubitNumber))
-      });
-    }
-  }, [circuit]);
+    return circuitService.onCircuitChange((c) => {
+      if (c.length !== observableCircuitService.circuit.length) {
+        const hasMoreQubitsThanObservable = c.length > observableCircuitService.circuit.length;
+
+        while (c.length !== observableCircuitService.circuit.length) {
+          hasMoreQubitsThanObservable
+            ? observableCircuitService.addQubit()
+            : observableCircuitService.removeQubit();
+        }
+      }
+
+      setCircuit(c);
+    });
+  }, []);
 
   useLayoutEffect(() => {
     fetchDevices();
@@ -160,22 +101,12 @@ export default function Page() {
       const jobId = await jobApi.submitJob(req);
       toast.success(t('job.form.toast.success'));
       setJobId(jobId);
-    }
-    catch (e) {
+    } catch (e) {
       toast.error(t('job.form.toast.error'));
-    }
-    finally {
+    } finally {
       setBusy(false);
     }
-  }
-
-  const handleCircuitUpdate = (newCircuit: QuantumCircuit) => {
-    setCircuit(newCircuit);
-  }
-
-  const handleObservableUpdate = (newObservable: Observable) => {
-    setObservable(newObservable);
-  }
+  };
 
   return (
     <>
@@ -199,31 +130,23 @@ export default function Page() {
         }}
       />
 
-      <hr className={clsx([
-        ["w-full", "my-4"],
-        ["text-neutral-content"]
-      ])} />
+      <hr className={clsx([['w-full', 'my-4'], ['text-neutral-content']])} />
 
-      <QuantumCircuitComposer
-        supportedGates={allGates}
-        circuit={circuit}
-        onCircuitUpdate={handleCircuitUpdate}
-      />
+      <circuitContext.Provider value={circuitService}>
+        <QuantumCircuitComposer />
+      </circuitContext.Provider>
 
-      {jobType === "estimation"
-        ? (
-          <>
-            <hr className="text-neutral-content"></hr>
-            <h2 className='text-primary text-xl font-bold my-4'>{t("composer.observable.title")}</h2>
-            <div className='my-6'>
-              <ObservableComposer
-                observable={observable}
-                onObservableUpdate={handleObservableUpdate}
-              />
-            </div>
-          </>
-        )
-        : null}
+      {jobType === 'estimation' ? (
+        <>
+          <hr className="text-neutral-content"></hr>
+          <h2 className="text-primary text-xl font-bold my-4">{t('composer.observable.title')}</h2>
+          <div className="my-6">
+            <circuitContext.Provider value={observableCircuitService}>
+              <ObservableComposer observable={observable} onObservableUpdate={setObservable} />
+            </circuitContext.Provider>
+          </div>
+        </>
+      ) : null}
 
       <ControlPanel
         onSubmit={handleSubmitJob}
@@ -232,11 +155,8 @@ export default function Page() {
         jobType={jobType}
         busy={busy}
         mkProgram={() => ({
-          program: renderQasm(
-            circuit.qubitNumber.valueOf(),
-            circuit.steps
-          ),
-          qubitNumber: circuit.qubitNumber.valueOf()
+          program: generateQASMCode(circuit, Object.values(circuitService.customGates)),
+          qubitNumber: circuit.length,
         })}
         mkOperator={() => renderOperator(observable)}
       />

@@ -2,9 +2,9 @@ import { Button } from '@/pages/_components/Button';
 import { Spacer } from '@/pages/_components/Spacer';
 import clsx from 'clsx';
 import { t } from 'i18next';
-import QuantumCircuitComposer from '../../composer_refactored/_components/QuantumCircuitComposer';
+import QuantumCircuitComposer from '../../composer/_components/QuantumCircuitComposer';
 import { useState } from 'react';
-import { circuitContext, QuantumCircuitService } from '../../composer_refactored/circuit';
+import { circuitContext, QuantumCircuitService } from '../../composer/circuit';
 
 export const Composer = (): React.ReactElement => {
   const [circuitService] = useState(

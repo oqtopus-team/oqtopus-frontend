@@ -1,487 +1,210 @@
-import clsx from "clsx";
-import { ControlWireDirection, Down, QuantumGate, Up, getDaggerGateBaseLabel, labelOfGate } from "../gates";
-import { useEffect, useRef } from "react";
-import { useDrag } from "react-dnd";
-import { DragMoveGateItem, FromCanvas, ItemTypeMoveGate } from "../dnd";
-import { DummyGate } from "../composer";
-import { RxCross2 } from "react-icons/rx";
+import clsx from 'clsx';
+import { ReactElement, ReactNode, RefObject, useContext, useEffect, useRef } from 'react';
+import { DropTargetMonitor, useDrag, useDrop, XYCoord } from 'react-dnd';
+import {
+  ComposerGate,
+  DragGateItem,
+  isDummyGate,
+  ItemTypeMoveGate,
+  ItemTypeNewGate,
+  RealComposerGate,
+} from '../composer';
 
-import "./Composer.css";
+import './Composer.css';
+import { circuitContext } from '../circuit';
+import { GATE_CELL_SIZE } from '../gates_rendering/Gates';
+import { isCustomGate, isMultiQubitGate } from '../gates';
 
 interface Props {
-  qubitIndex: number;
-  timestep: number;
-  gate: QuantumGate | DummyGate;
-  isDragging: boolean;
+  gate: ComposerGate;
+  row: number;
+  column: number;
   static?: boolean;
-  active: boolean;
   selected: boolean;
-  previewDirections?: ("up" | "down")[];
-  onClick: () => void;
-  onDragStart?: () => void;
-  onDragEnd?: () => void;
-  resetControlGate?: () => void
-}
-
-interface ControlledGateProps {
-  label: string;
-  wireDirections: ControlWireDirection[];
-  previewWire: boolean;
-  resetControlGate?: () => void;
-  onClick?: () => void;
-  static?: boolean;
-}
-
-const ControlledGate = (props: ControlledGateProps) => {
-  return (
-    <div
-      className={clsx([
-        ['relative', 'w-full', 'h-full']
-      ])}
-      onClick={() => {
-        props.onClick?.();
-        props.resetControlGate?.();
-      }}
-    >
-      <div
-        className={clsx([
-          ['absolute', 'top-0', 'left-0', 'z-20'],
-          ["w-full", "h-full", "rounded-full"],
-          ["flex", "items-center", "justify-center"],
-          ["bg-gate-controlled", "text-center", "align-middle"]
-        ])}
-      >
-        <span
-          className={clsx([
-            ["text-primary-content", "font-bold"],
-            ["text-2xl"]
-          ])}
-        >
-          +
-        </span>
-      </div>
-      {props.wireDirections.includes(Up)
-        ? (
-          <div
-            className={clsx([
-              ['absolute', 'top-[-12px]', 'left-0', 'z-10'],
-              ["w-full", "h-[12px]"],
-              ["flex", "items-center", "justify-center"],
-              props.previewWire ? ["opacity-50"] : []
-            ])}
-          >
-            <div
-              className={clsx([
-                ["bg-gate-controlled", "font-bold"],
-                ["text-2xl"],
-                ['h-full', 'w-1']
-              ])}
-            />
-          </div>
-        )
-        : <></>
-      }
-      {props.wireDirections.includes(Down)
-        ? (
-          <div
-            className={clsx([
-              ['absolute', 'bottom-[-12px]', 'left-0', 'z-10'],
-              ["w-full", "h-[12px]"],
-              ["flex", "items-center", "justify-center"],
-              props.previewWire ? ["opacity-50"] : []
-            ])}
-          >
-            <div
-              className={clsx([
-                ["bg-gate-controlled", "font-bold"],
-                ["text-2xl"],
-                ['h-full', 'w-1']
-              ])}
-            />
-          </div>
-        )
-        : <></>
-      }
-    </div>
-  )
-}
-
-const ControlledZGate = (props: ControlledGateProps) => {
-  return (
-    <div
-      className={clsx([
-        ['relative', 'w-full', 'h-full']
-      ])}
-      onClick={() => {
-        props.onClick?.();
-        props.resetControlGate?.();
-      }}
-    >
-      <div
-        className={clsx([
-          ['absolute', 'top-0', 'left-0', 'z-20'],
-          ["w-full", "h-full", "rounded-full"],
-          ["flex", "items-center", "justify-center"],
-          ["text-center", "align-middle"]
-        ])}
-      >
-        <div
-          className="bg-gate-controlled w-[16px] h-[16px] rounded-full"
-        >
-        </div>
-      </div>
-      {props.wireDirections.includes(Up)
-        ? (
-          <div
-            className={clsx([
-              ['absolute', 'top-[-12px]', 'left-0', 'z-10'],
-              ["w-full", "h-[24px]"],
-              ["flex", "items-center", "justify-center"],
-              props.previewWire ? ["opacity-50"] : []
-            ])}
-          >
-            <div
-              className={clsx([
-                ["bg-gate-controlled", "font-bold"],
-                ["text-2xl"],
-                ['h-full', 'w-1']
-              ])}
-            />
-          </div>
-        )
-        : <></>
-      }
-      {props.wireDirections.includes(Down)
-        ? (
-          <div
-            className={clsx([
-              ['absolute', 'bottom-[-12px]', 'left-0', 'z-10'],
-              ["w-full", "h-[24px]"],
-              ["flex", "items-center", "justify-center"],
-              props.previewWire ? ["opacity-50"] : []
-            ])}
-          >
-            <div
-              className={clsx([
-                ["bg-gate-controlled", "font-bold"],
-                ["text-2xl"],
-                ['h-full', 'w-1']
-              ])}
-            />
-          </div>
-        )
-        : <></>
-      }
-    </div>
-  )
-}
-
-const SwapGate = (props: ControlledGateProps) => {
-  return (
-    <div
-      className={clsx([
-        ['relative', 'w-full', 'h-full']
-      ])}
-      onClick={() => {
-        props.onClick?.();
-        props.resetControlGate?.();
-      }}
-    >
-      <div
-        className={clsx([
-          ['absolute', 'top-0', 'left-0', 'z-20'],
-          ["w-full", "h-full", "rounded-full"],
-          ["flex", "items-center", "justify-center"],
-          ["text-center", "align-middle"]
-        ])}
-      >
-        <div
-          className={clsx(
-            ["w-[32px]", "h-[32px]"], 
-            ["text-gate-controlled", "font-bold", "text-3xl"],
-            ["flex", "justify-center", "items-center"]
-          )}
-        >
-          <RxCross2 style={{ strokeWidth: 0.5}} />
-        </div>
-      </div>
-      {props.wireDirections.includes(Up)
-        ? (
-          <div
-            className={clsx([
-              ['absolute', 'top-[-12px]', 'left-0', 'z-10'],
-              ["w-full", "h-[32px]"],
-              ["flex", "items-center", "justify-center"],
-              props.previewWire ? ["opacity-50"] : []
-            ])}
-          >
-            <div
-              className={clsx([
-                ["bg-gate-controlled", "font-bold"],
-                ["text-2xl"],
-                ['h-full', 'w-1']
-              ])}
-            />
-          </div>
-        )
-        : <></>
-      }
-      {props.wireDirections.includes(Down)
-        ? (
-          <div
-            className={clsx([
-              ['absolute', 'bottom-[-12px]', 'left-0', 'z-10'],
-              ["w-full", "h-[32px]"],
-              ["flex", "items-center", "justify-center"],
-              props.previewWire ? ["opacity-50"] : []
-            ])}
-          >
-            <div
-              className={clsx([
-                ["bg-gate-controlled", "font-bold"],
-                ["text-2xl"],
-                ['h-full', 'w-1']
-              ])}
-            />
-          </div>
-        )
-        : <></>
-      }
-    </div>
-  )
-}
-
-interface BarrierGateProps {
-  onClick?: () => void;
-  isDragging?: boolean;
-}
-
-const BarrierGate = ({ isDragging, onClick }: BarrierGateProps) => {
-  return (
-    <div
-      className={clsx([
-        ["w-full", "h-full", "rounded",],
-        ["flex", "items-center", "justify-center"],
-        isDragging ? ["opacity-50"] : [],
-        ["text-center", "align-middle"]
-      ])}
-      onClick={onClick}
-    >
-      <img
-        className="h-full"
-        src={`/img/composer/barrier.svg`}
-      />
-    </div>
-  );
+  circuitGrid: RefObject<HTMLDivElement | null>;
 }
 
 export default function QuantumGateElement(props: Props) {
-  const gate = props.gate
+  const { gate, circuitGrid } = props;
+  const circuitService = useContext(circuitContext);
   const ref = useRef<HTMLDivElement>(null);
-  const executedRef = useRef(false)
-  const [{ isDragging }, drag, preview] = useDrag<DragMoveGateItem, void, { isDragging: boolean }>(() => ({
-    type: ItemTypeMoveGate,
-    item: {
-      type: ItemTypeMoveGate,
-      from: FromCanvas,
+  const gateRef = useRef<ComposerGate>(gate);
 
-      sourceQubit: props.qubitIndex,
-      sourceTimestep: props.timestep,
+  const [, drop] = useDrop<DragGateItem>({
+    accept: [ItemTypeNewGate, ItemTypeMoveGate],
+    hover(item, monitor) {
+      if (!circuitService.isObservableCircuit) {
+        handleMoveGate(item, monitor);
+      }
+    },
+    drop(item, monitor) {
+      if (circuitService.isObservableCircuit) {
+        handleMoveGate(item, monitor);
+      }
+    },
+  });
+
+  const [, drag] = useDrag<DragGateItem>(() => ({
+    type: ItemTypeMoveGate,
+    canDrag: () => !isDummyGate(gateRef.current) && !props.static,
+    item: () => {
+      const gate = gateRef.current;
+      circuitService.handleDragStart([gate.id]);
+
+      return {
+        type: ItemTypeMoveGate,
+        gate: gate as RealComposerGate, // we validate it in canDrag so we can assume it's RealComposerGate here
+        isCreated: true,
+      };
     },
     end: () => {
-      props.onDragEnd?.();
-      executedRef.current = false;
+      circuitService.handleDragEnd();
     },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    })
-  }))
+  }));
 
   useEffect(() => {
-    if (ref.current && props.static === false) {
-      drag(ref.current);
-    }
-  }, [drag])
+    gateRef.current = gate;
+  }, [props]);
 
-  useEffect(() => {
-    if (isDragging && executedRef.current == false) {
-      props.onDragStart?.();
-      executedRef.current = true;
+  const isGateDragged = circuitService.draggedGateIds.some((id) => gate.id === id);
+
+  drag(drop(ref));
+
+  function handleMoveGate(item: DragGateItem, monitor: DropTargetMonitor) {
+    const { gate, isCreated } = item;
+    let actualRow = determineCurrentRow(props.row, monitor.getClientOffset());
+
+    if (isMultiQubitGate(gate)) {
+      actualRow = determineFirstRow(
+        actualRow,
+        monitor.getSourceClientOffset(),
+        monitor.getClientOffset()
+      );
     }
-  }, [isDragging])
+
+    if (!isCreated) {
+      circuitService.moveGate(
+        gate,
+        actualRow,
+        props.column,
+        (row, column, targets, controls) => {
+          item.isCreated = true;
+          item.gate = { ...gate, row, column, targets, controls } as any;
+        },
+        true
+      );
+    } else {
+      circuitService.moveGate(gate, actualRow, props.column, (row, column, targets, controls) => {
+        item.gate.row = row;
+        item.gate.column = column;
+        item.gate.targets = targets;
+        item.gate.controls = controls;
+      });
+    }
+  }
+
+  /**
+   * When dragging multi-row gate and we start dragging from parts of the gate that are on the further rows
+   * then it doesn't automatically detect and adjust which row of the gate we are dragging and it would place
+   * it incorrectly, e.g. when dragging by the bottom part of the gate from row 1 to 2, it would not place
+   * bottom of the gate at row 2, but the top of the gate. Therefore, we need to adjust it manually depending
+   * on the position of the gate.
+   */
+  function determineFirstRow(hoverRow: number, source: XYCoord | null, offset: XYCoord | null) {
+    if (!offset || !source) return hoverRow;
+
+    let firstRow = hoverRow - Math.floor((offset.y - source.y) / GATE_CELL_SIZE);
+
+    if (firstRow < 0) {
+      firstRow = 0;
+    } else if (firstRow >= circuitService.circuit.length) {
+      firstRow = circuitService.circuit.length - 1;
+    }
+    return firstRow;
+  }
+
+  /**
+   * Due to the fact that when dragging on multi-row always provided first row of multi-row gate as hovered row
+   * We calculate real row on which we hover basing on the actual position on which we hover on a grid
+   * We also clamp the value between 0 and last available row to prevent overflowing values
+   */
+  function determineCurrentRow(defaultRow: number, offset: XYCoord | null) {
+    if (!circuitGrid.current || !offset) return defaultRow;
+
+    const gridStartY = circuitGrid.current.getBoundingClientRect().y;
+    const offsetY = offset.y;
+
+    let currentRow = Math.floor((offsetY - gridStartY) / GATE_CELL_SIZE);
+
+    if (currentRow < 0) {
+      currentRow = 0;
+    } else if (currentRow >= circuitService.circuit.length) {
+      currentRow = circuitService.circuit.length - 1;
+    }
+
+    return currentRow;
+  }
+
+  function renderGate(): ReactNode {
+    if (isDummyGate(gate)) return null;
+    if ('renderComposerItem' in gate)
+      return gate.renderComposerItem({
+        targets: gate.targets,
+        controls: gate.controls,
+        styles: clsx(
+          props.selected
+            ? ['shadow-md', 'rounded', 'ring-4', 'ring-primary', 'ring-opacity-50']
+            : []
+        ),
+        customTag: isCustomGate(gate) ? gate.customTag : undefined,
+      });
+
+    return (
+      <div
+        className={clsx([
+          ['w-full', 'h-full', 'rounded'],
+          ['flex', 'items-center', 'justify-center'],
+          isGateDragged ? ['opacity-50'] : [],
+          ['bg-gate-atomic', 'text-center', 'align-middle'],
+          props.selected ? ['shadow-md', 'ring-4', 'ring-primary', 'ring-opacity-50'] : [],
+        ])}
+        style={{
+          backgroundColor: gate.backgroundColor,
+        }}
+      >
+        <span className={clsx([['text-primary-content', 'font-bold'], ['text-xl']])}>
+          {gate.composerItem}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div
       ref={ref}
       className={clsx([
-        ["w-10", "h-10"],
-        ["text-primary-content"],
-        ["transition-all", "duration-300"],
-        props.static === true
-          ? []
-          : [props.isDragging ? "cursor-grabbing" : "cursor-pointer"],
-        [props.isDragging ? "opacity-50" : "opacity-100"],
-        props.selected ? ["shadow-md", "ring-4", "ring-primary", "ring-opacity-50"] : []
+        ['w-10', 'h-10'],
+        ['text-primary-content'],
+        // ["transition-all", "duration-300"],
+        props.static === true ? [] : [isGateDragged ? 'cursor-grabbing' : 'cursor-pointer'],
+        [isGateDragged ? 'opacity-50' : 'opacity-100'],
       ])}
-    >
-      {
-        (() => {
-          switch (gate._tag) {
-            case "x":
-            case "y":
-            case "z":
-            case "h":
-            case "s":
-            case "sx":
-            case "t":
-            case "i":
-              return (
-                <div
-                  className={clsx([
-                    ["w-full", "h-full", "rounded",],
-                    ["flex", "items-center", "justify-center"],
-                    props.isDragging ? ["opacity-50"] : [],
-                    ["bg-gate-atomic", "text-center", "align-middle"]
-                  ])}
-                  onClick={props.onClick}
-                >
-                  <span
-                    className={clsx([
-                      ["text-primary-content", "font-bold"],
-                      ["text-xl"]
-                    ])}
-                  >
-                    {labelOfGate(gate)}
-                  </span>
-                </div>
-              )
-            case "sdg":
-            case "tdg":
-              return (
-                <div
-                  className={clsx([
-                    ["w-full", "h-full", "rounded",],
-                    ["flex", "items-center", "justify-center"],
-                    props.isDragging ? ["opacity-50"] : [],
-                    ["bg-gate-atomic", "text-center", "align-middle"]
-                  ])}
-                  onClick={props.onClick}
-                >
-                  <span
-                    className={clsx([
-                      ["text-primary-content", "font-bold"],
-                      ["text-xl"],
-                      ["dagger-gate"]
-                    ])}
-                  >
-                    {getDaggerGateBaseLabel(gate._tag)}
-                  </span>
-                </div>
-              )
-            // parameterized gates
-            case "rx":
-            case "ry":
-            case "rz":
-              return (
-                <div
-                  className={clsx([
-                    ["w-full", "h-full", "rounded",],
-                    ["flex", "flex", "items-center", "justify-center"],
-                    ["bg-gate-parametrized"],
-                  ])}
-                  onClick={props.onClick}
-                >
-                  <span
-                    className={clsx([
-                      ["text-primary-content", "font-bold"],
-                      ["text-xs"]
-                    ])}
-                  >
-                    {labelOfGate(gate)}
-                  </span>
-                  <span
-                    className={clsx([
-                      ["text-primary-content"],
-                      ["text-xs"]
-                    ])}
-                  >
-                    (θ)
-                  </span>
-                </div>
-              )
+      style={{ position: 'relative' }}
+      onClick={(e) => {
+        if (isDummyGate(gate)) return;
 
-
-            case "cnot":
-              const cnotWireDirections = (() => {
-                return [
-                  (props.previewDirections?.includes("up") || gate.control < gate.target) ? [Up] : [],
-                  (props.previewDirections?.includes("down") || gate.control > gate.target) ? [Down] : []
-                ].flat() as ControlWireDirection[]
-              })()
-              return (
-                <ControlledGate
-                  wireDirections={cnotWireDirections}
-                  previewWire={props.previewDirections !== undefined}
-                  label="+"
-                  onClick={props.onClick}
-                  resetControlGate={props.resetControlGate}
-                />
-              );
-            case "ccnot":
-              const ccnotWireDirections = (() => {
-                return [
-                  (props.previewDirections?.includes("up") || gate.control1 < gate.target || gate.control2 < gate.target) ? [Up] : [],
-                  (props.previewDirections?.includes("down") || gate.control1 > gate.target || gate.control2 > gate.target) ? [Down] : []
-                ].flat() as ControlWireDirection[]
-              })()
-              return (
-                <ControlledGate
-                  wireDirections={ccnotWireDirections}
-                  label="+"
-                  previewWire={props.previewDirections !== undefined}
-                  resetControlGate={props.resetControlGate}
-                />
-              );
-            case "cz":
-              const czWireDirections = (() => {
-                return [
-                  (props.previewDirections?.includes("up") || gate.control < gate.target) ? [Up] : [],
-                  (props.previewDirections?.includes("down") || gate.control > gate.target) ? [Down] : []
-                ].flat() as ControlWireDirection[]
-              })()
-              return (
-                <ControlledZGate
-                  wireDirections={czWireDirections}
-                  previewWire={props.previewDirections !== undefined}
-                  label="+"
-                  onClick={props.onClick}
-                  resetControlGate={props.resetControlGate}
-                />
-              );
-            case "swap":
-              const swapWireDirections = (() => {
-                return [
-                  (props.previewDirections?.includes("up") || gate.control < gate.target) ? [Up] : [],
-                  (props.previewDirections?.includes("down") || gate.control > gate.target) ? [Down] : []
-                ].flat() as ControlWireDirection[]
-              })()
-              return (
-                <SwapGate
-                  wireDirections={swapWireDirections}
-                  previewWire={props.previewDirections !== undefined}
-                  label="+"
-                  onClick={props.onClick}
-                  resetControlGate={props.resetControlGate}
-                />
-              );
-            case "barrier":
-              return (
-                <BarrierGate onClick={props.onClick} isDragging={props.isDragging} />
-              )
+        if (circuitService.mode === 'eraser') {
+          circuitService.removeGate(gate);
+        } else {
+          if (e.shiftKey) {
+            circuitService.toggleSelectedGate(gate);
+          } else {
+            circuitService.selectedGates = [gate];
           }
-
-        })()
-      }
+        }
+      }}
+    >
+      {renderGate()}
     </div>
-  )
+  );
 }

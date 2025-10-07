@@ -6,17 +6,17 @@ import 'simplebar-react/dist/simplebar.min.css';
 import ClipboardCopy from './utils/ClipboardCopy';
 import QuantumCircuitCanvas, {
   staticCircuitProps,
-} from '@/pages/authenticated/composer_refactored/_components/QuantumCircuitCanvas';
+} from '@/pages/authenticated/composer/_components/QuantumCircuitCanvas';
 import { useEffect, useState } from 'react';
 import {
   circuitContext,
   QuantumCircuit,
   QuantumCircuitService,
-} from '@/pages/authenticated/composer_refactored/circuit';
+} from '@/pages/authenticated/composer/circuit';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { Switch } from '@mui/material';
-import { parseCircuitJSON } from '@/pages/authenticated/composer_refactored/qasm';
+import { parseCircuitJSON } from '@/pages/authenticated/composer/qasm';
 
 export interface JobDetailProgramProps {
   program: string[];

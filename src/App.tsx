@@ -22,7 +22,7 @@ const JobDetail = lazy(async () => await import('@/pages/authenticated/jobs/deta
 const JobForm = lazy(async () => await import('@/pages/authenticated/jobs/form/page'));
 const HowTo = lazy(async () => await import('@/pages/authenticated/howto/page'));
 const Dashboard = lazy(async () => await import('@/pages/authenticated/dashboard/page'));
-const Composer = lazy(async () => await import('@/pages/authenticated/composer_refactored/page'));
+const Composer = lazy(async () => await import('@/pages/authenticated/composer/page'));
 const DeviceList = lazy(async () => await import('@/pages/authenticated/device/page'));
 const DeviceDetail = lazy(async () => await import('@/pages/authenticated/device/detail/page'));
 const Announcements = lazy(

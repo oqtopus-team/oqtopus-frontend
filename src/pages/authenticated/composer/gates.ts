@@ -1,172 +1,90 @@
-export type Complex = [number, number];
+export const supportedGates = [
+  'i',
+  'x',
+  'y',
+  'z',
+  'h',
+  't',
+  's',
+  'sdg',
+  'tdg',
+  'sx',
+  'rx',
+  'ry',
+  'rz',
+  'cx',
+  //   "ccnot",
+  'cz',
+  'swap',
+  'barrier',
+] as const;
 
-export type GateI = { readonly _tag: "i"; target: number };
-export type GateX = { readonly _tag: "x"; target: number };
-export type GateY = { readonly _tag: "y"; target: number };
-export type GateZ = { readonly _tag: "z"; target: number };
-export type GateH = { readonly _tag: "h"; target: number };
-export type GateT = { readonly _tag: "t"; target: number };
-export type GateS = { readonly _tag: "s"; target: number };
-export type GateSdg = { readonly _tag: "sdg"; target: number };
-export type GateTdg = { readonly _tag: "tdg"; target: number };
-export type GateSX = { readonly _tag: "sx"; target: number };
-export type GateRX = { readonly _tag: "rx"; target: number; arg: number };
-export type GateRY = { readonly _tag: "ry"; target: number; arg: number }; // 修正
-export type GateRZ = { readonly _tag: "rz"; target: number; arg: number }; // 修正
-export type GateCNOT = { readonly _tag: "cnot"; target: number; control: number };
-export type GateCCNOT = { readonly _tag: "ccnot"; target: number; control1: number; control2: number };
-export type GateCZ = { readonly _tag: "cz"; target: number; control: number };
-export type GateSwap = { readonly _tag: "swap"; target: number; control: number; };
-export type OpBarrier = { readonly _tag: "barrier"; target: number };
+export type CustomGateTag = '$custom_gate';
+export type GateTag = (typeof supportedGates)[number] | CustomGateTag;
+export type ParametrizedGateTag = Extract<GateTag, 'rx' | 'ry' | 'rz'>;
+export type RegularGateTag = Exclude<GateTag, ParametrizedGateTag | CustomGateTag>;
 
-export type QuantumGate =
-  | GateI
-  | GateX
-  | GateY
-  | GateZ
-  | GateH
-  | GateT
-  | GateS
-  | GateSdg
-  | GateTdg
-  | GateSX
-  | GateRX
-  | GateRY
-  | GateRZ
-  | GateCNOT
-  | GateCCNOT
-  | GateCZ
-  | GateSwap
-  | OpBarrier;
+type BaseQuantumGate = {
+  readonly _tag: GateTag;
+  targets: number[];
+  controls: number[];
+};
 
-export const GateI = (target: number): GateI => ({ _tag: "i", target });
-export const GateX = (target: number): GateX => ({ _tag: "x", target });
-export const GateY = (target: number): GateY => ({ _tag: "y", target });
-export const GateZ = (target: number): GateZ => ({ _tag: "z", target });
-export const GateH = (target: number): GateH => ({ _tag: "h", target });
-export const GateT = (target: number): GateT => ({ _tag: "t", target });
-export const GateS = (target: number): GateS => ({ _tag: "s", target });
-export const GateSdg = (target: number): GateSdg => ({ _tag: "sdg", target });
-export const GateTdg = (target: number): GateTdg => ({ _tag: "tdg", target });
-export const GateSX = (target: number): GateSX => ({ _tag: "sx", target})
-export const GateRX = (target: number, arg: number): GateRX => ({ _tag: "rx", target, arg });
-export const GateRY = (target: number, arg: number): GateRY => ({ _tag: "ry", target, arg });
-export const GateRZ = (target: number, arg: number): GateRZ => ({ _tag: "rz", target, arg });
-export const GateCNOT = (control: number, target: number): GateCNOT => ({ _tag: "cnot", control, target });
-export const GateCCNOT = (control1: number, control2: number, target: number): GateCCNOT => ({ _tag: "ccnot", control1, control2, target });
-export const GateCZ = (control: number, target: number): GateCZ => ({ _tag: "cz", control, target });
-export const GateSwap = (control: number, target: number): GateSwap => ({ _tag: "swap", control, target });
-export const OpBarrier = (target: number): OpBarrier => ({ _tag: "barrier", target });
+type RegularQuantumGate = BaseQuantumGate & {
+  readonly _tag: RegularGateTag;
+};
 
-export const labelOfGate = (gate: QuantumGate): string => {
-  switch (gate._tag) {
-    case "barrier": return "Barrier";
-    case "ccnot": return "CCNot";
-    case "cnot": return "CNot";
-    case "cz": return "CZ";
-    case "swap": return "Swap";
-    case "i": return "i";
-    case "h": return "H";
-    case "rx": return "RX";
-    case "ry": return "RY";
-    case "rz": return "RZ";
-    case "s": return "S";
-    case "sdg": return "S†";
-    case "tdg": return "T†";
-    case "sx": return "SX";
-    case "t": return "T";
-    case "x": return "X";
-    case "y": return "Y";
-    case "z": return "Z";
+type ParametrizedQuantumGate = BaseQuantumGate & {
+  readonly _tag: ParametrizedGateTag;
+  rotationAngle: number;
+};
+
+type CustomQuantumGate = BaseQuantumGate & {
+  readonly _tag: CustomGateTag;
+  customTag: string;
+};
+
+export type QuantumGate = RegularQuantumGate | ParametrizedQuantumGate | CustomQuantumGate;
+
+export const parametrizedGates: ParametrizedGateTag[] = ['rx', 'ry', 'rz'];
+export const controlledGates: GateTag[] = ['cx', 'cz'];
+
+export function createQuantumGate(tag: GateTag): QuantumGate {
+  if (tag === 'rx' || tag === 'ry' || tag === 'rz') {
+    return {
+      _tag: tag,
+      targets: [],
+      controls: [],
+      rotationAngle: Math.PI / 2,
+    };
+  } else if (tag === '$custom_gate') {
+    return {
+      _tag: tag,
+      customTag: '',
+      targets: [],
+      controls: [],
+    };
+  } else {
+    return {
+      _tag: tag,
+      targets: [],
+      controls: [],
+    };
   }
 }
 
-export const isControlledGate = (g: QuantumGate) : g is GateCNOT | GateCCNOT => {
-  return g._tag == "cnot" || g?._tag == "ccnot"
+export function isParametrizedGate(g: QuantumGate): g is ParametrizedQuantumGate {
+  return parametrizedGates.includes(g._tag as ParametrizedGateTag);
 }
 
-
-export type ControlWireDirection = "up" | "down";
-
-export const Up: ControlWireDirection = "up";
-export const Down: ControlWireDirection = "down";
-
-export const compareGate = (lhs: QuantumGate, rhs: QuantumGate): boolean => {
-  if (lhs.target != rhs.target) return false;
-
-  switch (lhs._tag) {
-    case "cnot":
-      return rhs._tag === "cnot" && lhs.control === rhs.control;
-    case "ccnot":
-      return rhs._tag === "ccnot" && lhs.control1 === rhs.control1 && lhs.control2 === rhs.control2;
-    case "rx":
-      return rhs._tag === "rx" && lhs.arg === rhs.arg;
-    case "ry":
-      return rhs._tag === "ry" && lhs.arg === rhs.arg;
-    case "rz":
-      return rhs._tag === "rz" && lhs.arg === rhs.arg;
-    default:
-      return lhs._tag === rhs._tag;
-  }
+export function isCustomGate(g: QuantumGate): g is CustomQuantumGate {
+  return g._tag === '$custom_gate';
 }
 
-export const gateName =(g: QuantumGate): string => {
-  switch(g._tag) {
-    case "ccnot": return "Toffoli Gate";
-    case "cnot": return "Controlled Not Gate";
-    case "cz": return "Controlled Z Gate";
-    case "swap": return "Swap Gate";
-    case "i": return "Identity Gate";
-    case "h": return "Hadamard Gate";
-    case "rx": return "RX Gate";
-    case "ry": return "RY Gate";
-    case "rz": return "RZ Gate";
-    case "s": return "S Gate";
-    case "sdg": return "Sdag Gate";
-    case "tdg": return "Tdag Gate";
-    case "sx": return "SX Gate";
-    case "t": return "T Gate";
-    case "x": return "X Gate";
-    case "y": return "Y Gate";
-    case "z": return "Z Gate";
-    case "barrier": return "Barrier" 
-  }
+export function isMultiQubitGate(g: QuantumGate): boolean {
+  return [...g.controls, ...g.targets].length > 1;
 }
 
-
-export const allGates: QuantumGate["_tag"][] =
-  ["x",
-    "y",
-    "z",
-    "h",
-    "s",
-    "sx",
-    "sdg",
-    "tdg",
-    "t",
-    "cnot",
-    // "ccnot",
-    "cz",
-    "swap",
-    "rx",
-    "ry",
-    "rz",
-    "barrier"
-  ];
-
-export type DaggerGateTag = Extract<typeof allGates[number], "sdg" | "tdg">; 
-
-export const getDaggerGateBaseLabel = (tag: DaggerGateTag): string => {
-  switch(tag) {
-    case "sdg": return "S";
-    case "tdg": return "T";
-  }
+function isControlledGate(g: QuantumGate): boolean {
+  return g.controls.length > 0;
 }
-
-export type ControlledGateTag =  Extract<typeof allGates[number], "cnot" | "ccnot" | "cz" | "swap">; 
-export const controlledGateTags: ControlledGateTag[] = [
-  "ccnot",
-  "cnot",
-  "cz",
-  "swap"
-] as const; 
