@@ -99,7 +99,7 @@ export function CustomGateModal(): ReactElement {
   function createCustomGate() {
     if (!gateDefinition || gateDefinition.name === '') return;
     circuitService.groupSelectedGates(gateDefinition);
-    setIsOpen(false);
+    circuitService.isCustomGateModalOpen = false;
   }
 
   function gateDefinitionToString(): string {
@@ -159,7 +159,13 @@ export function CustomGateModal(): ReactElement {
         />
         <Spacer className={'h-4'} />
         <section className={clsx('w-full', 'flex', 'flex-row', 'justify-around')}>
-          <Button onClick={() => setIsOpen(false)}>{t('composer.custom_gate_modal.cancel')}</Button>
+          <Button
+            onClick={() => {
+              circuitService.isCustomGateModalOpen = false;
+            }}
+          >
+            {t('composer.custom_gate_modal.cancel')}
+          </Button>
           <Button
             color={canCreateGate ? 'secondary' : 'disabled'}
             onClick={createCustomGate}
