@@ -91,6 +91,78 @@ export default function Page() {
     });
   }, []);
 
+  useEffect(() => {
+    setInterval(() => {
+      console.log(
+        'REEE',
+        generateQASMCode(circuitService.circuit, Object.values(circuitService.customGates))
+      );
+    }, 3000);
+  });
+
+  // to allow key interaction with the circuits we check in what place we last had focus or we had interaction
+  // and apply the key effect only to that place. It is used to allow e.g. deleting selected gates from circuit
+  // with delete key when we work on the circuit and on the other hand prevent delete effect on the circuit
+  // when we are inserting input in control panel's inputs
+  useEffect(() => {
+    const ac = new AbortController();
+    const quantumCircuitComposer = document.querySelector('#quantum-circuit-composer');
+    const observableComposer = document.querySelector('#observable-composer');
+    const controlPanelContainer = document.querySelector('#control-panel-container');
+
+    let currentFocus: 'circuit' | 'observable' | 'panel' | '' = '';
+
+    quantumCircuitComposer?.addEventListener(
+      'pointerdown',
+      () => {
+        currentFocus = 'circuit';
+      },
+      { signal: ac.signal }
+    );
+    observableComposer?.addEventListener(
+      'pointerdown',
+      () => {
+        currentFocus = 'observable';
+      },
+      { signal: ac.signal }
+    );
+    controlPanelContainer?.addEventListener(
+      'focusin',
+      () => {
+        currentFocus = 'panel';
+      },
+      { signal: ac.signal }
+    );
+
+    window.addEventListener(
+      'keydown',
+      (e) => {
+        if (currentFocus === '' || currentFocus === 'panel') return;
+
+        if (currentFocus === 'observable') {
+          if (e.key === 'Delete') {
+            observableCircuitService.selectedGates
+              .toReversed()
+              .forEach((g) => circuitService.removeGate(g));
+          }
+        } else {
+          if (e.key === 'Delete') {
+            circuitService.selectedGates.toReversed().forEach((g) => circuitService.removeGate(g));
+          } else if (e.key.toUpperCase() === 'G' && e.ctrlKey) {
+            e.preventDefault();
+            if (circuitService.selectedGates.length >= 2)
+              circuitService.isCustomGateModalOpen = true;
+          }
+        }
+      },
+      { signal: ac.signal }
+    );
+
+    return () => {
+      ac.abort();
+    };
+  }, [jobType]);
+
   useLayoutEffect(() => {
     fetchDevices();
   }, []);
@@ -148,18 +220,20 @@ export default function Page() {
         </>
       ) : null}
 
-      <ControlPanel
-        onSubmit={handleSubmitJob}
-        devices={devices}
-        jobId={jobId}
-        jobType={jobType}
-        busy={busy}
-        mkProgram={() => ({
-          program: generateQASMCode(circuit, Object.values(circuitService.customGates)),
-          qubitNumber: circuit.length,
-        })}
-        mkOperator={() => renderOperator(observable)}
-      />
+      <div id="control-panel-container">
+        <ControlPanel
+          onSubmit={handleSubmitJob}
+          devices={devices}
+          jobId={jobId}
+          jobType={jobType}
+          busy={busy}
+          mkProgram={() => ({
+            program: generateQASMCode(circuit, Object.values(circuitService.customGates)),
+            qubitNumber: circuit.length,
+          })}
+          mkOperator={() => renderOperator(observable)}
+        />
+      </div>
     </>
   );
 }

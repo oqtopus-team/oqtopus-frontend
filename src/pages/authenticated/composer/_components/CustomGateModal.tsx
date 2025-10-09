@@ -16,33 +16,35 @@ import { Card } from '@/pages/_components/Card';
 import { Spacer } from '@/pages/_components/Spacer';
 import { useTranslation } from 'react-i18next';
 
-type Props = {
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
-};
-
-export function CustomGateModal({ isOpen, setIsOpen }: Props): ReactElement {
+export function CustomGateModal(): ReactElement {
   const { t } = useTranslation();
   const circuitService = useContext(circuitContext);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
+  const [isOpen, setIsOpen] = useState(circuitService.isCustomGateModalOpen);
   const [gateDefinition, setGateDefinition] = useState<GateDefinition | undefined>(undefined);
   const [nameError, setNameError] = useState<string | undefined>(undefined);
 
-  useEffect(() => {
-    if (isOpen) {
-      const [params, singleGateParams] = mapGatesToGateDefinitionParams() ?? [];
-      if (!params || !singleGateParams) return;
-      setGateDefinition({
-        name: '',
-        params,
-        singleGateParams,
-      });
-    } else {
-      setGateDefinition(undefined);
-      setNameError(undefined);
-    }
-  }, [isOpen]);
+  useEffect(
+    () =>
+      circuitService.onIsCustomGateModalOpen((isOpen) => {
+        if (isOpen) {
+          const [params, singleGateParams] = mapGatesToGateDefinitionParams() ?? [];
+          if (!params || !singleGateParams) return;
+          setGateDefinition({
+            name: '',
+            params,
+            singleGateParams,
+          });
+        } else {
+          setGateDefinition(undefined);
+          setNameError(undefined);
+        }
+
+        setIsOpen(isOpen);
+      }),
+    []
+  );
 
   useEffect(() => {
     if (!textAreaRef.current) return;
@@ -81,12 +83,12 @@ export function CustomGateModal({ isOpen, setIsOpen }: Props): ReactElement {
     const { value } = event.target;
 
     if (!isGateNameValid(value)) {
-      setNameError(t('composer.custom_gate_modal.invalid_gate_name_format'));
+      setNameError(t('composer.custom_gate_modal.errors.invalid_gate_name_format'));
     } else if (
       supportedGates.some((gateTag) => gateTag === value) ||
       circuitService.customGates[value]
     ) {
-      setNameError(t('composer.custom_gate_modal.gate_already_defined'));
+      setNameError(t('composer.custom_gate_modal.errors.gate_already_defined'));
     } else {
       nameError && setNameError(undefined);
     }

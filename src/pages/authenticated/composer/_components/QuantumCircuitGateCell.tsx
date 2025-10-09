@@ -184,13 +184,20 @@ export default (props: Props) => {
         ['w-full', 'h-full', 'flex', 'items-center', 'justify-center'],
         ['relative'],
       ])}
+      onClick={() => {
+        if (isDummyGate(gate)) {
+          circuitService.selectedGates = [];
+        }
+      }}
     >
       <div
         ref={ref}
         className={clsx([
           ['w-10', 'h-10'],
           ['text-primary-content'],
-          props.static === true ? [] : [isGateDragged ? 'cursor-grabbing' : 'cursor-pointer'],
+          props.static === true || isDummyGate(gate)
+            ? []
+            : [isGateDragged ? 'cursor-grabbing' : 'cursor-pointer'],
           [isGateDragged ? 'opacity-50' : 'opacity-100'],
         ])}
         style={{ position: 'relative' }}

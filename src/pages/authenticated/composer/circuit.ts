@@ -29,7 +29,9 @@ export class QuantumCircuitService {
   private _supportedGates: ReadonlyArray<QuantumGate['_tag']>;
   private _mode: Reactive<Mode> = new Reactive<Mode>('normal');
   private _controlModeProgress = 0;
+
   private _customGates: Record<string, GateDefinition> = {};
+  private _isCustomGateModalOpen: Reactive<boolean> = new Reactive(false);
 
   private _draggedGateIds = new Reactive<number[]>([]);
   private _selectedGates = new Reactive<RealComposerGate[]>([]);
@@ -90,6 +92,14 @@ export class QuantumCircuitService {
     return this._customGates;
   }
 
+  get isCustomGateModalOpen(): boolean {
+    return this._isCustomGateModalOpen.value;
+  }
+
+  set isCustomGateModalOpen(isOpen: boolean) {
+    this._isCustomGateModalOpen.value = isOpen;
+  }
+
   get draggedGateIds(): number[] {
     return this._draggedGateIds.value;
   }
@@ -116,6 +126,10 @@ export class QuantumCircuitService {
 
   onDraggedGateIdsChange(cb: ReactiveCallback<number[]>): Unsubscribe {
     return this._draggedGateIds.subscribe(cb);
+  }
+
+  onIsCustomGateModalOpen(cb: ReactiveCallback<boolean>): Unsubscribe {
+    return this._isCustomGateModalOpen.subscribe(cb);
   }
 
   onSelectedGatesChange(cb: ReactiveCallback<RealComposerGate[]>): Unsubscribe {
@@ -225,8 +239,6 @@ export class QuantumCircuitService {
     this.prevHoverCoords = { row, column };
 
     if (g.row === row && g.column === column) return;
-
-    //? if (!isGatePresent(gate)) return;
     if (row + getGateHeight(g) > this.circuit.length) return;
 
     this._draggedGateIds.value = [g.id];

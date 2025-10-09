@@ -60,7 +60,7 @@ export default (props: ObservableComposerProps) => {
   };
 
   return (
-    <div className="flex items-stretch">
+    <div id="observable-composer" className="flex items-stretch">
       <div className="w-1/2">
         <DndProvider backend={HTML5Backend}>
           <div className={clsx([['w-full']])}>

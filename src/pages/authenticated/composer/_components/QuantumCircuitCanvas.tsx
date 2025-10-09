@@ -38,7 +38,6 @@ export default (props: Props) => {
     selectedGates.length === 1 ? selectedGates[1] : undefined
   );
   const [mode, setMode] = useState(circuitService.mode);
-  const [isCustomGateModalOpen, setIsCustomGateModalOpen] = useState(false);
 
   useEffect(() => {
     return circuitService.onCircuitChange((c) => {
@@ -256,7 +255,9 @@ export default (props: Props) => {
               color={canGroupGates ? 'secondary' : 'disabled'}
               disabled={!canGroupGates}
               style={{ marginBottom: '1.25rem' }}
-              onClick={() => setIsCustomGateModalOpen(true)}
+              onClick={() => {
+                circuitService.isCustomGateModalOpen = true;
+              }}
             >
               <div
                 style={{
@@ -291,7 +292,7 @@ export default (props: Props) => {
           </div>
         )}
       </div>
-      <CustomGateModal isOpen={isCustomGateModalOpen} setIsOpen={setIsCustomGateModalOpen} />
+      <CustomGateModal />
     </>
   );
 };

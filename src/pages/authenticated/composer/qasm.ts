@@ -34,7 +34,9 @@ export function generateQASMCode(
       if (isParametrizedGate(gate)) {
         codeLines.push(`${gate._tag}(${gate.rotationAngle}) q[${gate.targets[0]}];`);
       } else if (isCustomGate(gate)) {
-        `${gate.customTag} ${[...gate.controls, ...gate.targets].map((v) => `q[${v}]`).join(', ')};`;
+        codeLines.push(
+          `${gate.customTag} ${[...gate.controls, ...gate.targets].map((v) => `q[${v}]`).join(', ')};`
+        );
       } else {
         codeLines.push(
           `${gate._tag} ${[...gate.controls, ...gate.targets].map((v) => `q[${v}]`).join(', ')};`
