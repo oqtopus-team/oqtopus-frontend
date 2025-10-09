@@ -91,15 +91,6 @@ export default function Page() {
     });
   }, []);
 
-  useEffect(() => {
-    setInterval(() => {
-      console.log(
-        'REEE',
-        generateQASMCode(circuitService.circuit, Object.values(circuitService.customGates))
-      );
-    }, 3000);
-  });
-
   // to allow key interaction with the circuits we check in what place we last had focus or we had interaction
   // and apply the key effect only to that place. It is used to allow e.g. deleting selected gates from circuit
   // with delete key when we work on the circuit and on the other hand prevent delete effect on the circuit
