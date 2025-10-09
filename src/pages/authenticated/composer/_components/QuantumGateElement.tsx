@@ -13,7 +13,7 @@ import {
 import './Composer.css';
 import { circuitContext } from '../circuit';
 import { GATE_CELL_SIZE } from '../gates_rendering/Gates';
-import { isCustomGate, isMultiQubitGate } from '../gates';
+import { isControlledGate, isCustomGate, isMultiQubitGate } from '../gates';
 
 interface Props {
   gate: ComposerGate;
@@ -156,6 +156,7 @@ export default function QuantumGateElement(props: Props) {
             ? ['shadow-md', 'rounded', 'ring-4', 'ring-primary', 'ring-opacity-50']
             : []
         ),
+        isSettingControl: circuitService.mode === 'control' && props.selected,
         customTag: isCustomGate(gate) ? gate.customTag : undefined,
       });
 
@@ -193,15 +194,31 @@ export default function QuantumGateElement(props: Props) {
       onClick={(e) => {
         if (isDummyGate(gate)) return;
 
-        if (circuitService.mode === 'eraser') {
-          circuitService.removeGate(gate);
-        } else {
-          if (e.shiftKey) {
-            circuitService.toggleSelectedGate(gate);
-          } else {
-            circuitService.selectedGates = [gate];
-          }
+        switch (circuitService.mode) {
+          case 'normal':
+            if (e.shiftKey) {
+              circuitService.toggleSelectedGate(gate);
+            } else {
+              circuitService.selectedGates = [gate];
+            }
+            break;
+          case 'eraser':
+            circuitService.removeGate(gate);
+            break;
+          case 'control':
+            circuitService.toggleMode('control');
+            circuitService.controlModeProgress++;
+            break;
         }
+      }}
+      onDoubleClick={(e) => {
+        if (e.shiftKey) return;
+        if (circuitService.mode === 'eraser') return;
+        if (isDummyGate(gate) || !isControlledGate(gate)) return;
+
+        circuitService.selectedGates = [gate];
+        circuitService.controlModeProgress = 0;
+        circuitService.toggleMode('control');
       }}
     >
       {renderGate()}

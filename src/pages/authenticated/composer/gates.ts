@@ -90,6 +90,6 @@ export function isGateMultiQubitByDefault(tag: GateTag): boolean {
   return multiQubitGates.includes(tag);
 }
 
-function isControlledGate(g: QuantumGate): boolean {
+export function isControlledGate(g: QuantumGate): boolean {
   return g.controls.length > 0;
 }

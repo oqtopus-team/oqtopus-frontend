@@ -10,6 +10,7 @@ import QuantumGateViewer from './QuantumGateViewer';
 import { CustomGateModal } from './CustomGateModal';
 import { cellSize } from '../gates_rendering/constants';
 import { useTranslation } from 'react-i18next';
+import { GATE_CELL_SIZE } from '../gates_rendering/Gates';
 
 export const staticCircuitProps = (): Props => ({
   fixedQubitNumber: true,
@@ -56,6 +57,40 @@ export default (props: Props) => {
         setGateViewer(gates.length === 1 ? gates[0] : undefined);
       }
     });
+  }, []);
+
+  useEffect(() => {
+    const circuitGrid = circuitGridRef.current;
+    if (!circuitGrid) return;
+
+    const abortController = new AbortController();
+
+    circuitGrid.addEventListener(
+      'mousemove',
+      (e) => {
+        if (circuitService.mode !== 'control') return;
+        if (!circuitGridRef.current) return;
+
+        const gate = circuitService.selectedGates[0];
+        const gridStartY = circuitGridRef.current.getBoundingClientRect().y;
+        let currentRow = Math.floor((e.clientY - gridStartY) / GATE_CELL_SIZE);
+
+        if (gate.controls.some((c) => c === currentRow)) return;
+        if (gate.targets.some((t) => t === currentRow)) return;
+
+        let newTargets = [...gate.targets];
+        let newControls = gate.controls.map((c, idx) =>
+          idx === circuitService.controlModeProgress ? currentRow : c
+        );
+
+        circuitService.updateControlsTargets(gate, newTargets, newControls);
+      },
+      { signal: abortController.signal }
+    );
+
+    return () => {
+      abortController.abort();
+    };
   }, []);
 
   const canGroupGates = circuitService.selectedGates.length >= 2;

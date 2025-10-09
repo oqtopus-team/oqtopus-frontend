@@ -4,7 +4,7 @@ import { cellBlockDiff, cellSize, gateBlockSize } from './constants';
 
 export default function CZGate(props: RenderProps): ReactElement {
   const gateColor = GateColor.GATE_CONTROLLED;
-  const { targets, controls, styles } = props;
+  const { targets, controls, styles, isSettingControl } = props;
   const target = targets[0];
   const control = controls[0];
 
@@ -13,6 +13,8 @@ export default function CZGate(props: RenderProps): ReactElement {
   const cellMiddle = gateBlockSize / 2;
   const totalOffset = cellSize * (height - 1);
   const baseHeight = cellSize * height - cellBlockDiff;
+
+  const controlHigherThanTarget = control > target;
 
   return (
     <div
@@ -39,9 +41,22 @@ export default function CZGate(props: RenderProps): ReactElement {
           y2={cellMiddle}
           stroke={gateColor}
           strokeWidth="4"
+          style={{ opacity: isSettingControl ? '0.5' : '1' }}
         />
-        <circle cx="20" cy={cellMiddle} r="8" fill={gateColor} />
-        <circle cx="20" cy={cellMiddle + totalOffset} r="8" fill={gateColor} />
+        <circle
+          cx="20"
+          cy={cellMiddle}
+          r="8"
+          fill={gateColor}
+          style={{ opacity: isSettingControl && !controlHigherThanTarget ? '0.5' : '1' }}
+        />
+        <circle
+          cx="20"
+          cy={cellMiddle + totalOffset}
+          r="8"
+          fill={gateColor}
+          style={{ opacity: isSettingControl && controlHigherThanTarget ? '0.5' : '1' }}
+        />
       </svg>
     </div>
   );

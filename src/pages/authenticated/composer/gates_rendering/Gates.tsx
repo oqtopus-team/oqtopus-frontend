@@ -21,6 +21,7 @@ export type RenderProps = {
   targets: number[];
   controls: number[];
   styles: string;
+  isSettingControl: boolean;
   customTag?: string;
 };
 

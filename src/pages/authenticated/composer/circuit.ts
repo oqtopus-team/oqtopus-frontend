@@ -28,6 +28,7 @@ export class QuantumCircuitService {
   private _circuit: Reactive<QuantumCircuit>;
   private _supportedGates: ReadonlyArray<QuantumGate['_tag']>;
   private _mode: Reactive<Mode> = new Reactive<Mode>('normal');
+  private _controlModeProgress = 0;
   private _customGates: Record<string, GateDefinition> = {};
 
   private _draggedGateIds = new Reactive<number[]>([]);
@@ -75,6 +76,14 @@ export class QuantumCircuitService {
 
   get mode(): Mode {
     return this._mode.value;
+  }
+
+  get controlModeProgress() {
+    return this._controlModeProgress;
+  }
+
+  set controlModeProgress(progress: number) {
+    this._controlModeProgress = progress;
   }
 
   get customGates(): Record<string, GateDefinition> {
@@ -896,6 +905,9 @@ function getColumnToWhichCanMoveUp(circuit: QuantumCircuit, row: number, column:
   return circuit[row][column]?._tag === 'multiRowGateEmptyBlock' ? column + 1 : column;
 }
 
+/**************************/
+/**** UTILS FUNCTIONS ****/
+/************************/
 // if we are reaching the end of the circuit row, we have to append new empty gates
 // at the end of each row, so that we are able to add new elements. We check if we have
 // any non-empty gates at last two columns, and if we found any in any row, then we append
