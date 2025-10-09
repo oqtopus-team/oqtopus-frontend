@@ -220,6 +220,7 @@ export class QuantumCircuitService {
   moveGate(g: ComposerGate, row: number, column: number, cb: GateMoveCallback, isNew = false) {
     if (isDummyGate(g)) return;
 
+    if (g.row === row && g.column === column) return;
     if (this.prevHoverCoords.row === row && this.prevHoverCoords.column === column) return;
     this.prevHoverCoords = { row, column };
 
