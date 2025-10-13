@@ -132,7 +132,7 @@ export default (props: Props) => {
                       ['flex', 'justify-center', 'items-center'],
                     ])}
                     key={row}
-                    onClick={() => circuitService.removeEmptyQubit(row)}
+                    onClick={() => mode === 'eraser' && circuitService.removeEmptyQubit(row)}
                   >
                     <span
                       className={clsx([
@@ -165,62 +165,49 @@ export default (props: Props) => {
               <div className={clsx([['relative', 'h-full', 'w-full']])}>
                 <div
                   ref={circuitGridRef}
-                  style={{
-                    gridTemplateRows: `repeat(${qubitNumber}, ${cellSize}px)`,
-                    gridTemplateColumns: `repeat(${circuitDepth}, ${cellSize}px)`,
-                  }}
                   className={clsx([
                     ['absolute', 'top-0', 'left-0', 'm-5', 'mt-[52px]'],
-                    ['grid', 'grid-flow'],
                     ['w-full'],
                     ['transition-all', 'duration-300'],
                   ])}
+                  style={{
+                    display: 'table',
+                    borderCollapse: 'collapse',
+                  }}
                 >
-                  {circuit.map((circuitRow, row) => {
-                    return circuitRow.map((gate, column) => {
-                      return (
-                        <div
-                          className={clsx(['relative', 'w-full', 'h-full'])}
+                  {circuit.map((circuitRow, row) => (
+                    <div
+                      style={{
+                        display: 'table-row',
+                        position: 'relative',
+                        minHeight: `${cellSize}px`,
+                        height: `${cellSize}px`,
+                        width: '100%',
+                      }}
+                    >
+                      {circuitRow.map((gate, column) => (
+                        <QuantumCircuitGateCell
                           key={`cell-q${row}-t${column}`}
-                          style={{ zIndex: !isDummyGate(gate) ? '1' : '0' }}
-                        >
-                          <div
-                            className={clsx([
-                              'absolute',
-                              'top-0',
-                              'left-0',
-                              'w-full',
-                              'h-full',
-                              'z-20',
-                              'flex',
-                              'items-center',
-                              'justify-center',
-                            ])}
-                          >
-                            <QuantumCircuitGateCell
-                              gate={gate}
-                              row={row}
-                              column={column}
-                              circuitGrid={circuitGridRef}
-                              static={props.static}
-                              selected={selectedGates.some((g) => g.id === gate.id)}
-                              key={`q${row}-t${column}`}
-                            />
-                          </div>
-                          <div
-                            className={clsx([
-                              ['absolute', 'top-0', 'left-0'],
-                              ['z-10'],
-                              ['w-full', 'h-full'],
-                              ['flex', 'justify-center', 'items-center'],
-                            ])}
-                          >
-                            <div className={clsx([['w-full', 'h-1'], ['bg-neutral-content']])} />
-                          </div>
-                        </div>
-                      );
-                    });
-                  })}
+                          gate={gate}
+                          row={row}
+                          column={column}
+                          circuitGrid={circuitGridRef}
+                          static={props.static}
+                          selected={selectedGates.some((g) => g.id === gate.id)}
+                        />
+                      ))}
+                      <div
+                        className={clsx([
+                          ['absolute', 'top-0', 'left-0'],
+                          ['pointer-events-none'],
+                          ['w-full', 'h-full'],
+                          ['flex', 'justify-center', 'items-center'],
+                        ])}
+                      >
+                        <div className={clsx([['w-full', 'h-1'], ['bg-neutral-content']])} />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

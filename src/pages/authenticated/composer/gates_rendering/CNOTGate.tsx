@@ -23,10 +23,7 @@ export default function CNOTGate(props: RenderProps): ReactElement {
       className={styles}
       style={{
         display: 'block',
-        position: 'absolute',
         maxHeight: baseHeight,
-        left: '50%',
-        transform: 'translateX(-50%)',
       }}
     >
       <svg

@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import {
   ComposerGate,
   DragGateItem,
+  getGateHeight,
   isDummyGate,
   ItemTypeMoveGate,
   ItemTypeNewGate,
@@ -12,6 +13,7 @@ import { isControlledGate, isCustomGate, isMultiQubitGate } from '../gates';
 import { GATE_CELL_SIZE } from '../gates_rendering/Gates';
 import { DropTargetMonitor, useDrag, useDrop, XYCoord } from 'react-dnd';
 import { circuitContext } from '../circuit';
+import { cellBlockDiff, cellSize, gateBlockSize } from '../gates_rendering/constants';
 
 export interface Props {
   row: number;
@@ -169,6 +171,8 @@ export default (props: Props) => {
         ])}
         style={{
           backgroundColor: gate.backgroundColor,
+          width: `${gateBlockSize}px`,
+          height: `${gateBlockSize}px`,
         }}
       >
         <span className={clsx([['text-primary-content', 'font-bold'], ['text-xl']])}>
@@ -180,58 +184,79 @@ export default (props: Props) => {
 
   return (
     <div
-      className={clsx([
-        ['w-full', 'h-full', 'flex', 'items-center', 'justify-center'],
-        ['relative'],
-      ])}
+      style={{
+        display: 'table-cell',
+        position: 'relative',
+        minWidth: `${cellSize}px`,
+        height: `${cellSize}px`,
+        zIndex: !isDummyGate(gate) ? '1' : '0',
+        verticalAlign: 'middle',
+        textAlign: 'center',
+      }}
       onClick={() => {
         if (isDummyGate(gate)) {
           circuitService.selectedGates = [];
         }
       }}
     >
-      <div
-        ref={ref}
-        className={clsx([
-          ['w-10', 'h-10'],
-          ['text-primary-content'],
-          props.static === true || isDummyGate(gate)
-            ? []
-            : [isGateDragged ? 'cursor-grabbing' : 'cursor-pointer'],
-          [isGateDragged ? 'opacity-50' : 'opacity-100'],
-        ])}
-        style={{ position: 'relative' }}
-        onClick={(e) => {
-          if (isDummyGate(gate)) return;
+      {/* Ensure table-cell has height of cellSize at most even if gate's height is greater */}
+      <div style={{ maxHeight: `${cellSize}px` }}>
+        <div
+          style={{
+            minWidth: `${cellSize}px`,
+            padding: `${cellBlockDiff / 2}px`,
+            height: !isDummyGate(gate) ? `${getGateHeight(gate) * cellSize}px` : `${cellSize}px`,
+          }}
+        >
+          <div
+            ref={ref}
+            className={clsx([
+              ['text-primary-content'],
+              props.static === true || isDummyGate(gate)
+                ? []
+                : [isGateDragged ? 'cursor-grabbing' : 'cursor-pointer'],
+              [isGateDragged ? 'opacity-50' : 'opacity-100'],
+            ])}
+            style={{
+              position: 'relative',
+              display: 'inline-block',
+              width: 'auto',
+              minWidth: `${gateBlockSize}px`,
+              minHeight: `${gateBlockSize}px`,
+            }}
+            onClick={(e) => {
+              if (isDummyGate(gate)) return;
 
-          switch (circuitService.mode) {
-            case 'normal':
-              if (e.shiftKey) {
-                circuitService.toggleSelectedGate(gate);
-              } else {
-                circuitService.selectedGates = [gate];
+              switch (circuitService.mode) {
+                case 'normal':
+                  if (e.shiftKey) {
+                    circuitService.toggleSelectedGate(gate);
+                  } else {
+                    circuitService.selectedGates = [gate];
+                  }
+                  break;
+                case 'eraser':
+                  circuitService.removeGate(gate);
+                  break;
+                case 'control':
+                  circuitService.toggleMode('control');
+                  circuitService.controlModeProgress++;
+                  break;
               }
-              break;
-            case 'eraser':
-              circuitService.removeGate(gate);
-              break;
-            case 'control':
-              circuitService.toggleMode('control');
-              circuitService.controlModeProgress++;
-              break;
-          }
-        }}
-        onDoubleClick={(e) => {
-          if (e.shiftKey) return;
-          if (circuitService.mode === 'eraser') return;
-          if (isDummyGate(gate) || !isControlledGate(gate)) return;
+            }}
+            onDoubleClick={(e) => {
+              if (e.shiftKey) return;
+              if (circuitService.mode === 'eraser') return;
+              if (isDummyGate(gate) || !isControlledGate(gate)) return;
 
-          circuitService.selectedGates = [gate];
-          circuitService.controlModeProgress = 0;
-          circuitService.toggleMode('control');
-        }}
-      >
-        {renderGate()}
+              circuitService.selectedGates = [gate];
+              circuitService.controlModeProgress = 0;
+              circuitService.toggleMode('control');
+            }}
+          >
+            {renderGate()}
+          </div>
+        </div>
       </div>
     </div>
   );

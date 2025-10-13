@@ -52,6 +52,7 @@ export default function CustomGate({ targets, customTag, styles }: RenderProps) 
       </section>
       <span
         style={{
+          paddingRight: '2px',
           fontSize: '0.8rem',
         }}
       >
