@@ -6,9 +6,6 @@ import CZGate from './CZGate';
 import SwapGate from './SwapGate';
 import CustomGate from './CustomGate';
 
-export const GATE_CELL_SIZE = 64;
-export const GATE_BLOCK_SIZE = 40;
-
 export enum GateColor {
   NONE = 'transparent',
   GATE_ATOMIC = '#5179d5',
@@ -100,8 +97,8 @@ export const gateRenderingBlockMap: Record<GateTag, GateRenderingBlock> = {
     name: 'Sdag Gate',
     backgroundColor: GateColor.GATE_ATOMIC,
     hasBorder: false,
-    palletteItem: <span className="dagger-gate"> X</span>,
-    composerItem: <span className="dagger-gate"> X</span>,
+    palletteItem: <span className="dagger-gate">S</span>,
+    composerItem: <span className="dagger-gate">S</span>,
   },
   tdg: {
     label: 'T†',

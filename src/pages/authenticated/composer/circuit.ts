@@ -33,7 +33,7 @@ export class QuantumCircuitService {
   private _customGates: Record<string, GateDefinition> = {};
   private _isCustomGateModalOpen: Reactive<boolean> = new Reactive(false);
 
-  private _draggedGateIds = new Reactive<number[]>([]);
+  private _draggedGates = new Reactive<RealComposerGate[]>([]);
   private _selectedGates = new Reactive<RealComposerGate[]>([]);
   private prevHoverCoords: { row: number; column: number } = { row: -1, column: -1 };
 
@@ -100,8 +100,8 @@ export class QuantumCircuitService {
     this._isCustomGateModalOpen.value = isOpen;
   }
 
-  get draggedGateIds(): number[] {
-    return this._draggedGateIds.value;
+  get draggedGates(): RealComposerGate[] {
+    return this._draggedGates.value;
   }
 
   get selectedGates(): RealComposerGate[] {
@@ -110,6 +110,9 @@ export class QuantumCircuitService {
 
   set selectedGates(gates: RealComposerGate[]) {
     this._selectedGates.value = gates.sort(compareGates);
+
+    // if we change selected gates we have to cancel setting control mode
+    if (this.mode === "control") this.toggleMode("control");
   }
 
   get isObservableCircuit(): boolean {
@@ -124,8 +127,8 @@ export class QuantumCircuitService {
     return this._mode.subscribe(cb);
   }
 
-  onDraggedGateIdsChange(cb: ReactiveCallback<number[]>): Unsubscribe {
-    return this._draggedGateIds.subscribe(cb);
+  onDraggedGateIdsChange(cb: ReactiveCallback<RealComposerGate[]>): Unsubscribe {
+    return this._draggedGates.subscribe(cb);
   }
 
   onIsCustomGateModalOpen(cb: ReactiveCallback<boolean>): Unsubscribe {
@@ -160,13 +163,13 @@ export class QuantumCircuitService {
       .sort(compareGates);
   }
 
-  handleDragStart(draggedGateIds: number[]) {
-    this._draggedGateIds.value = draggedGateIds;
+  handleDragStart(draggedGates: RealComposerGate[], draggingNewGate: boolean = false) {
+    this._draggedGates.value = draggedGates;
   }
 
   handleDragEnd() {
     this.prevHoverCoords = { row: -1, column: -1 };
-    this._draggedGateIds.value = [];
+    this._draggedGates.value = [];
     this.reselectGates();
   }
 
@@ -240,8 +243,6 @@ export class QuantumCircuitService {
 
     if (g.row === row && g.column === column) return;
     if (row + getGateHeight(g) > this.circuit.length) return;
-
-    this._draggedGateIds.value = [g.id];
 
     if (!isNew) this.handleRemoveGate(this.circuit, g);
 

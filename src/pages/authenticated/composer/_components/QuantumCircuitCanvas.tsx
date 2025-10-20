@@ -2,7 +2,7 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { circuitContext } from '../circuit';
 import clsx from 'clsx';
 import QuantumCircuitGateCell from './QuantumCircuitGateCell';
-import { isDummyGate, RealComposerGate } from '../composer';
+import { RealComposerGate } from '../composer';
 import { Button } from '@/pages/_components/Button';
 import { RxCopy } from 'react-icons/rx';
 import { FaObjectGroup, FaObjectUngroup } from 'react-icons/fa';
@@ -10,7 +10,6 @@ import QuantumGateViewer from './QuantumGateViewer';
 import { CustomGateModal } from './CustomGateModal';
 import { cellSize } from '../gates_rendering/constants';
 import { useTranslation } from 'react-i18next';
-import { GATE_CELL_SIZE } from '../gates_rendering/Gates';
 
 export const staticCircuitProps = (): Props => ({
   fixedQubitNumber: true,
@@ -28,7 +27,6 @@ export default (props: Props) => {
   const circuitGridRef = useRef<HTMLDivElement>(null);
 
   const [qubitNumber, setQubitNumber] = useState(circuitService.circuit.length);
-  const [circuitDepth, setCircuitDepth] = useState(circuitService.circuit[0]?.length ?? 0);
   const [circuit, setCircuit] = useState(circuitService.circuit);
 
   const [selectedGates, setSelectedGates] = useState<RealComposerGate[]>(
@@ -42,7 +40,6 @@ export default (props: Props) => {
   useEffect(() => {
     return circuitService.onCircuitChange((c) => {
       setQubitNumber(c.length);
-      setCircuitDepth(c[0]?.length ?? 0);
       setCircuit(c);
     });
   }, []);
@@ -72,7 +69,9 @@ export default (props: Props) => {
 
         const gate = circuitService.selectedGates[0];
         const gridStartY = circuitGridRef.current.getBoundingClientRect().y;
-        let currentRow = Math.floor((e.clientY - gridStartY) / GATE_CELL_SIZE);
+        let currentRow = Math.floor((e.clientY - gridStartY) / cellSize);
+
+        if (currentRow < 0 || currentRow >= circuitService.circuit.length) return;
 
         if (gate.controls.some((c) => c === currentRow)) return;
         if (gate.targets.some((t) => t === currentRow)) return;
@@ -177,6 +176,7 @@ export default (props: Props) => {
                 >
                   {circuit.map((circuitRow, row) => (
                     <div
+                      key={`row-q${row}`}
                       style={{
                         display: 'table-row',
                         position: 'relative',
@@ -191,7 +191,6 @@ export default (props: Props) => {
                           gate={gate}
                           row={row}
                           column={column}
-                          circuitGrid={circuitGridRef}
                           static={props.static}
                           selected={selectedGates.some((g) => g.id === gate.id)}
                         />

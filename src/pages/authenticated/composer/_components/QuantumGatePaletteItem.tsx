@@ -1,10 +1,9 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { GateTag } from '../gates';
-import { useDrag } from 'react-dnd';
 import clsx from 'clsx';
 import { gateRenderingBlockMap } from '../gates_rendering/Gates';
-import { createComposerGate, DragGateItem, ItemTypeNewGate } from '../composer';
-import { circuitContext } from '../circuit';
+import { createComposerGate } from '../composer';
+import { useDraggable } from '@dnd-kit/core';
 
 export interface Props {
   gateTag: GateTag;
@@ -14,36 +13,20 @@ export interface Props {
 export default function QuantumGatePaletteItem({ disabled, gateTag }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [gateBlock] = useState(gateRenderingBlockMap[gateTag]);
-  const circuitService = useContext(circuitContext);
 
-  const [{ isDragging }, drag] = useDrag(
-    () => ({
-      type: ItemTypeNewGate,
-      item: () => {
-        const gate = createComposerGate(gateTag, -1, -1);
-        circuitService.handleDragStart([gate.id]);
-        return { gate, isCreated: false };
-      },
-      canDrag: disabled === false,
-      collect: (monitor) => ({
-        isDragging: monitor.isDragging(),
-      }),
-      end(draggedItem, monitor) {
-        circuitService.handleDragEnd();
-      },
-    }),
-    [gateTag, disabled]
-  );
-
-  useEffect(() => {
-    if (ref.current) {
-      drag(ref.current);
-    }
-  }, [ref, drag]);
+  const draggable = useDraggable({
+    id: gateTag,
+    data: { gate: createComposerGate(gateTag, -1, -1) },
+  });
 
   return (
     <div
-      ref={ref}
+      ref={(node) => {
+        ref.current = node;
+        draggable.setNodeRef(node);
+      }}
+      {...draggable.attributes}
+      {...(!disabled ? draggable.listeners : {})}
       className={clsx([
         ['text-info-content', 'font-bold'],
         gateBlock.hasBorder ? ['border', 'border-gate-operation-border'] : [],
@@ -55,8 +38,8 @@ export default function QuantumGatePaletteItem({ disabled, gateTag }: Props) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        opacity: isDragging || disabled ? 0.5 : 1,
-        cursor: isDragging ? 'grabbing' : disabled ? 'not-allowed' : 'pointer',
+        opacity: draggable.isDragging || disabled ? 0.5 : 1,
+        cursor: draggable.isDragging ? 'grabbing' : disabled ? 'not-allowed' : 'pointer',
         backgroundColor: gateBlock.backgroundColor,
       }}
     >
