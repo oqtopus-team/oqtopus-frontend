@@ -12,7 +12,7 @@ export default () => {
   useEffect(() => circuitService.onModeChange(setMode), []);
 
   return (
-    <div className={clsx(['flex gap-1'])}>
+    <div className={clsx(['flex gap-1', 'overflow-x-auto'])}>
       {circuitService.supportedGates.map((gateTag) => (
         <QuantumGatePaletteItem
           gateTag={gateTag}
@@ -26,7 +26,7 @@ export default () => {
       <div
         className={clsx([
           ['flex', 'items-center', 'justify-center'],
-          ['w-10', 'h-10', 'rounded'],
+          ['min-w-10', 'w-10', 'h-10', 'rounded'],
           ['cursor-pointer'],
           ['border', 'border-gate-operation-border'],
           mode == 'eraser' ? ['bg-gate-operation-enabled'] : [],

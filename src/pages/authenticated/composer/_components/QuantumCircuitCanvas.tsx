@@ -210,9 +210,6 @@ export default (props: Props) => {
                 </div>
               </div>
             </div>
-            <div>
-              <div></div>
-            </div>
           </div>
           {!circuitService.isObservableCircuit && !props.static && (
             <QuantumGateViewer gateViewer={gateViewer} setGateViewer={setGateViewer} />

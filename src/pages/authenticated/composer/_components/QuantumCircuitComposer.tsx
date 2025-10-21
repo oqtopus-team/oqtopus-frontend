@@ -14,7 +14,7 @@ import {
 import { isDummyGate, RealComposerGate } from '../composer';
 import { useContext, useRef, useState } from 'react';
 import { circuitContext } from '../circuit';
-import { gateBlockSize } from '../gates_rendering/constants';
+import { cellSize, gateBlockSize } from '../gates_rendering/constants';
 import { isCustomGate } from '../gates';
 
 export interface QuantumCircuitComposerProps {
@@ -44,6 +44,10 @@ const detectCollision: CollisionDetection = ({
 
     const dropX = dropRect.left + dropRect.width / 2;
     const dropY = dropRect.top + gateBlockSize / 2;
+
+    if (Math.abs(dropX - middleX) > cellSize || Math.abs(dropY - topCellMiddleY) > cellSize) {
+      continue;
+    }
 
     const distance = Math.sqrt(Math.pow(dropX - middleX, 2) + Math.pow(dropY - topCellMiddleY, 2));
     collisions.push({ id, data: { droppableContainer, value: distance } });

@@ -181,9 +181,9 @@ export default function QuantumGateViewer({ gateViewer, setGateViewer }: Quantum
   return (
     <div
       className={clsx([
-        !!gateViewer ? ['w-[40%]'] : ['w-0', 'border-0'],
-        ['relative', 'min-h-64', 'my-5', 'p-3'],
-        ['transition-all'],
+        !!gateViewer ? ['min-w-[10rem]', 'w-[40%]', 'p-3'] : ['w-0', 'border-0'],
+        ['relative', 'min-h-64', 'my-5'],
+        ['transition-width'],
         ['overflow-auto', 'rounded'],
         ['border', 'border-neutral-content', 'rounded-sm'],
       ])}
@@ -203,7 +203,7 @@ export default function QuantumGateViewer({ gateViewer, setGateViewer }: Quantum
             </div>
           </div>
           <div className="w-full">
-            <div className="grid grid-cols-8 ">
+            <div className="flex flex-row gap-2 items-center">
               <span className="col-span-2">
                 <div
                   className={clsx([
