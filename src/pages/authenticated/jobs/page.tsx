@@ -1,4 +1,4 @@
-import { useState, useLayoutEffect } from 'react';
+import { useState, useLayoutEffect, useEffect } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import {
   Job,
@@ -163,9 +163,14 @@ export default function JobListPage() {
   };
 
   const handleAllJobsSelectionChange = (selected: boolean) => {
-    if (selected) {
-      setSelectedJobs([...jobs]);
-    } else {
+    //TODO: Add handling "status" to getJobs request and remove code below
+    if (!params.status && selected) {
+      setSelectedJobs(jobs);
+    }
+    else if(params.status && selected) {
+      setSelectedJobs(jobs.filter((j) => j.status === params.status));
+    }
+    else {
       setSelectedJobs([]);
     }
   };
@@ -220,6 +225,11 @@ export default function JobListPage() {
       selectedJobs.length === 0 || selectedJobs.some((j) => NOT_CANCELABLE_JOBS.includes(j.status))
     );
   };
+
+  useEffect(() => {
+    //TODO: Add handling "status" to getJobs request and remove code below
+    setSelectedJobs([]);
+  }, [params.status]);
 
   return (
     <div>
@@ -281,62 +291,62 @@ export default function JobListPage() {
           >
             <table className={clsx('w-full')}>
               <thead>
-                <tr>
-                  <th>
-                    <input
-                      type="checkbox"
-                      checked={areAllJobsSelected()}
-                      onChange={(e) => handleAllJobsSelectionChange(e.target.checked)}
-                    />
-                  </th>
-                  <th>{t('job.list.table.id')}</th>
-                  <th>{t('job.list.table.name')}</th>
-                  <th>{t('job.list.table.device')}</th>
-                  <th>{t('job.list.table.status')}</th>
-                  <th>{t('job.list.table.date')}</th>
-                  <th>{t('job.list.table.operation')}</th>
-                </tr>
+              <tr>
+                <th>
+                  <input
+                    type="checkbox"
+                    checked={areAllJobsSelected()}
+                    onChange={(e) => handleAllJobsSelectionChange(e.target.checked)}
+                  />
+                </th>
+                <th>{t('job.list.table.id')}</th>
+                <th>{t('job.list.table.name')}</th>
+                <th>{t('job.list.table.device')}</th>
+                <th>{t('job.list.table.status')}</th>
+                <th>{t('job.list.table.date')}</th>
+                <th>{t('job.list.table.operation')}</th>
+              </tr>
               </thead>
               <tbody>
-                {jobs
-                  .filter((job) => {
-                    if (params.status && job.status !== params.status) {
-                      return false;
-                    }
-                    if (
-                      params.query &&
-                      !job.id.includes(params.query) &&
-                      !job.name.includes(params.query) &&
-                      !job.description?.includes(params.query)
-                    ) {
-                      return false;
-                    }
+              {jobs
+                .filter((job) => {
+                  if (params.status && job.status !== params.status) {
+                    return false;
+                  }
+                  if (
+                    params.query &&
+                    !job.id.includes(params.query) &&
+                    !job.name.includes(params.query) &&
+                    !job.description?.includes(params.query)
+                  ) {
+                    return false;
+                  }
 
-                    return true;
-                  })
-                  .map((job) => (
-                    <JobListItem
-                      key={job.id}
-                      job={job}
-                      onJobModified={reloadJobs}
-                      selectedJobs={selectedJobs}
-                      onJobSelectionChange={handleJobSelectionChange}
-                    />
-                  ))}
-                {!loading && jobs.length === 0 && (
-                  <tr>
-                    <td colSpan={4}>{t('job.list.nodata')}</td>
-                  </tr>
-                )}
-                {loading && (
-                  <tr>
-                    <td colSpan={5} className={clsx('text-center')}>
-                      <div className={clsx('justify-center')}>
-                        <Loader />
-                      </div>
-                    </td>
-                  </tr>
-                )}
+                  return true;
+                })
+                .map((job) => (
+                  <JobListItem
+                    key={job.id}
+                    job={job}
+                    onJobModified={reloadJobs}
+                    selectedJobs={selectedJobs}
+                    onJobSelectionChange={handleJobSelectionChange}
+                  />
+                ))}
+              {!loading && jobs.length === 0 && (
+                <tr>
+                  <td colSpan={4}>{t('job.list.nodata')}</td>
+                </tr>
+              )}
+              {loading && (
+                <tr>
+                  <td colSpan={5} className={clsx('text-center')}>
+                    <div className={clsx('justify-center')}>
+                      <Loader />
+                    </div>
+                  </td>
+                </tr>
+              )}
               </tbody>
             </table>
           </InfiniteScroll>
@@ -396,6 +406,7 @@ const Loadmore = (props: { handleClick: () => void }) => {
 };
 
 const generateSearchParams = (params: JobSearchParams): string => {
+  console.log('params', params);
   const searchParams = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
     if (value === undefined || value === '') {
