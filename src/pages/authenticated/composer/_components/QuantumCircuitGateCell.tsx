@@ -75,6 +75,7 @@ export default (props: Props) => {
         display: 'table-cell',
         position: 'relative',
         minWidth: `${cellSize}px`,
+        width: `${cellSize}px`,
         height: `${cellSize}px`,
         zIndex: !isDummyGate(gate) ? '1' : '0',
         verticalAlign: 'middle',

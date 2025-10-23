@@ -48,7 +48,7 @@ export default function Page() {
   useDocumentTitle(t('composer.title'));
   const [jobType, setJobType] = useState<JobTypeType>('sampling');
 
-  const [circuitService] = useState(new QuantumCircuitService(2, 20, composerSupportedGates, true));
+  const [circuitService] = useState(new QuantumCircuitService(2, 3, composerSupportedGates, true));
   const [circuit, setCircuit] = useState(circuitService.circuit);
   const [observableCircuitService] = useState(
     new QuantumCircuitService(2, 10, observableSupportedGates, false, true)

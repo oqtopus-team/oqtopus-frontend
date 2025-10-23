@@ -165,8 +165,7 @@ export default (props: Props) => {
                 <div
                   ref={circuitGridRef}
                   className={clsx([
-                    ['absolute', 'top-0', 'left-0', 'm-5', 'mt-[52px]'],
-                    ['w-full'],
+                    ['absolute', 'top-0', 'left-0', 'w-auto', 'm-5', 'mt-[52px]'],
                     ['transition-all', 'duration-300'],
                   ])}
                   style={{
