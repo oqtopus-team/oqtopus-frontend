@@ -1,9 +1,9 @@
 import clsx from 'clsx';
 import { Input } from '@/pages/_components/Input';
 import {
+  TranspilerTypeType,
   initializeJobFormProgramDefaults,
   JOB_FORM_MITIGATION_INFO_DEFAULTS,
-  JOB_FORM_TRANSPILER_INFO_DEFAULTS,
   JOB_TYPE_DEFAULT,
   JOB_TYPES,
   JobFileData,
@@ -13,7 +13,7 @@ import {
   SHOTS_DEFAULT,
   TRANSPILER_TYPE_DEFAULT,
   TRANSPILER_TYPES,
-  TranspilerTypeType,
+  MitigationTypeType,
 } from '@/domain/types/Job';
 import { Select } from '@/pages/_components/Select';
 import { Accordion, AccordionDetails, AccordionSummary } from '@mui/material';
@@ -46,10 +46,10 @@ interface FormInput {
   type: JobsJobType;
   program: string;
   programType: ProgramType;
-  transpilerType: TranspilerTypeType;
+  transpilerType: TranspilerTypeType | 'Custom';
+  mitigationType: MitigationTypeType | 'Custom';
   transpiler?: string;
   simulator?: string;
-  mitigationEnabled: boolean;
   mitigation?: string;
   operator: JobsOperatorItem[];
 }
@@ -121,7 +121,7 @@ const validationRules = (t: TFunction<'translation', undefined>): yup.ObjectSche
     transpilerType: yup.mixed<TranspilerTypeType>().required(),
     transpiler: yup.string().test('', t('job.form.error_message.invalid_json'), isJsonParsable),
     simulator: yup.string().test('', t('job.form.error_message.invalid_json'), isJsonParsable),
-    mitigationEnabled: yup.boolean().required(),
+    mitigationType: yup.mixed<MitigationTypeType>().required(),
     mitigation: yup.string().test('', t('job.form.error_message.invalid_json'), isJsonParsable),
     operator: yup.array().of(operatorItemSchema(t)).required(),
   });
@@ -145,7 +145,7 @@ export const JobForm = (componentProps: JobFormProps) => {
 
   const {
     handleSubmit,
-    formState: { errors, isSubmitting, isValid },
+    formState: { errors, isSubmitting, dirtyFields },
     setValue,
     watch,
     register,
@@ -161,24 +161,23 @@ export const JobForm = (componentProps: JobFormProps) => {
       name: '',
       description: '',
       type: JOB_TYPE_DEFAULT,
-      mitigationEnabled: true,
-      mitigation: '',
+      mitigation: '{}',
       programType: PROGRAM_TYPE_DEFAULT,
       program: '',
-      transpilerType: TRANSPILER_TYPE_DEFAULT,
-      transpiler: JOB_FORM_TRANSPILER_INFO_DEFAULTS.Default,
+      transpilerType: 'Default',
+      transpiler: '{}',
       shots: SHOTS_DEFAULT,
       operator: [],
       simulator: '{}',
     },
   });
 
-  const [transpilerType, transpiler, mitigationEnabled, mitigation, program, jobType, operator] =
+  const [mitigationType, mitigation, transpilerType, transpiler, program, jobType, operator] =
     watch([
+      'mitigationType',
+      'mitigation',
       'transpilerType',
       'transpiler',
-      'mitigationEnabled',
-      'mitigation',
       'program',
       'type',
       'operator',
@@ -209,39 +208,43 @@ export const JobForm = (componentProps: JobFormProps) => {
   }, []);
 
   useEffect(() => {
-    // set default transpiler info if transpiler_info not changed or empty
-    if (
-      transpilerType === 'None' &&
-      (transpiler === JOB_FORM_TRANSPILER_INFO_DEFAULTS.Default || transpiler?.trim() === '')
-    ) {
-      setValue('transpiler', JOB_FORM_TRANSPILER_INFO_DEFAULTS.None);
-    }
-    if (
-      transpilerType === 'Default' &&
-      (transpiler === JOB_FORM_TRANSPILER_INFO_DEFAULTS.None || transpiler?.trim() === '')
-    ) {
-      setValue('transpiler', JOB_FORM_TRANSPILER_INFO_DEFAULTS.Default);
-    }
-  }, [transpilerType]);
-
-  useEffect(() => {
-    if (
-      mitigationEnabled &&
-      (mitigation === JOB_FORM_MITIGATION_INFO_DEFAULTS.None || mitigation?.trim() === '')
-    ) {
-      setValue('mitigation', JOB_FORM_MITIGATION_INFO_DEFAULTS.PseudoInv);
-    }
-    if (!mitigationEnabled) {
-      setValue('mitigation', JOB_FORM_MITIGATION_INFO_DEFAULTS.None);
-    }
-  }, [mitigationEnabled]);
-
-  useEffect(() => {
     if (props.mkProgram) {
       setValue('program', props.mkProgram?.program);
       setValue('operator', props.mkOperator ?? [{ pauli: '', coeff: 1.0 }]);
     }
   }, [props.mkProgram?.program]);
+
+  // Change templates after changing types
+  useEffect(() => {
+    if (transpilerType !== 'Custom') {
+      setValue('transpiler', TRANSPILER_TYPES[transpilerType]);
+    }
+  }, [transpilerType]);
+  useEffect(() => {
+    if (mitigationType !== 'Custom') {
+      setValue('mitigation', JOB_FORM_MITIGATION_INFO_DEFAULTS[mitigationType]);
+    }
+  }, [mitigationType]);
+
+  // Change types to Custom
+  useEffect(() => {
+    if (
+      transpiler &&
+      !Object.values(TRANSPILER_TYPES).includes(transpilerType) &&
+      dirtyFields.transpiler
+    ) {
+      setValue('transpilerType', 'Custom');
+    }
+  }, [transpiler]);
+  useEffect(() => {
+    if (
+      mitigation &&
+      !Object.values(JOB_FORM_MITIGATION_INFO_DEFAULTS).includes(mitigation) &&
+      dirtyFields.mitigation
+    ) {
+      setValue('mitigationType', 'Custom');
+    }
+  }, [mitigation]);
 
   const [jobFileData, setJobFileData] = useState<JobFileData | undefined>(undefined);
   useEffect(() => {
@@ -262,10 +265,7 @@ export const JobForm = (componentProps: JobFormProps) => {
     }
 
     if (jobFileData.mitigationInfo) {
-      setValue('mitigationEnabled', true);
       setValue('mitigation', JSON.stringify(jobFileData.mitigationInfo));
-    } else {
-      setValue('mitigationEnabled', false);
     }
 
     setJobFileData(undefined);
@@ -386,7 +386,7 @@ export const JobForm = (componentProps: JobFormProps) => {
             >
               <option value=""></option>
               {devices.map((device) => (
-                <option disabled={device.status === 'unavailable'} key={device.id}>
+                <option key={device.id} disabled={device.status === 'unavailable'}>
                   {device.id}
                 </option>
               ))}
@@ -504,21 +504,27 @@ export const JobForm = (componentProps: JobFormProps) => {
                   <Select
                     labelLeft="type"
                     {...register('transpilerType')}
-                    errorMessage={errors.transpilerType && errors.transpilerType.message}
                     size="xs"
+                    defaultValue={TRANSPILER_TYPE_DEFAULT}
                   >
-                    {TRANSPILER_TYPES.map((jobType) => (
-                      <option key={jobType}>{jobType}</option>
-                    ))}
+                    {Object.keys(TRANSPILER_TYPES).map((k) => {
+                      const key = k as TranspilerTypeType;
+                      return (
+                        <option key={key} value={key}>
+                          {key}
+                        </option>
+                      );
+                    })}
+                    <option value="Custom">Custom</option>
                   </Select>
                 </div>
                 <Spacer className="h-2" />
               </>
               <Spacer className="h-2" />
               <TextArea
+                {...register('transpiler')}
                 className={clsx('h-[16rem]')}
                 placeholder={t('job.form.transpiler_placeholder')}
-                {...register('transpiler')}
                 errorMessage={errors.transpiler && errors.transpiler.message}
               />
               {/* sumulator */}
@@ -542,22 +548,28 @@ export const JobForm = (componentProps: JobFormProps) => {
                 <Spacer className="h-4" />
                 <div className={clsx('flex', 'justify-between')}>
                   <p className={clsx('font-bold', 'text-primary')}>mitigation</p>
-                  <Toggle
-                    {...register('mitigationEnabled')}
-                    checked={mitigationEnabled}
-                    onChange={(e) =>
-                      register('mitigationEnabled').onChange({
-                        target: { name: 'mitigationEnabled', value: e },
-                      })
-                    }
-                  />
+                  <Select
+                    {...register('mitigationType')}
+                    defaultValue={JOB_FORM_MITIGATION_INFO_DEFAULTS.None}
+                  >
+                    {Object.keys(JOB_FORM_MITIGATION_INFO_DEFAULTS).map((k) => {
+                      const key = k as MitigationTypeType;
+                      return (
+                        <option key={key} value={key}>
+                          {key}
+                        </option>
+                      );
+                    })}
+                    <option value={'Custom'}>Custom</option>
+                  </Select>
                 </div>
                 <Spacer className="h-2" />
               </>
               <TextArea
                 className={clsx('h-[16rem]')}
-                placeholder={t('job.form.mitigation_placeholder')}
                 {...register('mitigation')}
+                placeholder={t('job.form.mitigation_placeholder')}
+                value={mitigation}
                 errorMessage={errors.mitigation && errors.mitigation.message}
               />
             </div>
