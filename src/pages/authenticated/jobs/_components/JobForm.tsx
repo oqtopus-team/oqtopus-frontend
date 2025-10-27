@@ -145,7 +145,7 @@ export const JobForm = (componentProps: JobFormProps) => {
 
   const {
     handleSubmit,
-    formState: { errors, isSubmitting, dirtyFields },
+    formState: { errors, isSubmitting },
     setValue,
     watch,
     register,
@@ -172,12 +172,11 @@ export const JobForm = (componentProps: JobFormProps) => {
     },
   });
 
-  const [mitigationType, mitigation, transpilerType, transpiler, program, jobType, operator] =
+  const [mitigationType, mitigation, transpilerType, program, jobType, operator] =
     watch([
       'mitigationType',
       'mitigation',
       'transpilerType',
-      'transpiler',
       'program',
       'type',
       'operator',
@@ -225,26 +224,6 @@ export const JobForm = (componentProps: JobFormProps) => {
       setValue('mitigation', JOB_FORM_MITIGATION_INFO_DEFAULTS[mitigationType], { shouldValidate: true });
     }
   }, [mitigationType]);
-
-  // Change types to Custom
-  useEffect(() => {
-    if (
-      transpiler &&
-      !Object.values(TRANSPILER_TYPES).includes(transpilerType) &&
-      dirtyFields.transpiler
-    ) {
-      setValue('transpilerType', 'Custom');
-    }
-  }, [transpiler]);
-  useEffect(() => {
-    if (
-      mitigation &&
-      !Object.values(JOB_FORM_MITIGATION_INFO_DEFAULTS).includes(mitigation) &&
-      dirtyFields.mitigation
-    ) {
-      setValue('mitigationType', 'Custom');
-    }
-  }, [mitigation]);
 
   const [jobFileData, setJobFileData] = useState<JobFileData | undefined>(undefined);
   useEffect(() => {
@@ -523,7 +502,7 @@ export const JobForm = (componentProps: JobFormProps) => {
               <Spacer className="h-2" />
               <TextArea
                 {...register('transpiler')}
-                className={clsx('h-[16rem]')}
+                className={clsx('h-[16rem]', transpilerType !== 'Custom' && 'hidden')}
                 placeholder={t('job.form.transpiler_placeholder')}
                 errorMessage={errors.transpiler && errors.transpiler.message}
               />
@@ -566,7 +545,7 @@ export const JobForm = (componentProps: JobFormProps) => {
                 <Spacer className="h-2" />
               </>
               <TextArea
-                className={clsx('h-[16rem]')}
+                className={clsx('h-[16rem]', mitigationType !== 'Custom' && 'hidden')}
                 {...register('mitigation')}
                 placeholder={t('job.form.mitigation_placeholder')}
                 value={mitigation}
