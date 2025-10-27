@@ -217,12 +217,12 @@ export const JobForm = (componentProps: JobFormProps) => {
   // Change templates after changing types
   useEffect(() => {
     if (transpilerType !== 'Custom') {
-      setValue('transpiler', TRANSPILER_TYPES[transpilerType]);
+      setValue('transpiler', TRANSPILER_TYPES[transpilerType], { shouldValidate: true });
     }
   }, [transpilerType]);
   useEffect(() => {
     if (mitigationType !== 'Custom') {
-      setValue('mitigation', JOB_FORM_MITIGATION_INFO_DEFAULTS[mitigationType]);
+      setValue('mitigation', JOB_FORM_MITIGATION_INFO_DEFAULTS[mitigationType], { shouldValidate: true });
     }
   }, [mitigationType]);
 
