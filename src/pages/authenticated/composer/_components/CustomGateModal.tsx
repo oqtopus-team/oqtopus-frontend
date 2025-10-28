@@ -129,7 +129,7 @@ export function CustomGateModal(): ReactElement {
     <div
       className={clsx(
         !isOpen && '!hidden',
-        ['!fixed', '!top-0', '!left-0', '!w-full', '!h-full', 'z-40'],
+        ['!fixed', '!top-0', '!left-0', '!w-full', '!h-full', 'z-50'],
         ['flex', 'flex-col', 'items-center', 'justify-center'],
         ['bg-modal-bg', 'bg-opacity-50']
       )}

@@ -19,6 +19,8 @@ export default (props: Props) => {
   const circuitService = useContext(circuitContext);
   const ref = useRef<HTMLDivElement>(null);
 
+  const touchTimeout = useRef<number | undefined>(undefined);
+
   const draggable = useDraggable({
     id: `r${props.row}-c${props.column}`,
     data: { row: props.row, column: props.column },
@@ -30,6 +32,13 @@ export default (props: Props) => {
 
   const isGateDragged = circuitService.draggedGates.some((g) => gate.id === g.id);
   const canDragGate = !isDummyGate(gate) && !props.static;
+
+  function cancelTimeout() {
+    if (touchTimeout.current) {
+      clearTimeout(touchTimeout.current);
+      touchTimeout.current = undefined;
+    }
+  }
 
   function renderGate(): ReactNode {
     if (isDummyGate(gate)) return null;
@@ -128,7 +137,7 @@ export default (props: Props) => {
 
               switch (circuitService.mode) {
                 case 'normal':
-                  if (e.shiftKey) {
+                  if (e.shiftKey || circuitService.gatesMultiSelectModeOpen) {
                     circuitService.toggleSelectedGate(gate);
                   } else {
                     circuitService.selectedGates = [gate];
@@ -152,6 +161,23 @@ export default (props: Props) => {
               circuitService.controlModeProgress = 0;
               circuitService.toggleMode('control');
             }}
+            onTouchStart={() => {
+              if (
+                isDummyGate(gate) ||
+                circuitService.mode !== 'normal' ||
+                circuitService.gatesMultiSelectModeOpen
+              ) {
+                return;
+              }
+
+              touchTimeout.current = window.setTimeout(() => {
+                circuitService.gatesMultiSelectModeOpen = true;
+                circuitService.selectedGates = [gate];
+              }, 500);
+            }}
+            onTouchMove={cancelTimeout}
+            onTouchEnd={cancelTimeout}
+            onTouchCancel={cancelTimeout}
           >
             {renderGate()}
           </div>

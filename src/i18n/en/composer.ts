@@ -45,6 +45,11 @@ export default {
     group: "Group",
     ungroup: "Ungroup"
   },
+  gates_multi_select_mode_popup: {
+    title: "Selecting multiple gates",
+    done: "Done",
+    cancel: "Cancel",
+  },
   custom_gate_modal: {
     title: "Create custom gate",
     gate_name_input_label: "Provide name for custom gate:",

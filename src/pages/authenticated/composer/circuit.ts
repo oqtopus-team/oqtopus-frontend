@@ -35,6 +35,7 @@ export class QuantumCircuitService {
 
   private _draggedGates = new Reactive<RealComposerGate[]>([]);
   private _selectedGates = new Reactive<RealComposerGate[]>([]);
+  private _gatesMultiSelectModeOpen = new Reactive<boolean>(false);
   private prevHoverCoords: { row: number; column: number } = { row: -1, column: -1 };
 
   private _isObservableCircuit = false;
@@ -115,6 +116,14 @@ export class QuantumCircuitService {
     if (this.mode === "control") this.toggleMode("control");
   }
 
+  get gatesMultiSelectModeOpen(): boolean {
+    return this._gatesMultiSelectModeOpen.value
+  }
+
+  set gatesMultiSelectModeOpen(isOpen: boolean) {
+    this._gatesMultiSelectModeOpen.value = isOpen;
+  }
+
   get isObservableCircuit(): boolean {
     return this._isObservableCircuit;
   }
@@ -137,6 +146,10 @@ export class QuantumCircuitService {
 
   onSelectedGatesChange(cb: ReactiveCallback<RealComposerGate[]>): Unsubscribe {
     return this._selectedGates.subscribe(cb);
+  }
+
+  onGatesMultiSelectModeOpenChange(cb: ReactiveCallback<boolean>): Unsubscribe {
+    return this._gatesMultiSelectModeOpen.subscribe(cb);
   }
 
   toggleMode(m: Mode) {

@@ -10,6 +10,7 @@ import QuantumGateViewer from './QuantumGateViewer';
 import { CustomGateModal } from './CustomGateModal';
 import { cellSize } from '../gates_rendering/constants';
 import { useTranslation } from 'react-i18next';
+import GatesMultiSelectModePopup from './GatesMultiSelectModePopup';
 
 export const staticCircuitProps = (): Props => ({
   fixedQubitNumber: true,
@@ -49,7 +50,7 @@ export default (props: Props) => {
   useEffect(() => {
     return circuitService.onSelectedGatesChange((gates) => {
       setSelectedGates(gates);
-      if (!circuitService.isObservableCircuit) {
+      if (!circuitService.isObservableCircuit && !circuitService.gatesMultiSelectModeOpen) {
         setGateViewer(gates.length === 1 ? gates[0] : undefined);
       }
     });
@@ -274,6 +275,7 @@ export default (props: Props) => {
           </div>
         )}
       </div>
+      <GatesMultiSelectModePopup />
       <CustomGateModal />
     </>
   );
