@@ -22,6 +22,11 @@ export type QuantumCircuit = ComposerGate[][];
 
 type GateMoveCallback = (row: number, cell: number, targets: number[], controls: number[]) => void;
 
+type MultiGateSelector =
+  | { kind: 'none' }
+  | { kind: 'touch' }
+  | { kind: 'mouse'; x1: number; y1: number; x2: number; y2: number };
+
 export const circuitContext = createContext({} as QuantumCircuitService);
 
 export class QuantumCircuitService {
@@ -35,7 +40,7 @@ export class QuantumCircuitService {
 
   private _draggedGates = new Reactive<RealComposerGate[]>([]);
   private _selectedGates = new Reactive<RealComposerGate[]>([]);
-  private _gatesMultiSelectModeOpen = new Reactive<boolean>(false);
+  private _multiGateSelector = new Reactive<MultiGateSelector>({ kind: 'none' });
   private prevHoverCoords: { row: number; column: number } = { row: -1, column: -1 };
 
   private _isObservableCircuit = false;
@@ -113,15 +118,15 @@ export class QuantumCircuitService {
     this._selectedGates.value = gates.sort(compareGates);
 
     // if we change selected gates we have to cancel setting control mode
-    if (this.mode === "control") this.toggleMode("control");
+    if (this.mode === 'control') this.toggleMode('control');
   }
 
-  get gatesMultiSelectModeOpen(): boolean {
-    return this._gatesMultiSelectModeOpen.value
+  get multiGatesSelector(): MultiGateSelector {
+    return this._multiGateSelector.value;
   }
 
-  set gatesMultiSelectModeOpen(isOpen: boolean) {
-    this._gatesMultiSelectModeOpen.value = isOpen;
+  set multiGatesSelector(selector: MultiGateSelector) {
+    this._multiGateSelector.value = selector;
   }
 
   get isObservableCircuit(): boolean {
@@ -148,8 +153,8 @@ export class QuantumCircuitService {
     return this._selectedGates.subscribe(cb);
   }
 
-  onGatesMultiSelectModeOpenChange(cb: ReactiveCallback<boolean>): Unsubscribe {
-    return this._gatesMultiSelectModeOpen.subscribe(cb);
+  onMultiGateSelectorChange(cb: ReactiveCallback<MultiGateSelector>): Unsubscribe {
+    return this._multiGateSelector.subscribe(cb);
   }
 
   toggleMode(m: Mode) {
@@ -978,7 +983,7 @@ export function getNonEmptyGatesRows(gate: RealComposerGate): Array<number> {
 }
 
 // gets the main gate of the multi-qubit gate. It is always the top part of the gate.
-function getBaseGate(circuit: QuantumCircuit, g: ComposerGate): RealComposerGate {
+export function getBaseGate(circuit: QuantumCircuit, g: ComposerGate): RealComposerGate {
   switch (g._tag) {
     case 'emptyCell':
       throw new Error('unexpected empty cell when trying to get base gate of multi row gate');

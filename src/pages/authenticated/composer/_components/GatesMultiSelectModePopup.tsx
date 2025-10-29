@@ -7,9 +7,11 @@ import { circuitContext } from '../circuit';
 export default function GatesMultiSelectModePopup() {
   const { t } = useTranslation();
   const circuitService = useContext(circuitContext);
-  const [isOpen, setIsOpen] = useState(circuitService.gatesMultiSelectModeOpen);
+  const [isOpen, setIsOpen] = useState(circuitService.multiGatesSelector.kind === 'touch');
 
-  useEffect(() => circuitService.onGatesMultiSelectModeOpenChange(setIsOpen), []);
+  useEffect(() => {
+    return circuitService.onMultiGateSelectorChange((m) => setIsOpen(m.kind === 'touch'));
+  }, []);
 
   return (
     <div
@@ -36,7 +38,7 @@ export default function GatesMultiSelectModePopup() {
       <div className={clsx('w-full', 'flex', 'flex-row', 'justify-around')}>
         <Button
           onClick={() => {
-            circuitService.gatesMultiSelectModeOpen = false;
+            circuitService.multiGatesSelector = { kind: 'none' };
           }}
           color="secondary"
         >
@@ -44,7 +46,7 @@ export default function GatesMultiSelectModePopup() {
         </Button>
         <Button
           onClick={() => {
-            circuitService.gatesMultiSelectModeOpen = false;
+            circuitService.multiGatesSelector = { kind: 'none' };
             circuitService.selectedGates = [];
           }}
         >

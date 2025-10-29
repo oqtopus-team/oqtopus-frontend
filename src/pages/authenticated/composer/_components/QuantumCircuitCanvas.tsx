@@ -11,6 +11,7 @@ import { CustomGateModal } from './CustomGateModal';
 import { cellSize } from '../gates_rendering/constants';
 import { useTranslation } from 'react-i18next';
 import GatesMultiSelectModePopup from './GatesMultiSelectModePopup';
+import GatesMouseSelector from './GatesMouseSelector';
 
 export const staticCircuitProps = (): Props => ({
   fixedQubitNumber: true,
@@ -50,7 +51,10 @@ export default (props: Props) => {
   useEffect(() => {
     return circuitService.onSelectedGatesChange((gates) => {
       setSelectedGates(gates);
-      if (!circuitService.isObservableCircuit && !circuitService.gatesMultiSelectModeOpen) {
+      if (
+        !circuitService.isObservableCircuit &&
+        circuitService.multiGatesSelector.kind === 'none'
+      ) {
         setGateViewer(gates.length === 1 ? gates[0] : undefined);
       }
     });
@@ -107,9 +111,34 @@ export default (props: Props) => {
               ['overflow-auto'],
               ['border', 'border-neutral-content', 'rounded-sm'],
             ])}
+            onPointerDown={(e) => {
+              if (e.pointerType === 'mouse' && e.button === 0) {
+                circuitService.multiGatesSelector = {
+                  kind: 'mouse',
+                  x1: e.clientX,
+                  y1: e.clientY,
+                  x2: e.clientX,
+                  y2: e.clientY,
+                };
+              }
+            }}
+            onPointerMove={(e) => {
+              if (e.pointerType === 'mouse' && circuitService.multiGatesSelector.kind === 'mouse') {
+                circuitService.multiGatesSelector = {
+                  ...circuitService.multiGatesSelector,
+                  x2: e.clientX,
+                  y2: e.clientY,
+                };
+              }
+            }}
+            onPointerUp={(e) => {
+              if (e.pointerType === 'mouse' && circuitService.multiGatesSelector.kind === 'mouse') {
+                circuitService.multiGatesSelector = { kind: 'none' };
+              }
+            }}
           >
             <div className={clsx([['flex']])}>
-              <div className={clsx([['py-5', 'pl-2']])}>
+              <div className={clsx([['py-5', 'pl-2', 'select-none']])}>
                 {props.fixedQubitNumber === false ? (
                   <button
                     className={clsx([
@@ -210,6 +239,7 @@ export default (props: Props) => {
                 </div>
               </div>
             </div>
+            <GatesMouseSelector grid={circuitGridRef} />
           </div>
           {!circuitService.isObservableCircuit && !props.static && (
             <QuantumGateViewer gateViewer={gateViewer} setGateViewer={setGateViewer} />

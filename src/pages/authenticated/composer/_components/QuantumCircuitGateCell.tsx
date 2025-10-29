@@ -31,7 +31,8 @@ export default (props: Props) => {
   });
 
   const isGateDragged = circuitService.draggedGates.some((g) => gate.id === g.id);
-  const canDragGate = !isDummyGate(gate) && !props.static;
+  const isGateDummy = isDummyGate(gate);
+  const canDragGate = !isGateDummy && !props.static;
 
   function cancelTimeout() {
     if (touchTimeout.current) {
@@ -41,7 +42,7 @@ export default (props: Props) => {
   }
 
   function renderGate(): ReactNode {
-    if (isDummyGate(gate)) return null;
+    if (isGateDummy) return null;
     if ('renderComposerItem' in gate)
       return gate.renderComposerItem({
         targets: gate.targets,
@@ -86,12 +87,15 @@ export default (props: Props) => {
         minWidth: `${cellSize}px`,
         width: `${cellSize}px`,
         height: `${cellSize}px`,
-        zIndex: !isDummyGate(gate) ? '1' : '0',
+        zIndex: !isGateDummy ? '1' : '0',
         verticalAlign: 'middle',
         textAlign: 'center',
       }}
+      onPointerDown={(e) => {
+        !isGateDummy && e.stopPropagation();
+      }}
       onClick={() => {
-        if (isDummyGate(gate)) {
+        if (isGateDummy) {
           circuitService.selectedGates = [];
         }
       }}
@@ -102,7 +106,7 @@ export default (props: Props) => {
           style={{
             minWidth: `${cellSize}px`,
             padding: `${cellBlockDiff / 2}px`,
-            height: !isDummyGate(gate) ? `${getGateHeight(gate) * cellSize}px` : `${cellSize}px`,
+            height: !isGateDummy ? `${getGateHeight(gate) * cellSize}px` : `${cellSize}px`,
           }}
         >
           <div
@@ -116,8 +120,8 @@ export default (props: Props) => {
             {...(canDragGate ? draggable.listeners : {})}
             className={clsx([
               ['text-primary-content'],
-              props.static === true || isDummyGate(gate)
-                ? []
+              props.static === true || isGateDummy
+                ? ['cursor-default']
                 : [isGateDragged ? 'cursor-grabbing' : 'cursor-pointer'],
               [isGateDragged ? 'opacity-50' : 'opacity-100'],
             ])}
@@ -133,11 +137,11 @@ export default (props: Props) => {
               outline: 'none',
             }}
             onClick={(e) => {
-              if (isDummyGate(gate)) return;
+              if (isGateDummy) return;
 
               switch (circuitService.mode) {
                 case 'normal':
-                  if (e.shiftKey || circuitService.gatesMultiSelectModeOpen) {
+                  if (e.shiftKey || circuitService.multiGatesSelector.kind === 'touch') {
                     circuitService.toggleSelectedGate(gate);
                   } else {
                     circuitService.selectedGates = [gate];
@@ -155,7 +159,7 @@ export default (props: Props) => {
             onDoubleClick={(e) => {
               if (e.shiftKey) return;
               if (circuitService.mode === 'eraser') return;
-              if (isDummyGate(gate) || !isControlledGate(gate)) return;
+              if (isGateDummy || !isControlledGate(gate)) return;
 
               circuitService.selectedGates = [gate];
               circuitService.controlModeProgress = 0;
@@ -163,15 +167,15 @@ export default (props: Props) => {
             }}
             onTouchStart={() => {
               if (
-                isDummyGate(gate) ||
+                isGateDummy ||
                 circuitService.mode !== 'normal' ||
-                circuitService.gatesMultiSelectModeOpen
+                circuitService.multiGatesSelector.kind === 'touch'
               ) {
                 return;
               }
 
               touchTimeout.current = window.setTimeout(() => {
-                circuitService.gatesMultiSelectModeOpen = true;
+                circuitService.multiGatesSelector = { kind: 'touch' };
                 circuitService.selectedGates = [gate];
               }, 500);
             }}
