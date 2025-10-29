@@ -1,7 +1,5 @@
 export default {
   title: 'Sign in',
-  explanation:
-    'dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy',
   form: {
     mail: 'Email address',
     password: 'Password',

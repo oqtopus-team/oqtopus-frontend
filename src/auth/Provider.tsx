@@ -113,6 +113,7 @@ const useProvideAuth = (): UseAuth => {
       console.log(error);
       return {
         success: false,
+        // Logout failed
         message: 'ログアウトに失敗しました。',
       };
     }

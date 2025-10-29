@@ -1,7 +1,5 @@
 export default {
   title: 'サインイン',
-  explanation:
-    'サービスの紹介、利用手順などの説明が入ります。ダミーコピーです。ダミーコピーです。ダミーコピーです。',
   form: {
     mail: 'メールアドレス',
     password: 'パスワード',

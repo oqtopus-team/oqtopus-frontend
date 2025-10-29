@@ -9,6 +9,8 @@ import { Input } from '@/pages/_components/Input';
 import { useFormProcessor } from '@/pages/_hooks/form';
 import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
+import { toast } from 'react-toastify';
+import { errorToastConfig } from '@/config/toast';
 
 interface FormInput {
   verificationCode: string;
@@ -35,11 +37,12 @@ export default function ConfirmSetupMFAPage() {
               navigate('/mfa');
               return;
             }
-            alert(result.message);
+            toast(result.message, errorToastConfig)
             setProcessingFalse();
           })
           .catch((error) => {
-            console.log(error);
+            const errorMsg = error.message ?? t('common.errors.default')
+            toast(errorMsg, errorToastConfig)
           });
       };
     }

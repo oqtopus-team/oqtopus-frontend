@@ -1,5 +1,6 @@
 import { Suspense, lazy } from 'react';
-import { BrowserRouter, Navigate, Outlet, Route, Routes, useParams } from 'react-router';
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router';
+import { ToastContainer } from 'react-toastify';
 import { Loader } from '@/pages/_components/Loader';
 import RootLayout from '@/pages/layout';
 import AuthLayout from '@/pages/auth/layout';
@@ -25,66 +26,80 @@ const Dashboard = lazy(async () => await import('@/pages/authenticated/dashboard
 const Composer = lazy(async () => await import('@/pages/authenticated/composer/page'));
 const DeviceList = lazy(async () => await import('@/pages/authenticated/device/page'));
 const DeviceDetail = lazy(async () => await import('@/pages/authenticated/device/detail/page'));
-const Announcements = lazy(async () => await import('@/pages/authenticated/dashboard/_components/Announcements'));
+const Announcements = lazy(
+  async () => await import('@/pages/authenticated/dashboard/_components/Announcements')
+);
 
 export const App: React.FunctionComponent = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<RootLayout />}>
-          <Route element={<AuthLayout />} /* 認証関連 */>
-            <Route /* login flow */>
-              <Route element={<LoginLayout />}>
-                <Route path="login" element={<LoginPage />} />
-              </Route>
-              <Route path="confirm-mfa" element={<ConfirmMFAPage />} />
-            </Route>
-
-            <Route /* signup flow */>
-              <Route path="signup" element={<SignUpPage />} />
-              <Route path="confirm" element={<ConfirmSetupMFAPage />} />
-              <Route path="mfa" element={<SetupMFAPage />} />
-            </Route>
-
-            <Route element={<ResetPasswordLayout />} /* reset password flow */>
-              <Route path="forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="confirm-password" element={<ForgotPasswordConfirmPage />} />
-            </Route>
-
-            {/* reset password flow */}
-            <Route path="mfa-reset" element={<ResetMFAPage />} />
-          </Route>
-
-          <Route
-            element={
-              <Suspense fallback={<Loader />}>
-                <Outlet />
-              </Suspense>
-            } /* 認証後画面を lazyload */
-          >
-            <Route element={<AuthenticatedLayout />} /* 認証後画面 */>
-              <Route element={<AuthenticatedDefaultLayout />}>
-                <Route index element={<Navigate to="/dashboard" />} />
-                <Route path="jobs">
-                  <Route index element={<JobList />} />
-                  <Route path=":id" element={<JobDetail />} />
-                  <Route path="form" element={<JobForm />} />
+    <>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<RootLayout />}>
+            <Route element={<AuthLayout />} /* 認証関連 */>
+              <Route /* login flow */>
+                <Route element={<LoginLayout />}>
+                  <Route path="login" element={<LoginPage />} />
                 </Route>
-                <Route path="howto" element={<HowTo />} />
-                <Route path="*" element={<p>Page Not Found</p>} />
-                <Route path="composer" element={<Composer />} />
-                <Route path="device" element={<DeviceList />} />
-                <Route path="device/:id" element={<DeviceDetail />} />
-                <Route path="announcements" element={<Announcements />} />
+                <Route path="confirm-mfa" element={<ConfirmMFAPage />} />
               </Route>
 
-              <Route path="dashboard" element={<DashboardLayout />}>
-                <Route index element={<Dashboard />} />
+              <Route /* signup flow */>
+                <Route path="signup" element={<SignUpPage />} />
+                <Route path="confirm" element={<ConfirmSetupMFAPage />} />
+                <Route path="mfa" element={<SetupMFAPage />} />
+              </Route>
+
+              <Route element={<ResetPasswordLayout />} /* reset password flow */>
+                <Route path="forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="confirm-password" element={<ForgotPasswordConfirmPage />} />
+              </Route>
+
+              {/* reset password flow */}
+              <Route path="mfa-reset" element={<ResetMFAPage />} />
+            </Route>
+
+            <Route
+              element={
+                <Suspense fallback={<Loader />}>
+                  <Outlet />
+                </Suspense>
+              } /* 認証後画面を lazyload */
+            >
+              <Route element={<AuthenticatedLayout />} /* 認証後画面 */>
+                <Route element={<AuthenticatedDefaultLayout />}>
+                  <Route index element={<Navigate to="/dashboard" />} />
+                  <Route path="jobs">
+                    <Route index element={<JobList />} />
+                    <Route path=":id" element={<JobDetail />} />
+                    <Route path="form" element={<JobForm />} />
+                  </Route>
+                  <Route path="howto" element={<HowTo />} />
+                  <Route path="*" element={<p>Page Not Found</p>} />
+                  <Route path="composer" element={<Composer />} />
+                  <Route path="device" element={<DeviceList />} />
+                  <Route path="device/:id" element={<DeviceDetail />} />
+                  <Route path="announcements" element={<Announcements />} />
+                </Route>
+
+                <Route path="dashboard" element={<DashboardLayout />}>
+                  <Route index element={<Dashboard />} />
+                </Route>
               </Route>
             </Route>
           </Route>
-        </Route>
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+      <ToastContainer
+        position="top-right"
+        autoClose={2000} // display for 2 seconds
+        newestOnTop={true}
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        hideProgressBar={true}
+        pauseOnHover
+      />
+    </>
   );
 };

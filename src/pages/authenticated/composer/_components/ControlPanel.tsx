@@ -12,6 +12,8 @@ import { ReactNode, useEffect, useState } from "react"
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router";
+import { infoToastConfig } from '@/config/toast';
+import { toast } from 'react-toastify';
 
 export type TabPanelItem = { id: string; label: string; disabled: boolean; };
 interface TabPanelsProps {
@@ -257,12 +259,13 @@ export const ControlPanelExecution = (props: ControlPanelExecutionProps) => {
 
     const selectedDevice = props.devices.find(d => d.id === form.device_id);
     if (!selectedDevice) {
-      alert("Select an available device!");
+      toast("Select an available device!", infoToastConfig);
       return;
     }
 
     if (qubitNumber > selectedDevice.nQubits) {
-      alert(`The device ${selectedDevice.id} supports quantum circuits of ${selectedDevice.nQubits} qubits or fewer.`)
+      toast(`The device ${selectedDevice.id} supports quantum circuits of ${selectedDevice.nQubits} qubits or fewer.`, infoToastConfig);
+      return;
     }
 
     if (Object.values(errors).every(e => e === undefined)) {
