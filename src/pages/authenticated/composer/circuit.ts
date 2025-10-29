@@ -48,8 +48,8 @@ export class QuantumCircuitService {
   private handleAddGate = addGate;
 
   constructor(
-    rows = 4,
-    columns = 20,
+    rows = 2,
+    columns = 3,
     supportedGates: ReadonlyArray<QuantumGate['_tag']>,
     useBellSampling = false,
     isObservableCircuit = false

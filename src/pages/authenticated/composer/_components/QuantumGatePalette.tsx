@@ -8,8 +8,10 @@ import { isGateMultiQubitByDefault } from '../gates';
 export default () => {
   const circuitService = useContext(circuitContext);
   const [mode, setMode] = useState(circuitService.mode);
+  const [numberOfQubits, setNumberOfQubits] = useState(circuitService.circuit.length);
 
   useEffect(() => circuitService.onModeChange(setMode), []);
+  useEffect(() => circuitService.onCircuitChange((c) => setNumberOfQubits(c.length)), []);
 
   return (
     <div className={clsx(['flex gap-1', 'overflow-x-auto'])}>
@@ -17,10 +19,7 @@ export default () => {
         <QuantumGatePaletteItem
           gateTag={gateTag}
           key={gateTag}
-          disabled={
-            mode !== 'normal' ||
-            (circuitService.circuit.length < 2 && isGateMultiQubitByDefault(gateTag))
-          }
+          disabled={mode !== 'normal' || (numberOfQubits < 2 && isGateMultiQubitByDefault(gateTag))}
         />
       ))}
       <div

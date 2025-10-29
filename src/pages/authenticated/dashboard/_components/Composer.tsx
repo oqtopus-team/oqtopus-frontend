@@ -8,7 +8,7 @@ import { circuitContext, QuantumCircuitService } from '../../composer/circuit';
 
 export const Composer = (): React.ReactElement => {
   const [circuitService] = useState(
-    new QuantumCircuitService(2, 5, ['x', 'y', 'z', 'h', 'cx'], true)
+    new QuantumCircuitService(2, 3, ['x', 'y', 'z', 'h', 'cx'], true)
   );
 
   return (

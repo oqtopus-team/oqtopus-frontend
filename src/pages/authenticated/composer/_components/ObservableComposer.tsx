@@ -1,7 +1,5 @@
 import { useContext, useEffect, useRef } from 'react';
 import QuantumCircuitCanvas from './QuantumCircuitCanvas';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import clsx from 'clsx';
 import QuantumGatePalette from './QuantumGatePalette';
@@ -9,6 +7,7 @@ import { ComposerGate, isDummyGate } from '../composer';
 import { filterEmptyRowsAfterLastGate, Observable, transpose } from '../observable';
 import { circuitContext } from '../circuit';
 import { Input } from '@/pages/_components/Input';
+import { DndContextProvider } from '../dragging';
 
 export interface ObservableComposerProps {
   observable: Observable;
@@ -62,13 +61,13 @@ export default (props: ObservableComposerProps) => {
   return (
     <div id="observable-composer" className="flex items-stretch">
       <div className="w-1/2">
-        <DndProvider backend={HTML5Backend}>
+        <DndContextProvider>
           <div className={clsx([['w-full']])}>
             <QuantumGatePalette />
           </div>
 
           <QuantumCircuitCanvas static={false} fixedQubitNumber />
-        </DndProvider>
+        </DndContextProvider>
       </div>
 
       <div className="w-1/2">

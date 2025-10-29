@@ -3,9 +3,6 @@ import { GateRenderingBlock, gateRenderingBlockMap } from './gates_rendering/Gat
 
 export type Mode = 'normal' | 'eraser' | 'control';
 
-export const ItemTypeNewGate = 'NEW_GATE' as const;
-export const ItemTypeMoveGate = 'MOVE_GATE' as const;
-
 type EmptyCellGate = { _tag: 'emptyCell' };
 
 // multiRowGateBlock is used for all cells (except main gate cell) occupied by any gate's control or target
@@ -30,12 +27,6 @@ export type RealComposerGate = QuantumGate & GateRenderingBlock & ComposerObject
 export type DummyComposerGate = (EmptyCellGate | MultiRowGatePart) & ComposerObject;
 
 export type ComposerGate = RealComposerGate | DummyComposerGate;
-
-export type DragGateItem = {
-  type: typeof ItemTypeNewGate | typeof ItemTypeMoveGate;
-  gate: RealComposerGate;
-  isCreated: boolean;
-};
 
 const generateID = idGenerator();
 

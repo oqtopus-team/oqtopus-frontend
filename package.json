@@ -32,8 +32,6 @@
     "react": "^19.1.0",
     "react-apexcharts": "^1.7.0",
     "react-datepicker": "^7.6.0",
-    "react-dnd": "^16.0.1",
-    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^19.1.0",
     "react-force-graph": "1.46.0",
     "react-hook-form": "^7.55.0",

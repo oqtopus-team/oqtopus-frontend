@@ -8,15 +8,10 @@ import QuantumCircuitCanvas, {
   staticCircuitProps,
 } from '@/pages/authenticated/composer/_components/QuantumCircuitCanvas';
 import { useEffect, useState } from 'react';
-import {
-  circuitContext,
-  QuantumCircuit,
-  QuantumCircuitService,
-} from '@/pages/authenticated/composer/circuit';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import { circuitContext, QuantumCircuitService } from '@/pages/authenticated/composer/circuit';
 import { Switch } from '@mui/material';
 import { parseCircuitJSON } from '@/pages/authenticated/composer/qasm';
+import { DndContextProvider } from '@/pages/authenticated/composer/dragging';
 
 export interface JobDetailProgramProps {
   program: string[];
@@ -75,11 +70,11 @@ export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
         <>
           {/* FIXME Far from an ideal solution... We REALLY do not need to put DndProvider here! */}
           {showCode ? (
-            <DndProvider backend={HTML5Backend}>
+            <DndContextProvider>
               <circuitContext.Provider value={circuitService}>
                 <QuantumCircuitCanvas {...staticCircuitProps()} />
               </circuitContext.Provider>
-            </DndProvider>
+            </DndContextProvider>
           ) : (
             <div className={clsx('relative')}>
               <div className={clsx('p-3', 'rounded', 'bg-cmd-bg', 'text-sm')}>
