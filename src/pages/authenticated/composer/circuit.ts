@@ -402,8 +402,6 @@ function removeGateWithFreePlacementAllowed(circuit: QuantumCircuit, g: RealComp
 }
 
 function addGate(circuit: QuantumCircuit, g: RealComposerGate, onInsert: GateMoveCallback) {
-  appendEmptyGatesAtTheEndOfRows(circuit);
-
   // we will look for first column to which we can put the gate
   // also, in case we move multi-qubit gate, we assign its head to base gate
   // as insert will handle inserting whole multi-row gate
@@ -422,6 +420,7 @@ function addGate(circuit: QuantumCircuit, g: RealComposerGate, onInsert: GateMov
   }
 
   insertGate(circuit, baseGate, finalRow, finalColumn, onInsert);
+  appendEmptyGatesAtCircuitEnd(circuit);
 }
 
 function removeGate(circuit: QuantumCircuit, g: RealComposerGate) {
@@ -434,6 +433,8 @@ function removeGate(circuit: QuantumCircuit, g: RealComposerGate) {
   for (let r = g.row; r <= maxRow; ++r) {
     moveBack(circuit, circuit[r][g.column + 1], r, g.column);
   }
+
+  keepOnlyOneEmptyColumnAtCircuitEnd(circuit);
 }
 
 /**************************/
@@ -942,18 +943,11 @@ function getColumnToWhichCanMoveUp(circuit: QuantumCircuit, row: number, column:
 /************************/
 // if we are reaching the end of the circuit row, we have to append new empty gates
 // at the end of each row, so that we are able to add new elements. We check if we have
-// any non-empty gates at last two columns, and if we found any in any row, then we append
-// two new empty gates to the circuit on each row. We always append two new gates, and not one
-// because we have to take into the account that there are edge cases where moving up the gates
-// results in moving more than one column forward.
-function appendEmptyGatesAtTheEndOfRows(circuit: QuantumCircuit) {
+// any non-empty gates at the last column and we append new empty gates only if we do
+function appendEmptyGatesAtCircuitEnd(circuit: QuantumCircuit) {
   let shouldAdd = false;
-  for (let i = 0; i < circuit.length; i++) {
-    const rowLength = circuit[i].length;
-    if (
-      circuit[i][rowLength - 1]?._tag !== 'emptyCell' ||
-      circuit[i][rowLength - 2]?._tag !== 'emptyCell'
-    ) {
+  for (let r = 0; r < circuit.length; ++r) {
+    if (circuit[r][circuit[r].length - 1]._tag !== 'emptyCell') {
       shouldAdd = true;
       break;
     }
@@ -961,10 +955,29 @@ function appendEmptyGatesAtTheEndOfRows(circuit: QuantumCircuit) {
 
   if (!shouldAdd) return;
 
-  for (let i = 0; i < circuit.length; i++) {
-    const rowLength = circuit[i].length;
-    circuit[i][rowLength] = emptyCell(i, rowLength);
-    circuit[i][rowLength + 1] = emptyCell(i, rowLength + 1);
+  for (let r = 0; r < circuit.length; ++r) {
+    const rowLength = circuit[r].length;
+    circuit[r][rowLength] = emptyCell(r, rowLength);
+  }
+}
+
+function keepOnlyOneEmptyColumnAtCircuitEnd(circuit: QuantumCircuit) {
+  let firstEmptyColumnAtCircuitEnd = circuit[0].length - 1;
+
+  // last column is guaranteed to be empty, so we start from next to last column
+  circuitLoop: for (let c = circuit[0].length - 2; c >= 0; --c) {
+    for (let r = 0; r < circuit.length; ++r) {
+      if (circuit[r][c]._tag !== 'emptyCell') {
+        break circuitLoop;
+      }
+    }
+    firstEmptyColumnAtCircuitEnd = c;
+  }
+
+  if (firstEmptyColumnAtCircuitEnd === circuit[0].length - 1) return;
+
+  for (let r = 0; r < circuit.length; ++r) {
+    circuit[r] = circuit[r].slice(0, firstEmptyColumnAtCircuitEnd + 1);
   }
 }
 
