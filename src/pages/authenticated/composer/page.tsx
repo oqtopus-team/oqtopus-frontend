@@ -134,7 +134,7 @@ export default function Page() {
           if (e.key === 'Delete') {
             observableCircuitService.selectedGates
               .toReversed()
-              .forEach((g) => circuitService.removeGate(g));
+              .forEach((g) => observableCircuitService.removeGate(g));
           }
         } else {
           if (e.key === 'Delete') {
