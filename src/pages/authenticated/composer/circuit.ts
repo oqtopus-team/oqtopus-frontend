@@ -395,10 +395,12 @@ function addGateWithFreePlacementAllowed(
 ) {
   circuit[g.row][g.column] = g;
   onInsert(g.row, g.column, g.targets, g.controls);
+  appendEmptyGatesAtCircuitEnd(circuit);
 }
 
 function removeGateWithFreePlacementAllowed(circuit: QuantumCircuit, g: RealComposerGate) {
   circuit[g.row][g.column] = emptyCell(g.row, g.column);
+  keepOnlyOneEmptyColumnAtCircuitEnd(circuit);
 }
 
 function addGate(circuit: QuantumCircuit, g: RealComposerGate, onInsert: GateMoveCallback) {

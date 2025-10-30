@@ -51,7 +51,7 @@ export default function Page() {
   const [circuitService] = useState(new QuantumCircuitService(2, 3, composerSupportedGates, true));
   const [circuit, setCircuit] = useState(circuitService.circuit);
   const [observableCircuitService] = useState(
-    new QuantumCircuitService(2, 3, observableSupportedGates, false, true)
+    new QuantumCircuitService(circuit.length, 1, observableSupportedGates, false, true)
   );
 
   const [busy, setBusy] = useState(false);
