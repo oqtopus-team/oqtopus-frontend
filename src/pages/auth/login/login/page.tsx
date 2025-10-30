@@ -25,19 +25,10 @@ const validationRules = (t: (key: string) => string): yup.ObjectSchema<FormInput
   yup.object({
     username: yup
       .string()
-      .required(t('signin.form.error_message.user_name'))
-      .email(t('signin.form.error_message.mail_address')),
+      .required(t('signin.form.error_message.user_name')),
     password: yup
       .string()
-      .required(t('signin.form.error_message.password'))
-      .min(12, t('signin.form.error_message.password_min_length'))
-      .matches(/[A-Z]/, t('signin.form.error_message.password_uppercase'))
-      .matches(/[a-z]/, t('signin.form.error_message.password_lowercase'))
-      .matches(/[0-9]/, t('signin.form.error_message.password_number'))
-      .matches(
-        /[\^$*.[\]{}()?"!@#%&/\\,><':;|_~`+=-]/,
-        t('signin.form.error_message.password_special')
-      ),
+      .required(t('signin.form.error_message.password')),
   });
 
 export default function LoginPage() {
