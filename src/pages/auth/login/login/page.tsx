@@ -14,7 +14,7 @@ import { useFormProcessor } from '@/pages/_hooks/form';
 import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
 import { toast } from 'react-toastify';
-import { errorToastConfig, infoToastConfig } from '@/config/toast';
+import { errorToastConfig } from '@/config/toast';
 
 interface FormInput {
   username: string;
@@ -56,8 +56,8 @@ export default function LoginPage() {
               navigate('/confirm-mfa');
               return;
             }
-            toast(message, infoToastConfig)
-            if (message === 'MFAを設定してください。') {
+            toast(t(message), errorToastConfig)
+            if (message === 'signup.confirm.form.mfa_setup_request') {
               navigate('/mfa');
               return;
             }

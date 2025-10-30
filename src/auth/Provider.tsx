@@ -13,7 +13,7 @@ export interface UseAuth {
   email: string;
   getCurrentIdToken: () => Promise<string>;
   signIn: (username: string, password: string) => Promise<Result>;
-  signOut: () => void;
+  signOut: () => Promise<Result>;
   signUp: (username: string, password: string) => Promise<Result>;
   confirmSignUp: (verificationCode: string) => Promise<Result>;
   forgotPassword: (username: string) => Promise<Result>;
@@ -90,14 +90,14 @@ const useProvideAuth = (): UseAuth => {
       setIsAuthenticated(false);
       setInitialized(true);
       if (!hasChallenge) {
-        return { success: false, message: 'MFAを設定してください。' };
+        return { success: false, message: 'signup.confirm.form.mfa_setup_request' };
       }
       return { success: true, message: '' };
     } catch (error) {
-      console.log(error);
+      const errorMessage = (error as Error).message ?? 'signin.errors.authentication_failed'
       return {
         success: false,
-        message: '認証に失敗しました。',
+        message: errorMessage,
       };
     }
   };
@@ -110,11 +110,10 @@ const useProvideAuth = (): UseAuth => {
       setInitialized(true);
       return { success: true, message: '' };
     } catch (error) {
-      console.log(error);
+      const errorMessage = (error as Error).message ?? 'signin.errors.logout_failed'
       return {
         success: false,
-        // Logout failed
-        message: 'ログアウトに失敗しました。',
+        message: errorMessage,
       };
     }
   };
@@ -142,17 +141,16 @@ const useProvideAuth = (): UseAuth => {
       setInitialized(true);
       return { success: true, message: '' };
     } catch (error: any) {
-      console.log(error);
+      const errorMessage = (error as Error).message
       if (error.code === 'UsernameExistsException') {
         return {
           success: false,
-          message: '入力したメールアドレスはすでに登録されています',
+          message: errorMessage ?? 'signup.errors.email_already_registered',
         };
       } else {
         return {
           success: false,
-          message:
-            'サインアップに失敗しました。\nサインアップには事前ユーザー登録が必要です。\n登録がお済みでない場合は管理者までお問い合わせください。',
+          message: errorMessage ?? 'signup.errors.signup_failed_prereq',
         };
       }
     }
@@ -181,9 +179,10 @@ const useProvideAuth = (): UseAuth => {
       setInitialized(true);
       return { success: true, message: '' };
     } catch (error) {
+      const errorMessage = (error as Error).message ?? 'signup.errors.authentication_failed'
       return {
         success: false,
-        message: '認証に失敗しました。',
+        message: errorMessage,
       };
     }
   };
@@ -195,16 +194,16 @@ const useProvideAuth = (): UseAuth => {
       setInitialized(true);
       return { success: true, message: '' };
     } catch (error: any) {
-      console.log(error);
+      const errorMessage = (error as Error).message
       if (error.code === 'UserNotFoundException') {
         return {
           success: false,
-          message: '入力したメールアドレスは存在しません',
+          message: errorMessage ?? 'signin.errors.email_not_found',
         };
       } else {
         return {
           success: false,
-          message: 'メール送信に失敗しました。',
+          message: errorMessage ?? 'signin.errors.email_sending_failed',
         };
       }
     }
@@ -221,10 +220,10 @@ const useProvideAuth = (): UseAuth => {
       setInitialized(true);
       return { success: true, message: '' };
     } catch (error) {
-      console.log(error);
+      const errorMessage = (error as Error).message ?? 'signin.errors.password_change_failed'
       return {
         success: false,
-        message: 'パスワード変更に失敗しました。',
+        message: errorMessage,
       };
     }
   };
@@ -240,10 +239,10 @@ const useProvideAuth = (): UseAuth => {
       setQRCode(code);
       return { success: true, message: '' };
     } catch (error) {
-      console.log(error);
+      const errorMessage = (error as Error).message ?? 'signin.errors.totp_setup_failed'
       return {
         success: false,
-        message: 'TOTPの設定に失敗しました。',
+        message: errorMessage,
       };
     }
   };
@@ -258,10 +257,10 @@ const useProvideAuth = (): UseAuth => {
       setInitialized(true);
       return { success: true, message: '' };
     } catch (error) {
-      console.log(error);
+      const errorMessage = (error as Error).message ?? 'signin.errors.totp_verification_failed'
       return {
         success: false,
-        message: 'TOTPの認証に失敗しました。',
+        message: errorMessage,
       };
     }
   };
@@ -273,10 +272,10 @@ const useProvideAuth = (): UseAuth => {
       setInitialized(true);
       return { success: true, message: '' };
     } catch (error) {
-      console.log(error);
+      const errorMessage = (error as Error).message ?? 'signin.errors.totp_verification_failed'
       return {
         success: false,
-        message: 'TOTPの認証に失敗しました。',
+        message: errorMessage,
       };
     }
   };
@@ -297,13 +296,13 @@ const useProvideAuth = (): UseAuth => {
 
       return {
         success: true,
-        message: 'APIトークンを再発行しました。',
+        message: 'signin.confirm.api_token_reissued',
       };
     } catch (error) {
-      console.error(error);
+      const errorMessage = (error as Error).message ?? 'signin.errors.api_token_reissue_failed'
       return {
         success: false,
-        message: 'APIトークンの再発行に失敗しました。',
+        message: errorMessage,
       };
     }
   };

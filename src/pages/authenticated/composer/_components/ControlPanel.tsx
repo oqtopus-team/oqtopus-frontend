@@ -259,12 +259,15 @@ export const ControlPanelExecution = (props: ControlPanelExecutionProps) => {
 
     const selectedDevice = props.devices.find(d => d.id === form.device_id);
     if (!selectedDevice) {
-      toast("Select an available device!", infoToastConfig);
+      toast(t('composer.control_panel.exec.select_device'), infoToastConfig);
       return;
     }
 
     if (qubitNumber > selectedDevice.nQubits) {
-      toast(`The device ${selectedDevice.id} supports quantum circuits of ${selectedDevice.nQubits} qubits or fewer.`, infoToastConfig);
+      toast(t('composer.control_panel.exec.deviceSupport', {
+        deviceId: selectedDevice.id,
+        qubitsCount: selectedDevice.nQubits
+      }), infoToastConfig)
       return;
     }
 

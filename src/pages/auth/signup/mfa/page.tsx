@@ -35,7 +35,7 @@ export default function SetupMFAPage() {
         if (result.success) {
           setQRLoading(true);
         } else {
-          toast(result.message, infoToastConfig);
+          toast(result.message, errorToastConfig);
         }
       })
       .catch((error) => {
@@ -56,7 +56,7 @@ export default function SetupMFAPage() {
               navigate('/dashboard');
               return;
             }
-            toast(result.message, successToastConfig);
+            toast(result.message, errorToastConfig);
             setProcessingFalse();
           })
           .catch((error) => {

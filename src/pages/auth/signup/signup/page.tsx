@@ -58,7 +58,7 @@ export default function SignUpPage() {
               navigate('/confirm');
               return;
             }
-            toast(result.message, successToastConfig)
+            toast(result.message, errorToastConfig)
             setProcessingFalse();
           })
           .catch((error) => {

@@ -27,5 +27,16 @@ export default {
       },
     },
     button: 'Send',
+    api_token_reissued: 'API token has been reissued.',
   },
+  errors: {
+    authentication_failed: 'Authentication failed',
+    logout_failed: 'Logout failed',
+    email_not_found: 'The email address you entered does not exist',
+    email_sending_failed: 'Failed to send email.',
+    password_change_failed: 'Failed to change password.',
+    totp_setup_failed: 'Failed to set up TOTP.',
+    totp_verification_failed: 'TOTP verification failed.',
+    api_token_reissue_failed: 'Failed to reissue API token.',
+  }
 };

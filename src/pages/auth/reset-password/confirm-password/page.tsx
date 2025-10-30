@@ -66,7 +66,7 @@ export default function ForgotPasswordConfirmPage() {
               navigate('/login');
               return;
             }
-            toast(result.message, infoToastConfig);
+            toast(result.message, errorToastConfig);
             setProcessingFalse();
           })
           .catch((error) => {

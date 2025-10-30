@@ -27,5 +27,16 @@ export default {
       },
     },
     button: '送信する',
+    api_token_reissued: 'APIトークンを再発行しました。',
   },
+  errors: {
+    authentication_failed: '認証に失敗しました。',
+    logout_failed: 'ログアウトに失敗しました。',
+    email_not_found: '入力したメールアドレスは存在しません',
+    email_sending_failed: 'メール送信に失敗しました。',
+    password_change_failed: 'パスワード変更に失敗しました。',
+    totp_setup_failed: 'TOTPの設定に失敗しました。',
+    totp_verification_failed: 'TOTPの認証に失敗しました。',
+    api_token_reissue_failed: 'APIトークンの再発行に失敗しました。',
+  }
 };
