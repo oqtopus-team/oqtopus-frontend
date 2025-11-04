@@ -13,7 +13,9 @@ export function generateQASMCode(
   const circuitJSONString = JSON.stringify({
     qubitNumber: rowCount,
     columns: columnCount,
-    circuit: circuit.map((circuitRow) => circuitRow.filter((g) => !isDummyGate(g)).map(toGateData)),
+    circuit: circuit.map((circuitRow) =>
+      circuitRow.filter((g) => !isDummyGate(g)).map((g) => toGateData(g as RealComposerGate))
+    ),
   });
 
   const codeLines = [
