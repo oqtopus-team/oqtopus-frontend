@@ -14,11 +14,6 @@ import { isCustomGate } from './gates';
 import { useContext, useRef, useState } from 'react';
 import { circuitContext } from './circuit';
 
-type DragOverData = {
-  row: number;
-  column: number;
-};
-
 /**
  * We detect collisions based on the middle of the top cell of the gate
  * and not based on the middle of the whole gate like the default collision detector
@@ -63,22 +58,12 @@ export function DndContextProvider({ children }: React.PropsWithChildren) {
   // when we for example want to just click on the gate to select it
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 1 } }));
 
-  function handleMoveGate(gateOver: DragOverData | undefined) {
-    if (!gateOver) return;
-
-    circuitService.moveGate(
-      circuitService.draggedGates[0],
-      gateOver.row,
-      gateOver.column,
-      (row, column, targets, controls) => {
-        isDraggingNewGate.current = false;
-        circuitService.draggedGates[0].row = row;
-        circuitService.draggedGates[0].column = column;
-        circuitService.draggedGates[0].targets = targets;
-        circuitService.draggedGates[0].controls = controls;
-      },
-      isDraggingNewGate.current
-    );
+  function handleGateMoved(row: number, column: number, targets: number[], controls: number[]) {
+    isDraggingNewGate.current = false;
+    circuitService.draggedGates[0].row = row;
+    circuitService.draggedGates[0].column = column;
+    circuitService.draggedGates[0].targets = targets;
+    circuitService.draggedGates[0].controls = controls;
   }
 
   return (
@@ -105,13 +90,30 @@ export function DndContextProvider({ children }: React.PropsWithChildren) {
       onDragOver={(e) => {
         // in regular circuits we move gate when hovering over given cell
         if (!circuitService.isObservableCircuit) {
-          handleMoveGate(e.over?.data.current as DragOverData | undefined);
+          const gateOverData = e.over?.data.current;
+          if (!gateOverData) return;
+
+          circuitService.moveGateOnHover(
+            circuitService.draggedGates[0],
+            gateOverData.row,
+            gateOverData.column,
+            handleGateMoved,
+            isDraggingNewGate.current
+          );
         }
       }}
       onDragEnd={(e) => {
         // in observable circuits we move gate only when we drop the gate on given cell
         if (circuitService.isObservableCircuit) {
-          handleMoveGate(e.over?.data.current as DragOverData | undefined);
+          const gateOverData = e.over?.data.current;
+          gateOverData &&
+            circuitService.moveGateOnDrop(
+              circuitService.draggedGates[0],
+              gateOverData.row,
+              gateOverData.column,
+              handleGateMoved,
+              isDraggingNewGate.current
+            );
         }
         circuitService.handleDragEnd();
       }}

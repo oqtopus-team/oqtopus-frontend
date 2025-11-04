@@ -1,10 +1,10 @@
-import { ReactNode, useContext, useRef } from 'react';
+import { ReactNode, useContext, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { ComposerGate, getGateHeight, isDummyGate } from '../composer';
 import { isControlledGate, isCustomGate } from '../gates';
 import { circuitContext } from '../circuit';
 import { cellBlockDiff, cellSize, gateBlockSize } from '../gates_rendering/constants';
-import { useDraggable, useDroppable } from '@dnd-kit/core';
+import { useDndMonitor, useDraggable, useDroppable } from '@dnd-kit/core';
 
 export interface Props {
   row: number;
@@ -30,6 +30,36 @@ export default (props: Props) => {
     data: { row: props.row, column: props.column },
   });
 
+  const [showDropTargets, setShowDropTargets] = useState(false);
+  const [showDraggingOver, setShowDraggingOver] = useState(false);
+
+  // we use dnd monitor only for observable circuits in order to
+  // display visualization of drop targets and current cell we're dragging over
+  useDndMonitor(
+    circuitService.isObservableCircuit
+      ? {
+          onDragStart() {
+            setShowDropTargets(true);
+          },
+          onDragOver(e) {
+            const overData = e.over?.data.current;
+            if (!overData) return;
+
+            setShowDraggingOver(overData.row === props.row && overData.column === props.column);
+          },
+          onDragEnd() {
+            handleDragEnd();
+          },
+          onDragCancel() {
+            handleDragEnd();
+          },
+          onDragAbort() {
+            handleDragEnd();
+          },
+        }
+      : {}
+  );
+
   const isGateDragged = circuitService.draggedGates.some((g) => gate.id === g.id);
   const isGateDummy = isDummyGate(gate);
   const canDragGate = !isGateDummy && !props.static;
@@ -39,6 +69,11 @@ export default (props: Props) => {
       clearTimeout(touchTimeout.current);
       touchTimeout.current = undefined;
     }
+  }
+
+  function handleDragEnd() {
+    setShowDropTargets(false);
+    setShowDraggingOver(false);
   }
 
   function renderGate(): ReactNode {
@@ -87,9 +122,10 @@ export default (props: Props) => {
         minWidth: `${cellSize}px`,
         width: `${cellSize}px`,
         height: `${cellSize}px`,
-        zIndex: !isGateDummy ? '1' : '0',
+        zIndex: 1,
         verticalAlign: 'middle',
         textAlign: 'center',
+        pointerEvents: isGateDummy ? 'none' : 'all',
       }}
       onPointerDown={(e) => {
         !isGateDummy && e.stopPropagation();
@@ -119,7 +155,7 @@ export default (props: Props) => {
             // skipping listeners disable dragging
             {...(canDragGate ? draggable.listeners : {})}
             className={clsx([
-              ['text-primary-content'],
+              ['text-primary-content', 'rounded'],
               props.static === true || isGateDummy
                 ? ['cursor-default']
                 : [isGateDragged ? 'cursor-grabbing' : 'cursor-pointer'],
@@ -134,7 +170,8 @@ export default (props: Props) => {
               touchAction: 'none',
               transition: 'none',
               userSelect: 'none',
-              outline: 'none',
+              outline: showDropTargets ? 'solid 1px gray' : 'none',
+              outlineOffset: showDropTargets ? '2px' : 'none',
             }}
             onClick={(e) => {
               if (isGateDummy) return;
@@ -187,6 +224,24 @@ export default (props: Props) => {
           </div>
         </div>
       </div>
+      <div
+        className={clsx(!showDraggingOver ? ['hidden'] : [], [
+          'absolute',
+          'left-1/2',
+          'top-1/2',
+          '-translate-x-1/2',
+          '-translate-y-1/2',
+          'pointer-events-none',
+          'z-[200]',
+          'rounded-full',
+          'bg-secondary',
+          'opacity-50',
+        ])}
+        style={{
+          width: `${gateBlockSize}px`,
+          height: `${gateBlockSize}px`,
+        }}
+      />
     </div>
   );
 };

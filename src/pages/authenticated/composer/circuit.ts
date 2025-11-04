@@ -252,7 +252,63 @@ export class QuantumCircuitService {
     this.reselectGates();
   }
 
-  moveGate(g: ComposerGate, row: number, column: number, cb: GateMoveCallback, isNew = false) {
+  moveGateOnHover(
+    g: ComposerGate,
+    row: number,
+    column: number,
+    cb: GateMoveCallback,
+    isNew = false
+  ) {
+    const gate = this.validateMovedGate(g, row, column);
+    if (!gate) return;
+
+    if (!isNew) this.handleRemoveGate(this.circuit, g as RealComposerGate);
+
+    this.handleAddGate(this.circuit, gate, cb);
+    this._circuit.value = [...this.circuit];
+  }
+
+  // moveGateOnDrop() is adjusted for the observable composer case, where free placement is allowed.
+  // it differs from the moveGateOnHover() by not using remove gate handler and directly calling
+  // keepOnlyOneEmptyColumnAtCircuitEnd() method only after gate is added.
+  //
+  // it is due to the fact, that when free gate placement is active, then during moving gate we can't call this method
+  // right after gate removal, because there exists an edge case in which calling keepOnlyOneEmptyColumnAtCircuitEnd()
+  // would result in removing empty column to which we would like to drag the gate
+  //
+  // e.g. having two gates at position [0][0] and [0][1] and trying to to move the second one to the [0][2] position.
+  // In such scenario, calling keepOnlyOneEmptyColumnAtCircuitEnd() right after removal and before putting the gate
+  // in new position would remove column 2, as in that moment we would only have gate at [0][0]
+  // so we would keep only one empty column which would be column 1.
+  moveGateOnDrop(
+    g: ComposerGate,
+    row: number,
+    column: number,
+    cb: GateMoveCallback,
+    isNew = false
+  ) {
+    const gate = this.validateMovedGate(g, row, column);
+    if (!gate) return;
+
+    if (!isNew) {
+      this.circuit[g.row][g.column] = emptyCell(g.row, g.column);
+    }
+
+    this.handleAddGate(this.circuit, gate, cb);
+    keepOnlyOneEmptyColumnAtCircuitEnd(this.circuit);
+
+    this._circuit.value = [...this.circuit];
+  }
+
+  /**
+   * validates if we can drag the gate to the given position and if so
+   * we return gate object with updated position, controls and targets
+   */
+  private validateMovedGate(
+    g: ComposerGate,
+    row: number,
+    column: number
+  ): RealComposerGate | undefined {
     if (isDummyGate(g)) return;
 
     if (g.row === row && g.column === column) return;
@@ -262,15 +318,11 @@ export class QuantumCircuitService {
     if (g.row === row && g.column === column) return;
     if (row + getGateHeight(g) > this.circuit.length) return;
 
-    if (!isNew) this.handleRemoveGate(this.circuit, g);
-
     const rowDiff = row - g.row;
     const targets = g.targets.map((t) => t + rowDiff);
     const controls = g.controls.map((c) => c + rowDiff);
-    g = { ...g, row, column, controls, targets };
 
-    this.handleAddGate(this.circuit, g, cb);
-    this._circuit.value = [...this.circuit];
+    return { ...g, row, column, controls, targets };
   }
 
   removeGate(g: ComposerGate) {
@@ -834,7 +886,7 @@ function moveUp(circuit: QuantumCircuit, g: ComposerGate, row: number, column: n
           : g.column + 1;
     }
 
-    // recursively we move next element back by one, such recursive call results in whole row moved
+    // recursively we move next element up by one, such recursive call results in whole row moved
     moveUp(circuit, circuit[finalRow][nextCellToMove], finalRow, finalColumn + 1);
 
     circuit[g.row][g.column] = emptyCell(g.row, g.column);
@@ -985,7 +1037,7 @@ function keepOnlyOneEmptyColumnAtCircuitEnd(circuit: QuantumCircuit) {
 
 // It returns all rows that gate occupies which are not empty (all but multiRowEmptyBlock parts)
 // for example for CZ gate we treat the wire connecting its control and target also as non-empty row
-// in case of barrier however, the row without controls and targets is visually empty, so we do not include it multiRowEmptyBlock
+// in case of barrier however, the row without controls and targets is visually empty, so we do not include its multiRowEmptyBlock
 export function getNonEmptyGatesRows(gate: RealComposerGate): Array<number> {
   if (gate._tag !== 'barrier') {
     const firstRow = Math.min(...gate.targets, ...gate.controls);
