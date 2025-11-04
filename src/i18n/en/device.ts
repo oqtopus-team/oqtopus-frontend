@@ -43,6 +43,7 @@ export default {
       min: 'Minimum',
       nodata: 'Data does not exist.',
       invalid_device_info: 'Topology information is invalid',
+      fit_to_view: 'Fit to View',
     },
     qubits_info: {
       header: 'Value per qubit',
