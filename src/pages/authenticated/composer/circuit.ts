@@ -602,6 +602,8 @@ function getFirstColumnToWhichCanMoveNewGate(
   const result: Array<number> = [];
 
   for (let c = column; c >= 0; --c) {
+    if (circuit[row].length <= c) continue;
+
     // can't place at multiRowGateEmptyBlock with the exception when we have two multiRowGateEmptyBlock column by column, then we
     // can place it between them. If we want to insert gate on the column where multiRowGateEmptyBlock is and there is no partial
     // height behind it, then we can place it in one column after

@@ -108,7 +108,7 @@ export default (props: Props) => {
               ['relative', 'min-h-64', 'my-5'],
               ['transition-all'],
               !gateViewer ? ['w-full'] : ['w-[calc(60%-24px)]'],
-              ['overflow-auto'],
+              ['overflow-auto', 'select-none'],
               ['border', 'border-neutral-content', 'rounded-sm'],
             ])}
             onPointerDown={(e) => {
