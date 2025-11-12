@@ -52,6 +52,7 @@ const detectCollision: CollisionDetection = ({
 export function DndContextProvider({ children }: React.PropsWithChildren) {
   const [draggedGate, setDraggedGate] = useState<RealComposerGate | undefined>(undefined);
   const isDraggingNewGate = useRef(false);
+  const heldGateRef = useRef<RealComposerGate | undefined>(undefined);
   const circuitService = useContext(circuitContext);
 
   // minimum activation constraint to prevent dragging from triggering
@@ -60,10 +61,13 @@ export function DndContextProvider({ children }: React.PropsWithChildren) {
 
   function handleGateMoved(row: number, column: number, targets: number[], controls: number[]) {
     isDraggingNewGate.current = false;
-    circuitService.draggedGates[0].row = row;
-    circuitService.draggedGates[0].column = column;
-    circuitService.draggedGates[0].targets = targets;
-    circuitService.draggedGates[0].controls = controls;
+
+    if (heldGateRef.current) {
+      heldGateRef.current.row = row;
+      heldGateRef.current.column = column;
+      heldGateRef.current.targets = targets;
+      heldGateRef.current.controls = controls;
+    }
   }
 
   return (
@@ -78,11 +82,13 @@ export function DndContextProvider({ children }: React.PropsWithChildren) {
           isDraggingNewGate.current = false;
           const gate = circuitService.circuit[data.row][data.column];
           if (!isDummyGate(gate)) {
+            heldGateRef.current = gate;
             setDraggedGate(gate);
             circuitService.handleDragStart([gate]);
           }
         } else if ('gate' in data) {
           isDraggingNewGate.current = true;
+          heldGateRef.current = data.gate;
           setDraggedGate(data.gate);
           circuitService.handleDragStart([data.gate]);
         }
@@ -93,27 +99,46 @@ export function DndContextProvider({ children }: React.PropsWithChildren) {
           const gateOverData = e.over?.data.current;
           if (!gateOverData) return;
 
-          circuitService.moveGateOnHover(
-            circuitService.draggedGates[0],
-            gateOverData.row,
-            gateOverData.column,
-            handleGateMoved,
-            isDraggingNewGate.current
-          );
+          const heldGate = heldGateRef.current;
+          if (!heldGate) return;
+
+          if (
+            circuitService.selectedGates.length > 1 &&
+            circuitService.selectedGates.some((g) => g.id === heldGate.id)
+          ) {
+            circuitService.moveSelectedGates(
+              heldGate,
+              gateOverData.row,
+              gateOverData.column,
+              handleGateMoved
+            );
+          } else {
+            circuitService.moveGateOnHover(
+              heldGate,
+              gateOverData.row,
+              gateOverData.column,
+              handleGateMoved,
+              isDraggingNewGate.current
+            );
+          }
         }
       }}
       onDragEnd={(e) => {
         // in observable circuits we move gate only when we drop the gate on given cell
         if (circuitService.isObservableCircuit) {
           const gateOverData = e.over?.data.current;
-          gateOverData &&
-            circuitService.moveGateOnDrop(
-              circuitService.draggedGates[0],
-              gateOverData.row,
-              gateOverData.column,
-              handleGateMoved,
-              isDraggingNewGate.current
-            );
+          if (!gateOverData) return;
+
+          const heldGate = heldGateRef.current;
+          if (!heldGate) return;
+
+          circuitService.moveGateOnDrop(
+            heldGate,
+            gateOverData.row,
+            gateOverData.column,
+            handleGateMoved,
+            isDraggingNewGate.current
+          );
         }
         circuitService.handleDragEnd();
       }}

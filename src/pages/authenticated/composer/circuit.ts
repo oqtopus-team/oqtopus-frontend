@@ -252,6 +252,125 @@ export class QuantumCircuitService {
     this.reselectGates();
   }
 
+  moveSelectedGates(
+    currentlyHeldGate: RealComposerGate,
+    row: number,
+    column: number,
+    cb: GateMoveCallback
+  ) {
+    if (!this.validateMovedGate(currentlyHeldGate, row, column)) return;
+
+    const selectedGates = [...this.selectedGates].sort(compareGates);
+    const currentlyHeldGateIdx = selectedGates.findIndex((g) => g.id === currentlyHeldGate.id);
+    if (currentlyHeldGateIdx === -1) return;
+
+    const rowDiff = row - currentlyHeldGate.row;
+    let lastGateColumn = currentlyHeldGate.column;
+    let lastHoverColumn = column;
+    const mappedGates = [{ gate: currentlyHeldGate, row, column, isHeldGate: true }];
+
+    for (let i = currentlyHeldGateIdx - 1; i >= 0; --i) {
+      const selectedGate = selectedGates[i];
+
+      const currentHoverColumn =
+        selectedGate.column === lastGateColumn ? lastHoverColumn : lastHoverColumn - 1;
+      const currentHoverRow = selectedGate.row + rowDiff;
+
+      if (!isCellInBounds(this.circuit, currentHoverRow, currentHoverColumn)) return;
+      if (currentHoverRow + getGateHeight(selectedGate) > this.circuit.length) return;
+
+      mappedGates.push({
+        gate: selectedGate,
+        row: currentHoverRow,
+        column: currentHoverColumn,
+        isHeldGate: false,
+      });
+
+      lastGateColumn = selectedGate.column;
+      lastHoverColumn = currentHoverColumn;
+    }
+
+    lastGateColumn = currentlyHeldGate.column;
+    lastHoverColumn = column;
+
+    for (let i = currentlyHeldGateIdx + 1; i < selectedGates.length; ++i) {
+      const selectedGate = selectedGates[i];
+
+      const currentHoverColumn =
+        selectedGate.column === lastGateColumn ? lastHoverColumn : lastHoverColumn + 1;
+      const currentHoverRow = selectedGate.row + rowDiff;
+
+      if (!isCellInBounds(this.circuit, currentHoverRow, currentHoverColumn)) return;
+      if (currentHoverRow + getGateHeight(selectedGate) > this.circuit.length) return;
+
+      mappedGates.push({
+        gate: selectedGate,
+        row: currentHoverRow,
+        column: currentHoverColumn,
+        isHeldGate: false,
+      });
+
+      lastGateColumn = selectedGate.column;
+      lastHoverColumn = currentHoverColumn;
+    }
+
+    const gatesToMove = mappedGates.sort((g1, g2) => compareGates(g1.gate, g2.gate));
+
+    // remove moved gates from current position, in reverse order
+    gatesToMove
+      .slice()
+      .reverse()
+      .forEach((g) => this.handleRemoveGate(this.circuit, g.gate));
+
+    let itemRow: number | undefined = undefined;
+    let itemColumn: number | undefined = undefined;
+    let itemId: number | undefined = undefined;
+
+    const originalCoords = gatesToMove.map((g) => ({ row: g.row, column: g.column }));
+    const gatesToAdd = gatesToMove.map(({ gate, row, column, isHeldGate }) => ({
+      gate: mapGateToNewPosition(gate, row, column),
+      row,
+      column,
+      isHeldGate,
+    }));
+
+    for (let i = 0; i < gatesToAdd.length; ++i) {
+      const { gate, row, column, isHeldGate } = gatesToAdd[i];
+      this.handleAddGate(this.circuit, gate, (insertedRow, insertedColumn, targets, controls) => {
+        if (insertedColumn != column) {
+          for (let j = i + 1; j < gatesToAdd.length; ++j) {
+            const nextGateData = gatesToAdd[j];
+            if (!isGateOnRow(nextGateData.gate, insertedRow)) continue;
+            const distanceBetweenGates = originalCoords[j].column - originalCoords[i].column;
+            gatesToAdd[j].column = insertedColumn + distanceBetweenGates;
+          }
+        }
+
+        if (isHeldGate) {
+          itemId = gate.id;
+          itemColumn = insertedColumn;
+          itemRow = insertedRow;
+          cb(insertedRow, insertedColumn, targets, controls);
+        } else if (itemRow !== undefined && itemColumn !== undefined && itemId !== undefined) {
+          const gateInCircuit = getGateById(this.circuit, itemId) as RealComposerGate;
+          if (!gateInCircuit) return;
+
+          if (gateInCircuit.row !== itemRow || gateInCircuit.column !== itemColumn) {
+            cb(
+              gateInCircuit.row,
+              gateInCircuit.column,
+              gateInCircuit.targets,
+              gateInCircuit.controls
+            );
+          }
+        }
+      });
+    }
+
+    this.reselectGates();
+    this._circuit.value = [...this.circuit];
+  }
+
   moveGateOnHover(
     g: ComposerGate,
     row: number,
@@ -1093,4 +1212,18 @@ function compareGates(g1: RealComposerGate, g2: RealComposerGate): number {
   } else {
     return g1.row - g2.row;
   }
+}
+
+function isCellInBounds(circuit: QuantumCircuit, row: number, column: number): boolean {
+  if (row < 0 || row >= circuit.length) return false;
+  if (column < 0 || column >= circuit[row].length) return false;
+  return true;
+}
+
+function mapGateToNewPosition(g: RealComposerGate, row: number, column: number): RealComposerGate {
+  const rowDiff = row - g.row;
+  const targets = g.targets.map((t) => t + rowDiff);
+  const controls = g.controls.map((c) => c + rowDiff);
+
+  return { ...g, row, column, controls, targets };
 }
