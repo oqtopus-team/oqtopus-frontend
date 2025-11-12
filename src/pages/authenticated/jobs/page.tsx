@@ -315,9 +315,9 @@ export default function JobListPage() {
                     }
                     if (
                       params.query &&
-                      !job.id.includes(params.query) &&
-                      !job.name.includes(params.query) &&
-                      !job.description?.includes(params.query)
+                      !job.id.includes(params.query?.toLowerCase()) &&
+                      !(job.name.toLowerCase()).includes(params.query?.toLowerCase()) &&
+                      !(job.description?.toLowerCase())?.includes(params.query?.toLowerCase())
                     ) {
                       return false;
                     }
