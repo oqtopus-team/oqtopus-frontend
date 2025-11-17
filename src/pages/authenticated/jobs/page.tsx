@@ -1,4 +1,4 @@
-import { useState, useLayoutEffect } from 'react';
+import { useState, useLayoutEffect, useEffect } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import {
   Job,
@@ -163,9 +163,14 @@ export default function JobListPage() {
   };
 
   const handleAllJobsSelectionChange = (selected: boolean) => {
-    if (selected) {
-      setSelectedJobs([...jobs]);
-    } else {
+    //TODO: Add handling "status" to getJobs request and remove code below
+    if (!params.status && selected) {
+      setSelectedJobs(jobs);
+    }
+    else if(params.status && selected) {
+      setSelectedJobs(jobs.filter((j) => j.status === params.status));
+    }
+    else {
       setSelectedJobs([]);
     }
   };
@@ -220,6 +225,11 @@ export default function JobListPage() {
       selectedJobs.length === 0 || selectedJobs.some((j) => NOT_CANCELABLE_JOBS.includes(j.status))
     );
   };
+
+  useEffect(() => {
+    //TODO: Add handling "status" to getJobs request and remove code below
+    setSelectedJobs([]);
+  }, [params.status]);
 
   return (
     <div>

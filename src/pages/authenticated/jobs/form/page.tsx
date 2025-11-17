@@ -9,7 +9,7 @@ import { Select } from '@/pages/_components/Select';
 import { TextArea } from '@/pages/_components/TextArea';
 import { Spacer } from '@/pages/_components/Spacer';
 import { NavLink, useNavigate } from 'react-router';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useDeviceAPI, useJobAPI } from '@/backend/hook';
 import { ChangeEvent, FormEvent, useEffect, useLayoutEffect, useState } from 'react';
@@ -37,6 +37,7 @@ import { ConfirmModal } from '@/pages/_components/ConfirmModal';
 import * as yup from 'yup';
 import { FieldError, FieldErrorsImpl, Merge, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { errorToastConfig, infoToastConfig, successToastConfig } from '@/config/toast';
 
 interface FormInput {
   name: string;
@@ -224,7 +225,7 @@ export default function Page() {
 
   const onSubmit = async (data: FormInput) => {
     if (isSubmitting) {
-      toast.info(t('job.form.submitting'));
+      toast(t('job.form.submitting'), infoToastConfig);
       return;
     }
 
@@ -243,11 +244,11 @@ export default function Page() {
         simulator_info: JSON.parse(data.simulator ?? ''),
         mitigation_info: JSON.parse(data.mitigation ?? ''),
       });
-      toast.success(t('job.form.toast.success'));
+      toast(t('job.form.toast.success'), successToastConfig);
       return res;
     } catch (e) {
       console.error(e);
-      toast.error(t('job.form.toast.error'));
+      toast(t('job.form.toast.error'), errorToastConfig);
     }
   };
 
@@ -292,16 +293,6 @@ export default function Page() {
 
   return (
     <div>
-      <ToastContainer
-        position="top-right"
-        autoClose={2000} // display for 2 seconds
-        newestOnTop={true}
-        closeOnClick
-        pauseOnFocusLoss
-        draggable
-        hideProgressBar={true}
-        pauseOnHover
-      />
       <h2 className={clsx('text-primary', 'text-2xl', 'font-bold')}>{t('job.form.title')}</h2>
       <Spacer className="h-3" />
       <p className={clsx('text-sm')}>{t('job.form.description')}</p>
