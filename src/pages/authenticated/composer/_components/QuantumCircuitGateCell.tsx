@@ -130,11 +130,6 @@ export default (props: Props) => {
       onPointerDown={(e) => {
         !isGateDummy && e.stopPropagation();
       }}
-      onClick={() => {
-        if (isGateDummy) {
-          circuitService.selectedGates = [];
-        }
-      }}
     >
       {/* Ensure table-cell has height of cellSize at most even if gate's height is greater */}
       <div style={{ maxHeight: `${cellSize}px` }}>

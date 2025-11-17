@@ -267,7 +267,7 @@ export class QuantumCircuitService {
     const rowDiff = row - currentlyHeldGate.row;
     let lastGateColumn = currentlyHeldGate.column;
     let lastHoverColumn = column;
-    const mappedGates = [{ gate: currentlyHeldGate, row, column, isHeldGate: true }];
+    const mappedGates = [{ gate: currentlyHeldGate, row, column }];
 
     for (let i = currentlyHeldGateIdx - 1; i >= 0; --i) {
       const selectedGate = selectedGates[i];
@@ -283,7 +283,6 @@ export class QuantumCircuitService {
         gate: selectedGate,
         row: currentHoverRow,
         column: currentHoverColumn,
-        isHeldGate: false,
       });
 
       lastGateColumn = selectedGate.column;
@@ -307,7 +306,6 @@ export class QuantumCircuitService {
         gate: selectedGate,
         row: currentHoverRow,
         column: currentHoverColumn,
-        isHeldGate: false,
       });
 
       lastGateColumn = selectedGate.column;
@@ -324,35 +322,32 @@ export class QuantumCircuitService {
 
     let itemRow: number | undefined = undefined;
     let itemColumn: number | undefined = undefined;
-    let itemId: number | undefined = undefined;
 
     const originalCoords = gatesToMove.map((g) => ({ row: g.row, column: g.column }));
-    const gatesToAdd = gatesToMove.map(({ gate, row, column, isHeldGate }) => ({
-      gate: mapGateToNewPosition(gate, row, column),
-      row,
-      column,
-      isHeldGate,
-    }));
+    const gatesToAdd = gatesToMove.map(({ gate, row, column }) =>
+      mapGateToNewPosition(gate, row, column)
+    );
 
     for (let i = 0; i < gatesToAdd.length; ++i) {
-      const { gate, row, column, isHeldGate } = gatesToAdd[i];
+      const gate = gatesToAdd[i];
+      const expectedColumn = gate.column;
+
       this.handleAddGate(this.circuit, gate, (insertedRow, insertedColumn, targets, controls) => {
-        if (insertedColumn != column) {
+        if (insertedColumn != expectedColumn) {
           for (let j = i + 1; j < gatesToAdd.length; ++j) {
             const nextGateData = gatesToAdd[j];
-            if (!isGateOnRow(nextGateData.gate, insertedRow)) continue;
+            if (!isGateOnRow(nextGateData, insertedRow)) continue;
             const distanceBetweenGates = originalCoords[j].column - originalCoords[i].column;
             gatesToAdd[j].column = insertedColumn + distanceBetweenGates;
           }
         }
 
-        if (isHeldGate) {
-          itemId = gate.id;
+        if (gate.id === currentlyHeldGate.id) {
           itemColumn = insertedColumn;
           itemRow = insertedRow;
           cb(insertedRow, insertedColumn, targets, controls);
-        } else if (itemRow !== undefined && itemColumn !== undefined && itemId !== undefined) {
-          const gateInCircuit = getGateById(this.circuit, itemId) as RealComposerGate;
+        } else if (itemRow !== undefined && itemColumn !== undefined) {
+          const gateInCircuit = getGateById(this.circuit, currentlyHeldGate.id) as RealComposerGate;
           if (!gateInCircuit) return;
 
           if (gateInCircuit.row !== itemRow || gateInCircuit.column !== itemColumn) {

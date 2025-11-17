@@ -203,6 +203,9 @@ export default (props: Props) => {
                     display: 'table',
                     borderCollapse: 'collapse',
                   }}
+                  onPointerDown={() => {
+                    circuitService.selectedGates = [];
+                  }}
                 >
                   {circuit.map((circuitRow, row) => (
                     <div
