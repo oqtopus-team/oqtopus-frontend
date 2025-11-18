@@ -31,8 +31,14 @@ export default {
       error_message: {
         code: '検証コードを入力してください',
       },
+      mfa_setup_request: 'MFAを設定してください。'
     },
     button: '送信する',
   },
   disclaimer: `<1>利用規約</1>及び<3>プライバシー・ポリシー</3>をご確認いただき、同意いただける場合は以下よりアカウント登録を完了させてください。`,
+  errors: {
+    email_already_registered: "入力したメールアドレスはすでに登録されています",
+    signup_failed_prereq: "サインアップに失敗しました。\nサインアップには事前ユーザー登録が必要です。\n登録がお済みでない場合は管理者までお問い合わせください。",
+    authentication_failed: '認証に失敗しました。',
+  }
 };
