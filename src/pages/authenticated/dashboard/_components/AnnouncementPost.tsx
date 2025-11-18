@@ -5,7 +5,7 @@ import styles from './announcement.module.css';
 import { AnnouncementsGetAnnouncementResponse } from '@/api/generated';
 import { DateTimeFormatter } from '@/pages/authenticated/_components/DateTimeFormatter';
 import { useTranslation } from 'react-i18next';
-import domPurify from 'dompurify';
+import dompurify from 'dompurify';
 
 interface PostProps {
   announcement: AnnouncementsGetAnnouncementResponse;
@@ -75,7 +75,7 @@ export const AnnouncementPost = ({ announcement, style: propsStyle }: PostProps)
           [styles.collapsed]: isCollapsed,
         })}
         style={propsStyle?.announcement}
-        dangerouslySetInnerHTML={{ __html: domPurify.sanitize(htmlContent) }}
+        dangerouslySetInnerHTML={{ __html: dompurify.sanitize(htmlContent) }}
       ></div>
       <button
         type="button"
