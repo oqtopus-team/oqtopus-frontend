@@ -25,11 +25,14 @@ export default {
       job_name: "ジョブ名",
       name_placeholder: "ジョブ名を入力してください",
       job_desc: "説明",
+      desc_placeholder: "仕事の説明を入力してください。",
       device_id: "デバイスID",
       shots: "ショット数",
       shots_placeholder: "ショット数を入力してください",
       submit: "送信",
       see_result: "結果を確認する",
+      select_device: "利用可能なデバイスを選択してください",
+      deviceSupport: "デバイス {{deviceId}} は {{qubitsCount}} 量子ビット以下の量子回路をサポートしています。",
     },
     siml: {
       tab_label: "シミュレーション"

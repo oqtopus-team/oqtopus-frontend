@@ -12,7 +12,6 @@ export default {
   observable: {
     title: "Observable"
   },
-
   gate_viewer: {
     title: "Gate Viewer",
     update: "Update",
@@ -32,6 +31,8 @@ export default {
       shots_placeholder: "Enter shots.",
       submit: "Submit",
       see_result: "See result",
+      select_device: "Select an available device",
+      deviceSupport: "The device {{deviceId}} supports quantum circuits of {{qubitsCount}} qubits or fewer.",
     },
     siml: {
       tab_label: "Simulation"

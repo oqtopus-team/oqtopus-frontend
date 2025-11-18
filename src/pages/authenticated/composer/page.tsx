@@ -2,6 +2,7 @@ import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'react-toastify';
 import QuantumCircuitComposer from './_components/QuantumCircuitComposer';
 import ControlPanel from './_components/ControlPanel';
 import { JobsOperatorItem, JobsSubmitJobRequest } from '@/api/generated';
@@ -11,12 +12,12 @@ import { JobTypeType } from '@/domain/types/Job';
 import ToolPalette from './_components/ToolPalette';
 import { useDeviceAPI, useJobAPI } from '@/backend/hook';
 import { Device } from '@/domain/types/Device';
-import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { generateQASMCode } from './qasm';
 import { QuantumGate, supportedGates } from './gates';
 import ObservableComposer from './_components/ObservableComposer';
 import { Observable } from './observable';
+import { errorToastConfig, successToastConfig } from '@/config/toast';
 
 const renderOperator = (obs: Observable): JobsOperatorItem[] => {
   return [...new Array(obs.operators.length)].map((_, i) => {
@@ -162,10 +163,10 @@ export default function Page() {
     setBusy(true);
     try {
       const jobId = await jobApi.submitJob(req);
-      toast.success(t('job.form.toast.success'));
+      toast(t('job.form.toast.success'), successToastConfig);
       setJobId(jobId);
     } catch (e) {
-      toast.error(t('job.form.toast.error'));
+      toast(t('job.form.toast.error'), errorToastConfig);
     } finally {
       setBusy(false);
     }
@@ -173,16 +174,6 @@ export default function Page() {
 
   return (
     <>
-      <ToastContainer
-        position="top-right"
-        autoClose={2000} // display for 2 seconds
-        newestOnTop={true}
-        closeOnClick
-        pauseOnFocusLoss
-        draggable
-        hideProgressBar={true}
-        pauseOnHover
-      />
       <h2 className={clsx('text-primary', 'text-2xl', 'font-bold')}>{t('composer.title')}</h2>
       <Spacer className="h-9" />
 
