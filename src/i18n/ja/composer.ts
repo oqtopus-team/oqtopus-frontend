@@ -10,7 +10,7 @@ export default {
     estimation: '期待値推定',
   },
   observable: {
-    title: '可観測量',
+    title: 'オブザーバブル',
   },
   gate_viewer: {
     title: 'ゲートビューア',
