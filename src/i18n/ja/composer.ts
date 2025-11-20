@@ -15,9 +15,9 @@ export default {
   gate_viewer: {
     title: "ゲートビューア",
     update: "更新",
-    param: "Param",
-    control_qubit: "Control qubit index",
-    target_qubit: "Target qubit index"
+    param: "パラメータ",
+    control_qubit: "制御量子ビットのインデックス",
+    target_qubit: "ターゲット量子ビットのインデックス"
   },
   control_panel: {
     exec: {
@@ -42,23 +42,23 @@ export default {
     }
   },
   actions: {
-    duplicate: "Duplicate",
-    group: "Group",
-    ungroup: "Ungroup"
+    duplicate: "複製",
+    group: "グループ化",
+    ungroup: "グループ化解除"
   },
   gates_multi_select_mode_popup: {
-    title: "Selecting multiple gates",
-    done: "Done",
-    cancel: "Cancel",
+    title: "複数のゲートを選択中",
+    done: "完了",
+    cancel: "キャンセル",
   },
   custom_gate_modal: {
-    title: "Create custom gate",
-    gate_name_input_label: "Provide name for custom gate:",
-    create: "Create",
-    cancel: "Cancel",
+    title: "カスタムゲートを作成",
+    gate_name_input_label: "カスタムゲートの名前を入力:",
+    create: "作成",
+    cancel: "キャンセル",
     errors: {
-      invalid_gate_name_format: "A gate name must start with a letter or an underscore. It must consist only of letters, numbers, and underscores.",
-      gate_already_defined: "Gate with provided name is already defined."
+      invalid_gate_name_format: "ゲート名は文字、数字、アンダースコアのみで構成される必要があります。また、文字またはアンダースコアで始まる必要があります。",
+      gate_already_defined: "指定された名前のゲートは既に定義されています。"
     }
   }
 };
