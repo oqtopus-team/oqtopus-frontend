@@ -11,6 +11,8 @@ import { useFormProcessor } from '@/pages/_hooks/form';
 import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
 import { use } from 'react';
+import { errorToastConfig, infoToastConfig } from '@/config/toast';
+import { toast } from 'react-toastify';
 
 interface FormInput {
   email: string;
@@ -42,11 +44,12 @@ export default function ForgotPasswordPage() {
               navigate('/confirm-password');
               return;
             }
-            alert(result.message);
+            toast(result.message, errorToastConfig)
             setProcessingFalse();
           })
           .catch((error) => {
-            console.log(error);
+            const errorMsg = error.message ?? t('common.errors.default')
+            toast(errorMsg, errorToastConfig)
           });
       };
     }

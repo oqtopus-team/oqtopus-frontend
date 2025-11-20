@@ -13,6 +13,8 @@ import { useNavigate } from 'react-router';
 import { useFormProcessor } from '@/pages/_hooks/form';
 import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
+import { toast } from 'react-toastify';
+import { errorToastConfig } from '@/config/toast';
 
 interface FormInput {
   username: string;
@@ -23,19 +25,10 @@ const validationRules = (t: (key: string) => string): yup.ObjectSchema<FormInput
   yup.object({
     username: yup
       .string()
-      .required(t('signin.form.error_message.user_name'))
-      .email(t('signin.form.error_message.mail_address')),
+      .required(t('signin.form.error_message.user_name')),
     password: yup
       .string()
-      .required(t('signin.form.error_message.password'))
-      .min(12, t('signin.form.error_message.password_min_length'))
-      .matches(/[A-Z]/, t('signin.form.error_message.password_uppercase'))
-      .matches(/[a-z]/, t('signin.form.error_message.password_lowercase'))
-      .matches(/[0-9]/, t('signin.form.error_message.password_number'))
-      .matches(
-        /[\^$*.[\]{}()?"!@#%&/\\,><':;|_~`+=-]/,
-        t('signin.form.error_message.password_special')
-      ),
+      .required(t('signin.form.error_message.password')),
   });
 
 export default function LoginPage() {
@@ -54,15 +47,16 @@ export default function LoginPage() {
               navigate('/confirm-mfa');
               return;
             }
-            alert(message);
-            if (message === 'MFAを設定してください。') {
+            toast(t(message), errorToastConfig)
+            if (message === 'signup.confirm.form.mfa_setup_request') {
               navigate('/mfa');
               return;
             }
             setProcessingFalse();
           })
           .catch((error) => {
-            console.log(error);
+            const errorMsg = error.message ?? t('common.errors.default')
+            toast(errorMsg, errorToastConfig)
           });
       };
     }

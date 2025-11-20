@@ -71,7 +71,7 @@ export type MitigationTypeType = 'PseudoInv' | 'None';
 export const JOB_FORM_MITIGATION_INFO_DEFAULTS: { [key in 'PseudoInv' | 'None']: string } = {
   PseudoInv: JSON.stringify(
     {
-      readout: 'pseudo_inverse',
+      ro_error_mitigation: 'pseudo_inverse',
     },
     null,
     2
