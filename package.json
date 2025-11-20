@@ -24,6 +24,7 @@
     "date-fns": "^4.1.0",
     "i18next": "^24.2.3",
     "i18next-browser-languagedetector": "^8.0.4",
+    "js-yaml": "^4.1.1",
     "marked": "^15.0.11",
     "mathjax": "^3.2.2",
     "qasm-ts": "^2.0.0",

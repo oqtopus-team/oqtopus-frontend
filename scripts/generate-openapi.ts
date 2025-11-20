@@ -6,6 +6,7 @@ import fs from 'node:fs/promises';
 import { execa } from 'execa';
 import { parseArgs } from 'node:util';
 import urlJoin from 'url-join';
+import yaml from 'js-yaml';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const __project_root = path.resolve(__dirname, '..');
@@ -108,7 +109,15 @@ const mkDocumentURL = (options: Partial<Options>) => {
   if (!documentURL) {
     failwith('\x1b[31m[ERROR]\x1b[0m Invalid document source.');
   }
-  const { data } = await axios.get(documentURL);
+  let { data } = await axios.get(documentURL);
+  let value = yaml.load(data) as any;
+  value.servers = [
+    {
+      url: process.env.VITE_APP_API_ENDPOINT,
+      description: process.env.VITE_APP_API_ENDPOINT_DESCRIPTION
+    }
+  ];
+  data = yaml.dump(value);
   await fs.writeFile(path.join(__project_root, 'src/api/generated/openapi.yaml'), data, 'utf-8');
   await fs.writeFile(path.join(__project_root, 'public/openapi.yaml'), data, 'utf-8');
 
