@@ -1,6 +1,5 @@
 import { Suspense, lazy } from 'react';
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router';
-import { ToastContainer } from 'react-toastify';
 import { Loader } from '@/pages/_components/Loader';
 import RootLayout from '@/pages/layout';
 import AuthLayout from '@/pages/auth/layout';
