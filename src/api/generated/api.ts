@@ -23,152 +23,47 @@ import type { RequestArgs } from './base';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerMap } from './base';
 
-/**
- * 
- * @export
- * @interface AnnouncementsGetAnnouncementResponse
- */
 export interface AnnouncementsGetAnnouncementResponse {
-    /**
-     * 
-     * @type {number}
-     * @memberof AnnouncementsGetAnnouncementResponse
-     */
     'id': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof AnnouncementsGetAnnouncementResponse
-     */
     'title': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof AnnouncementsGetAnnouncementResponse
-     */
     'content': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof AnnouncementsGetAnnouncementResponse
-     */
     'start_time': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof AnnouncementsGetAnnouncementResponse
-     */
     'end_time': string;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof AnnouncementsGetAnnouncementResponse
-     */
     'publishable': boolean;
 }
-/**
- * 
- * @export
- * @interface AnnouncementsGetAnnouncementsListResponse
- */
 export interface AnnouncementsGetAnnouncementsListResponse {
-    /**
-     * 
-     * @type {Array<AnnouncementsGetAnnouncementResponse>}
-     * @memberof AnnouncementsGetAnnouncementsListResponse
-     */
     'announcements'?: Array<AnnouncementsGetAnnouncementResponse>;
 }
-/**
- * 
- * @export
- * @interface ApiTokenApiToken
- */
 export interface ApiTokenApiToken {
     /**
      * The api token secret
-     * @type {string}
-     * @memberof ApiTokenApiToken
      */
     'api_token_secret'?: string;
     /**
      * The expiration date of the api token
-     * @type {string}
-     * @memberof ApiTokenApiToken
      */
     'api_token_expiration'?: string;
 }
-/**
- * 
- * @export
- * @interface DevicesDeviceInfo
- */
 export interface DevicesDeviceInfo {
-    /**
-     * 
-     * @type {string}
-     * @memberof DevicesDeviceInfo
-     */
     'device_id': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DevicesDeviceInfo
-     */
     'device_type': DevicesDeviceInfoDeviceTypeEnum;
-    /**
-     * 
-     * @type {string}
-     * @memberof DevicesDeviceInfo
-     */
     'status': DevicesDeviceInfoStatusEnum;
     /**
      * Parameter mandatory and valid for \'unavailable\' devices
-     * @type {string}
-     * @memberof DevicesDeviceInfo
      */
     'available_at'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof DevicesDeviceInfo
-     */
     'n_pending_jobs': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof DevicesDeviceInfo
-     */
     'n_qubits'?: number;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof DevicesDeviceInfo
-     */
     'basis_gates': Array<string>;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof DevicesDeviceInfo
-     */
     'supported_instructions': Array<string>;
     /**
      * json format calibration_data and n_nodes etc
-     * @type {string}
-     * @memberof DevicesDeviceInfo
      */
     'device_info'?: string;
     /**
      * Parameter available only for `QPU` devices with available calibration data
-     * @type {string}
-     * @memberof DevicesDeviceInfo
      */
     'calibrated_at'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DevicesDeviceInfo
-     */
     'description': string;
 }
 
@@ -185,409 +80,116 @@ export const DevicesDeviceInfoStatusEnum = {
 
 export type DevicesDeviceInfoStatusEnum = typeof DevicesDeviceInfoStatusEnum[keyof typeof DevicesDeviceInfoStatusEnum];
 
-/**
- * 
- * @export
- * @interface ErrorBadRequest
- */
 export interface ErrorBadRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof ErrorBadRequest
-     */
     'message': string;
 }
-/**
- * 
- * @export
- * @interface ErrorForbiddenError
- */
 export interface ErrorForbiddenError {
-    /**
-     * 
-     * @type {string}
-     * @memberof ErrorForbiddenError
-     */
     'message': string;
 }
-/**
- * 
- * @export
- * @interface ErrorInternalServerError
- */
 export interface ErrorInternalServerError {
-    /**
-     * 
-     * @type {string}
-     * @memberof ErrorInternalServerError
-     */
     'message': string;
 }
-/**
- * 
- * @export
- * @interface ErrorNotFoundError
- */
 export interface ErrorNotFoundError {
-    /**
-     * 
-     * @type {string}
-     * @memberof ErrorNotFoundError
-     */
     'message': string;
 }
-/**
- * 
- * @export
- * @interface ErrorUnauthorizedError
- */
 export interface ErrorUnauthorizedError {
-    /**
-     * 
-     * @type {string}
-     * @memberof ErrorUnauthorizedError
-     */
     'message': string;
 }
 /**
  * *(Only for estimation jobs)* The estimated expectation value and the standard deviation of the operators specified in `job_info.operator` field which is intended to be provided for estimation jobs. 
- * @export
- * @interface JobsEstimationResult
  */
 export interface JobsEstimationResult {
     /**
      * The estimated expectation value
-     * @type {number}
-     * @memberof JobsEstimationResult
      */
     'exp_value'?: number;
     /**
      * The standard deviation value
-     * @type {number}
-     * @memberof JobsEstimationResult
      */
     'stds'?: number;
 }
 /**
  * job status
- * @export
- * @interface JobsGetJobStatusResponse
  */
 export interface JobsGetJobStatusResponse {
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsGetJobStatusResponse
-     */
     'job_id': string;
-    /**
-     * 
-     * @type {JobsJobStatus}
-     * @memberof JobsGetJobStatusResponse
-     */
     'status': JobsJobStatus;
 }
 
 
-/**
- * 
- * @export
- * @interface JobsGetJobsResponse
- */
 export interface JobsGetJobsResponse {
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsGetJobsResponse
-     */
     'job_id'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsGetJobsResponse
-     */
     'name'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsGetJobsResponse
-     */
     'description'?: string;
-    /**
-     * 
-     * @type {JobsJobType}
-     * @memberof JobsGetJobsResponse
-     */
     'job_type'?: JobsJobType;
-    /**
-     * 
-     * @type {JobsJobStatus}
-     * @memberof JobsGetJobsResponse
-     */
     'status'?: JobsJobStatus;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsGetJobsResponse
-     */
     'device_id'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof JobsGetJobsResponse
-     */
     'shots'?: number;
-    /**
-     * 
-     * @type {JobsJobInfo}
-     * @memberof JobsGetJobsResponse
-     */
     'job_info'?: JobsJobInfo;
-    /**
-     * 
-     * @type {{ [key: string]: any; }}
-     * @memberof JobsGetJobsResponse
-     */
     'transpiler_info'?: { [key: string]: any; };
-    /**
-     * 
-     * @type {{ [key: string]: any; }}
-     * @memberof JobsGetJobsResponse
-     */
     'simulator_info'?: { [key: string]: any; };
-    /**
-     * 
-     * @type {{ [key: string]: any; }}
-     * @memberof JobsGetJobsResponse
-     */
     'mitigation_info'?: { [key: string]: any; };
-    /**
-     * 
-     * @type {number}
-     * @memberof JobsGetJobsResponse
-     */
     'execution_time'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsGetJobsResponse
-     */
     'submitted_at'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsGetJobsResponse
-     */
     'ready_at'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsGetJobsResponse
-     */
     'running_at'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsGetJobsResponse
-     */
     'ended_at'?: string;
 }
 
 
 /**
  * sse log file
- * @export
- * @interface JobsGetSselogResponse
  */
 export interface JobsGetSselogResponse {
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsGetSselogResponse
-     */
     'file'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsGetSselogResponse
-     */
     'file_name'?: string;
 }
-/**
- * 
- * @export
- * @interface JobsJobDef
- */
 export interface JobsJobDef {
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsJobDef
-     */
     'job_id': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsJobDef
-     */
     'name': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsJobDef
-     */
     'description'?: string;
-    /**
-     * 
-     * @type {JobsJobType}
-     * @memberof JobsJobDef
-     */
     'job_type': JobsJobType;
-    /**
-     * 
-     * @type {JobsJobStatus}
-     * @memberof JobsJobDef
-     */
     'status': JobsJobStatus;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsJobDef
-     */
     'device_id': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof JobsJobDef
-     */
     'shots': number;
-    /**
-     * 
-     * @type {JobsJobInfo}
-     * @memberof JobsJobDef
-     */
     'job_info': JobsJobInfo;
-    /**
-     * 
-     * @type {{ [key: string]: any; }}
-     * @memberof JobsJobDef
-     */
     'transpiler_info'?: { [key: string]: any; };
-    /**
-     * 
-     * @type {{ [key: string]: any; }}
-     * @memberof JobsJobDef
-     */
     'simulator_info'?: { [key: string]: any; };
-    /**
-     * 
-     * @type {{ [key: string]: any; }}
-     * @memberof JobsJobDef
-     */
     'mitigation_info'?: { [key: string]: any; };
-    /**
-     * 
-     * @type {number}
-     * @memberof JobsJobDef
-     */
     'execution_time'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsJobDef
-     */
     'submitted_at'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsJobDef
-     */
     'ready_at'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsJobDef
-     */
     'running_at'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsJobDef
-     */
     'ended_at'?: string;
 }
 
 
-/**
- * 
- * @export
- * @interface JobsJobInfo
- */
 export interface JobsJobInfo {
     /**
      * A list of OPENQASM3 program. For non-multiprogramming jobs, this field is assumed to contain exactly one program. Otherwise, those programs are combined according to the multiprogramming machinery.
-     * @type {Array<string>}
-     * @memberof JobsJobInfo
      */
     'program': Array<string>;
     /**
      * For multiprogramming jobs, this field contains the combined circuit.
-     * @type {string}
-     * @memberof JobsJobInfo
      */
     'combined_program'?: string;
     /**
      * *(Only for estimation jobs)* The operator (or observable) for which the expectation value is to be estimated. 
-     * @type {Array<JobsOperatorItem>}
-     * @memberof JobsJobInfo
      */
     'operator'?: Array<JobsOperatorItem>;
-    /**
-     * 
-     * @type {JobsJobResult}
-     * @memberof JobsJobInfo
-     */
     'result'?: JobsJobResult;
-    /**
-     * 
-     * @type {JobsTranspileResult}
-     * @memberof JobsJobInfo
-     */
     'transpile_result'?: JobsTranspileResult;
     /**
      * Describing the reason why there is no result
-     * @type {string}
-     * @memberof JobsJobInfo
      */
     'message'?: string;
 }
-/**
- * 
- * @export
- * @interface JobsJobResult
- */
 export interface JobsJobResult {
     [key: string]: any;
 
-    /**
-     * 
-     * @type {JobsSamplingResult}
-     * @memberof JobsJobResult
-     */
     'sampling'?: JobsSamplingResult;
-    /**
-     * 
-     * @type {JobsEstimationResult}
-     * @memberof JobsJobResult
-     */
     'estimation'?: JobsEstimationResult;
 }
-/**
- * 
- * @export
- * @enum {string}
- */
 
 export const JobsJobStatus = {
     Submitted: 'submitted',
@@ -601,11 +203,6 @@ export const JobsJobStatus = {
 export type JobsJobStatus = typeof JobsJobStatus[keyof typeof JobsJobStatus];
 
 
-/**
- * 
- * @export
- * @enum {string}
- */
 
 export const JobsJobType = {
     Estimation: 'estimation',
@@ -617,181 +214,63 @@ export const JobsJobType = {
 export type JobsJobType = typeof JobsJobType[keyof typeof JobsJobType];
 
 
-/**
- * 
- * @export
- * @interface JobsOperatorItem
- */
 export interface JobsOperatorItem {
     /**
      * The Pauli string.
-     * @type {string}
-     * @memberof JobsOperatorItem
      */
     'pauli': string;
     /**
      * Coefficient number in the Pauli string representation.
-     * @type {number}
-     * @memberof JobsOperatorItem
      */
     'coeff'?: number;
 }
 /**
  * *(Only for sampling jobs)* JSON string representing the sampling result
- * @export
- * @interface JobsSamplingResult
  */
 export interface JobsSamplingResult {
-    /**
-     * 
-     * @type {{ [key: string]: any; }}
-     * @memberof JobsSamplingResult
-     */
     'counts'?: { [key: string]: any; };
-    /**
-     * 
-     * @type {{ [key: string]: any; }}
-     * @memberof JobsSamplingResult
-     */
     'divided_counts'?: { [key: string]: any; } | null;
 }
 /**
  * All fields in this schema also exist in the `JobInfo` schema and have the same meaning as their counterparts in the `JobInfo` schema.
- * @export
- * @interface JobsSubmitJobInfo
  */
 export interface JobsSubmitJobInfo {
     /**
      * A list of OPENQASM3 program. For non-multiprogramming jobs, this field is assumed to contain exactly one program. Otherwise, those programs are combined according to the multiprogramming machinery.
-     * @type {Array<string>}
-     * @memberof JobsSubmitJobInfo
      */
     'program': Array<string>;
-    /**
-     * 
-     * @type {Array<JobsOperatorItem>}
-     * @memberof JobsSubmitJobInfo
-     */
     'operator'?: Array<JobsOperatorItem>;
 }
-/**
- * 
- * @export
- * @interface JobsSubmitJobRequest
- */
 export interface JobsSubmitJobRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsSubmitJobRequest
-     */
     'name'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsSubmitJobRequest
-     */
     'description'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsSubmitJobRequest
-     */
     'device_id': string;
-    /**
-     * 
-     * @type {JobsJobType}
-     * @memberof JobsSubmitJobRequest
-     */
     'job_type': JobsJobType;
-    /**
-     * 
-     * @type {JobsSubmitJobInfo}
-     * @memberof JobsSubmitJobRequest
-     */
     'job_info': JobsSubmitJobInfo;
-    /**
-     * 
-     * @type {{ [key: string]: any; }}
-     * @memberof JobsSubmitJobRequest
-     */
     'transpiler_info'?: { [key: string]: any; };
-    /**
-     * 
-     * @type {{ [key: string]: any; }}
-     * @memberof JobsSubmitJobRequest
-     */
     'simulator_info'?: { [key: string]: any; };
-    /**
-     * 
-     * @type {{ [key: string]: any; }}
-     * @memberof JobsSubmitJobRequest
-     */
     'mitigation_info'?: { [key: string]: any; };
-    /**
-     * 
-     * @type {number}
-     * @memberof JobsSubmitJobRequest
-     */
     'shots': number;
 }
 
 
 /**
  * submit a job
- * @export
- * @interface JobsSubmitJobResponse
  */
 export interface JobsSubmitJobResponse {
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsSubmitJobResponse
-     */
     'job_id': string;
 }
-/**
- * 
- * @export
- * @interface JobsTranspileResult
- */
 export interface JobsTranspileResult {
-    /**
-     * 
-     * @type {string}
-     * @memberof JobsTranspileResult
-     */
     'transpiled_program': string | null;
-    /**
-     * 
-     * @type {{ [key: string]: any; }}
-     * @memberof JobsTranspileResult
-     */
     'stats': { [key: string]: any; } | null;
-    /**
-     * 
-     * @type {{ [key: string]: any; }}
-     * @memberof JobsTranspileResult
-     */
     'virtual_physical_mapping': { [key: string]: any; } | null;
 }
-/**
- * 
- * @export
- * @interface SuccessSuccessResponse
- */
 export interface SuccessSuccessResponse {
-    /**
-     * 
-     * @type {string}
-     * @memberof SuccessSuccessResponse
-     */
     'message': string;
 }
 
 /**
  * AnnouncementsApi - axios parameter creator
- * @export
  */
 export const AnnouncementsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -822,8 +301,8 @@ export const AnnouncementsApiAxiosParamCreator = function (configuration?: Confi
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -878,8 +357,8 @@ export const AnnouncementsApiAxiosParamCreator = function (configuration?: Confi
                     currentTime;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -894,7 +373,6 @@ export const AnnouncementsApiAxiosParamCreator = function (configuration?: Confi
 
 /**
  * AnnouncementsApi - functional programming interface
- * @export
  */
 export const AnnouncementsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = AnnouncementsApiAxiosParamCreator(configuration)
@@ -933,7 +411,6 @@ export const AnnouncementsApiFp = function(configuration?: Configuration) {
 
 /**
  * AnnouncementsApi - factory interface
- * @export
  */
 export const AnnouncementsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = AnnouncementsApiFp(configuration)
@@ -966,9 +443,6 @@ export const AnnouncementsApiFactory = function (configuration?: Configuration, 
 
 /**
  * AnnouncementsApi - object-oriented interface
- * @export
- * @class AnnouncementsApi
- * @extends {BaseAPI}
  */
 export class AnnouncementsApi extends BaseAPI {
     /**
@@ -977,7 +451,6 @@ export class AnnouncementsApi extends BaseAPI {
      * @param {number} announcementId announcement ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof AnnouncementsApi
      */
     public getAnnouncement(announcementId: number, options?: RawAxiosRequestConfig) {
         return AnnouncementsApiFp(this.configuration).getAnnouncement(announcementId, options).then((request) => request(this.axios, this.basePath));
@@ -992,16 +465,12 @@ export class AnnouncementsApi extends BaseAPI {
      * @param {string} [currentTime] Allows to filter the list of announcements to fetch by provided time. If specified only announcements with start_time &lt;&#x3D; current_time and end_time &gt;&#x3D; current_time are returned.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof AnnouncementsApi
      */
     public getAnnouncementsList(offset?: string, limit?: string, order?: GetAnnouncementsListOrderEnum, currentTime?: string, options?: RawAxiosRequestConfig) {
         return AnnouncementsApiFp(this.configuration).getAnnouncementsList(offset, limit, order, currentTime, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
-/**
- * @export
- */
 export const GetAnnouncementsListOrderEnum = {
     Desc: 'DESC',
     Asc: 'ASC'
@@ -1011,7 +480,6 @@ export type GetAnnouncementsListOrderEnum = typeof GetAnnouncementsListOrderEnum
 
 /**
  * ApiTokenApi - axios parameter creator
- * @export
  */
 export const ApiTokenApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -1038,8 +506,8 @@ export const ApiTokenApiAxiosParamCreator = function (configuration?: Configurat
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -1072,8 +540,8 @@ export const ApiTokenApiAxiosParamCreator = function (configuration?: Configurat
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -1106,8 +574,8 @@ export const ApiTokenApiAxiosParamCreator = function (configuration?: Configurat
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -1122,7 +590,6 @@ export const ApiTokenApiAxiosParamCreator = function (configuration?: Configurat
 
 /**
  * ApiTokenApi - functional programming interface
- * @export
  */
 export const ApiTokenApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = ApiTokenApiAxiosParamCreator(configuration)
@@ -1168,7 +635,6 @@ export const ApiTokenApiFp = function(configuration?: Configuration) {
 
 /**
  * ApiTokenApi - factory interface
- * @export
  */
 export const ApiTokenApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = ApiTokenApiFp(configuration)
@@ -1205,9 +671,6 @@ export const ApiTokenApiFactory = function (configuration?: Configuration, baseP
 
 /**
  * ApiTokenApi - object-oriented interface
- * @export
- * @class ApiTokenApi
- * @extends {BaseAPI}
  */
 export class ApiTokenApi extends BaseAPI {
     /**
@@ -1215,7 +678,6 @@ export class ApiTokenApi extends BaseAPI {
      * @summary create api token
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ApiTokenApi
      */
     public createApiToken(options?: RawAxiosRequestConfig) {
         return ApiTokenApiFp(this.configuration).createApiToken(options).then((request) => request(this.axios, this.basePath));
@@ -1226,7 +688,6 @@ export class ApiTokenApi extends BaseAPI {
      * @summary delete api token
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ApiTokenApi
      */
     public deleteApiToken(options?: RawAxiosRequestConfig) {
         return ApiTokenApiFp(this.configuration).deleteApiToken(options).then((request) => request(this.axios, this.basePath));
@@ -1237,7 +698,6 @@ export class ApiTokenApi extends BaseAPI {
      * @summary get api token
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof ApiTokenApi
      */
     public getApiToken(options?: RawAxiosRequestConfig) {
         return ApiTokenApiFp(this.configuration).getApiToken(options).then((request) => request(this.axios, this.basePath));
@@ -1248,7 +708,6 @@ export class ApiTokenApi extends BaseAPI {
 
 /**
  * DeviceApi - axios parameter creator
- * @export
  */
 export const DeviceApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -1279,8 +738,8 @@ export const DeviceApiAxiosParamCreator = function (configuration?: Configuratio
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -1313,8 +772,8 @@ export const DeviceApiAxiosParamCreator = function (configuration?: Configuratio
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -1329,7 +788,6 @@ export const DeviceApiAxiosParamCreator = function (configuration?: Configuratio
 
 /**
  * DeviceApi - functional programming interface
- * @export
  */
 export const DeviceApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = DeviceApiAxiosParamCreator(configuration)
@@ -1364,7 +822,6 @@ export const DeviceApiFp = function(configuration?: Configuration) {
 
 /**
  * DeviceApi - factory interface
- * @export
  */
 export const DeviceApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = DeviceApiFp(configuration)
@@ -1393,9 +850,6 @@ export const DeviceApiFactory = function (configuration?: Configuration, basePat
 
 /**
  * DeviceApi - object-oriented interface
- * @export
- * @class DeviceApi
- * @extends {BaseAPI}
  */
 export class DeviceApi extends BaseAPI {
     /**
@@ -1404,7 +858,6 @@ export class DeviceApi extends BaseAPI {
      * @param {string} deviceId Device identifier
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof DeviceApi
      */
     public getDevice(deviceId: string, options?: RawAxiosRequestConfig) {
         return DeviceApiFp(this.configuration).getDevice(deviceId, options).then((request) => request(this.axios, this.basePath));
@@ -1415,7 +868,6 @@ export class DeviceApi extends BaseAPI {
      * @summary List available devices
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof DeviceApi
      */
     public listDevices(options?: RawAxiosRequestConfig) {
         return DeviceApiFp(this.configuration).listDevices(options).then((request) => request(this.axios, this.basePath));
@@ -1426,7 +878,6 @@ export class DeviceApi extends BaseAPI {
 
 /**
  * JobApi - axios parameter creator
- * @export
  */
 export const JobApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
@@ -1457,8 +908,8 @@ export const JobApiAxiosParamCreator = function (configuration?: Configuration) 
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -1495,8 +946,8 @@ export const JobApiAxiosParamCreator = function (configuration?: Configuration) 
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -1533,8 +984,8 @@ export const JobApiAxiosParamCreator = function (configuration?: Configuration) 
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -1571,8 +1022,8 @@ export const JobApiAxiosParamCreator = function (configuration?: Configuration) 
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -1609,8 +1060,8 @@ export const JobApiAxiosParamCreator = function (configuration?: Configuration) 
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -1682,8 +1133,8 @@ export const JobApiAxiosParamCreator = function (configuration?: Configuration) 
                 localVarQueryParameter['order'] = order;
             }
 
+            localVarHeaderParameter['Accept'] = 'application/json';
 
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -1717,9 +1168,8 @@ export const JobApiAxiosParamCreator = function (configuration?: Configuration) 
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-
-    
             localVarHeaderParameter['Content-Type'] = 'application/json';
+            localVarHeaderParameter['Accept'] = 'application/json';
 
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -1736,7 +1186,6 @@ export const JobApiAxiosParamCreator = function (configuration?: Configuration) 
 
 /**
  * JobApi - functional programming interface
- * @export
  */
 export const JobApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = JobApiAxiosParamCreator(configuration)
@@ -1843,7 +1292,6 @@ export const JobApiFp = function(configuration?: Configuration) {
 
 /**
  * JobApi - factory interface
- * @export
  */
 export const JobApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
     const localVarFp = JobApiFp(configuration)
@@ -1929,9 +1377,6 @@ export const JobApiFactory = function (configuration?: Configuration, basePath?:
 
 /**
  * JobApi - object-oriented interface
- * @export
- * @class JobApi
- * @extends {BaseAPI}
  */
 export class JobApi extends BaseAPI {
     /**
@@ -1940,7 +1385,6 @@ export class JobApi extends BaseAPI {
      * @param {string} jobId Job identifier
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof JobApi
      */
     public cancelJob(jobId: string, options?: RawAxiosRequestConfig) {
         return JobApiFp(this.configuration).cancelJob(jobId, options).then((request) => request(this.axios, this.basePath));
@@ -1952,7 +1396,6 @@ export class JobApi extends BaseAPI {
      * @param {string} jobId Job identifier
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof JobApi
      */
     public deleteJob(jobId: string, options?: RawAxiosRequestConfig) {
         return JobApiFp(this.configuration).deleteJob(jobId, options).then((request) => request(this.axios, this.basePath));
@@ -1964,7 +1407,6 @@ export class JobApi extends BaseAPI {
      * @param {string} jobId Job identifier
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof JobApi
      */
     public getJob(jobId: string, options?: RawAxiosRequestConfig) {
         return JobApiFp(this.configuration).getJob(jobId, options).then((request) => request(this.axios, this.basePath));
@@ -1976,7 +1418,6 @@ export class JobApi extends BaseAPI {
      * @param {string} jobId Job identifier
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof JobApi
      */
     public getJobStatus(jobId: string, options?: RawAxiosRequestConfig) {
         return JobApiFp(this.configuration).getJobStatus(jobId, options).then((request) => request(this.axios, this.basePath));
@@ -1988,7 +1429,6 @@ export class JobApi extends BaseAPI {
      * @param {string} jobId Job identifier
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof JobApi
      */
     public getSselog(jobId: string, options?: RawAxiosRequestConfig) {
         return JobApiFp(this.configuration).getSselog(jobId, options).then((request) => request(this.axios, this.basePath));
@@ -2006,7 +1446,6 @@ export class JobApi extends BaseAPI {
      * @param {ListJobsOrderEnum} [order] Specify jobs order according to creation time (createdAt property)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof JobApi
      */
     public listJobs(fields?: string, startTime?: string, endTiime?: string, q?: string, page?: number, size?: number, order?: ListJobsOrderEnum, options?: RawAxiosRequestConfig) {
         return JobApiFp(this.configuration).listJobs(fields, startTime, endTiime, q, page, size, order, options).then((request) => request(this.axios, this.basePath));
@@ -2018,16 +1457,12 @@ export class JobApi extends BaseAPI {
      * @param {JobsSubmitJobRequest} [jobsSubmitJobRequest] Quantum job to be submitted
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
-     * @memberof JobApi
      */
     public submitJob(jobsSubmitJobRequest?: JobsSubmitJobRequest, options?: RawAxiosRequestConfig) {
         return JobApiFp(this.configuration).submitJob(jobsSubmitJobRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
-/**
- * @export
- */
 export const ListJobsOrderEnum = {
     Desc: 'DESC',
     Asc: 'ASC'

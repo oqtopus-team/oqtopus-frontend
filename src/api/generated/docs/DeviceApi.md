@@ -55,6 +55,7 @@ const { status, data } = await apiInstance.getDevice(
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | job response |  -  |
+|**403** | Cannot access device with device_id |  -  |
 |**404** | Device with device_id not found |  -  |
 |**500** | Internal Server Error |  -  |
 
