@@ -4,6 +4,7 @@ import { Card } from './Card';
 import { Button } from './Button';
 import { Divider } from './Divider';
 import { Spacer } from './Spacer';
+import dompurify from 'dompurify';
 
 interface Props {
   show: boolean;
@@ -37,7 +38,7 @@ export const ConfirmModal = ({ show, title, message, onConfirm, onHide }: Props)
         </div>
         <Divider className="!my-[15px]" />
         <div className="text-sm">
-          <p dangerouslySetInnerHTML={{ __html: message }} />
+          <p dangerouslySetInnerHTML={{ __html: dompurify.sanitize(message) }} />
         </div>
         <Spacer className="h-7" />
         <div className={clsx('flex', 'justify-end', 'gap-2')}>
