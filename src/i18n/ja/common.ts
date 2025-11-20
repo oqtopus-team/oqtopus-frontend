@@ -8,5 +8,5 @@ export default {
   date_format: 'yyyy/MM/dd HH:mm:ss',
   errors: {
     common: '問題が発生しました',
-  }
+  },
 };

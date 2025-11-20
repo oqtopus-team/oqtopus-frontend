@@ -36,8 +36,9 @@ export default {
   },
   disclaimer: `Please check <1>the term of use</1> and <3>the private policy</3>, and if you agree, please complete the account registration below.`,
   errors: {
-    email_already_registered: "The email address you entered is already registered",
-    signup_failed_prereq: "Sign up failed.\nPre-registration is required for sign up.\nIf you have not registered, please contact the administrator.",
+    email_already_registered: 'The email address you entered is already registered',
+    signup_failed_prereq:
+      'Sign up failed.\nPre-registration is required for sign up.\nIf you have not registered, please contact the administrator.',
     authentication_failed: 'Authentication failed.',
-  }
+  },
 };

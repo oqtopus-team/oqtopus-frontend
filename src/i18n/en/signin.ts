@@ -31,5 +31,5 @@ export default {
     totp_setup_failed: 'Failed to set up TOTP.',
     totp_verification_failed: 'TOTP verification failed.',
     api_token_reissue_failed: 'Failed to reissue API token.',
-  }
+  },
 };

@@ -23,12 +23,8 @@ interface FormInput {
 
 const validationRules = (t: (key: string) => string): yup.ObjectSchema<FormInput> =>
   yup.object({
-    username: yup
-      .string()
-      .required(t('signin.form.error_message.user_name')),
-    password: yup
-      .string()
-      .required(t('signin.form.error_message.password')),
+    username: yup.string().required(t('signin.form.error_message.user_name')),
+    password: yup.string().required(t('signin.form.error_message.password')),
   });
 
 export default function LoginPage() {
@@ -47,7 +43,7 @@ export default function LoginPage() {
               navigate('/confirm-mfa');
               return;
             }
-            toast(t(message), errorToastConfig)
+            toast(t(message), errorToastConfig);
             if (message === 'signup.confirm.form.mfa_setup_request') {
               navigate('/mfa');
               return;
@@ -55,18 +51,17 @@ export default function LoginPage() {
             setProcessingFalse();
           })
           .catch((error) => {
-            const errorMsg = error.message ?? t('common.errors.default')
-            toast(errorMsg, errorToastConfig)
+            const errorMsg = error.message ?? t('common.errors.default');
+            toast(errorMsg, errorToastConfig);
           });
       };
     }
   );
 
-  const { termOfService, privacyPolicy }
-    = {
-      termOfService: import.meta.env.VITE_APP_TERM_OF_SERVICE_PATH ?? "",
-      privacyPolicy: import.meta.env.VITE_APP_PRIVACY_POLICY_PATH ?? ""
-    };
+  const { termOfService, privacyPolicy } = {
+    termOfService: import.meta.env.VITE_APP_TERM_OF_SERVICE_PATH ?? '',
+    privacyPolicy: import.meta.env.VITE_APP_PRIVACY_POLICY_PATH ?? '',
+  };
 
   return (
     <div className={clsx('w-[300px]', 'pt-8', 'text-sm')}>
@@ -95,10 +90,9 @@ export default function LoginPage() {
           {t('signin.forgot_password')}
         </NavLink>
         <Spacer className="h-2.5" />
-        { termOfService !== "" && privacyPolicy !== ""
-          ? <SignUpAgreement termsOfService={termOfService} privacyPolicy={privacyPolicy} />
-          : null
-        }
+        {termOfService !== '' && privacyPolicy !== '' ? (
+          <SignUpAgreement termsOfService={termOfService} privacyPolicy={privacyPolicy} />
+        ) : null}
         <Spacer className="h-3" />
         <Button type="submit" color="secondary" loading={processing}>
           {t('signin.button')}

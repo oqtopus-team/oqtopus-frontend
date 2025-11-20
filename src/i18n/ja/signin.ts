@@ -31,5 +31,5 @@ export default {
     totp_setup_failed: 'TOTPの設定に失敗しました。',
     totp_verification_failed: 'TOTPの認証に失敗しました。',
     api_token_reissue_failed: 'APIトークンの再発行に失敗しました。',
-  }
+  },
 };

@@ -48,7 +48,7 @@ export type QuantumGate = RegularQuantumGate | ParametrizedQuantumGate | CustomQ
 
 export const parametrizedGates: ParametrizedGateTag[] = ['rx', 'ry', 'rz'];
 export const controlledGates: GateTag[] = ['cx', 'cz'];
-const multiQubitGates: GateTag[] = [...controlledGates, 'swap']
+const multiQubitGates: GateTag[] = [...controlledGates, 'swap'];
 
 export function createQuantumGate(tag: GateTag): QuantumGate {
   if (tag === 'rx' || tag === 'ry' || tag === 'rz') {

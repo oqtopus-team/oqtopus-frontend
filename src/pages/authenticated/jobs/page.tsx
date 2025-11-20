@@ -166,11 +166,9 @@ export default function JobListPage() {
     //TODO: Add handling "status" to getJobs request and remove code below
     if (!params.status && selected) {
       setSelectedJobs(jobs);
-    }
-    else if(params.status && selected) {
+    } else if (params.status && selected) {
       setSelectedJobs(jobs.filter((j) => j.status === params.status));
-    }
-    else {
+    } else {
       setSelectedJobs([]);
     }
   };

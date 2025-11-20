@@ -42,8 +42,8 @@ export const JobListItem = ({
         toast(message, successToastConfig);
       })
       .catch((err) => {
-        const errorMsg = err.message ?? t('common.errors.default')
-        toast(errorMsg, errorToastConfig)
+        const errorMsg = err.message ?? t('common.errors.default');
+        toast(errorMsg, errorToastConfig);
       })
       .finally(() => {
         onJobModified();
@@ -63,8 +63,8 @@ export const JobListItem = ({
         toast(message, successToastConfig);
       })
       .catch((err) => {
-        const errorMsg = err.message ?? t('common.errors.default')
-        toast(errorMsg, errorToastConfig)
+        const errorMsg = err.message ?? t('common.errors.default');
+        toast(errorMsg, errorToastConfig);
       })
       .finally(() => {
         onJobModified();
