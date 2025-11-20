@@ -176,7 +176,7 @@ const transpilerOptions = {
 
 const mitigationOptions = {
   none: {},
-  ro_pseudo_inverse: { readout: "pseudo_inverse" }
+  ro_pseudo_inverse: { ro_error_mitigation: "pseudo_inverse" }
 }
 
 export const ControlPanelExecution = (props: ControlPanelExecutionProps) => {
