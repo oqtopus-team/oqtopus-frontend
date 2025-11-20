@@ -291,62 +291,62 @@ export default function JobListPage() {
           >
             <table className={clsx('w-full')}>
               <thead>
-                <tr>
-                  <th>
-                    <input
-                      type="checkbox"
-                      checked={areAllJobsSelected()}
-                      onChange={(e) => handleAllJobsSelectionChange(e.target.checked)}
-                    />
-                  </th>
-                  <th>{t('job.list.table.id')}</th>
-                  <th>{t('job.list.table.name')}</th>
-                  <th>{t('job.list.table.device')}</th>
-                  <th>{t('job.list.table.status')}</th>
-                  <th>{t('job.list.table.date')}</th>
-                  <th>{t('job.list.table.operation')}</th>
-                </tr>
+              <tr>
+                <th>
+                  <input
+                    type="checkbox"
+                    checked={areAllJobsSelected()}
+                    onChange={(e) => handleAllJobsSelectionChange(e.target.checked)}
+                  />
+                </th>
+                <th>{t('job.list.table.id')}</th>
+                <th>{t('job.list.table.name')}</th>
+                <th>{t('job.list.table.device')}</th>
+                <th>{t('job.list.table.status')}</th>
+                <th>{t('job.list.table.date')}</th>
+                <th>{t('job.list.table.operation')}</th>
+              </tr>
               </thead>
               <tbody>
-                {jobs
-                  .filter((job) => {
-                    if (params.status && job.status !== params.status) {
-                      return false;
-                    }
-                    if (
-                      params.query &&
-                      !job.id.includes(params.query) &&
-                      !job.name.includes(params.query) &&
-                      !job.description?.includes(params.query)
-                    ) {
-                      return false;
-                    }
+              {jobs
+                .filter((job) => {
+                  if (params.status && job.status !== params.status) {
+                    return false;
+                  }
+                  if (
+                    params.query &&
+                    !job.id.includes(params.query) &&
+                    !job.name.includes(params.query) &&
+                    !job.description?.includes(params.query)
+                  ) {
+                    return false;
+                  }
 
-                    return true;
-                  })
-                  .map((job) => (
-                    <JobListItem
-                      key={job.id}
-                      job={job}
-                      onJobModified={reloadJobs}
-                      selectedJobs={selectedJobs}
-                      onJobSelectionChange={handleJobSelectionChange}
-                    />
-                  ))}
-                {!loading && jobs.length === 0 && (
-                  <tr>
-                    <td colSpan={4}>{t('job.list.nodata')}</td>
-                  </tr>
-                )}
-                {loading && (
-                  <tr>
-                    <td colSpan={5} className={clsx('text-center')}>
-                      <div className={clsx('justify-center')}>
-                        <Loader />
-                      </div>
-                    </td>
-                  </tr>
-                )}
+                  return true;
+                })
+                .map((job) => (
+                  <JobListItem
+                    key={job.id}
+                    job={job}
+                    onJobModified={reloadJobs}
+                    selectedJobs={selectedJobs}
+                    onJobSelectionChange={handleJobSelectionChange}
+                  />
+                ))}
+              {!loading && jobs.length === 0 && (
+                <tr>
+                  <td colSpan={4}>{t('job.list.nodata')}</td>
+                </tr>
+              )}
+              {loading && (
+                <tr>
+                  <td colSpan={5} className={clsx('text-center')}>
+                    <div className={clsx('justify-center')}>
+                      <Loader />
+                    </div>
+                  </td>
+                </tr>
+              )}
               </tbody>
             </table>
           </InfiniteScroll>
@@ -406,6 +406,7 @@ const Loadmore = (props: { handleClick: () => void }) => {
 };
 
 const generateSearchParams = (params: JobSearchParams): string => {
+  console.log('params', params);
   const searchParams = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
     if (value === undefined || value === '') {
