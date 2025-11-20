@@ -5,7 +5,9 @@ info:
   contact:
     name: oqtopus-team
     email: oqtopus-team[at]googlegroups.com
-  description: OQTOPUS Cloud User API. This API is used to interact with the OQTOPUS Cloud service. The API provides endpoints to manage devices, jobs, and results.
+  description: >-
+    OQTOPUS Cloud User API. This API is used to interact with the OQTOPUS Cloud
+    service. The API provides endpoints to manage devices, jobs, and results.
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
@@ -69,6 +71,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/devices.DeviceInfo'
+        '403':
+          description: Cannot access device with device_id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error.ForbiddenError'
         '404':
           description: Device with device_id not found
           content:
@@ -86,24 +94,37 @@ paths:
       tags:
         - job
       summary: List all quantum jobs
-      description: |-
-        By default, all available job's properties are returned. Use 'fields' parameter to specify exact list of properties to get for each job.
+      description: >-
+        By default, all available job's properties are returned. Use 'fields'
+        parameter to specify exact list of properties to get for each job.
 
-        List of jobs can be filtered by job creation time or search text with 'start_time', 'end_time' and 'q' parameters.
 
-        Jobs are fetched with the pagination mechanism. This can be configured with 'page' and 'perPage' parameters. Check response's 'Link' header for pagination details.
+        List of jobs can be filtered by job creation time or search text with
+        'start_time', 'end_time' and 'q' parameters.
+
+
+        Jobs are fetched with the pagination mechanism. This can be configured
+        with 'page' and 'perPage' parameters. Check response's 'Link' header for
+        pagination details.
       operationId: list_jobs
       security:
         - BearerAuth: []
       parameters:
         - name: fields
           in: query
-          description: |-
-            Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.
+          description: >-
+            Allows to specify an exact list of job properties to fetch for a
+            single job. Each element of the list must be a valid name of job
+            property.
 
-            If parameter is specified and requested job field is not defined for a job null is returned.
 
-            If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
+            If parameter is specified and requested job field is not defined for
+            a job null is returned.
+
+
+            If parameter is omitted all available job properties are returned.
+            Undefined job properties (null properties) are not included in the
+            response.
           required: false
           schema:
             type: string
@@ -111,7 +132,10 @@ paths:
             example: job_id,status,name
         - name: start_time
           in: query
-          description: Allows to filter the list of jobs to fetch by creation time. If specified only jobs with creation time  (createdAt property) >= start_time are returned.
+          description: >-
+            Allows to filter the list of jobs to fetch by creation time. If
+            specified only jobs with creation time  (createdAt property) >=
+            start_time are returned.
           required: false
           schema:
             type: string
@@ -119,7 +143,10 @@ paths:
             example: '2022-10-19T11:45:34+09:00'
         - name: end_tiime
           in: query
-          description: Allows to filter the list of jobs to fetch by to creation time. If specified only jobs with creation time (createdAt property) <= end_time are returned.
+          description: >-
+            Allows to filter the list of jobs to fetch by to creation time. If
+            specified only jobs with creation time (createdAt property) <=
+            end_time are returned.
           required: false
           schema:
             type: string
@@ -127,7 +154,10 @@ paths:
             example: '2022-10-19T11:45:34+09:00'
         - name: q
           in: query
-          description: Allows to filter the list of jobs to fetch by job's id, name and description. If specified only jobs which id, name or description contains specified search string are returned.
+          description: >-
+            Allows to filter the list of jobs to fetch by job's id, name and
+            description. If specified only jobs which id, name or description
+            contains specified search string are returned.
           required: false
           schema:
             type: string
@@ -135,9 +165,11 @@ paths:
             example: Bell
         - name: page
           in: query
-          description: |-
+          description: >-
             Set jobs list page number to fetch.
-            If requested page number exceeds number of all pages last page is returned.
+
+            If requested page number exceeds number of all pages last page is
+            returned.
           required: false
           schema:
             type: integer
@@ -204,7 +236,9 @@ paths:
                   job_type: sampling
                   job_info:
                     program:
-                      - OPENQASM 3; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;
+                      - >-
+                        OPENQASM 3; qubit[2] q; bit[2] c; h q[0]; cnot q[0],
+                        q[1]; c = measure q;
                   transpiler_info: {}
                   simulator_info:
                     n_qubits: 5
@@ -226,7 +260,9 @@ paths:
                   job_type: estimation
                   job_info:
                     program:
-                      - OPENQASM 3; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;
+                      - >-
+                        OPENQASM 3; qubit[2] q; bit[2] c; h q[0]; cnot q[0],
+                        q[1]; c = measure q;
                     operator:
                       - pauli: X 0 X 1
                         coeff: 1.5
@@ -267,6 +303,14 @@ paths:
                 $ref: '#/components/schemas/error.UnauthorizedError'
               example:
                 message: Unauthorized
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error.ForbiddenError'
+              example:
+                message: Forbidden
   /jobs/{job_id}:
     get:
       tags:
@@ -318,7 +362,10 @@ paths:
       tags:
         - job
       summary: Delete job
-      description: 'Deletes quantum job and related result<br/><br/>Operation is valid only for job with status: succeeded, failed and cancelled. submitted, ready and running jobs must be cancelled before deletion.'
+      description: >-
+        Deletes quantum job and related result<br/><br/>Operation is valid only
+        for job with status: succeeded, failed and cancelled. submitted, ready
+        and running jobs must be cancelled before deletion.
       operationId: delete_job
       security:
         - BearerAuth: []
@@ -414,7 +461,9 @@ paths:
       tags:
         - job
       summary: Cancel job
-      description: 'Start a procedure to cancel quantum job.<br/><br/> Operation is valid only for job with status: submitted, ready or running.'
+      description: >-
+        Start a procedure to cancel quantum job.<br/><br/> Operation is valid
+        only for job with status: submitted, ready or running.
       operationId: cancel_job
       security:
         - BearerAuth: []
@@ -659,7 +708,10 @@ paths:
             default: ASC
         - name: current_time
           in: query
-          description: Allows to filter the list of announcements to fetch by provided time. If specified only announcements with start_time <= current_time and end_time >= current_time are returned.
+          description: >-
+            Allows to filter the list of announcements to fetch by provided
+            time. If specified only announcements with start_time <=
+            current_time and end_time >= current_time are returned.
           required: false
           schema:
             type: string
@@ -671,7 +723,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/announcements.GetAnnouncementsListResponse'
+                $ref: >-
+                  #/components/schemas/announcements.GetAnnouncementsListResponse
         '401':
           description: Unauthorized
         '403':
@@ -821,7 +874,9 @@ components:
               }
             }
         calibrated_at:
-          description: Parameter available only for `QPU` devices with available calibration data
+          description: >-
+            Parameter available only for `QPU` devices with available
+            calibration data
           type: string
           format: date-time
           example: '2022-10-19T11:45:34'
@@ -892,6 +947,13 @@ components:
       required:
         - message
     error.InternalServerError:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+    error.ForbiddenError:
       type: object
       properties:
         message:
@@ -970,9 +1032,12 @@ components:
               '01': 75
     jobs.EstimationResult:
       type: object
-      description: |
-        *(Only for estimation jobs)* The estimated expectation value and the standard deviation
-        of the operators specified in `job_info.operator` field which is intended to be provided for estimation jobs.
+      description: >
+        *(Only for estimation jobs)* The estimated expectation value and the
+        standard deviation
+
+        of the operators specified in `job_info.operator` field which is
+        intended to be provided for estimation jobs.
       properties:
         exp_value:
           description: The estimated expectation value
@@ -995,7 +1060,9 @@ components:
         transpiled_program:
           type: string
           nullable: true
-          example: OPENQASM 3; include "stdgates.inc"; qubit[2] _all_qubits; let q = _all_qubits[0:1]; h q[0]; cx q[0], q[1];
+          example: >-
+            OPENQASM 3; include "stdgates.inc"; qubit[2] _all_qubits; let q =
+            _all_qubits[0:1]; h q[0]; cx q[0], q[1];
         stats:
           type: object
           properties: {}
@@ -1015,16 +1082,23 @@ components:
       properties:
         program:
           type: array
-          description: A list of OPENQASM3 program. For non-multiprogramming jobs, this field is assumed to contain exactly one program. Otherwise, those programs are combined according to the multiprogramming machinery.
+          description: >-
+            A list of OPENQASM3 program. For non-multiprogramming jobs, this
+            field is assumed to contain exactly one program. Otherwise, those
+            programs are combined according to the multiprogramming machinery.
           items:
             type: string
-          example: '[ "OPENQASM 3; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;" ]'
+          example: >-
+            [ "OPENQASM 3; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c =
+            measure q;" ]
         combined_program:
           type: string
           description: For multiprogramming jobs, this field contains the combined circuit.
         operator:
-          description: |
-            *(Only for estimation jobs)* The operator (or observable) for which the expectation
+          description: >
+            *(Only for estimation jobs)* The operator (or observable) for which
+            the expectation
+
             value is to be estimated.
           type: array
           items:
@@ -1120,14 +1194,21 @@ components:
         job_type: estimation
         job_info:
           program:
-            - OPENQASM 3; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;
+            - >-
+              OPENQASM 3; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c =
+              measure q;
           operator:
             - pauli: X 0 Y 1 Z 5 I 2
           transpiled_code: '{}'
           result: '{}'
           reason: ''
-        transpiler_info: '{ "qubit_allocation": { "0": 12, "1": 16 }, "skip_transpilation": false, "seed_transpilation": 873 },'
-        simulator_info: '{ "n_qubits": 5, "n_nodes": 12, "n_per_node": 2, "seed_simulation": 39058567, "simulation_opt": { "optimization_method": "light", "optimization_block_size": 1, "optimization_swap_level": 1 } }'
+        transpiler_info: >-
+          { "qubit_allocation": { "0": 12, "1": 16 }, "skip_transpilation":
+          false, "seed_transpilation": 873 },
+        simulator_info: >-
+          { "n_qubits": 5, "n_nodes": 12, "n_per_node": 2, "seed_simulation":
+          39058567, "simulation_opt": { "optimization_method": "light",
+          "optimization_block_size": 1, "optimization_swap_level": 1 } }
         mitigation_info: '{ "ro_error_mitigation": "pseudo_inverse" }'
         shots: 1000
         status: submitted
@@ -1137,15 +1218,22 @@ components:
         running_at: '2022-10-19T11:45:34+09:00'
         ended_at: '2022-10-19T11:45:34+09:00'
     jobs.SubmitJobInfo:
-      description: All fields in this schema also exist in the `JobInfo` schema and have the same meaning as their counterparts in the `JobInfo` schema.
+      description: >-
+        All fields in this schema also exist in the `JobInfo` schema and have
+        the same meaning as their counterparts in the `JobInfo` schema.
       type: object
       properties:
         program:
           type: array
-          description: A list of OPENQASM3 program. For non-multiprogramming jobs, this field is assumed to contain exactly one program. Otherwise, those programs are combined according to the multiprogramming machinery.
+          description: >-
+            A list of OPENQASM3 program. For non-multiprogramming jobs, this
+            field is assumed to contain exactly one program. Otherwise, those
+            programs are combined according to the multiprogramming machinery.
           items:
             type: string
-          example: '[ "OPENQASM 3; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;" ]'
+          example: >-
+            [ "OPENQASM 3; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c =
+            measure q;" ]
         operator:
           type: array
           x-see-also:
@@ -1313,7 +1401,9 @@ components:
         job_type: estimation
         job_info:
           program:
-            - OPENQASM 3; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;
+            - >-
+              OPENQASM 3; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c =
+              measure q;
           operator:
             - pauli: X 0 Y 1 Z 5 I 2
               coeff: 1
@@ -1384,13 +1474,6 @@ components:
           format: date-time
           example: '2025-01-09T12:34:56'
           description: The expiration date of the api token
-    error.ForbiddenError:
-      type: object
-      properties:
-        message:
-          type: string
-      required:
-        - message
     announcements.GetAnnouncementResponse:
       type: object
       properties:
