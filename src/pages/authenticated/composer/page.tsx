@@ -209,11 +209,11 @@ export default function Page() {
           jobId={jobId}
           jobType={jobType}
           busy={busy}
-          mkProgram={() => ({
+          mkProgram={{
             program: generateQASMCode(circuit, Object.values(circuitService.customGates)),
             qubitNumber: circuit.length,
-          })}
-          mkOperator={() => renderOperator(observable)}
+          }}
+          mkOperator={renderOperator(observable)}
         />
       </div>
     </>
