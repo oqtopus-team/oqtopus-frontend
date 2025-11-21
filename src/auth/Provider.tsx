@@ -94,7 +94,7 @@ const useProvideAuth = (): UseAuth => {
       }
       return { success: true, message: '' };
     } catch (error) {
-      const errorMessage = (error as Error).message ?? 'signin.errors.authentication_failed'
+      const errorMessage = (error as Error).message ?? 'signin.errors.authentication_failed';
       return {
         success: false,
         message: errorMessage,
@@ -110,7 +110,7 @@ const useProvideAuth = (): UseAuth => {
       setInitialized(true);
       return { success: true, message: '' };
     } catch (error) {
-      const errorMessage = (error as Error).message ?? 'signin.errors.logout_failed'
+      const errorMessage = (error as Error).message ?? 'signin.errors.logout_failed';
       return {
         success: false,
         message: errorMessage,
@@ -141,7 +141,7 @@ const useProvideAuth = (): UseAuth => {
       setInitialized(true);
       return { success: true, message: '' };
     } catch (error: any) {
-      const errorMessage = (error as Error).message
+      const errorMessage = (error as Error).message;
       if (error.code === 'UsernameExistsException') {
         return {
           success: false,
@@ -179,7 +179,7 @@ const useProvideAuth = (): UseAuth => {
       setInitialized(true);
       return { success: true, message: '' };
     } catch (error) {
-      const errorMessage = (error as Error).message ?? 'signup.errors.authentication_failed'
+      const errorMessage = (error as Error).message ?? 'signup.errors.authentication_failed';
       return {
         success: false,
         message: errorMessage,
@@ -194,7 +194,7 @@ const useProvideAuth = (): UseAuth => {
       setInitialized(true);
       return { success: true, message: '' };
     } catch (error: any) {
-      const errorMessage = (error as Error).message
+      const errorMessage = (error as Error).message;
       if (error.code === 'UserNotFoundException') {
         return {
           success: false,
@@ -220,7 +220,7 @@ const useProvideAuth = (): UseAuth => {
       setInitialized(true);
       return { success: true, message: '' };
     } catch (error) {
-      const errorMessage = (error as Error).message ?? 'signin.errors.password_change_failed'
+      const errorMessage = (error as Error).message ?? 'signin.errors.password_change_failed';
       return {
         success: false,
         message: errorMessage,
@@ -239,7 +239,7 @@ const useProvideAuth = (): UseAuth => {
       setQRCode(code);
       return { success: true, message: '' };
     } catch (error) {
-      const errorMessage = (error as Error).message ?? 'signin.errors.totp_setup_failed'
+      const errorMessage = (error as Error).message ?? 'signin.errors.totp_setup_failed';
       return {
         success: false,
         message: errorMessage,
@@ -257,7 +257,7 @@ const useProvideAuth = (): UseAuth => {
       setInitialized(true);
       return { success: true, message: '' };
     } catch (error) {
-      const errorMessage = (error as Error).message ?? 'signin.errors.totp_verification_failed'
+      const errorMessage = (error as Error).message ?? 'signin.errors.totp_verification_failed';
       return {
         success: false,
         message: errorMessage,
@@ -272,7 +272,7 @@ const useProvideAuth = (): UseAuth => {
       setInitialized(true);
       return { success: true, message: '' };
     } catch (error) {
-      const errorMessage = (error as Error).message ?? 'signin.errors.totp_verification_failed'
+      const errorMessage = (error as Error).message ?? 'signin.errors.totp_verification_failed';
       return {
         success: false,
         message: errorMessage,
@@ -299,7 +299,7 @@ const useProvideAuth = (): UseAuth => {
         message: 'signin.confirm.api_token_reissued',
       };
     } catch (error) {
-      const errorMessage = (error as Error).message ?? 'signin.errors.api_token_reissue_failed'
+      const errorMessage = (error as Error).message ?? 'signin.errors.api_token_reissue_failed';
       return {
         success: false,
         message: errorMessage,

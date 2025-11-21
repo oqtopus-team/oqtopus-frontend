@@ -77,10 +77,10 @@ export const Sidebar = () => {
       name: t('sidebar.nav.logout'),
       onClick: () => {
         auth.signOut().then(({ success, message }) => {
-          if(!success) {
-            toast(message, errorToastConfig)
+          if (!success) {
+            toast(message, errorToastConfig);
           }
-        })
+        });
         navigate('/login');
       },
       icon: <SVGLogout />,
