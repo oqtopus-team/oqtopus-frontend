@@ -8,5 +8,5 @@ export default {
   date_format: 'MM/dd/yyyy HH:mm:ss',
   errors: {
     default: 'Something went wrong',
-  }
+  },
 };

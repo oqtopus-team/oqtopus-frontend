@@ -43,8 +43,8 @@ export default function ConfirmMFAPage() {
             setProcessingFalse();
           })
           .catch((error) => {
-            const errorMsg = error.message ?? t('common.errors.default')
-            toast(errorMsg, errorToastConfig)
+            const errorMsg = error.message ?? t('common.errors.default');
+            toast(errorMsg, errorToastConfig);
           });
       };
     }

@@ -70,8 +70,8 @@ export default function ForgotPasswordConfirmPage() {
             setProcessingFalse();
           })
           .catch((error) => {
-            const errorMsg = error.message ?? t('common.errors.default')
-            toast(errorMsg, errorToastConfig)
+            const errorMsg = error.message ?? t('common.errors.default');
+            toast(errorMsg, errorToastConfig);
           });
       };
     }
