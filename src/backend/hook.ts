@@ -15,7 +15,7 @@ interface AnnouncementsApi {
   limit?: string;
   options?: RawAxiosRequestConfig;
   currentTime?: string;
-  order?: GetAnnouncementsListOrderEnum
+  order?: GetAnnouncementsListOrderEnum;
 }
 
 export const useJobAPI = () => {
@@ -38,7 +38,7 @@ export const useJobAPI = () => {
   ): Promise<Job[]> => {
     return api.job
       .listJobs(
-        'job_id,name,description,device_id,job_info,transpiler_info,simulator_info,mitigation_info,job_type,shots,status,submitted_at',
+        'job_id,name,description,device_id,status,submitted_at',
         undefined,
         undefined,
         params.query ?? '',
@@ -148,13 +148,21 @@ const convertDeviceResult = (device: DevicesDeviceInfo): Device => ({
 export const useAnnouncementsAPI = () => {
   const api = useContext(userApiContext);
 
-  const getAnnouncements = async ({ limit, offset, options, order, currentTime }: AnnouncementsApi) => {
-    return api.announcements.getAnnouncementsList(offset, limit, order, currentTime, options).then((res) => {
-      if (res.status === 200) {
-        return res.data.announcements;
-      }
-      return null;
-    });
+  const getAnnouncements = async ({
+    limit,
+    offset,
+    options,
+    order,
+    currentTime,
+  }: AnnouncementsApi) => {
+    return api.announcements
+      .getAnnouncementsList(offset, limit, order, currentTime, options)
+      .then((res) => {
+        if (res.status === 200) {
+          return res.data.announcements;
+        }
+        return null;
+      });
   };
 
   return { getAnnouncements };

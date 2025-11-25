@@ -43,6 +43,7 @@ export default {
       min: '最小',
       nodata: 'データが存在しません',
       invalid_device_info: 'トポロジー情報が無効です',
+      fit_to_view: '画面に合わせる',
     },
     qubits_info: {
       header: '量子ビットごとの値',

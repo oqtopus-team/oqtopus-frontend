@@ -6,4 +6,7 @@ export default {
   expand: '展開',
   collapse: '折りたたむ',
   date_format: 'yyyy/MM/dd HH:mm:ss',
+  errors: {
+    common: '問題が発生しました',
+  },
 };

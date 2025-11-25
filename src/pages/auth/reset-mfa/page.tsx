@@ -9,6 +9,8 @@ import { useFormProcessor } from '@/pages/_hooks/form';
 import { resetMfa } from '@/backend/MfaApi';
 import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
+import { toast } from 'react-toastify';
+import { errorToastConfig, successToastConfig } from '@/config/toast';
 
 interface FormInput {
   username: string;
@@ -35,14 +37,15 @@ export default function ResetMFAPage() {
         resetMfa(data.username, data.password)
           .then((result) => {
             if (result) {
-              alert(t('mfa_reset.alert.success'));
+              toast(t('mfa_reset.alert.success'), successToastConfig);
               navigate('/login');
             } else {
-              alert(t('mfa_reset.alert.failure'));
+              toast(t('mfa_reset.alert.failure'), errorToastConfig);
             }
           })
           .catch((error) => {
-            console.log(error);
+            const errorMsg = error.message ?? t('common.errors.default');
+            toast(errorMsg, errorToastConfig);
           })
           .finally(() => {
             setProcessingFalse();

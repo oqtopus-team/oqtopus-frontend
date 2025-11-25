@@ -4,17 +4,14 @@ import clsx from 'clsx';
 import { t } from 'i18next';
 import QuantumCircuitComposer from '../../composer/_components/QuantumCircuitComposer';
 import { useState } from 'react';
-import { bellSampling } from '../../composer/page';
-import { QuantumCircuit } from '../../composer/circuit';
+import { circuitContext, QuantumCircuitService } from '../../composer/circuit';
 
 export const Composer = (): React.ReactElement => {
-  const [circuit, setCircuit] = useState(bellSampling)
-  const handleCircuitUpdate = (newCircuit: QuantumCircuit) => {
-    setCircuit(newCircuit);
-  }
+  const [circuitService] = useState(
+    new QuantumCircuitService(2, 3, ['x', 'y', 'z', 'h', 'cx'], true)
+  );
 
   return (
-
     <>
       <div className={clsx('flex', 'justify-between', 'items-center')}>
         <div className={clsx('text-lg', 'font-bold', 'text-primary')}>
@@ -27,14 +24,9 @@ export const Composer = (): React.ReactElement => {
       <Spacer className="h-3" />
       <p className="text-xs">{t('dashboard.composer.description')}</p>
       <Spacer className="h-3" />
-      <QuantumCircuitComposer
-        supportedGates={[
-          "x", "y", "z", "h", "cnot",
-        ]}
-        circuit={circuit}
-        onCircuitUpdate={handleCircuitUpdate}
-      />
+      <circuitContext.Provider value={circuitService}>
+        <QuantumCircuitComposer />
+      </circuitContext.Provider>
     </>
   );
-
-}
+};

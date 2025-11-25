@@ -10,6 +10,8 @@ import { useJobAPI } from '@/backend/hook';
 import { DateTimeFormatter } from '../../_components/DateTimeFormatter';
 import DownloadJobButton from './DownloadJobButton';
 import { TruncateText } from '@/pages/authenticated/_components/TruncateText';
+import { toast } from 'react-toastify';
+import { errorToastConfig, successToastConfig } from '@/config/toast';
 
 interface JobProps {
   job: Job;
@@ -37,9 +39,12 @@ export const JobListItem = ({
 
     cancelJob(job)
       .then((message) => {
-        alert(message);
+        toast(message, successToastConfig);
       })
-      .catch((err) => console.error(err))
+      .catch((err) => {
+        const errorMsg = err.message ?? t('common.errors.default');
+        toast(errorMsg, errorToastConfig);
+      })
       .finally(() => {
         onJobModified();
         setLoading(false);
@@ -55,9 +60,12 @@ export const JobListItem = ({
 
     deleteJob(job)
       .then((message) => {
-        alert(message);
+        toast(message, successToastConfig);
       })
-      .catch((err) => console.error(err))
+      .catch((err) => {
+        const errorMsg = err.message ?? t('common.errors.default');
+        toast(errorMsg, errorToastConfig);
+      })
       .finally(() => {
         onJobModified();
         setLoading(false);
