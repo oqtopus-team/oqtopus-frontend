@@ -1,5 +1,8 @@
 version: 1
-
+env:
+  variables:
+    API_CLIENT_SOURCE_REF: production
+    BUN_INSTALL: /root/.bun
 frontend:
   phases:
     preBuild:
@@ -8,7 +11,8 @@ frontend:
         - curl -fsSL https://bun.sh/install | bash
         - source /root/.bash_profile
         - bun install
-        # - bun generate -- --src "github:oqtopus-team/oqtopus-cloud" --ref develop --path "/backend/oas/user/openapi.yaml"
+        - bun run --bun generate -- --src "github:oqtopus-team/oqtopus-cloud" --ref $GEN_API_SOURCE_REF --path "/backend/oas/user/openapi.yaml"
+        - cp src/api/generated/openapi.yaml public/openapi.yaml
     build:
       commands:
         - bun run build
