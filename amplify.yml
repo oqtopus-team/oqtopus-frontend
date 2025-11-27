@@ -6,7 +6,7 @@ frontend:
       commands:
         # install bun
         - curl -fsSL https://bun.sh/install | bash
-        - source /root/.bashrc
+        - source /root/.bash_profile
         - bun install
         # - bun generate -- --src "github:oqtopus-team/oqtopus-cloud" --ref develop --path "/backend/oas/user/openapi.yaml"
     build:

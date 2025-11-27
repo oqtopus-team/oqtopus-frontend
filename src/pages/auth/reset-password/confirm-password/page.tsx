@@ -11,6 +11,8 @@ import { useResetPassword } from '../_components/Provider';
 import { useFormProcessor } from '@/pages/_hooks/form';
 import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
+import { toast } from 'react-toastify';
+import { errorToastConfig, infoToastConfig } from '@/config/toast';
 
 interface FormInput {
   password: string;
@@ -64,11 +66,12 @@ export default function ForgotPasswordConfirmPage() {
               navigate('/login');
               return;
             }
-            alert(result.message);
+            toast(result.message, errorToastConfig);
             setProcessingFalse();
           })
           .catch((error) => {
-            console.log(error);
+            const errorMsg = error.message ?? t('common.errors.default');
+            toast(errorMsg, errorToastConfig);
           });
       };
     }

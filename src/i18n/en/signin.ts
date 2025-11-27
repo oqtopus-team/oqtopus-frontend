@@ -1,20 +1,11 @@
 export default {
   title: 'Sign in',
-  explanation:
-    'dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy',
   form: {
     mail: 'Email address',
     password: 'Password',
     error_message: {
       user_name: 'Please enter your email address',
-      mail_address: 'Please enter a valid email address',
       password: 'Please enter your password',
-      password_min_length: 'Password must be at least 12 characters long',
-      password_uppercase: 'Password must contain at least one uppercase letter',
-      password_lowercase: 'Password must contain at least one lowercase letter',
-      password_number: 'Password must contain at least one number',
-      password_special:
-        'Password must contain at least one special character（^$*.[]{}()?"!@#%&/\\,><\':;|_~`+=-）',
     },
   },
   forgot_password: 'If you forgot your password, click here',
@@ -29,5 +20,16 @@ export default {
       },
     },
     button: 'Send',
+    api_token_reissued: 'API token has been reissued.',
+  },
+  errors: {
+    authentication_failed: 'Authentication failed',
+    logout_failed: 'Logout failed',
+    email_not_found: 'The email address you entered does not exist',
+    email_sending_failed: 'Failed to send email.',
+    password_change_failed: 'Failed to change password.',
+    totp_setup_failed: 'Failed to set up TOTP.',
+    totp_verification_failed: 'TOTP verification failed.',
+    api_token_reissue_failed: 'Failed to reissue API token.',
   },
 };

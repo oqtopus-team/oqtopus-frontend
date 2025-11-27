@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
+import { toast } from 'react-toastify';
 import { useAuth } from '@/auth/hook';
 import { NavLink, useNavigate, useLocation } from 'react-router';
 import { Spacer } from '@/pages/_components/Spacer';
 import './Sidebar.css';
+import { errorToastConfig } from '@/config/toast';
 
 type MenuItem = MenuNavigate | MenuOnClick;
+
 interface MenuNavigate {
   kind: 'navigate';
   name: string;
@@ -14,6 +17,7 @@ interface MenuNavigate {
   icon: React.ReactElement;
   disable?: boolean;
 }
+
 interface MenuOnClick {
   kind: 'onclick';
   name: string;
@@ -72,7 +76,11 @@ export const Sidebar = () => {
       kind: 'onclick',
       name: t('sidebar.nav.logout'),
       onClick: () => {
-        auth.signOut();
+        auth.signOut().then(({ success, message }) => {
+          if (!success) {
+            toast(message, errorToastConfig);
+          }
+        });
         navigate('/login');
       },
       icon: <SVGLogout />,

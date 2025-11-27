@@ -13,6 +13,8 @@ import { useNavigate } from 'react-router';
 import { useFormProcessor } from '@/pages/_hooks/form';
 import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
+import { toast } from 'react-toastify';
+import { errorToastConfig } from '@/config/toast';
 
 interface FormInput {
   username: string;
@@ -21,21 +23,8 @@ interface FormInput {
 
 const validationRules = (t: (key: string) => string): yup.ObjectSchema<FormInput> =>
   yup.object({
-    username: yup
-      .string()
-      .required(t('signin.form.error_message.user_name'))
-      .email(t('signin.form.error_message.mail_address')),
-    password: yup
-      .string()
-      .required(t('signin.form.error_message.password'))
-      .min(12, t('signin.form.error_message.password_min_length'))
-      .matches(/[A-Z]/, t('signin.form.error_message.password_uppercase'))
-      .matches(/[a-z]/, t('signin.form.error_message.password_lowercase'))
-      .matches(/[0-9]/, t('signin.form.error_message.password_number'))
-      .matches(
-        /[\^$*.[\]{}()?"!@#%&/\\,><':;|_~`+=-]/,
-        t('signin.form.error_message.password_special')
-      ),
+    username: yup.string().required(t('signin.form.error_message.user_name')),
+    password: yup.string().required(t('signin.form.error_message.password')),
   });
 
 export default function LoginPage() {
@@ -54,25 +43,25 @@ export default function LoginPage() {
               navigate('/confirm-mfa');
               return;
             }
-            alert(message);
-            if (message === 'MFAを設定してください。') {
+            toast(t(message), errorToastConfig);
+            if (message === 'signup.confirm.form.mfa_setup_request') {
               navigate('/mfa');
               return;
             }
             setProcessingFalse();
           })
           .catch((error) => {
-            console.log(error);
+            const errorMsg = error.message ?? t('common.errors.default');
+            toast(errorMsg, errorToastConfig);
           });
       };
     }
   );
 
-  const { termOfService, privacyPolicy }
-    = {
-      termOfService: import.meta.env.VITE_APP_TERM_OF_SERVICE_PATH ?? "",
-      privacyPolicy: import.meta.env.VITE_APP_PRIVACY_POLICY_PATH ?? ""
-    };
+  const { termOfService, privacyPolicy } = {
+    termOfService: import.meta.env.VITE_APP_TERM_OF_SERVICE_PATH ?? '',
+    privacyPolicy: import.meta.env.VITE_APP_PRIVACY_POLICY_PATH ?? '',
+  };
 
   return (
     <div className={clsx('w-[300px]', 'pt-8', 'text-sm')}>
@@ -101,10 +90,9 @@ export default function LoginPage() {
           {t('signin.forgot_password')}
         </NavLink>
         <Spacer className="h-2.5" />
-        { termOfService !== "" && privacyPolicy !== ""
-          ? <SignUpAgreement termsOfService={termOfService} privacyPolicy={privacyPolicy} />
-          : null
-        }
+        {termOfService !== '' && privacyPolicy !== '' ? (
+          <SignUpAgreement termsOfService={termOfService} privacyPolicy={privacyPolicy} />
+        ) : null}
         <Spacer className="h-3" />
         <Button type="submit" color="secondary" loading={processing}>
           {t('signin.button')}

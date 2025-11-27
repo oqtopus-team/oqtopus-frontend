@@ -11,6 +11,8 @@ import { FormTitle } from '../../_components/FormTitle';
 import { useFormProcessor } from '@/pages/_hooks/form';
 import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
+import { toast } from 'react-toastify';
+import { errorToastConfig } from '@/config/toast';
 
 interface FormInput {
   totpCode: string;
@@ -37,11 +39,12 @@ export default function ConfirmMFAPage() {
               navigate('/dashboard');
               return;
             }
-            alert(result.message);
+            toast(result.message, errorToastConfig);
             setProcessingFalse();
           })
           .catch((error) => {
-            console.log(error);
+            const errorMsg = error.message ?? t('common.errors.default');
+            toast(errorMsg, errorToastConfig);
           });
       };
     }

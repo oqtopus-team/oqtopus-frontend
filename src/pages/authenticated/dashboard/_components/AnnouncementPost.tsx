@@ -5,11 +5,12 @@ import styles from './announcement.module.css';
 import { AnnouncementsGetAnnouncementResponse } from '@/api/generated';
 import { DateTimeFormatter } from '@/pages/authenticated/_components/DateTimeFormatter';
 import { useTranslation } from 'react-i18next';
+import dompurify from 'dompurify';
 
 interface PostProps {
   announcement: AnnouncementsGetAnnouncementResponse;
   style?: {
-    announcement?: CSSProperties
+    announcement?: CSSProperties;
   };
 }
 
@@ -32,7 +33,7 @@ export const AnnouncementPost = ({ announcement, style: propsStyle }: PostProps)
       const shouldCollapse = scrollHeight > 400;
       setShouldShowButton(shouldCollapse);
       setIsCollapsed(shouldCollapse);
-      observer.disconnect()
+      observer.disconnect();
     });
 
     observer.observe(contentRef.current);
@@ -70,11 +71,11 @@ export const AnnouncementPost = ({ announcement, style: propsStyle }: PostProps)
       </div>
       <div
         ref={contentRef}
-        className={clsx(styles.post_content, styles.markdown_content , {
+        className={clsx(styles.post_content, styles.markdown_content, {
           [styles.collapsed]: isCollapsed,
         })}
         style={propsStyle?.announcement}
-        dangerouslySetInnerHTML={{ __html: htmlContent }}
+        dangerouslySetInnerHTML={{ __html: dompurify.sanitize(htmlContent) }}
       ></div>
       <button
         type="button"
