@@ -5,17 +5,18 @@ import { toast } from 'react-toastify';
 import { useAuth } from '@/auth/hook';
 import { NavLink, useNavigate, useLocation } from 'react-router';
 import { Spacer } from '@/pages/_components/Spacer';
-import './Sidebar.css';
 import { errorToastConfig } from '@/config/toast';
+import './Sidebar.css';
 
 type MenuItem = MenuNavigate | MenuOnClick;
 
 interface MenuNavigate {
-  kind: 'navigate';
+  kind: 'link';
   name: string;
   path: string;
   icon: React.ReactElement;
   disable?: boolean;
+  nestedRoutes?: MenuItem[];
 }
 
 interface MenuOnClick {
@@ -23,6 +24,7 @@ interface MenuOnClick {
   name: string;
   onClick: () => void;
   icon: React.ReactElement;
+  nestedRoutes?: MenuItem[];
 }
 
 export const Sidebar = () => {
@@ -35,42 +37,51 @@ export const Sidebar = () => {
     setOpen(!open);
   };
 
-  const menuItems: MenuItem[] = [
+  const topMenuItems: MenuItem[] = [
     {
-      kind: 'navigate',
+      kind: 'link',
       name: t('sidebar.nav.dashboard'),
       path: '/dashboard',
       icon: <SVGDashboard />,
     },
     {
-      kind: 'navigate',
+      kind: 'link',
       name: t('sidebar.nav.composer'),
       path: '/composer',
       icon: <SVGComposer />,
     },
     {
-      kind: 'navigate',
+      kind: 'link',
       name: t('sidebar.nav.device'),
       path: '/device',
       icon: <SVGDevice />,
     },
     {
-      kind: 'navigate',
+      kind: 'link',
       name: t('sidebar.nav.job'),
       path: '/jobs',
       icon: <SVGJob />,
     },
     {
-      kind: 'navigate',
+      kind: 'link',
       name: t('sidebar.nav.document'),
       path: '/howto',
       icon: <SVGDocument />,
     },
     {
-      kind: 'navigate',
+      kind: 'link',
       name: t('sidebar.nav.announcements'),
       path: '/announcements',
       icon: <SVGAnnouncements />,
+    },
+  ];
+
+  const bottomMenuItems: MenuItem[] = [
+    {
+      kind: 'link',
+      name: t('sidebar.nav.settings'),
+      path: '/settings',
+      icon: <SVGSettings />,
     },
     {
       kind: 'onclick',
@@ -103,7 +114,17 @@ export const Sidebar = () => {
           </div>
           <Spacer className="h-4" />
           <ul className={clsx('flex', 'flex-col', 'gap-[1px]', 'text-sm')}>
-            {menuItems.map((menuItem, index) => (
+            {topMenuItems.map((menuItem, index) => (
+              <li key={index}>
+                <MenuItemComponent menuItem={menuItem} open={open} />
+              </li>
+            ))}
+          </ul>
+
+          <div className="border-t my-3" />
+
+          <ul className={clsx('flex', 'flex-col', 'gap-[1px]', 'text-sm')}>
+            {bottomMenuItems.map((menuItem, index) => (
               <li key={index}>
                 <MenuItemComponent menuItem={menuItem} open={open} />
               </li>
@@ -126,41 +147,47 @@ export const NavigationBottomBar = () => {
 
   const menuItems: MenuItem[] = [
     {
-      kind: 'navigate',
+      kind: 'link',
       name: t('sidebar.nav.dashboard'),
       path: '/dashboard',
       icon: <SVGDashboard />,
     },
     {
-      kind: 'navigate',
+      kind: 'link',
       name: t('sidebar.nav.composer'),
       path: '/composer',
       icon: <SVGComposer />,
     },
     {
-      kind: 'navigate',
+      kind: 'link',
       name: t('sidebar.nav.device'),
       path: '/device',
       icon: <SVGDevice />,
     },
     {
-      kind: 'navigate',
+      kind: 'link',
       name: t('sidebar.nav.job'),
       path: '/jobs',
       icon: <SVGJob />,
     },
     {
-      kind: 'navigate',
+      kind: 'link',
       name: t('sidebar.nav.document'),
       path: '/howto',
       icon: <SVGDocument />,
     },
     {
-      kind: 'navigate',
+      kind: 'link',
       name: t('sidebar.nav.news'),
       path: '/news',
       icon: <SVGAnnouncements />,
       disable: true,
+    },
+    {
+      kind: 'link',
+      name: t('sidebar.nav.settings'),
+      path: '/settings',
+      icon: <SVGSettings />,
     },
     {
       kind: 'onclick',
@@ -194,78 +221,51 @@ export const NavigationBottomBar = () => {
   );
 };
 
-const MenuItemComponent = ({
-  menuItem,
-  open,
-}: {
-  menuItem: MenuItem;
-  open: boolean;
-}): React.ReactElement => {
-  const STYLE_SIDEBAR = {
-    button: {
-      default: clsx(
-        ['flex', 'gap-3', 'items-center', 'min-h-[56px]', 'p-4'],
-        ['rounded', 'cursor-pointer'],
-        ['text-primary', 'font-bold'],
-        ['hover:bg-gradient-p-s', 'hover:text-primary-content'],
-        ['[&.active]:bg-gradient-p-s', '[&.active]:text-primary-content'],
-        'group'
-      ),
-      close: clsx('rounded-r-none', 'closed-navigation-menu-item'),
-    },
-    icon: clsx(
-      'w-[23px]',
-      ['flex', 'justify-center', 'box-content'],
-      [
-        ['[&_.fill]:fill-secondary', '[&_.stroke]:stroke-secondary'],
-        'group-hover:[&_.fill]:fill-primary-content',
-        'group-hover:[&_.stroke]:stroke-primary-content',
-        'group-[.active]:[&_.fill]:fill-primary-content',
-        'group-[.active]:[&_.stroke]:stroke-primary-content',
-      ]
-    ),
-  };
+const MenuItemComponent = ({ menuItem, open }: { menuItem: MenuItem; open: boolean }) => {
+  const location = useLocation();
+  const isActive = menuItem.kind === 'link' && location.pathname.startsWith(menuItem.path);
+  const isDisabled = menuItem.kind === 'link' && menuItem.disable === true;
+
+  const baseButtonStyles = clsx(
+    'flex gap-3 items-center min-h-[56px] p-4',
+    'rounded cursor-pointer',
+    'text-primary font-bold',
+    'hover:bg-gradient-p-s hover:text-primary-content',
+    '[&.active]:bg-gradient-p-s [&.active]:text-primary-content',
+    'group',
+    !open && 'rounded-r-none closed-navigation-menu-item',
+    isDisabled && 'grayscale'
+  );
+
+  const iconStyles = clsx(
+    'w-[23px] flex justify-center box-content',
+    '[&_.fill]:fill-secondary [&_.stroke]:stroke-secondary',
+    'group-hover:[&_.fill]:fill-primary-content group-hover:[&_.stroke]:stroke-primary-content',
+    'group-[.active]:[&_.fill]:fill-primary-content group-[.active]:[&_.stroke]:stroke-primary-content'
+  );
+
+  const content = (
+    <>
+      <span className={iconStyles}>{menuItem.icon}</span>
+      {open && <span>{menuItem.name}</span>}
+    </>
+  );
 
   if (menuItem.kind === 'onclick') {
     return (
-      <div
-        className={clsx(STYLE_SIDEBAR.button.default, !open && STYLE_SIDEBAR.button.close)}
-        onClick={menuItem.onClick}
-      >
-        <span className={STYLE_SIDEBAR.icon}>{menuItem.icon}</span>
-        {open && <span>{menuItem.name}</span>}
-      </div>
+      <button type="button" className={baseButtonStyles} onClick={menuItem.onClick}>
+        {content}
+      </button>
     );
   }
 
-  const location = useLocation();
-  const isCurrentPath = location.pathname.startsWith(menuItem.path);
-
-  if (menuItem.disable === true) {
-    return (
-      <div
-        className={clsx(
-          STYLE_SIDEBAR.button.default,
-          !open && STYLE_SIDEBAR.button.close,
-          'grayscale'
-        )}
-      >
-        <span className={STYLE_SIDEBAR.icon}>{menuItem.icon}</span>
-        {open && <span>{menuItem.name}</span>}
-      </div>
-    );
+  if (isDisabled) {
+    return <div className={baseButtonStyles}>{content}</div>;
   }
+
   return (
-    <NavLink
-      to={menuItem.path}
-      className={clsx(
-        STYLE_SIDEBAR.button.default,
-        !open && STYLE_SIDEBAR.button.close,
-        isCurrentPath && 'active'
-      )}
-    >
-      <span className={STYLE_SIDEBAR.icon}>{menuItem.icon}</span>
-      {open && <span>{menuItem.name}</span>}
+    <NavLink to={menuItem.path} className={clsx(baseButtonStyles, isActive && 'active')}>
+      {content}
     </NavLink>
   );
 };
@@ -388,6 +388,22 @@ const SVGAnnouncements = (): React.ReactElement => (
       d="M3.33317 3.33329H16.6665V13.3333H4.30817L3.33317 14.3083V3.33329ZM3.33317 1.66663C2.4165 1.66663 1.67484 2.41663 1.67484 3.33329L1.6665 18.3333L4.99984 15H16.6665C17.5832 15 18.3332 14.25 18.3332 13.3333V3.33329C18.3332 2.41663 17.5832 1.66663 16.6665 1.66663H3.33317ZM4.99984 9.99996H11.6665V11.6666H4.99984V9.99996ZM4.99984 7.49996H14.9998V9.16663H4.99984V7.49996ZM4.99984 4.99996H14.9998V6.66663H4.99984V4.99996Z"
       className="fill"
     />
+  </svg>
+);
+
+const SVGSettings = (): React.ReactElement => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    x="0px"
+    y="0px"
+    width="20"
+    height="21"
+    viewBox="0 0 45 45"
+  >
+    <path
+      d="M47.16,21.221l-5.91-0.966c-0.346-1.186-0.819-2.326-1.411-3.405l3.45-4.917c0.279-0.397,0.231-0.938-0.112-1.282 l-3.889-3.887c-0.347-0.346-0.893-0.391-1.291-0.104l-4.843,3.481c-1.089-0.602-2.239-1.08-3.432-1.427l-1.031-5.886 C28.607,2.35,28.192,2,27.706,2h-5.5c-0.49,0-0.908,0.355-0.987,0.839l-0.956,5.854c-1.2,0.345-2.352,0.818-3.437,1.412l-4.83-3.45 c-0.399-0.285-0.942-0.239-1.289,0.106L6.82,10.648c-0.343,0.343-0.391,0.883-0.112,1.28l3.399,4.863 c-0.605,1.095-1.087,2.254-1.438,3.46l-5.831,0.971c-0.482,0.08-0.836,0.498-0.836,0.986v5.5c0,0.485,0.348,0.9,0.825,0.985 l5.831,1.034c0.349,1.203,0.831,2.362,1.438,3.46l-3.441,4.813c-0.284,0.397-0.239,0.942,0.106,1.289l3.888,3.891 c0.343,0.343,0.884,0.391,1.281,0.112l4.87-3.411c1.093,0.601,2.248,1.078,3.445,1.424l0.976,5.861C21.3,47.647,21.717,48,22.206,48 h5.5c0.485,0,0.9-0.348,0.984-0.825l1.045-5.89c1.199-0.353,2.348-0.833,3.43-1.435l4.905,3.441 c0.398,0.281,0.938,0.232,1.282-0.111l3.888-3.891c0.346-0.347,0.391-0.894,0.104-1.292l-3.498-4.857 c0.593-1.08,1.064-2.222,1.407-3.408l5.918-1.039c0.479-0.084,0.827-0.5,0.827-0.985v-5.5C47.999,21.718,47.644,21.3,47.16,21.221z M25,32c-3.866,0-7-3.134-7-7c0-3.866,3.134-7,7-7s7,3.134,7,7C32,28.866,28.866,32,25,32z"
+      className="fill"
+    ></path>
   </svg>
 );
 

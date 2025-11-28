@@ -33,5 +33,8 @@ docs/JobsSubmitJobRequest.md
 docs/JobsSubmitJobResponse.md
 docs/JobsTranspileResult.md
 docs/SuccessSuccessResponse.md
+docs/UsersApi.md
+docs/UsersGetOneUserResponse.md
+docs/UsersUpdateUserRequest.md
 git_push.sh
 index.ts

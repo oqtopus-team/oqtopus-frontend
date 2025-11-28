@@ -69,6 +69,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/devices.DeviceInfo'
+        '403':
+          description: Cannot access device with device_id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error.ForbiddenError'
         '404':
           description: Device with device_id not found
           content:
@@ -267,6 +273,14 @@ paths:
                 $ref: '#/components/schemas/error.UnauthorizedError'
               example:
                 message: Unauthorized
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error.ForbiddenError'
+              example:
+                message: Forbidden
   /jobs/{job_id}:
     get:
       tags:
@@ -734,6 +748,101 @@ paths:
                 $ref: '#/components/schemas/error.InternalServerError'
               example:
                 message: Internal server error
+  /users/me:
+    get:
+      tags:
+        - Users
+      summary: Get current user
+      description: Get current user
+      operationId: get_current_user
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Return current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/users.GetOneUserResponse'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error.NotFoundError'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error.InternalServerError'
+    patch:
+      tags:
+        - Users
+      summary: Update current user
+      description: Update current user
+      operationId: update_current_user
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/users.UpdateUserRequest'
+      responses:
+        '200':
+          description: Return current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/users.GetOneUserResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error.BadRequest'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error.NotFoundError'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error.InternalServerError'
+    delete:
+      tags:
+        - Users
+      summary: Delete current user
+      description: Delete current user
+      operationId: delete_current_user
+      security:
+        - BearerAuth: []
+      responses:
+        '204':
+          description: Current user deleted
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error.NotFoundError'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error.InternalServerError'
 components:
   securitySchemes:
     BearerAuth:
@@ -892,6 +1001,13 @@ components:
       required:
         - message
     error.InternalServerError:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+    error.ForbiddenError:
       type: object
       properties:
         message:
@@ -1384,13 +1500,6 @@ components:
           format: date-time
           example: '2025-01-09T12:34:56'
           description: The expiration date of the api token
-    error.ForbiddenError:
-      type: object
-      properties:
-        message:
-          type: string
-      required:
-        - message
     announcements.GetAnnouncementResponse:
       type: object
       properties:
@@ -1434,3 +1543,28 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/announcements.GetAnnouncementResponse'
+    users.GetOneUserResponse:
+      description: detail of user response
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        name:
+          type: string
+        organization:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - id
+    users.UpdateUserRequest:
+      description: user update data
+      type: object
+      properties:
+        name:
+          type: string
+        organization:
+          type: string
