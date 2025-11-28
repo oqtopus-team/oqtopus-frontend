@@ -19,7 +19,7 @@ export default {
     organization: '組織',
     memberSince: '登録日',
     emailReadonly: 'メールアドレスは変更できません',
-    memberSinceReadonly: 'アカウント作成日',
+    created_at: 'アカウント作成日',
     saved: 'プロフィールが正常に更新されました！',
   },
 

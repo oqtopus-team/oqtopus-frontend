@@ -1,96 +1,135 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import clsx from 'clsx';
-import { TextField, Button } from '@mui/material';
+import { Button, Skeleton, Stack, TextField } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
-import { successToastConfig } from '@/config/toast';
+import { errorToastConfig, successToastConfig } from '@/config/toast';
+import { useUserAPI } from '@/backend/hook';
+import { DateTimeFormatter } from '@/pages/authenticated/_components/DateTimeFormatter';
 
 interface ProfileFormData {
-  email: string;
-  name: string;
-  organization: string;
-  memberSince: string;
+  email?: string;
+  name?: string;
+  organization?: string;
+  created_at?: string;
+}
+
+function UserFormSkeleton() {
+  return (
+    <Stack spacing={2}>
+      <Skeleton variant="rounded" height={56} />
+      <Skeleton variant="rounded" height={56} />
+      <Skeleton variant="rounded" height={56} />
+    </Stack>
+  );
 }
 
 export function ProfileTab() {
-  const { t } = useTranslation();
-  const { handleSubmit, register } = useForm<ProfileFormData>({
-    defaultValues: {
-      email: 'user@example.com',
-      name: 'John Doe',
-      organization: 'Acme Corp',
-      memberSince: '2023-01-15',
-    },
-  });
+  const { t, i18n } = useTranslation();
+  const { getCurrentUser, updateCurrentUser } = useUserAPI();
+  const {
+    handleSubmit,
+    register,
+    reset,
+    setValue,
+    formState: { isSubmitting },
+  } = useForm<ProfileFormData>();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const onSubmit = async (data: ProfileFormData) => {
-    setIsLoading(true);
-
-    // Mock API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    setIsLoading(false);
-    toast(t('settings.profile.saved'), successToastConfig);
+    try {
+      await updateCurrentUser(data);
+      toast(t('settings.profile.saved'), successToastConfig);
+    } catch (e) {
+      toast(t('common.errors.default'), errorToastConfig);
+    }
   };
+
+  useEffect(() => {
+    getCurrentUser()
+      .then((userData) => {
+        reset(userData);
+        setValue('created_at', DateTimeFormatter(t, i18n, userData.created_at));
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
 
   return (
     <div className={clsx('max-w-2xl')}>
       <h3 className={clsx('text-xl', 'font-semibold', 'mb-6')}>{t('settings.profile.title')}</h3>
 
       <form onSubmit={handleSubmit(onSubmit)} className={clsx('space-y-4')}>
-        <div>
-          <TextField
-            fullWidth
-            label={t('settings.profile.email')}
-            disabled
-            helperText={t('settings.profile.emailReadonly')}
-            variant="outlined"
-            {...register('email')}
-          />
-        </div>
-
-        <div>
-          <TextField
-            {...register('name')}
-            fullWidth
-            label={t('settings.profile.name')}
-            variant="outlined"
-            required
-          />
-        </div>
-
-        <div>
-          <TextField
-            {...register('organization')}
-            fullWidth
-            label={t('settings.profile.organization')}
-            variant="outlined"
-          />
-        </div>
-
-        <div>
-          <TextField
-            {...register('memberSince')}
-            fullWidth
-            label={t('settings.profile.memberSince')}
-            disabled
-            helperText={t('settings.profile.memberSinceReadonly')}
-            variant="outlined"
-          />
-        </div>
+        {isLoading ? (
+          <UserFormSkeleton />
+        ) : (
+          <Stack spacing={3} direction="column">
+            <TextField
+              fullWidth
+              label={t('settings.profile.email')}
+              disabled
+              helperText={t('settings.profile.emailReadonly')}
+              variant="outlined"
+              slotProps={{
+                inputLabel: {
+                  shrink: true,
+                },
+              }}
+              {...register('email')}
+            />
+            <TextField
+              {...register('name')}
+              disabled={isSubmitting}
+              fullWidth
+              label={t('settings.profile.name')}
+              variant="outlined"
+              required
+              slotProps={{
+                inputLabel: {
+                  shrink: true,
+                },
+              }}
+            />
+            <TextField
+              {...register('organization')}
+              disabled={isSubmitting}
+              fullWidth
+              label={t('settings.profile.organization')}
+              variant="outlined"
+              slotProps={{
+                inputLabel: {
+                  shrink: true,
+                },
+              }}
+            />
+            <TextField
+              {...register('created_at')}
+              fullWidth
+              label={t('settings.profile.created_at')}
+              disabled
+              helperText={t('settings.profile.created_at')}
+              variant="outlined"
+              slotProps={{
+                inputLabel: {
+                  shrink: true,
+                },
+              }}
+            />
+          </Stack>
+        )}
 
         <div className={clsx('pt-4')}>
           <Button
             type="submit"
             variant="contained"
             color="primary"
-            disabled={isLoading}
+            disabled={isLoading || isSubmitting}
             size="large"
           >
-            {isLoading ? t('settings.saving') : t('settings.save')}
+            {isSubmitting ? t('settings.saving') : t('settings.save')}
           </Button>
         </div>
       </form>
