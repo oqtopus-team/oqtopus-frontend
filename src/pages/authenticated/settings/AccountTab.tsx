@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Auth } from 'aws-amplify';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
@@ -54,15 +54,15 @@ const validationRules = (t: (key: string) => string): yup.ObjectSchema<AccountTa
   });
 
 export function AccountTab() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { deleteCurrentUser } = useUserAPI();
-  const auth = useAuth()
+  const auth = useAuth();
 
-  const [language, setLanguage] = useState('en');
+  const [language, setLanguage] = useState(() => {
+    return i18n.language || 'en';
+  });
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
-  const navigate = useNavigate()
 
   const {
     register,
@@ -73,6 +73,10 @@ export function AccountTab() {
     resolver: yupResolver(validationRules(t)),
     defaultValues: defaultFormValues,
   });
+
+  useEffect(() => {
+    setLanguage(i18n.language);
+  }, [i18n.language]);
 
   const handlePasswordSubmit = async (data: AccountTabFormData) => {
     setIsPasswordLoading(true);
@@ -98,16 +102,15 @@ export function AccountTab() {
     const newLanguage = event.target.value;
     setLanguage(newLanguage);
 
-    // Mock API call
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await i18n.changeLanguage(newLanguage);
   };
 
   const handleDeleteAccount = async () => {
-    try{
-      await deleteCurrentUser()
+    try {
+      await deleteCurrentUser();
 
       toast(t('settings.account.accountDeleted'), successToastConfig);
-      await auth.signOut()
+      await auth.signOut();
     } catch (e: any) {
       if (typeof e === 'object' && 'message' in e) {
         toast(e.message ?? t('common.errors.default'), errorToastConfig);
@@ -187,8 +190,8 @@ export function AccountTab() {
             onChange={handleLanguageChange}
             label={t('settings.account.language')}
           >
-            <MenuItem value="en">English</MenuItem>
-            <MenuItem value="jpn">Japanese</MenuItem>
+            <MenuItem value="en">{t('header.lang.en')}</MenuItem>
+            <MenuItem value="ja">{t('header.lang.ja')}</MenuItem>
           </Select>
         </FormControl>
       </div>
