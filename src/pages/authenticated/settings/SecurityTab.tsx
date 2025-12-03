@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { Button, Chip, Collapse, IconButton, List, ListItem, ListItemText } from '@mui/material';
-import { MdExpandLess, MdExpandMore  } from "react-icons/md";
+import { MdExpandLess, MdExpandMore } from 'react-icons/md';
 import { useTranslation } from 'react-i18next';
-
+import { Auth } from 'aws-amplify';
+import { useNavigate } from 'react-router';
 
 interface ActivityLog {
   id: string;
@@ -16,11 +17,21 @@ interface ActivityLog {
 
 export function SecurityTab() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const [mfaEnabled, setMfaEnabled] = useState(true);
   const [isResetLoading, setIsResetLoading] = useState(false);
   const [activityExpanded, setActivityExpanded] = useState(false);
   const [apiKeyExpiry, setApiKeyExpiry] = useState('2025-12-31');
+
+  useEffect(() => {
+    verifyMFAStatus();
+  }, []);
+
+  async function verifyMFAStatus() {
+    const user = await Auth.currentAuthenticatedUser();
+    setMfaEnabled((await Auth.getPreferredMFA(user)) !== 'NOMFA');
+  }
 
   // Mock activity data
   const [recentActivity] = useState<ActivityLog[]>([
@@ -67,15 +78,7 @@ export function SecurityTab() {
   ]);
 
   const handleResetMFA = async () => {
-    setIsResetLoading(true);
-
-    // Mock API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    setMfaEnabled(false);
-    setIsResetLoading(false);
-
-    alert(t('settings.security.mfaResetSuccess'));
+    navigate('/mfa-reset');
   };
 
   const formatDate = (dateString: string) => {
