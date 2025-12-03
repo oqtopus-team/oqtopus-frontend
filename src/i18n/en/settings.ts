@@ -19,7 +19,7 @@ export default {
     organization: 'Organization',
     memberSince: 'Member Since',
     emailReadonly: 'Email cannot be changed',
-    memberSinceReadonly: 'Account creation date',
+    created_at: 'Account creation date',
     saved: 'Profile updated successfully!',
   },
 

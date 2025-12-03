@@ -5,6 +5,7 @@ import {
   GetAnnouncementsListOrderEnum,
   JobsGetJobsResponse,
   JobsSubmitJobRequest,
+  UsersUpdateUserRequest,
 } from '@/api/generated';
 import { Job, JobSearchParams } from '@/domain/types/Job';
 import { Device } from '@/domain/types/Device';
@@ -144,6 +145,24 @@ const convertDeviceResult = (device: DevicesDeviceInfo): Device => ({
   calibratedAt: device.calibrated_at ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   description: device.description,
 });
+
+export const useUserAPI = () => {
+  const api = useContext(userApiContext);
+
+  const getCurrentUser = async () => {
+    return api.user.getCurrentUser().then((res) => res.data);
+  };
+
+  const updateCurrentUser = async (userData: UsersUpdateUserRequest) => {
+    return api.user.updateCurrentUser(userData);
+  };
+
+  const deleteCurrentUser = async () => {
+    return api.user.deleteCurrentUser().then((res) => res.data);
+  }
+
+  return { getCurrentUser, updateCurrentUser, deleteCurrentUser };
+};
 
 export const useAnnouncementsAPI = () => {
   const api = useContext(userApiContext);

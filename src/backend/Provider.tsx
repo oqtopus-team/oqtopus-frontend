@@ -6,6 +6,7 @@ interface UserAPI {
   job: OAS.JobApi;
   apiToken: OAS.ApiTokenApi;
   announcements: OAS.AnnouncementsApi;
+  user: OAS.UsersApi;
 }
 
 export const newUserAPI = (config?: OAS.ConfigurationParameters): UserAPI => {
@@ -14,6 +15,7 @@ export const newUserAPI = (config?: OAS.ConfigurationParameters): UserAPI => {
     job: new OAS.JobApi(new OAS.Configuration(config)),
     apiToken: new OAS.ApiTokenApi(new OAS.Configuration(config)),
     announcements: new OAS.AnnouncementsApi(new OAS.Configuration(config)),
+    user: new OAS.UsersApi(new OAS.Configuration(config)),
   };
 };
 

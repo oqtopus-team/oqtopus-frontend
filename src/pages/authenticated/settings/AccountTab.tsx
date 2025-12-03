@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Auth } from 'aws-amplify';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import {
@@ -18,14 +19,22 @@ import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { toast } from 'react-toastify';
-import { successToastConfig } from '@/config/toast';
+import { errorToastConfig, successToastConfig } from '@/config/toast';
+import { useUserAPI } from '@/backend/hook';
+import { useNavigate } from 'react-router';
+import { useAuth } from '@/auth/hook';
 
 interface AccountTabFormData {
   currentPassword: string;
   newPassword: string;
   newPasswordConfirm: string;
-  language: 'en' | 'jpn';
 }
+
+const defaultFormValues: AccountTabFormData = {
+  currentPassword: '',
+  newPassword: '',
+  newPasswordConfirm: '',
+};
 
 const validationRules = (t: (key: string) => string): yup.ObjectSchema<AccountTabFormData> =>
   yup.object({
@@ -42,13 +51,16 @@ const validationRules = (t: (key: string) => string): yup.ObjectSchema<AccountTa
       .string()
       .required(t('signup.form.error_message.confirm_password_enter'))
       .oneOf([yup.ref('newPassword')], t('signup.form.error_message.confirm_password_mismatch')),
-    language: yup.string().oneOf(['en', 'jpn']).required(),
   });
 
 export function AccountTab() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { deleteCurrentUser } = useUserAPI();
+  const auth = useAuth();
 
-  const [language, setLanguage] = useState('en');
+  const [language, setLanguage] = useState(() => {
+    return i18n.language || 'en';
+  });
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
@@ -56,39 +68,56 @@ export function AccountTab() {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<AccountTabFormData>({
     resolver: yupResolver(validationRules(t)),
-    defaultValues: {
-      currentPassword: '',
-      newPassword: '',
-      newPasswordConfirm: '',
-      language: 'en',
-    },
+    defaultValues: defaultFormValues,
   });
 
-  const handlePasswordSubmit = async (data) => {
-    console.log('Submit form data', data);
+  useEffect(() => {
+    setLanguage(i18n.language);
+  }, [i18n.language]);
+
+  const handlePasswordSubmit = async (data: AccountTabFormData) => {
     setIsPasswordLoading(true);
-    setTimeout(() => {
-      setIsPasswordLoading(false)
-      toast(t('settings.account.passwordChanged'), successToastConfig)
-    }, 3000);
+    try {
+      const user = await Auth.currentUserPoolUser();
+
+      await Auth.changePassword(user, data.currentPassword, data.newPasswordConfirm);
+
+      toast(t('settings.account.passwordChanged'), successToastConfig);
+      reset(defaultFormValues);
+    } catch (e: any) {
+      if (typeof e === 'object' && 'message' in e) {
+        toast(e.message ?? t('common.errors.default'), errorToastConfig);
+      } else {
+        toast(t('common.errors.default'), errorToastConfig);
+      }
+    } finally {
+      setIsPasswordLoading(false);
+    }
   };
 
   const handleLanguageChange = async (event: any) => {
     const newLanguage = event.target.value;
     setLanguage(newLanguage);
 
-    // Mock API call
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await i18n.changeLanguage(newLanguage);
   };
 
   const handleDeleteAccount = async () => {
-    // Mock API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      await deleteCurrentUser();
 
-    setDeleteDialogOpen(false);
-    alert(t('settings.account.accountDeleted'));
+      toast(t('settings.account.accountDeleted'), successToastConfig);
+      await auth.signOut();
+    } catch (e: any) {
+      if (typeof e === 'object' && 'message' in e) {
+        toast(e.message ?? t('common.errors.default'), errorToastConfig);
+      }
+    } finally {
+      setDeleteDialogOpen(false);
+    }
   };
 
   return (
@@ -161,8 +190,8 @@ export function AccountTab() {
             onChange={handleLanguageChange}
             label={t('settings.account.language')}
           >
-            <MenuItem value="en">English</MenuItem>
-            <MenuItem value="jpn">Japanese</MenuItem>
+            <MenuItem value="en">{t('header.lang.en')}</MenuItem>
+            <MenuItem value="ja">{t('header.lang.ja')}</MenuItem>
           </Select>
         </FormControl>
       </div>
