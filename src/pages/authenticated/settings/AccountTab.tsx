@@ -1,19 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Auth } from 'aws-amplify';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import {
-  TextField,
   Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Dialog,
-  DialogTitle,
-  DialogContent,
   DialogActions,
+  DialogContent,
   DialogContentText,
+  DialogTitle,
+  TextField,
 } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';
@@ -21,7 +17,6 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { toast } from 'react-toastify';
 import { errorToastConfig, successToastConfig } from '@/config/toast';
 import { useUserAPI } from '@/backend/hook';
-import { useNavigate } from 'react-router';
 import { useAuth } from '@/auth/hook';
 
 interface AccountTabFormData {
@@ -54,13 +49,10 @@ const validationRules = (t: (key: string) => string): yup.ObjectSchema<AccountTa
   });
 
 export function AccountTab() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { deleteCurrentUser } = useUserAPI();
   const auth = useAuth();
 
-  const [language, setLanguage] = useState(() => {
-    return i18n.language || 'en';
-  });
   const [isPasswordLoading, setIsPasswordLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
@@ -73,10 +65,6 @@ export function AccountTab() {
     resolver: yupResolver(validationRules(t)),
     defaultValues: defaultFormValues,
   });
-
-  useEffect(() => {
-    setLanguage(i18n.language);
-  }, [i18n.language]);
 
   const handlePasswordSubmit = async (data: AccountTabFormData) => {
     setIsPasswordLoading(true);
@@ -96,13 +84,6 @@ export function AccountTab() {
     } finally {
       setIsPasswordLoading(false);
     }
-  };
-
-  const handleLanguageChange = async (event: any) => {
-    const newLanguage = event.target.value;
-    setLanguage(newLanguage);
-
-    await i18n.changeLanguage(newLanguage);
   };
 
   const handleDeleteAccount = async () => {
@@ -178,27 +159,7 @@ export function AccountTab() {
 
       <hr className={clsx('border-gray-200')} />
 
-      <div>
-        <h3 className={clsx('text-xl', 'font-semibold', 'mb-4')}>
-          {t('settings.account.languagePreference')}
-        </h3>
-
-        <FormControl fullWidth variant="outlined">
-          <InputLabel>{t('settings.account.language')}</InputLabel>
-          <Select
-            value={language}
-            onChange={handleLanguageChange}
-            label={t('settings.account.language')}
-          >
-            <MenuItem value="en">{t('header.lang.en')}</MenuItem>
-            <MenuItem value="ja">{t('header.lang.ja')}</MenuItem>
-          </Select>
-        </FormControl>
-      </div>
-
-      <hr className={clsx('border-gray-200')} />
-
-      <div>
+`      <div>
         <h3 className={clsx('text-xl', 'font-semibold', 'mb-4', 'text-red-600')}>
           {t('settings.account.deleteAccount')}
         </h3>

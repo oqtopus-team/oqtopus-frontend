@@ -31,9 +31,6 @@ export default {
     passwordChanged: 'パスワードが正常に変更されました！',
     updatePassword: 'パスワードを更新',
 
-    languagePreference: '言語設定',
-    language: 'UI言語',
-
     deleteAccount: 'アカウント削除',
     deleteAccountWarning: 'この操作は元に戻せません。すべてのデータが削除されます。',
     confirmDelete: 'アカウント削除の確認',

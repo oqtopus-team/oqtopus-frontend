@@ -31,9 +31,6 @@ export default {
     passwordChanged: 'Password changed successfully!',
     updatePassword: 'Update Password',
 
-    languagePreference: 'Language Preference',
-    language: 'UI Language',
-
     deleteAccount: 'Delete Account',
     deleteAccountWarning: 'This action is permanent and cannot be undone. All your data will be deleted.',
     confirmDelete: 'Confirm Account Deletion',
