@@ -12,274 +12,262 @@
  * Do not edit the class manually.
  */
 
+
 import type { Configuration } from './configuration';
 import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
 import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import {
-  DUMMY_BASE_URL,
-  assertParamExists,
-  setApiKeyToObject,
-  setBasicAuthToObject,
-  setBearerAuthToObject,
-  setOAuthToObject,
-  setSearchParams,
-  serializeDataIfNeeded,
-  toPathString,
-  createRequestFunction,
-} from './common';
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from './common';
 import type { RequestArgs } from './base';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerMap } from './base';
 
 /**
- *
+ * 
  * @export
  * @interface AnnouncementsGetAnnouncementResponse
  */
 export interface AnnouncementsGetAnnouncementResponse {
-  /**
-   *
-   * @type {number}
-   * @memberof AnnouncementsGetAnnouncementResponse
-   */
-  id: number;
-  /**
-   *
-   * @type {string}
-   * @memberof AnnouncementsGetAnnouncementResponse
-   */
-  title: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AnnouncementsGetAnnouncementResponse
-   */
-  content: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AnnouncementsGetAnnouncementResponse
-   */
-  start_time: string;
-  /**
-   *
-   * @type {string}
-   * @memberof AnnouncementsGetAnnouncementResponse
-   */
-  end_time: string;
-  /**
-   *
-   * @type {boolean}
-   * @memberof AnnouncementsGetAnnouncementResponse
-   */
-  publishable: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof AnnouncementsGetAnnouncementResponse
+     */
+    'id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof AnnouncementsGetAnnouncementResponse
+     */
+    'title': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AnnouncementsGetAnnouncementResponse
+     */
+    'content': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AnnouncementsGetAnnouncementResponse
+     */
+    'start_time': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AnnouncementsGetAnnouncementResponse
+     */
+    'end_time': string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof AnnouncementsGetAnnouncementResponse
+     */
+    'publishable': boolean;
 }
 /**
- *
+ * 
  * @export
  * @interface AnnouncementsGetAnnouncementsListResponse
  */
 export interface AnnouncementsGetAnnouncementsListResponse {
-  /**
-   *
-   * @type {Array<AnnouncementsGetAnnouncementResponse>}
-   * @memberof AnnouncementsGetAnnouncementsListResponse
-   */
-  announcements?: Array<AnnouncementsGetAnnouncementResponse>;
+    /**
+     * 
+     * @type {Array<AnnouncementsGetAnnouncementResponse>}
+     * @memberof AnnouncementsGetAnnouncementsListResponse
+     */
+    'announcements'?: Array<AnnouncementsGetAnnouncementResponse>;
 }
 /**
- *
+ * 
  * @export
  * @interface ApiTokenApiToken
  */
 export interface ApiTokenApiToken {
-  /**
-   * The api token secret
-   * @type {string}
-   * @memberof ApiTokenApiToken
-   */
-  api_token_secret?: string;
-  /**
-   * The expiration date of the api token
-   * @type {string}
-   * @memberof ApiTokenApiToken
-   */
-  api_token_expiration?: string;
+    /**
+     * The api token secret
+     * @type {string}
+     * @memberof ApiTokenApiToken
+     */
+    'api_token_secret'?: string;
+    /**
+     * The expiration date of the api token
+     * @type {string}
+     * @memberof ApiTokenApiToken
+     */
+    'api_token_expiration'?: string;
 }
 /**
- *
+ * 
  * @export
  * @interface DevicesDeviceInfo
  */
 export interface DevicesDeviceInfo {
-  /**
-   *
-   * @type {string}
-   * @memberof DevicesDeviceInfo
-   */
-  device_id: string;
-  /**
-   *
-   * @type {string}
-   * @memberof DevicesDeviceInfo
-   */
-  device_type: DevicesDeviceInfoDeviceTypeEnum;
-  /**
-   *
-   * @type {string}
-   * @memberof DevicesDeviceInfo
-   */
-  status: DevicesDeviceInfoStatusEnum;
-  /**
-   * Parameter mandatory and valid for \'unavailable\' devices
-   * @type {string}
-   * @memberof DevicesDeviceInfo
-   */
-  available_at?: string;
-  /**
-   *
-   * @type {number}
-   * @memberof DevicesDeviceInfo
-   */
-  n_pending_jobs: number;
-  /**
-   *
-   * @type {number}
-   * @memberof DevicesDeviceInfo
-   */
-  n_qubits?: number;
-  /**
-   *
-   * @type {Array<string>}
-   * @memberof DevicesDeviceInfo
-   */
-  basis_gates: Array<string>;
-  /**
-   *
-   * @type {Array<string>}
-   * @memberof DevicesDeviceInfo
-   */
-  supported_instructions: Array<string>;
-  /**
-   * json format calibration_data and n_nodes etc
-   * @type {string}
-   * @memberof DevicesDeviceInfo
-   */
-  device_info?: string;
-  /**
-   * Parameter available only for `QPU` devices with available calibration data
-   * @type {string}
-   * @memberof DevicesDeviceInfo
-   */
-  calibrated_at?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof DevicesDeviceInfo
-   */
-  description: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DevicesDeviceInfo
+     */
+    'device_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DevicesDeviceInfo
+     */
+    'device_type': DevicesDeviceInfoDeviceTypeEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof DevicesDeviceInfo
+     */
+    'status': DevicesDeviceInfoStatusEnum;
+    /**
+     * Parameter mandatory and valid for \'unavailable\' devices
+     * @type {string}
+     * @memberof DevicesDeviceInfo
+     */
+    'available_at'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof DevicesDeviceInfo
+     */
+    'n_pending_jobs': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof DevicesDeviceInfo
+     */
+    'n_qubits'?: number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof DevicesDeviceInfo
+     */
+    'basis_gates': Array<string>;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof DevicesDeviceInfo
+     */
+    'supported_instructions': Array<string>;
+    /**
+     * json format calibration_data and n_nodes etc
+     * @type {string}
+     * @memberof DevicesDeviceInfo
+     */
+    'device_info'?: string;
+    /**
+     * Parameter available only for `QPU` devices with available calibration data
+     * @type {string}
+     * @memberof DevicesDeviceInfo
+     */
+    'calibrated_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DevicesDeviceInfo
+     */
+    'description': string;
 }
 
 export const DevicesDeviceInfoDeviceTypeEnum = {
-  Qpu: 'QPU',
-  Simulator: 'simulator',
+    Qpu: 'QPU',
+    Simulator: 'simulator'
 } as const;
 
-export type DevicesDeviceInfoDeviceTypeEnum =
-  (typeof DevicesDeviceInfoDeviceTypeEnum)[keyof typeof DevicesDeviceInfoDeviceTypeEnum];
+export type DevicesDeviceInfoDeviceTypeEnum = typeof DevicesDeviceInfoDeviceTypeEnum[keyof typeof DevicesDeviceInfoDeviceTypeEnum];
 export const DevicesDeviceInfoStatusEnum = {
-  Available: 'available',
-  Unavailable: 'unavailable',
+    Available: 'available',
+    Unavailable: 'unavailable'
 } as const;
 
-export type DevicesDeviceInfoStatusEnum =
-  (typeof DevicesDeviceInfoStatusEnum)[keyof typeof DevicesDeviceInfoStatusEnum];
+export type DevicesDeviceInfoStatusEnum = typeof DevicesDeviceInfoStatusEnum[keyof typeof DevicesDeviceInfoStatusEnum];
 
 /**
- *
+ * 
  * @export
  * @interface ErrorBadRequest
  */
 export interface ErrorBadRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof ErrorBadRequest
-   */
-  message: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ErrorBadRequest
+     */
+    'message': string;
 }
 /**
- *
+ * 
  * @export
  * @interface ErrorForbiddenError
  */
 export interface ErrorForbiddenError {
-  /**
-   *
-   * @type {string}
-   * @memberof ErrorForbiddenError
-   */
-  message: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ErrorForbiddenError
+     */
+    'message': string;
 }
 /**
- *
+ * 
  * @export
  * @interface ErrorInternalServerError
  */
 export interface ErrorInternalServerError {
-  /**
-   *
-   * @type {string}
-   * @memberof ErrorInternalServerError
-   */
-  message: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ErrorInternalServerError
+     */
+    'message': string;
 }
 /**
- *
+ * 
  * @export
  * @interface ErrorNotFoundError
  */
 export interface ErrorNotFoundError {
-  /**
-   *
-   * @type {string}
-   * @memberof ErrorNotFoundError
-   */
-  message: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ErrorNotFoundError
+     */
+    'message': string;
 }
 /**
- *
+ * 
  * @export
  * @interface ErrorUnauthorizedError
  */
 export interface ErrorUnauthorizedError {
-  /**
-   *
-   * @type {string}
-   * @memberof ErrorUnauthorizedError
-   */
-  message: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ErrorUnauthorizedError
+     */
+    'message': string;
 }
 /**
- * *(Only for estimation jobs)* The estimated expectation value and the standard deviation of the operators specified in `job_info.operator` field which is intended to be provided for estimation jobs.
+ * *(Only for estimation jobs)* The estimated expectation value and the standard deviation of the operators specified in `job_info.operator` field which is intended to be provided for estimation jobs. 
  * @export
  * @interface JobsEstimationResult
  */
 export interface JobsEstimationResult {
-  /**
-   * The estimated expectation value
-   * @type {number}
-   * @memberof JobsEstimationResult
-   */
-  exp_value?: number;
-  /**
-   * The standard deviation value
-   * @type {number}
-   * @memberof JobsEstimationResult
-   */
-  stds?: number;
+    /**
+     * The estimated expectation value
+     * @type {number}
+     * @memberof JobsEstimationResult
+     */
+    'exp_value'?: number;
+    /**
+     * The standard deviation value
+     * @type {number}
+     * @memberof JobsEstimationResult
+     */
+    'stds'?: number;
 }
 /**
  * job status
@@ -287,123 +275,125 @@ export interface JobsEstimationResult {
  * @interface JobsGetJobStatusResponse
  */
 export interface JobsGetJobStatusResponse {
-  /**
-   *
-   * @type {string}
-   * @memberof JobsGetJobStatusResponse
-   */
-  job_id: string;
-  /**
-   *
-   * @type {JobsJobStatus}
-   * @memberof JobsGetJobStatusResponse
-   */
-  status: JobsJobStatus;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsGetJobStatusResponse
+     */
+    'job_id': string;
+    /**
+     * 
+     * @type {JobsJobStatus}
+     * @memberof JobsGetJobStatusResponse
+     */
+    'status': JobsJobStatus;
 }
 
+
 /**
- *
+ * 
  * @export
  * @interface JobsGetJobsResponse
  */
 export interface JobsGetJobsResponse {
-  /**
-   *
-   * @type {string}
-   * @memberof JobsGetJobsResponse
-   */
-  job_id?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsGetJobsResponse
-   */
-  name?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsGetJobsResponse
-   */
-  description?: string;
-  /**
-   *
-   * @type {JobsJobType}
-   * @memberof JobsGetJobsResponse
-   */
-  job_type?: JobsJobType;
-  /**
-   *
-   * @type {JobsJobStatus}
-   * @memberof JobsGetJobsResponse
-   */
-  status?: JobsJobStatus;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsGetJobsResponse
-   */
-  device_id?: string;
-  /**
-   *
-   * @type {number}
-   * @memberof JobsGetJobsResponse
-   */
-  shots?: number;
-  /**
-   *
-   * @type {JobsJobInfo}
-   * @memberof JobsGetJobsResponse
-   */
-  job_info?: JobsJobInfo;
-  /**
-   *
-   * @type {{ [key: string]: any; }}
-   * @memberof JobsGetJobsResponse
-   */
-  transpiler_info?: { [key: string]: any };
-  /**
-   *
-   * @type {{ [key: string]: any; }}
-   * @memberof JobsGetJobsResponse
-   */
-  simulator_info?: { [key: string]: any };
-  /**
-   *
-   * @type {{ [key: string]: any; }}
-   * @memberof JobsGetJobsResponse
-   */
-  mitigation_info?: { [key: string]: any };
-  /**
-   *
-   * @type {number}
-   * @memberof JobsGetJobsResponse
-   */
-  execution_time?: number;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsGetJobsResponse
-   */
-  submitted_at?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsGetJobsResponse
-   */
-  ready_at?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsGetJobsResponse
-   */
-  running_at?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsGetJobsResponse
-   */
-  ended_at?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsGetJobsResponse
+     */
+    'job_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsGetJobsResponse
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsGetJobsResponse
+     */
+    'description'?: string;
+    /**
+     * 
+     * @type {JobsJobType}
+     * @memberof JobsGetJobsResponse
+     */
+    'job_type'?: JobsJobType;
+    /**
+     * 
+     * @type {JobsJobStatus}
+     * @memberof JobsGetJobsResponse
+     */
+    'status'?: JobsJobStatus;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsGetJobsResponse
+     */
+    'device_id'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof JobsGetJobsResponse
+     */
+    'shots'?: number;
+    /**
+     * 
+     * @type {JobsJobInfo}
+     * @memberof JobsGetJobsResponse
+     */
+    'job_info'?: JobsJobInfo;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof JobsGetJobsResponse
+     */
+    'transpiler_info'?: { [key: string]: any; };
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof JobsGetJobsResponse
+     */
+    'simulator_info'?: { [key: string]: any; };
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof JobsGetJobsResponse
+     */
+    'mitigation_info'?: { [key: string]: any; };
+    /**
+     * 
+     * @type {number}
+     * @memberof JobsGetJobsResponse
+     */
+    'execution_time'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsGetJobsResponse
+     */
+    'submitted_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsGetJobsResponse
+     */
+    'ready_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsGetJobsResponse
+     */
+    'running_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsGetJobsResponse
+     */
+    'ended_at'?: string;
 }
+
 
 /**
  * sse log file
@@ -411,237 +401,240 @@ export interface JobsGetJobsResponse {
  * @interface JobsGetSselogResponse
  */
 export interface JobsGetSselogResponse {
-  /**
-   *
-   * @type {string}
-   * @memberof JobsGetSselogResponse
-   */
-  file?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsGetSselogResponse
-   */
-  file_name?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsGetSselogResponse
+     */
+    'file'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsGetSselogResponse
+     */
+    'file_name'?: string;
 }
 /**
- *
+ * 
  * @export
  * @interface JobsJobDef
  */
 export interface JobsJobDef {
-  /**
-   *
-   * @type {string}
-   * @memberof JobsJobDef
-   */
-  job_id: string;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsJobDef
-   */
-  name: string;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsJobDef
-   */
-  description?: string;
-  /**
-   *
-   * @type {JobsJobType}
-   * @memberof JobsJobDef
-   */
-  job_type: JobsJobType;
-  /**
-   *
-   * @type {JobsJobStatus}
-   * @memberof JobsJobDef
-   */
-  status: JobsJobStatus;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsJobDef
-   */
-  device_id: string;
-  /**
-   *
-   * @type {number}
-   * @memberof JobsJobDef
-   */
-  shots: number;
-  /**
-   *
-   * @type {JobsJobInfo}
-   * @memberof JobsJobDef
-   */
-  job_info: JobsJobInfo;
-  /**
-   *
-   * @type {{ [key: string]: any; }}
-   * @memberof JobsJobDef
-   */
-  transpiler_info?: { [key: string]: any };
-  /**
-   *
-   * @type {{ [key: string]: any; }}
-   * @memberof JobsJobDef
-   */
-  simulator_info?: { [key: string]: any };
-  /**
-   *
-   * @type {{ [key: string]: any; }}
-   * @memberof JobsJobDef
-   */
-  mitigation_info?: { [key: string]: any };
-  /**
-   *
-   * @type {number}
-   * @memberof JobsJobDef
-   */
-  execution_time?: number;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsJobDef
-   */
-  submitted_at?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsJobDef
-   */
-  ready_at?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsJobDef
-   */
-  running_at?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsJobDef
-   */
-  ended_at?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsJobDef
+     */
+    'job_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsJobDef
+     */
+    'name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsJobDef
+     */
+    'description'?: string;
+    /**
+     * 
+     * @type {JobsJobType}
+     * @memberof JobsJobDef
+     */
+    'job_type': JobsJobType;
+    /**
+     * 
+     * @type {JobsJobStatus}
+     * @memberof JobsJobDef
+     */
+    'status': JobsJobStatus;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsJobDef
+     */
+    'device_id': string;
+    /**
+     * 
+     * @type {number}
+     * @memberof JobsJobDef
+     */
+    'shots': number;
+    /**
+     * 
+     * @type {JobsJobInfo}
+     * @memberof JobsJobDef
+     */
+    'job_info': JobsJobInfo;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof JobsJobDef
+     */
+    'transpiler_info'?: { [key: string]: any; };
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof JobsJobDef
+     */
+    'simulator_info'?: { [key: string]: any; };
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof JobsJobDef
+     */
+    'mitigation_info'?: { [key: string]: any; };
+    /**
+     * 
+     * @type {number}
+     * @memberof JobsJobDef
+     */
+    'execution_time'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsJobDef
+     */
+    'submitted_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsJobDef
+     */
+    'ready_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsJobDef
+     */
+    'running_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsJobDef
+     */
+    'ended_at'?: string;
 }
 
+
 /**
- *
+ * 
  * @export
  * @interface JobsJobInfo
  */
 export interface JobsJobInfo {
-  /**
-   * A list of OPENQASM3 program. For non-multiprogramming jobs, this field is assumed to contain exactly one program. Otherwise, those programs are combined according to the multiprogramming machinery.
-   * @type {Array<string>}
-   * @memberof JobsJobInfo
-   */
-  program: Array<string>;
-  /**
-   * For multiprogramming jobs, this field contains the combined circuit.
-   * @type {string}
-   * @memberof JobsJobInfo
-   */
-  combined_program?: string;
-  /**
-   * *(Only for estimation jobs)* The operator (or observable) for which the expectation value is to be estimated.
-   * @type {Array<JobsOperatorItem>}
-   * @memberof JobsJobInfo
-   */
-  operator?: Array<JobsOperatorItem>;
-  /**
-   *
-   * @type {JobsJobResult}
-   * @memberof JobsJobInfo
-   */
-  result?: JobsJobResult;
-  /**
-   *
-   * @type {JobsTranspileResult}
-   * @memberof JobsJobInfo
-   */
-  transpile_result?: JobsTranspileResult;
-  /**
-   * Describing the reason why there is no result
-   * @type {string}
-   * @memberof JobsJobInfo
-   */
-  message?: string;
+    /**
+     * A list of OPENQASM3 program. For non-multiprogramming jobs, this field is assumed to contain exactly one program. Otherwise, those programs are combined according to the multiprogramming machinery.
+     * @type {Array<string>}
+     * @memberof JobsJobInfo
+     */
+    'program': Array<string>;
+    /**
+     * For multiprogramming jobs, this field contains the combined circuit.
+     * @type {string}
+     * @memberof JobsJobInfo
+     */
+    'combined_program'?: string;
+    /**
+     * *(Only for estimation jobs)* The operator (or observable) for which the expectation value is to be estimated. 
+     * @type {Array<JobsOperatorItem>}
+     * @memberof JobsJobInfo
+     */
+    'operator'?: Array<JobsOperatorItem>;
+    /**
+     * 
+     * @type {JobsJobResult}
+     * @memberof JobsJobInfo
+     */
+    'result'?: JobsJobResult;
+    /**
+     * 
+     * @type {JobsTranspileResult}
+     * @memberof JobsJobInfo
+     */
+    'transpile_result'?: JobsTranspileResult;
+    /**
+     * Describing the reason why there is no result
+     * @type {string}
+     * @memberof JobsJobInfo
+     */
+    'message'?: string;
 }
 /**
- *
+ * 
  * @export
  * @interface JobsJobResult
  */
 export interface JobsJobResult {
-  [key: string]: any;
+    [key: string]: any;
 
-  /**
-   *
-   * @type {JobsSamplingResult}
-   * @memberof JobsJobResult
-   */
-  sampling?: JobsSamplingResult;
-  /**
-   *
-   * @type {JobsEstimationResult}
-   * @memberof JobsJobResult
-   */
-  estimation?: JobsEstimationResult;
+    /**
+     * 
+     * @type {JobsSamplingResult}
+     * @memberof JobsJobResult
+     */
+    'sampling'?: JobsSamplingResult;
+    /**
+     * 
+     * @type {JobsEstimationResult}
+     * @memberof JobsJobResult
+     */
+    'estimation'?: JobsEstimationResult;
 }
 /**
- *
+ * 
  * @export
  * @enum {string}
  */
 
 export const JobsJobStatus = {
-  Submitted: 'submitted',
-  Ready: 'ready',
-  Running: 'running',
-  Succeeded: 'succeeded',
-  Failed: 'failed',
-  Cancelled: 'cancelled',
+    Submitted: 'submitted',
+    Ready: 'ready',
+    Running: 'running',
+    Succeeded: 'succeeded',
+    Failed: 'failed',
+    Cancelled: 'cancelled'
 } as const;
 
-export type JobsJobStatus = (typeof JobsJobStatus)[keyof typeof JobsJobStatus];
+export type JobsJobStatus = typeof JobsJobStatus[keyof typeof JobsJobStatus];
+
 
 /**
- *
+ * 
  * @export
  * @enum {string}
  */
 
 export const JobsJobType = {
-  Estimation: 'estimation',
-  Sampling: 'sampling',
-  MultiManual: 'multi_manual',
-  Sse: 'sse',
+    Estimation: 'estimation',
+    Sampling: 'sampling',
+    MultiManual: 'multi_manual',
+    Sse: 'sse'
 } as const;
 
-export type JobsJobType = (typeof JobsJobType)[keyof typeof JobsJobType];
+export type JobsJobType = typeof JobsJobType[keyof typeof JobsJobType];
+
 
 /**
- *
+ * 
  * @export
  * @interface JobsOperatorItem
  */
 export interface JobsOperatorItem {
-  /**
-   * The Pauli string.
-   * @type {string}
-   * @memberof JobsOperatorItem
-   */
-  pauli: string;
-  /**
-   * Coefficient number in the Pauli string representation.
-   * @type {number}
-   * @memberof JobsOperatorItem
-   */
-  coeff?: number;
+    /**
+     * The Pauli string.
+     * @type {string}
+     * @memberof JobsOperatorItem
+     */
+    'pauli': string;
+    /**
+     * Coefficient number in the Pauli string representation.
+     * @type {number}
+     * @memberof JobsOperatorItem
+     */
+    'coeff'?: number;
 }
 /**
  * *(Only for sampling jobs)* JSON string representing the sampling result
@@ -649,18 +642,18 @@ export interface JobsOperatorItem {
  * @interface JobsSamplingResult
  */
 export interface JobsSamplingResult {
-  /**
-   *
-   * @type {{ [key: string]: any; }}
-   * @memberof JobsSamplingResult
-   */
-  counts?: { [key: string]: any };
-  /**
-   *
-   * @type {{ [key: string]: any; }}
-   * @memberof JobsSamplingResult
-   */
-  divided_counts?: { [key: string]: any } | null;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof JobsSamplingResult
+     */
+    'counts'?: { [key: string]: any; };
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof JobsSamplingResult
+     */
+    'divided_counts'?: { [key: string]: any; } | null;
 }
 /**
  * All fields in this schema also exist in the `JobInfo` schema and have the same meaning as their counterparts in the `JobInfo` schema.
@@ -668,80 +661,81 @@ export interface JobsSamplingResult {
  * @interface JobsSubmitJobInfo
  */
 export interface JobsSubmitJobInfo {
-  /**
-   * A list of OPENQASM3 program. For non-multiprogramming jobs, this field is assumed to contain exactly one program. Otherwise, those programs are combined according to the multiprogramming machinery.
-   * @type {Array<string>}
-   * @memberof JobsSubmitJobInfo
-   */
-  program: Array<string>;
-  /**
-   *
-   * @type {Array<JobsOperatorItem>}
-   * @memberof JobsSubmitJobInfo
-   */
-  operator?: Array<JobsOperatorItem>;
+    /**
+     * A list of OPENQASM3 program. For non-multiprogramming jobs, this field is assumed to contain exactly one program. Otherwise, those programs are combined according to the multiprogramming machinery.
+     * @type {Array<string>}
+     * @memberof JobsSubmitJobInfo
+     */
+    'program': Array<string>;
+    /**
+     * 
+     * @type {Array<JobsOperatorItem>}
+     * @memberof JobsSubmitJobInfo
+     */
+    'operator'?: Array<JobsOperatorItem>;
 }
 /**
- *
+ * 
  * @export
  * @interface JobsSubmitJobRequest
  */
 export interface JobsSubmitJobRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof JobsSubmitJobRequest
-   */
-  name?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsSubmitJobRequest
-   */
-  description?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsSubmitJobRequest
-   */
-  device_id: string;
-  /**
-   *
-   * @type {JobsJobType}
-   * @memberof JobsSubmitJobRequest
-   */
-  job_type: JobsJobType;
-  /**
-   *
-   * @type {JobsSubmitJobInfo}
-   * @memberof JobsSubmitJobRequest
-   */
-  job_info: JobsSubmitJobInfo;
-  /**
-   *
-   * @type {{ [key: string]: any; }}
-   * @memberof JobsSubmitJobRequest
-   */
-  transpiler_info?: { [key: string]: any };
-  /**
-   *
-   * @type {{ [key: string]: any; }}
-   * @memberof JobsSubmitJobRequest
-   */
-  simulator_info?: { [key: string]: any };
-  /**
-   *
-   * @type {{ [key: string]: any; }}
-   * @memberof JobsSubmitJobRequest
-   */
-  mitigation_info?: { [key: string]: any };
-  /**
-   *
-   * @type {number}
-   * @memberof JobsSubmitJobRequest
-   */
-  shots: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsSubmitJobRequest
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsSubmitJobRequest
+     */
+    'description'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsSubmitJobRequest
+     */
+    'device_id': string;
+    /**
+     * 
+     * @type {JobsJobType}
+     * @memberof JobsSubmitJobRequest
+     */
+    'job_type': JobsJobType;
+    /**
+     * 
+     * @type {JobsSubmitJobInfo}
+     * @memberof JobsSubmitJobRequest
+     */
+    'job_info': JobsSubmitJobInfo;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof JobsSubmitJobRequest
+     */
+    'transpiler_info'?: { [key: string]: any; };
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof JobsSubmitJobRequest
+     */
+    'simulator_info'?: { [key: string]: any; };
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof JobsSubmitJobRequest
+     */
+    'mitigation_info'?: { [key: string]: any; };
+    /**
+     * 
+     * @type {number}
+     * @memberof JobsSubmitJobRequest
+     */
+    'shots': number;
 }
+
 
 /**
  * submit a job
@@ -749,50 +743,106 @@ export interface JobsSubmitJobRequest {
  * @interface JobsSubmitJobResponse
  */
 export interface JobsSubmitJobResponse {
-  /**
-   *
-   * @type {string}
-   * @memberof JobsSubmitJobResponse
-   */
-  job_id: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsSubmitJobResponse
+     */
+    'job_id': string;
 }
 /**
- *
+ * 
  * @export
  * @interface JobsTranspileResult
  */
 export interface JobsTranspileResult {
-  /**
-   *
-   * @type {string}
-   * @memberof JobsTranspileResult
-   */
-  transpiled_program: string | null;
-  /**
-   *
-   * @type {{ [key: string]: any; }}
-   * @memberof JobsTranspileResult
-   */
-  stats: { [key: string]: any } | null;
-  /**
-   *
-   * @type {{ [key: string]: any; }}
-   * @memberof JobsTranspileResult
-   */
-  virtual_physical_mapping: { [key: string]: any } | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof JobsTranspileResult
+     */
+    'transpiled_program': string | null;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof JobsTranspileResult
+     */
+    'stats': { [key: string]: any; } | null;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof JobsTranspileResult
+     */
+    'virtual_physical_mapping': { [key: string]: any; } | null;
 }
 /**
- *
+ * 
  * @export
  * @interface SuccessSuccessResponse
  */
 export interface SuccessSuccessResponse {
-  /**
-   *
-   * @type {string}
-   * @memberof SuccessSuccessResponse
-   */
-  message: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SuccessSuccessResponse
+     */
+    'message': string;
+}
+/**
+ * detail of user response
+ * @export
+ * @interface UsersGetOneUserResponse
+ */
+export interface UsersGetOneUserResponse {
+    /**
+     * 
+     * @type {number}
+     * @memberof UsersGetOneUserResponse
+     */
+    'id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof UsersGetOneUserResponse
+     */
+    'email'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UsersGetOneUserResponse
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UsersGetOneUserResponse
+     */
+    'organization'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UsersGetOneUserResponse
+     */
+    'created_at'?: string;
+}
+/**
+ * user update data
+ * @export
+ * @interface UsersUpdateUserRequest
+ */
+export interface UsersUpdateUserRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof UsersUpdateUserRequest
+     */
+    'name'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UsersUpdateUserRequest
+     */
+    'organization'?: string;
 }
 
 /**
@@ -800,248 +850,174 @@ export interface SuccessSuccessResponse {
  * @export
  */
 export const AnnouncementsApiAxiosParamCreator = function (configuration?: Configuration) {
-  return {
-    /**
-     * Get selected announcement
-     * @summary Get selected announcement
-     * @param {number} announcementId announcement ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getAnnouncement: async (
-      announcementId: number,
-      options: RawAxiosRequestConfig = {}
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'announcementId' is not null or undefined
-      assertParamExists('getAnnouncement', 'announcementId', announcementId);
-      const localVarPath = `/announcements/{announcement_id}`.replace(
-        `{${'announcement_id'}}`,
-        encodeURIComponent(String(announcementId))
-      );
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
+    return {
+        /**
+         * Get selected announcement
+         * @summary Get selected announcement
+         * @param {number} announcementId announcement ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAnnouncement: async (announcementId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'announcementId' is not null or undefined
+            assertParamExists('getAnnouncement', 'announcementId', announcementId)
+            const localVarPath = `/announcements/{announcement_id}`
+                .replace(`{${"announcement_id"}}`, encodeURIComponent(String(announcementId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      // authentication BearerAuth required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration);
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Get announcements list from backend
-     * @summary Get announcements list from backend
-     * @param {string} [offset] offset information
-     * @param {string} [limit] Limit information
-     * @param {GetAnnouncementsListOrderEnum} [order] Specify order according to start time
-     * @param {string} [currentTime] Allows to filter the list of announcements to fetch by provided time. If specified only announcements with start_time &lt;&#x3D; current_time and end_time &gt;&#x3D; current_time are returned.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getAnnouncementsList: async (
-      offset?: string,
-      limit?: string,
-      order?: GetAnnouncementsListOrderEnum,
-      currentTime?: string,
-      options: RawAxiosRequestConfig = {}
-    ): Promise<RequestArgs> => {
-      const localVarPath = `/announcements`;
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get announcements list from backend
+         * @summary Get announcements list from backend
+         * @param {string} [offset] offset information
+         * @param {string} [limit] Limit information
+         * @param {GetAnnouncementsListOrderEnum} [order] Specify order according to start time
+         * @param {string} [currentTime] Allows to filter the list of announcements to fetch by provided time. If specified only announcements with start_time &lt;&#x3D; current_time and end_time &gt;&#x3D; current_time are returned.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAnnouncementsList: async (offset?: string, limit?: string, order?: GetAnnouncementsListOrderEnum, currentTime?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/announcements`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      // authentication BearerAuth required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration);
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      if (offset !== undefined) {
-        localVarQueryParameter['offset'] = offset;
-      }
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-      if (limit !== undefined) {
-        localVarQueryParameter['limit'] = limit;
-      }
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
 
-      if (order !== undefined) {
-        localVarQueryParameter['order'] = order;
-      }
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
 
-      if (currentTime !== undefined) {
-        localVarQueryParameter['current_time'] =
-          (currentTime as any) instanceof Date ? (currentTime as any).toISOString() : currentTime;
-      }
+            if (order !== undefined) {
+                localVarQueryParameter['order'] = order;
+            }
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
+            if (currentTime !== undefined) {
+                localVarQueryParameter['current_time'] = (currentTime as any instanceof Date) ?
+                    (currentTime as any).toISOString() :
+                    currentTime;
+            }
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-  };
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
 };
 
 /**
  * AnnouncementsApi - functional programming interface
  * @export
  */
-export const AnnouncementsApiFp = function (configuration?: Configuration) {
-  const localVarAxiosParamCreator = AnnouncementsApiAxiosParamCreator(configuration);
-  return {
-    /**
-     * Get selected announcement
-     * @summary Get selected announcement
-     * @param {number} announcementId announcement ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async getAnnouncement(
-      announcementId: number,
-      options?: RawAxiosRequestConfig
-    ): Promise<
-      (
-        axios?: AxiosInstance,
-        basePath?: string
-      ) => AxiosPromise<AnnouncementsGetAnnouncementResponse>
-    > {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getAnnouncement(
-        announcementId,
-        options
-      );
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-      const localVarOperationServerBasePath =
-        operationServerMap['AnnouncementsApi.getAnnouncement']?.[localVarOperationServerIndex]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration
-        )(axios, localVarOperationServerBasePath || basePath);
-    },
-    /**
-     * Get announcements list from backend
-     * @summary Get announcements list from backend
-     * @param {string} [offset] offset information
-     * @param {string} [limit] Limit information
-     * @param {GetAnnouncementsListOrderEnum} [order] Specify order according to start time
-     * @param {string} [currentTime] Allows to filter the list of announcements to fetch by provided time. If specified only announcements with start_time &lt;&#x3D; current_time and end_time &gt;&#x3D; current_time are returned.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async getAnnouncementsList(
-      offset?: string,
-      limit?: string,
-      order?: GetAnnouncementsListOrderEnum,
-      currentTime?: string,
-      options?: RawAxiosRequestConfig
-    ): Promise<
-      (
-        axios?: AxiosInstance,
-        basePath?: string
-      ) => AxiosPromise<AnnouncementsGetAnnouncementsListResponse>
-    > {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getAnnouncementsList(
-        offset,
-        limit,
-        order,
-        currentTime,
-        options
-      );
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-      const localVarOperationServerBasePath =
-        operationServerMap['AnnouncementsApi.getAnnouncementsList']?.[localVarOperationServerIndex]
-          ?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration
-        )(axios, localVarOperationServerBasePath || basePath);
-    },
-  };
+export const AnnouncementsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = AnnouncementsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Get selected announcement
+         * @summary Get selected announcement
+         * @param {number} announcementId announcement ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getAnnouncement(announcementId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AnnouncementsGetAnnouncementResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getAnnouncement(announcementId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AnnouncementsApi.getAnnouncement']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get announcements list from backend
+         * @summary Get announcements list from backend
+         * @param {string} [offset] offset information
+         * @param {string} [limit] Limit information
+         * @param {GetAnnouncementsListOrderEnum} [order] Specify order according to start time
+         * @param {string} [currentTime] Allows to filter the list of announcements to fetch by provided time. If specified only announcements with start_time &lt;&#x3D; current_time and end_time &gt;&#x3D; current_time are returned.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getAnnouncementsList(offset?: string, limit?: string, order?: GetAnnouncementsListOrderEnum, currentTime?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AnnouncementsGetAnnouncementsListResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getAnnouncementsList(offset, limit, order, currentTime, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AnnouncementsApi.getAnnouncementsList']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
 };
 
 /**
  * AnnouncementsApi - factory interface
  * @export
  */
-export const AnnouncementsApiFactory = function (
-  configuration?: Configuration,
-  basePath?: string,
-  axios?: AxiosInstance
-) {
-  const localVarFp = AnnouncementsApiFp(configuration);
-  return {
-    /**
-     * Get selected announcement
-     * @summary Get selected announcement
-     * @param {number} announcementId announcement ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getAnnouncement(
-      announcementId: number,
-      options?: RawAxiosRequestConfig
-    ): AxiosPromise<AnnouncementsGetAnnouncementResponse> {
-      return localVarFp
-        .getAnnouncement(announcementId, options)
-        .then((request) => request(axios, basePath));
-    },
-    /**
-     * Get announcements list from backend
-     * @summary Get announcements list from backend
-     * @param {string} [offset] offset information
-     * @param {string} [limit] Limit information
-     * @param {GetAnnouncementsListOrderEnum} [order] Specify order according to start time
-     * @param {string} [currentTime] Allows to filter the list of announcements to fetch by provided time. If specified only announcements with start_time &lt;&#x3D; current_time and end_time &gt;&#x3D; current_time are returned.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getAnnouncementsList(
-      offset?: string,
-      limit?: string,
-      order?: GetAnnouncementsListOrderEnum,
-      currentTime?: string,
-      options?: RawAxiosRequestConfig
-    ): AxiosPromise<AnnouncementsGetAnnouncementsListResponse> {
-      return localVarFp
-        .getAnnouncementsList(offset, limit, order, currentTime, options)
-        .then((request) => request(axios, basePath));
-    },
-  };
+export const AnnouncementsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = AnnouncementsApiFp(configuration)
+    return {
+        /**
+         * Get selected announcement
+         * @summary Get selected announcement
+         * @param {number} announcementId announcement ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAnnouncement(announcementId: number, options?: RawAxiosRequestConfig): AxiosPromise<AnnouncementsGetAnnouncementResponse> {
+            return localVarFp.getAnnouncement(announcementId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get announcements list from backend
+         * @summary Get announcements list from backend
+         * @param {string} [offset] offset information
+         * @param {string} [limit] Limit information
+         * @param {GetAnnouncementsListOrderEnum} [order] Specify order according to start time
+         * @param {string} [currentTime] Allows to filter the list of announcements to fetch by provided time. If specified only announcements with start_time &lt;&#x3D; current_time and end_time &gt;&#x3D; current_time are returned.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAnnouncementsList(offset?: string, limit?: string, order?: GetAnnouncementsListOrderEnum, currentTime?: string, options?: RawAxiosRequestConfig): AxiosPromise<AnnouncementsGetAnnouncementsListResponse> {
+            return localVarFp.getAnnouncementsList(offset, limit, order, currentTime, options).then((request) => request(axios, basePath));
+        },
+    };
 };
 
 /**
@@ -1051,287 +1027,236 @@ export const AnnouncementsApiFactory = function (
  * @extends {BaseAPI}
  */
 export class AnnouncementsApi extends BaseAPI {
-  /**
-   * Get selected announcement
-   * @summary Get selected announcement
-   * @param {number} announcementId announcement ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof AnnouncementsApi
-   */
-  public getAnnouncement(announcementId: number, options?: RawAxiosRequestConfig) {
-    return AnnouncementsApiFp(this.configuration)
-      .getAnnouncement(announcementId, options)
-      .then((request) => request(this.axios, this.basePath));
-  }
+    /**
+     * Get selected announcement
+     * @summary Get selected announcement
+     * @param {number} announcementId announcement ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AnnouncementsApi
+     */
+    public getAnnouncement(announcementId: number, options?: RawAxiosRequestConfig) {
+        return AnnouncementsApiFp(this.configuration).getAnnouncement(announcementId, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   * Get announcements list from backend
-   * @summary Get announcements list from backend
-   * @param {string} [offset] offset information
-   * @param {string} [limit] Limit information
-   * @param {GetAnnouncementsListOrderEnum} [order] Specify order according to start time
-   * @param {string} [currentTime] Allows to filter the list of announcements to fetch by provided time. If specified only announcements with start_time &lt;&#x3D; current_time and end_time &gt;&#x3D; current_time are returned.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof AnnouncementsApi
-   */
-  public getAnnouncementsList(
-    offset?: string,
-    limit?: string,
-    order?: GetAnnouncementsListOrderEnum,
-    currentTime?: string,
-    options?: RawAxiosRequestConfig
-  ) {
-    return AnnouncementsApiFp(this.configuration)
-      .getAnnouncementsList(offset, limit, order, currentTime, options)
-      .then((request) => request(this.axios, this.basePath));
-  }
+    /**
+     * Get announcements list from backend
+     * @summary Get announcements list from backend
+     * @param {string} [offset] offset information
+     * @param {string} [limit] Limit information
+     * @param {GetAnnouncementsListOrderEnum} [order] Specify order according to start time
+     * @param {string} [currentTime] Allows to filter the list of announcements to fetch by provided time. If specified only announcements with start_time &lt;&#x3D; current_time and end_time &gt;&#x3D; current_time are returned.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AnnouncementsApi
+     */
+    public getAnnouncementsList(offset?: string, limit?: string, order?: GetAnnouncementsListOrderEnum, currentTime?: string, options?: RawAxiosRequestConfig) {
+        return AnnouncementsApiFp(this.configuration).getAnnouncementsList(offset, limit, order, currentTime, options).then((request) => request(this.axios, this.basePath));
+    }
 }
 
 /**
  * @export
  */
 export const GetAnnouncementsListOrderEnum = {
-  Desc: 'DESC',
-  Asc: 'ASC',
+    Desc: 'DESC',
+    Asc: 'ASC'
 } as const;
-export type GetAnnouncementsListOrderEnum =
-  (typeof GetAnnouncementsListOrderEnum)[keyof typeof GetAnnouncementsListOrderEnum];
+export type GetAnnouncementsListOrderEnum = typeof GetAnnouncementsListOrderEnum[keyof typeof GetAnnouncementsListOrderEnum];
+
 
 /**
  * ApiTokenApi - axios parameter creator
  * @export
  */
 export const ApiTokenApiAxiosParamCreator = function (configuration?: Configuration) {
-  return {
-    /**
-     * Create api token
-     * @summary create api token
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    createApiToken: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      const localVarPath = `/api-token`;
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
+    return {
+        /**
+         * Create api token
+         * @summary create api token
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createApiToken: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api-token`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      // authentication BearerAuth required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration);
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Delete api token
-     * @summary delete api token
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    deleteApiToken: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      const localVarPath = `/api-token`;
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
-      const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Delete api token
+         * @summary delete api token
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteApiToken: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api-token`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      // authentication BearerAuth required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration);
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Get api token
-     * @summary get api token
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getApiToken: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      const localVarPath = `/api-token`;
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
 
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
-      // authentication BearerAuth required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration);
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get api token
+         * @summary get api token
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getApiToken: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api-token`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-  };
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
 };
 
 /**
  * ApiTokenApi - functional programming interface
  * @export
  */
-export const ApiTokenApiFp = function (configuration?: Configuration) {
-  const localVarAxiosParamCreator = ApiTokenApiAxiosParamCreator(configuration);
-  return {
-    /**
-     * Create api token
-     * @summary create api token
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async createApiToken(
-      options?: RawAxiosRequestConfig
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ApiTokenApiToken>>
-    > {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.createApiToken(options);
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-      const localVarOperationServerBasePath =
-        operationServerMap['ApiTokenApi.createApiToken']?.[localVarOperationServerIndex]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration
-        )(axios, localVarOperationServerBasePath || basePath);
-    },
-    /**
-     * Delete api token
-     * @summary delete api token
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async deleteApiToken(
-      options?: RawAxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.deleteApiToken(options);
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-      const localVarOperationServerBasePath =
-        operationServerMap['ApiTokenApi.deleteApiToken']?.[localVarOperationServerIndex]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration
-        )(axios, localVarOperationServerBasePath || basePath);
-    },
-    /**
-     * Get api token
-     * @summary get api token
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async getApiToken(
-      options?: RawAxiosRequestConfig
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ApiTokenApiToken>>
-    > {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getApiToken(options);
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-      const localVarOperationServerBasePath =
-        operationServerMap['ApiTokenApi.getApiToken']?.[localVarOperationServerIndex]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration
-        )(axios, localVarOperationServerBasePath || basePath);
-    },
-  };
+export const ApiTokenApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = ApiTokenApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Create api token
+         * @summary create api token
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createApiToken(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ApiTokenApiToken>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createApiToken(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ApiTokenApi.createApiToken']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Delete api token
+         * @summary delete api token
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteApiToken(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteApiToken(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ApiTokenApi.deleteApiToken']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get api token
+         * @summary get api token
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getApiToken(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ApiTokenApiToken>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getApiToken(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ApiTokenApi.getApiToken']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
 };
 
 /**
  * ApiTokenApi - factory interface
  * @export
  */
-export const ApiTokenApiFactory = function (
-  configuration?: Configuration,
-  basePath?: string,
-  axios?: AxiosInstance
-) {
-  const localVarFp = ApiTokenApiFp(configuration);
-  return {
-    /**
-     * Create api token
-     * @summary create api token
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    createApiToken(options?: RawAxiosRequestConfig): AxiosPromise<Array<ApiTokenApiToken>> {
-      return localVarFp.createApiToken(options).then((request) => request(axios, basePath));
-    },
-    /**
-     * Delete api token
-     * @summary delete api token
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    deleteApiToken(options?: RawAxiosRequestConfig): AxiosPromise<void> {
-      return localVarFp.deleteApiToken(options).then((request) => request(axios, basePath));
-    },
-    /**
-     * Get api token
-     * @summary get api token
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getApiToken(options?: RawAxiosRequestConfig): AxiosPromise<Array<ApiTokenApiToken>> {
-      return localVarFp.getApiToken(options).then((request) => request(axios, basePath));
-    },
-  };
+export const ApiTokenApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = ApiTokenApiFp(configuration)
+    return {
+        /**
+         * Create api token
+         * @summary create api token
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createApiToken(options?: RawAxiosRequestConfig): AxiosPromise<Array<ApiTokenApiToken>> {
+            return localVarFp.createApiToken(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Delete api token
+         * @summary delete api token
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteApiToken(options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.deleteApiToken(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get api token
+         * @summary get api token
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getApiToken(options?: RawAxiosRequestConfig): AxiosPromise<Array<ApiTokenApiToken>> {
+            return localVarFp.getApiToken(options).then((request) => request(axios, basePath));
+        },
+    };
 };
 
 /**
@@ -1341,223 +1266,185 @@ export const ApiTokenApiFactory = function (
  * @extends {BaseAPI}
  */
 export class ApiTokenApi extends BaseAPI {
-  /**
-   * Create api token
-   * @summary create api token
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof ApiTokenApi
-   */
-  public createApiToken(options?: RawAxiosRequestConfig) {
-    return ApiTokenApiFp(this.configuration)
-      .createApiToken(options)
-      .then((request) => request(this.axios, this.basePath));
-  }
+    /**
+     * Create api token
+     * @summary create api token
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ApiTokenApi
+     */
+    public createApiToken(options?: RawAxiosRequestConfig) {
+        return ApiTokenApiFp(this.configuration).createApiToken(options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   * Delete api token
-   * @summary delete api token
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof ApiTokenApi
-   */
-  public deleteApiToken(options?: RawAxiosRequestConfig) {
-    return ApiTokenApiFp(this.configuration)
-      .deleteApiToken(options)
-      .then((request) => request(this.axios, this.basePath));
-  }
+    /**
+     * Delete api token
+     * @summary delete api token
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ApiTokenApi
+     */
+    public deleteApiToken(options?: RawAxiosRequestConfig) {
+        return ApiTokenApiFp(this.configuration).deleteApiToken(options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   * Get api token
-   * @summary get api token
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof ApiTokenApi
-   */
-  public getApiToken(options?: RawAxiosRequestConfig) {
-    return ApiTokenApiFp(this.configuration)
-      .getApiToken(options)
-      .then((request) => request(this.axios, this.basePath));
-  }
+    /**
+     * Get api token
+     * @summary get api token
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ApiTokenApi
+     */
+    public getApiToken(options?: RawAxiosRequestConfig) {
+        return ApiTokenApiFp(this.configuration).getApiToken(options).then((request) => request(this.axios, this.basePath));
+    }
 }
+
+
 
 /**
  * DeviceApi - axios parameter creator
  * @export
  */
 export const DeviceApiAxiosParamCreator = function (configuration?: Configuration) {
-  return {
-    /**
-     * get device
-     * @summary Get specified device details
-     * @param {string} deviceId Device identifier
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getDevice: async (
-      deviceId: string,
-      options: RawAxiosRequestConfig = {}
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'deviceId' is not null or undefined
-      assertParamExists('getDevice', 'deviceId', deviceId);
-      const localVarPath = `/devices/{device_id}`.replace(
-        `{${'device_id'}}`,
-        encodeURIComponent(String(deviceId))
-      );
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
+    return {
+        /**
+         * get device
+         * @summary Get specified device details
+         * @param {string} deviceId Device identifier
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getDevice: async (deviceId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'deviceId' is not null or undefined
+            assertParamExists('getDevice', 'deviceId', deviceId)
+            const localVarPath = `/devices/{device_id}`
+                .replace(`{${"device_id"}}`, encodeURIComponent(String(deviceId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      // authentication BearerAuth required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration);
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * List available devices
-     * @summary List available devices
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listDevices: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      const localVarPath = `/devices`;
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * List available devices
+         * @summary List available devices
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listDevices: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/devices`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      // authentication BearerAuth required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration);
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-  };
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
 };
 
 /**
  * DeviceApi - functional programming interface
  * @export
  */
-export const DeviceApiFp = function (configuration?: Configuration) {
-  const localVarAxiosParamCreator = DeviceApiAxiosParamCreator(configuration);
-  return {
-    /**
-     * get device
-     * @summary Get specified device details
-     * @param {string} deviceId Device identifier
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async getDevice(
-      deviceId: string,
-      options?: RawAxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DevicesDeviceInfo>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getDevice(deviceId, options);
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-      const localVarOperationServerBasePath =
-        operationServerMap['DeviceApi.getDevice']?.[localVarOperationServerIndex]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration
-        )(axios, localVarOperationServerBasePath || basePath);
-    },
-    /**
-     * List available devices
-     * @summary List available devices
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async listDevices(
-      options?: RawAxiosRequestConfig
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<DevicesDeviceInfo>>
-    > {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.listDevices(options);
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-      const localVarOperationServerBasePath =
-        operationServerMap['DeviceApi.listDevices']?.[localVarOperationServerIndex]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration
-        )(axios, localVarOperationServerBasePath || basePath);
-    },
-  };
+export const DeviceApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = DeviceApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * get device
+         * @summary Get specified device details
+         * @param {string} deviceId Device identifier
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getDevice(deviceId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DevicesDeviceInfo>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getDevice(deviceId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['DeviceApi.getDevice']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * List available devices
+         * @summary List available devices
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listDevices(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<DevicesDeviceInfo>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listDevices(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['DeviceApi.listDevices']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
 };
 
 /**
  * DeviceApi - factory interface
  * @export
  */
-export const DeviceApiFactory = function (
-  configuration?: Configuration,
-  basePath?: string,
-  axios?: AxiosInstance
-) {
-  const localVarFp = DeviceApiFp(configuration);
-  return {
-    /**
-     * get device
-     * @summary Get specified device details
-     * @param {string} deviceId Device identifier
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getDevice(deviceId: string, options?: RawAxiosRequestConfig): AxiosPromise<DevicesDeviceInfo> {
-      return localVarFp.getDevice(deviceId, options).then((request) => request(axios, basePath));
-    },
-    /**
-     * List available devices
-     * @summary List available devices
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listDevices(options?: RawAxiosRequestConfig): AxiosPromise<Array<DevicesDeviceInfo>> {
-      return localVarFp.listDevices(options).then((request) => request(axios, basePath));
-    },
-  };
+export const DeviceApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = DeviceApiFp(configuration)
+    return {
+        /**
+         * get device
+         * @summary Get specified device details
+         * @param {string} deviceId Device identifier
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getDevice(deviceId: string, options?: RawAxiosRequestConfig): AxiosPromise<DevicesDeviceInfo> {
+            return localVarFp.getDevice(deviceId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * List available devices
+         * @summary List available devices
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listDevices(options?: RawAxiosRequestConfig): AxiosPromise<Array<DevicesDeviceInfo>> {
+            return localVarFp.listDevices(options).then((request) => request(axios, basePath));
+        },
+    };
 };
 
 /**
@@ -1567,697 +1454,533 @@ export const DeviceApiFactory = function (
  * @extends {BaseAPI}
  */
 export class DeviceApi extends BaseAPI {
-  /**
-   * get device
-   * @summary Get specified device details
-   * @param {string} deviceId Device identifier
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DeviceApi
-   */
-  public getDevice(deviceId: string, options?: RawAxiosRequestConfig) {
-    return DeviceApiFp(this.configuration)
-      .getDevice(deviceId, options)
-      .then((request) => request(this.axios, this.basePath));
-  }
+    /**
+     * get device
+     * @summary Get specified device details
+     * @param {string} deviceId Device identifier
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DeviceApi
+     */
+    public getDevice(deviceId: string, options?: RawAxiosRequestConfig) {
+        return DeviceApiFp(this.configuration).getDevice(deviceId, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   * List available devices
-   * @summary List available devices
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof DeviceApi
-   */
-  public listDevices(options?: RawAxiosRequestConfig) {
-    return DeviceApiFp(this.configuration)
-      .listDevices(options)
-      .then((request) => request(this.axios, this.basePath));
-  }
+    /**
+     * List available devices
+     * @summary List available devices
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DeviceApi
+     */
+    public listDevices(options?: RawAxiosRequestConfig) {
+        return DeviceApiFp(this.configuration).listDevices(options).then((request) => request(this.axios, this.basePath));
+    }
 }
+
+
 
 /**
  * JobApi - axios parameter creator
  * @export
  */
 export const JobApiAxiosParamCreator = function (configuration?: Configuration) {
-  return {
-    /**
-     * Start a procedure to cancel quantum job.<br/><br/> Operation is valid only for job with status: submitted, ready or running.
-     * @summary Cancel job
-     * @param {string} jobId Job identifier
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    cancelJob: async (jobId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      // verify required parameter 'jobId' is not null or undefined
-      assertParamExists('cancelJob', 'jobId', jobId);
-      const localVarPath = `/jobs/{job_id}/cancel`.replace(
-        `{${'job_id'}}`,
-        encodeURIComponent(String(jobId))
-      );
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
+    return {
+        /**
+         * Start a procedure to cancel quantum job.<br/><br/> Operation is valid only for job with status: submitted, ready or running.
+         * @summary Cancel job
+         * @param {string} jobId Job identifier
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        cancelJob: async (jobId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'jobId' is not null or undefined
+            assertParamExists('cancelJob', 'jobId', jobId)
+            const localVarPath = `/jobs/{job_id}/cancel`
+                .replace(`{${"job_id"}}`, encodeURIComponent(String(jobId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      // authentication BearerAuth required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration);
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Deletes quantum job and related result<br/><br/>Operation is valid only for job with status: succeeded, failed and cancelled. submitted, ready and running jobs must be cancelled before deletion.
-     * @summary Delete job
-     * @param {string} jobId Job identifier
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    deleteJob: async (jobId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      // verify required parameter 'jobId' is not null or undefined
-      assertParamExists('deleteJob', 'jobId', jobId);
-      const localVarPath = `/jobs/{job_id}`.replace(
-        `{${'job_id'}}`,
-        encodeURIComponent(String(jobId))
-      );
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
-      const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Deletes quantum job and related result<br/><br/>Operation is valid only for job with status: succeeded, failed and cancelled. submitted, ready and running jobs must be cancelled before deletion.
+         * @summary Delete job
+         * @param {string} jobId Job identifier
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteJob: async (jobId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'jobId' is not null or undefined
+            assertParamExists('deleteJob', 'jobId', jobId)
+            const localVarPath = `/jobs/{job_id}`
+                .replace(`{${"job_id"}}`, encodeURIComponent(String(jobId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      // authentication BearerAuth required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration);
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Get selected job
-     * @summary Get selected job
-     * @param {string} jobId Job identifier
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getJob: async (jobId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      // verify required parameter 'jobId' is not null or undefined
-      assertParamExists('getJob', 'jobId', jobId);
-      const localVarPath = `/jobs/{job_id}`.replace(
-        `{${'job_id'}}`,
-        encodeURIComponent(String(jobId))
-      );
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
 
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
-      // authentication BearerAuth required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration);
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get selected job
+         * @summary Get selected job
+         * @param {string} jobId Job identifier
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getJob: async (jobId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'jobId' is not null or undefined
+            assertParamExists('getJob', 'jobId', jobId)
+            const localVarPath = `/jobs/{job_id}`
+                .replace(`{${"job_id"}}`, encodeURIComponent(String(jobId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Get selected job\'s status
-     * @summary Get selected job\'s status
-     * @param {string} jobId Job identifier
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getJobStatus: async (
-      jobId: string,
-      options: RawAxiosRequestConfig = {}
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'jobId' is not null or undefined
-      assertParamExists('getJobStatus', 'jobId', jobId);
-      const localVarPath = `/jobs/{job_id}/status`.replace(
-        `{${'job_id'}}`,
-        encodeURIComponent(String(jobId))
-      );
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
 
-      // authentication BearerAuth required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration);
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get selected job\'s status
+         * @summary Get selected job\'s status
+         * @param {string} jobId Job identifier
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getJobStatus: async (jobId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'jobId' is not null or undefined
+            assertParamExists('getJobStatus', 'jobId', jobId)
+            const localVarPath = `/jobs/{job_id}/status`
+                .replace(`{${"job_id"}}`, encodeURIComponent(String(jobId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Get SSE log file of selected job
-     * @summary Get SSE log file
-     * @param {string} jobId Job identifier
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getSselog: async (jobId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      // verify required parameter 'jobId' is not null or undefined
-      assertParamExists('getSselog', 'jobId', jobId);
-      const localVarPath = `/jobs/{job_id}/sselog`.replace(
-        `{${'job_id'}}`,
-        encodeURIComponent(String(jobId))
-      );
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-      // authentication BearerAuth required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration);
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time or search text with \'start_time\', \'end_time\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
-     * @summary List all quantum jobs
-     * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
-     * @param {string} [startTime] Allows to filter the list of jobs to fetch by creation time. If specified only jobs with creation time  (createdAt property) &gt;&#x3D; start_time are returned.
-     * @param {string} [endTiime] Allows to filter the list of jobs to fetch by to creation time. If specified only jobs with creation time (createdAt property) &lt;&#x3D; end_time are returned.
-     * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s id, name and description. If specified only jobs which id, name or description contains specified search string are returned.
-     * @param {number} [page] Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned.
-     * @param {number} [size] Configure number of jobs per page
-     * @param {ListJobsOrderEnum} [order] Specify jobs order according to creation time (createdAt property)
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listJobs: async (
-      fields?: string,
-      startTime?: string,
-      endTiime?: string,
-      q?: string,
-      page?: number,
-      size?: number,
-      order?: ListJobsOrderEnum,
-      options: RawAxiosRequestConfig = {}
-    ): Promise<RequestArgs> => {
-      const localVarPath = `/jobs`;
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get SSE log file of selected job
+         * @summary Get SSE log file
+         * @param {string} jobId Job identifier
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSselog: async (jobId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'jobId' is not null or undefined
+            assertParamExists('getSselog', 'jobId', jobId)
+            const localVarPath = `/jobs/{job_id}/sselog`
+                .replace(`{${"job_id"}}`, encodeURIComponent(String(jobId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      // authentication BearerAuth required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration);
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-      if (fields !== undefined) {
-        localVarQueryParameter['fields'] = fields;
-      }
 
-      if (startTime !== undefined) {
-        localVarQueryParameter['start_time'] =
-          (startTime as any) instanceof Date ? (startTime as any).toISOString() : startTime;
-      }
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
-      if (endTiime !== undefined) {
-        localVarQueryParameter['end_tiime'] =
-          (endTiime as any) instanceof Date ? (endTiime as any).toISOString() : endTiime;
-      }
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time or search text with \'start_time\', \'end_time\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
+         * @summary List all quantum jobs
+         * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
+         * @param {string} [startTime] Allows to filter the list of jobs to fetch by creation time. If specified only jobs with creation time  (createdAt property) &gt;&#x3D; start_time are returned.
+         * @param {string} [endTiime] Allows to filter the list of jobs to fetch by to creation time. If specified only jobs with creation time (createdAt property) &lt;&#x3D; end_time are returned.
+         * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s id, name and description. If specified only jobs which id, name or description contains specified search string are returned.
+         * @param {number} [page] Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned.
+         * @param {number} [size] Configure number of jobs per page
+         * @param {ListJobsOrderEnum} [order] Specify jobs order according to creation time (createdAt property)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listJobs: async (fields?: string, startTime?: string, endTiime?: string, q?: string, page?: number, size?: number, order?: ListJobsOrderEnum, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/jobs`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      if (q !== undefined) {
-        localVarQueryParameter['q'] = q;
-      }
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      if (page !== undefined) {
-        localVarQueryParameter['page'] = page;
-      }
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-      if (size !== undefined) {
-        localVarQueryParameter['size'] = size;
-      }
+            if (fields !== undefined) {
+                localVarQueryParameter['fields'] = fields;
+            }
 
-      if (order !== undefined) {
-        localVarQueryParameter['order'] = order;
-      }
+            if (startTime !== undefined) {
+                localVarQueryParameter['start_time'] = (startTime as any instanceof Date) ?
+                    (startTime as any).toISOString() :
+                    startTime;
+            }
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
+            if (endTiime !== undefined) {
+                localVarQueryParameter['end_tiime'] = (endTiime as any instanceof Date) ?
+                    (endTiime as any).toISOString() :
+                    endTiime;
+            }
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
-     * Submit a quantum job
-     * @summary Submit a quantum job
-     * @param {JobsSubmitJobRequest} [jobsSubmitJobRequest] Quantum job to be submitted
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    submitJob: async (
-      jobsSubmitJobRequest?: JobsSubmitJobRequest,
-      options: RawAxiosRequestConfig = {}
-    ): Promise<RequestArgs> => {
-      const localVarPath = `/jobs`;
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
+            if (q !== undefined) {
+                localVarQueryParameter['q'] = q;
+            }
 
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
 
-      // authentication BearerAuth required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration);
+            if (size !== undefined) {
+                localVarQueryParameter['size'] = size;
+            }
 
-      localVarHeaderParameter['Content-Type'] = 'application/json';
+            if (order !== undefined) {
+                localVarQueryParameter['order'] = order;
+            }
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        jobsSubmitJobRequest,
-        localVarRequestOptions,
-        configuration
-      );
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-  };
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Submit a quantum job
+         * @summary Submit a quantum job
+         * @param {JobsSubmitJobRequest} [jobsSubmitJobRequest] Quantum job to be submitted
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        submitJob: async (jobsSubmitJobRequest?: JobsSubmitJobRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/jobs`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(jobsSubmitJobRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
 };
 
 /**
  * JobApi - functional programming interface
  * @export
  */
-export const JobApiFp = function (configuration?: Configuration) {
-  const localVarAxiosParamCreator = JobApiAxiosParamCreator(configuration);
-  return {
-    /**
-     * Start a procedure to cancel quantum job.<br/><br/> Operation is valid only for job with status: submitted, ready or running.
-     * @summary Cancel job
-     * @param {string} jobId Job identifier
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async cancelJob(
-      jobId: string,
-      options?: RawAxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SuccessSuccessResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.cancelJob(jobId, options);
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-      const localVarOperationServerBasePath =
-        operationServerMap['JobApi.cancelJob']?.[localVarOperationServerIndex]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration
-        )(axios, localVarOperationServerBasePath || basePath);
-    },
-    /**
-     * Deletes quantum job and related result<br/><br/>Operation is valid only for job with status: succeeded, failed and cancelled. submitted, ready and running jobs must be cancelled before deletion.
-     * @summary Delete job
-     * @param {string} jobId Job identifier
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async deleteJob(
-      jobId: string,
-      options?: RawAxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SuccessSuccessResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.deleteJob(jobId, options);
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-      const localVarOperationServerBasePath =
-        operationServerMap['JobApi.deleteJob']?.[localVarOperationServerIndex]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration
-        )(axios, localVarOperationServerBasePath || basePath);
-    },
-    /**
-     * Get selected job
-     * @summary Get selected job
-     * @param {string} jobId Job identifier
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async getJob(
-      jobId: string,
-      options?: RawAxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobsJobDef>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getJob(jobId, options);
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-      const localVarOperationServerBasePath =
-        operationServerMap['JobApi.getJob']?.[localVarOperationServerIndex]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration
-        )(axios, localVarOperationServerBasePath || basePath);
-    },
-    /**
-     * Get selected job\'s status
-     * @summary Get selected job\'s status
-     * @param {string} jobId Job identifier
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async getJobStatus(
-      jobId: string,
-      options?: RawAxiosRequestConfig
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobsGetJobStatusResponse>
-    > {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getJobStatus(jobId, options);
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-      const localVarOperationServerBasePath =
-        operationServerMap['JobApi.getJobStatus']?.[localVarOperationServerIndex]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration
-        )(axios, localVarOperationServerBasePath || basePath);
-    },
-    /**
-     * Get SSE log file of selected job
-     * @summary Get SSE log file
-     * @param {string} jobId Job identifier
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async getSselog(
-      jobId: string,
-      options?: RawAxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobsGetSselogResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getSselog(jobId, options);
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-      const localVarOperationServerBasePath =
-        operationServerMap['JobApi.getSselog']?.[localVarOperationServerIndex]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration
-        )(axios, localVarOperationServerBasePath || basePath);
-    },
-    /**
-     * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time or search text with \'start_time\', \'end_time\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
-     * @summary List all quantum jobs
-     * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
-     * @param {string} [startTime] Allows to filter the list of jobs to fetch by creation time. If specified only jobs with creation time  (createdAt property) &gt;&#x3D; start_time are returned.
-     * @param {string} [endTiime] Allows to filter the list of jobs to fetch by to creation time. If specified only jobs with creation time (createdAt property) &lt;&#x3D; end_time are returned.
-     * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s id, name and description. If specified only jobs which id, name or description contains specified search string are returned.
-     * @param {number} [page] Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned.
-     * @param {number} [size] Configure number of jobs per page
-     * @param {ListJobsOrderEnum} [order] Specify jobs order according to creation time (createdAt property)
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async listJobs(
-      fields?: string,
-      startTime?: string,
-      endTiime?: string,
-      q?: string,
-      page?: number,
-      size?: number,
-      order?: ListJobsOrderEnum,
-      options?: RawAxiosRequestConfig
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<JobsGetJobsResponse>>
-    > {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.listJobs(
-        fields,
-        startTime,
-        endTiime,
-        q,
-        page,
-        size,
-        order,
-        options
-      );
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-      const localVarOperationServerBasePath =
-        operationServerMap['JobApi.listJobs']?.[localVarOperationServerIndex]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration
-        )(axios, localVarOperationServerBasePath || basePath);
-    },
-    /**
-     * Submit a quantum job
-     * @summary Submit a quantum job
-     * @param {JobsSubmitJobRequest} [jobsSubmitJobRequest] Quantum job to be submitted
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async submitJob(
-      jobsSubmitJobRequest?: JobsSubmitJobRequest,
-      options?: RawAxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobsSubmitJobResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.submitJob(
-        jobsSubmitJobRequest,
-        options
-      );
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-      const localVarOperationServerBasePath =
-        operationServerMap['JobApi.submitJob']?.[localVarOperationServerIndex]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration
-        )(axios, localVarOperationServerBasePath || basePath);
-    },
-  };
+export const JobApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = JobApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Start a procedure to cancel quantum job.<br/><br/> Operation is valid only for job with status: submitted, ready or running.
+         * @summary Cancel job
+         * @param {string} jobId Job identifier
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async cancelJob(jobId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SuccessSuccessResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.cancelJob(jobId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['JobApi.cancelJob']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Deletes quantum job and related result<br/><br/>Operation is valid only for job with status: succeeded, failed and cancelled. submitted, ready and running jobs must be cancelled before deletion.
+         * @summary Delete job
+         * @param {string} jobId Job identifier
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteJob(jobId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SuccessSuccessResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteJob(jobId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['JobApi.deleteJob']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get selected job
+         * @summary Get selected job
+         * @param {string} jobId Job identifier
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getJob(jobId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobsJobDef>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getJob(jobId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['JobApi.getJob']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get selected job\'s status
+         * @summary Get selected job\'s status
+         * @param {string} jobId Job identifier
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getJobStatus(jobId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobsGetJobStatusResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getJobStatus(jobId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['JobApi.getJobStatus']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get SSE log file of selected job
+         * @summary Get SSE log file
+         * @param {string} jobId Job identifier
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getSselog(jobId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobsGetSselogResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getSselog(jobId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['JobApi.getSselog']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time or search text with \'start_time\', \'end_time\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
+         * @summary List all quantum jobs
+         * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
+         * @param {string} [startTime] Allows to filter the list of jobs to fetch by creation time. If specified only jobs with creation time  (createdAt property) &gt;&#x3D; start_time are returned.
+         * @param {string} [endTiime] Allows to filter the list of jobs to fetch by to creation time. If specified only jobs with creation time (createdAt property) &lt;&#x3D; end_time are returned.
+         * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s id, name and description. If specified only jobs which id, name or description contains specified search string are returned.
+         * @param {number} [page] Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned.
+         * @param {number} [size] Configure number of jobs per page
+         * @param {ListJobsOrderEnum} [order] Specify jobs order according to creation time (createdAt property)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listJobs(fields?: string, startTime?: string, endTiime?: string, q?: string, page?: number, size?: number, order?: ListJobsOrderEnum, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<JobsGetJobsResponse>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listJobs(fields, startTime, endTiime, q, page, size, order, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['JobApi.listJobs']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Submit a quantum job
+         * @summary Submit a quantum job
+         * @param {JobsSubmitJobRequest} [jobsSubmitJobRequest] Quantum job to be submitted
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async submitJob(jobsSubmitJobRequest?: JobsSubmitJobRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobsSubmitJobResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.submitJob(jobsSubmitJobRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['JobApi.submitJob']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
 };
 
 /**
  * JobApi - factory interface
  * @export
  */
-export const JobApiFactory = function (
-  configuration?: Configuration,
-  basePath?: string,
-  axios?: AxiosInstance
-) {
-  const localVarFp = JobApiFp(configuration);
-  return {
-    /**
-     * Start a procedure to cancel quantum job.<br/><br/> Operation is valid only for job with status: submitted, ready or running.
-     * @summary Cancel job
-     * @param {string} jobId Job identifier
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    cancelJob(
-      jobId: string,
-      options?: RawAxiosRequestConfig
-    ): AxiosPromise<SuccessSuccessResponse> {
-      return localVarFp.cancelJob(jobId, options).then((request) => request(axios, basePath));
-    },
-    /**
-     * Deletes quantum job and related result<br/><br/>Operation is valid only for job with status: succeeded, failed and cancelled. submitted, ready and running jobs must be cancelled before deletion.
-     * @summary Delete job
-     * @param {string} jobId Job identifier
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    deleteJob(
-      jobId: string,
-      options?: RawAxiosRequestConfig
-    ): AxiosPromise<SuccessSuccessResponse> {
-      return localVarFp.deleteJob(jobId, options).then((request) => request(axios, basePath));
-    },
-    /**
-     * Get selected job
-     * @summary Get selected job
-     * @param {string} jobId Job identifier
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getJob(jobId: string, options?: RawAxiosRequestConfig): AxiosPromise<JobsJobDef> {
-      return localVarFp.getJob(jobId, options).then((request) => request(axios, basePath));
-    },
-    /**
-     * Get selected job\'s status
-     * @summary Get selected job\'s status
-     * @param {string} jobId Job identifier
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getJobStatus(
-      jobId: string,
-      options?: RawAxiosRequestConfig
-    ): AxiosPromise<JobsGetJobStatusResponse> {
-      return localVarFp.getJobStatus(jobId, options).then((request) => request(axios, basePath));
-    },
-    /**
-     * Get SSE log file of selected job
-     * @summary Get SSE log file
-     * @param {string} jobId Job identifier
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getSselog(jobId: string, options?: RawAxiosRequestConfig): AxiosPromise<JobsGetSselogResponse> {
-      return localVarFp.getSselog(jobId, options).then((request) => request(axios, basePath));
-    },
-    /**
-     * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time or search text with \'start_time\', \'end_time\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
-     * @summary List all quantum jobs
-     * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
-     * @param {string} [startTime] Allows to filter the list of jobs to fetch by creation time. If specified only jobs with creation time  (createdAt property) &gt;&#x3D; start_time are returned.
-     * @param {string} [endTiime] Allows to filter the list of jobs to fetch by to creation time. If specified only jobs with creation time (createdAt property) &lt;&#x3D; end_time are returned.
-     * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s id, name and description. If specified only jobs which id, name or description contains specified search string are returned.
-     * @param {number} [page] Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned.
-     * @param {number} [size] Configure number of jobs per page
-     * @param {ListJobsOrderEnum} [order] Specify jobs order according to creation time (createdAt property)
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listJobs(
-      fields?: string,
-      startTime?: string,
-      endTiime?: string,
-      q?: string,
-      page?: number,
-      size?: number,
-      order?: ListJobsOrderEnum,
-      options?: RawAxiosRequestConfig
-    ): AxiosPromise<Array<JobsGetJobsResponse>> {
-      return localVarFp
-        .listJobs(fields, startTime, endTiime, q, page, size, order, options)
-        .then((request) => request(axios, basePath));
-    },
-    /**
-     * Submit a quantum job
-     * @summary Submit a quantum job
-     * @param {JobsSubmitJobRequest} [jobsSubmitJobRequest] Quantum job to be submitted
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    submitJob(
-      jobsSubmitJobRequest?: JobsSubmitJobRequest,
-      options?: RawAxiosRequestConfig
-    ): AxiosPromise<JobsSubmitJobResponse> {
-      return localVarFp
-        .submitJob(jobsSubmitJobRequest, options)
-        .then((request) => request(axios, basePath));
-    },
-  };
+export const JobApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = JobApiFp(configuration)
+    return {
+        /**
+         * Start a procedure to cancel quantum job.<br/><br/> Operation is valid only for job with status: submitted, ready or running.
+         * @summary Cancel job
+         * @param {string} jobId Job identifier
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        cancelJob(jobId: string, options?: RawAxiosRequestConfig): AxiosPromise<SuccessSuccessResponse> {
+            return localVarFp.cancelJob(jobId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Deletes quantum job and related result<br/><br/>Operation is valid only for job with status: succeeded, failed and cancelled. submitted, ready and running jobs must be cancelled before deletion.
+         * @summary Delete job
+         * @param {string} jobId Job identifier
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteJob(jobId: string, options?: RawAxiosRequestConfig): AxiosPromise<SuccessSuccessResponse> {
+            return localVarFp.deleteJob(jobId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get selected job
+         * @summary Get selected job
+         * @param {string} jobId Job identifier
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getJob(jobId: string, options?: RawAxiosRequestConfig): AxiosPromise<JobsJobDef> {
+            return localVarFp.getJob(jobId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get selected job\'s status
+         * @summary Get selected job\'s status
+         * @param {string} jobId Job identifier
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getJobStatus(jobId: string, options?: RawAxiosRequestConfig): AxiosPromise<JobsGetJobStatusResponse> {
+            return localVarFp.getJobStatus(jobId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get SSE log file of selected job
+         * @summary Get SSE log file
+         * @param {string} jobId Job identifier
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSselog(jobId: string, options?: RawAxiosRequestConfig): AxiosPromise<JobsGetSselogResponse> {
+            return localVarFp.getSselog(jobId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time or search text with \'start_time\', \'end_time\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
+         * @summary List all quantum jobs
+         * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
+         * @param {string} [startTime] Allows to filter the list of jobs to fetch by creation time. If specified only jobs with creation time  (createdAt property) &gt;&#x3D; start_time are returned.
+         * @param {string} [endTiime] Allows to filter the list of jobs to fetch by to creation time. If specified only jobs with creation time (createdAt property) &lt;&#x3D; end_time are returned.
+         * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s id, name and description. If specified only jobs which id, name or description contains specified search string are returned.
+         * @param {number} [page] Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned.
+         * @param {number} [size] Configure number of jobs per page
+         * @param {ListJobsOrderEnum} [order] Specify jobs order according to creation time (createdAt property)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listJobs(fields?: string, startTime?: string, endTiime?: string, q?: string, page?: number, size?: number, order?: ListJobsOrderEnum, options?: RawAxiosRequestConfig): AxiosPromise<Array<JobsGetJobsResponse>> {
+            return localVarFp.listJobs(fields, startTime, endTiime, q, page, size, order, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Submit a quantum job
+         * @summary Submit a quantum job
+         * @param {JobsSubmitJobRequest} [jobsSubmitJobRequest] Quantum job to be submitted
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        submitJob(jobsSubmitJobRequest?: JobsSubmitJobRequest, options?: RawAxiosRequestConfig): AxiosPromise<JobsSubmitJobResponse> {
+            return localVarFp.submitJob(jobsSubmitJobRequest, options).then((request) => request(axios, basePath));
+        },
+    };
 };
 
 /**
@@ -2267,125 +1990,348 @@ export const JobApiFactory = function (
  * @extends {BaseAPI}
  */
 export class JobApi extends BaseAPI {
-  /**
-   * Start a procedure to cancel quantum job.<br/><br/> Operation is valid only for job with status: submitted, ready or running.
-   * @summary Cancel job
-   * @param {string} jobId Job identifier
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof JobApi
-   */
-  public cancelJob(jobId: string, options?: RawAxiosRequestConfig) {
-    return JobApiFp(this.configuration)
-      .cancelJob(jobId, options)
-      .then((request) => request(this.axios, this.basePath));
-  }
+    /**
+     * Start a procedure to cancel quantum job.<br/><br/> Operation is valid only for job with status: submitted, ready or running.
+     * @summary Cancel job
+     * @param {string} jobId Job identifier
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof JobApi
+     */
+    public cancelJob(jobId: string, options?: RawAxiosRequestConfig) {
+        return JobApiFp(this.configuration).cancelJob(jobId, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   * Deletes quantum job and related result<br/><br/>Operation is valid only for job with status: succeeded, failed and cancelled. submitted, ready and running jobs must be cancelled before deletion.
-   * @summary Delete job
-   * @param {string} jobId Job identifier
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof JobApi
-   */
-  public deleteJob(jobId: string, options?: RawAxiosRequestConfig) {
-    return JobApiFp(this.configuration)
-      .deleteJob(jobId, options)
-      .then((request) => request(this.axios, this.basePath));
-  }
+    /**
+     * Deletes quantum job and related result<br/><br/>Operation is valid only for job with status: succeeded, failed and cancelled. submitted, ready and running jobs must be cancelled before deletion.
+     * @summary Delete job
+     * @param {string} jobId Job identifier
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof JobApi
+     */
+    public deleteJob(jobId: string, options?: RawAxiosRequestConfig) {
+        return JobApiFp(this.configuration).deleteJob(jobId, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   * Get selected job
-   * @summary Get selected job
-   * @param {string} jobId Job identifier
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof JobApi
-   */
-  public getJob(jobId: string, options?: RawAxiosRequestConfig) {
-    return JobApiFp(this.configuration)
-      .getJob(jobId, options)
-      .then((request) => request(this.axios, this.basePath));
-  }
+    /**
+     * Get selected job
+     * @summary Get selected job
+     * @param {string} jobId Job identifier
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof JobApi
+     */
+    public getJob(jobId: string, options?: RawAxiosRequestConfig) {
+        return JobApiFp(this.configuration).getJob(jobId, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   * Get selected job\'s status
-   * @summary Get selected job\'s status
-   * @param {string} jobId Job identifier
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof JobApi
-   */
-  public getJobStatus(jobId: string, options?: RawAxiosRequestConfig) {
-    return JobApiFp(this.configuration)
-      .getJobStatus(jobId, options)
-      .then((request) => request(this.axios, this.basePath));
-  }
+    /**
+     * Get selected job\'s status
+     * @summary Get selected job\'s status
+     * @param {string} jobId Job identifier
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof JobApi
+     */
+    public getJobStatus(jobId: string, options?: RawAxiosRequestConfig) {
+        return JobApiFp(this.configuration).getJobStatus(jobId, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   * Get SSE log file of selected job
-   * @summary Get SSE log file
-   * @param {string} jobId Job identifier
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof JobApi
-   */
-  public getSselog(jobId: string, options?: RawAxiosRequestConfig) {
-    return JobApiFp(this.configuration)
-      .getSselog(jobId, options)
-      .then((request) => request(this.axios, this.basePath));
-  }
+    /**
+     * Get SSE log file of selected job
+     * @summary Get SSE log file
+     * @param {string} jobId Job identifier
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof JobApi
+     */
+    public getSselog(jobId: string, options?: RawAxiosRequestConfig) {
+        return JobApiFp(this.configuration).getSselog(jobId, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time or search text with \'start_time\', \'end_time\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
-   * @summary List all quantum jobs
-   * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
-   * @param {string} [startTime] Allows to filter the list of jobs to fetch by creation time. If specified only jobs with creation time  (createdAt property) &gt;&#x3D; start_time are returned.
-   * @param {string} [endTiime] Allows to filter the list of jobs to fetch by to creation time. If specified only jobs with creation time (createdAt property) &lt;&#x3D; end_time are returned.
-   * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s id, name and description. If specified only jobs which id, name or description contains specified search string are returned.
-   * @param {number} [page] Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned.
-   * @param {number} [size] Configure number of jobs per page
-   * @param {ListJobsOrderEnum} [order] Specify jobs order according to creation time (createdAt property)
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof JobApi
-   */
-  public listJobs(
-    fields?: string,
-    startTime?: string,
-    endTiime?: string,
-    q?: string,
-    page?: number,
-    size?: number,
-    order?: ListJobsOrderEnum,
-    options?: RawAxiosRequestConfig
-  ) {
-    return JobApiFp(this.configuration)
-      .listJobs(fields, startTime, endTiime, q, page, size, order, options)
-      .then((request) => request(this.axios, this.basePath));
-  }
+    /**
+     * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time or search text with \'start_time\', \'end_time\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
+     * @summary List all quantum jobs
+     * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
+     * @param {string} [startTime] Allows to filter the list of jobs to fetch by creation time. If specified only jobs with creation time  (createdAt property) &gt;&#x3D; start_time are returned.
+     * @param {string} [endTiime] Allows to filter the list of jobs to fetch by to creation time. If specified only jobs with creation time (createdAt property) &lt;&#x3D; end_time are returned.
+     * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s id, name and description. If specified only jobs which id, name or description contains specified search string are returned.
+     * @param {number} [page] Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned.
+     * @param {number} [size] Configure number of jobs per page
+     * @param {ListJobsOrderEnum} [order] Specify jobs order according to creation time (createdAt property)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof JobApi
+     */
+    public listJobs(fields?: string, startTime?: string, endTiime?: string, q?: string, page?: number, size?: number, order?: ListJobsOrderEnum, options?: RawAxiosRequestConfig) {
+        return JobApiFp(this.configuration).listJobs(fields, startTime, endTiime, q, page, size, order, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   * Submit a quantum job
-   * @summary Submit a quantum job
-   * @param {JobsSubmitJobRequest} [jobsSubmitJobRequest] Quantum job to be submitted
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof JobApi
-   */
-  public submitJob(jobsSubmitJobRequest?: JobsSubmitJobRequest, options?: RawAxiosRequestConfig) {
-    return JobApiFp(this.configuration)
-      .submitJob(jobsSubmitJobRequest, options)
-      .then((request) => request(this.axios, this.basePath));
-  }
+    /**
+     * Submit a quantum job
+     * @summary Submit a quantum job
+     * @param {JobsSubmitJobRequest} [jobsSubmitJobRequest] Quantum job to be submitted
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof JobApi
+     */
+    public submitJob(jobsSubmitJobRequest?: JobsSubmitJobRequest, options?: RawAxiosRequestConfig) {
+        return JobApiFp(this.configuration).submitJob(jobsSubmitJobRequest, options).then((request) => request(this.axios, this.basePath));
+    }
 }
 
 /**
  * @export
  */
 export const ListJobsOrderEnum = {
-  Desc: 'DESC',
-  Asc: 'ASC',
+    Desc: 'DESC',
+    Asc: 'ASC'
 } as const;
-export type ListJobsOrderEnum = (typeof ListJobsOrderEnum)[keyof typeof ListJobsOrderEnum];
+export type ListJobsOrderEnum = typeof ListJobsOrderEnum[keyof typeof ListJobsOrderEnum];
+
+
+/**
+ * UsersApi - axios parameter creator
+ * @export
+ */
+export const UsersApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Delete current user
+         * @summary Delete current user
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteCurrentUser: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/users/me`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get current user
+         * @summary Get current user
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getCurrentUser: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/users/me`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Update current user
+         * @summary Update current user
+         * @param {UsersUpdateUserRequest} [usersUpdateUserRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateCurrentUser: async (usersUpdateUserRequest?: UsersUpdateUserRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/users/me`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(usersUpdateUserRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * UsersApi - functional programming interface
+ * @export
+ */
+export const UsersApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = UsersApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Delete current user
+         * @summary Delete current user
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteCurrentUser(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteCurrentUser(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UsersApi.deleteCurrentUser']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get current user
+         * @summary Get current user
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getCurrentUser(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UsersGetOneUserResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getCurrentUser(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UsersApi.getCurrentUser']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Update current user
+         * @summary Update current user
+         * @param {UsersUpdateUserRequest} [usersUpdateUserRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateCurrentUser(usersUpdateUserRequest?: UsersUpdateUserRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UsersGetOneUserResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateCurrentUser(usersUpdateUserRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UsersApi.updateCurrentUser']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * UsersApi - factory interface
+ * @export
+ */
+export const UsersApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = UsersApiFp(configuration)
+    return {
+        /**
+         * Delete current user
+         * @summary Delete current user
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteCurrentUser(options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.deleteCurrentUser(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get current user
+         * @summary Get current user
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getCurrentUser(options?: RawAxiosRequestConfig): AxiosPromise<UsersGetOneUserResponse> {
+            return localVarFp.getCurrentUser(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Update current user
+         * @summary Update current user
+         * @param {UsersUpdateUserRequest} [usersUpdateUserRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateCurrentUser(usersUpdateUserRequest?: UsersUpdateUserRequest, options?: RawAxiosRequestConfig): AxiosPromise<UsersGetOneUserResponse> {
+            return localVarFp.updateCurrentUser(usersUpdateUserRequest, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * UsersApi - object-oriented interface
+ * @export
+ * @class UsersApi
+ * @extends {BaseAPI}
+ */
+export class UsersApi extends BaseAPI {
+    /**
+     * Delete current user
+     * @summary Delete current user
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public deleteCurrentUser(options?: RawAxiosRequestConfig) {
+        return UsersApiFp(this.configuration).deleteCurrentUser(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get current user
+     * @summary Get current user
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public getCurrentUser(options?: RawAxiosRequestConfig) {
+        return UsersApiFp(this.configuration).getCurrentUser(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Update current user
+     * @summary Update current user
+     * @param {UsersUpdateUserRequest} [usersUpdateUserRequest] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsersApi
+     */
+    public updateCurrentUser(usersUpdateUserRequest?: UsersUpdateUserRequest, options?: RawAxiosRequestConfig) {
+        return UsersApiFp(this.configuration).updateCurrentUser(usersUpdateUserRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
