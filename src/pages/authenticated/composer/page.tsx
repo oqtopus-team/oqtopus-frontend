@@ -3,7 +3,7 @@ import { useDocumentTitle } from '@/pages/_hooks/title';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
-import QuantumCircuitComposer from './_components/QuantumCircuitComposer';
+import QuantumCircuitComposer, { QasmFeatures } from './_components/QuantumCircuitComposer';
 import ControlPanel from './_components/ControlPanel';
 import { JobsOperatorItem, JobsSubmitJobRequest } from '@/api/generated';
 import { useEffect, useLayoutEffect, useState } from 'react';
@@ -75,6 +75,14 @@ export default function Page() {
     setDevices(res);
     setBusy(false);
   };
+
+  const [qasmFeatures, setQasmFeatures] = useState<QasmFeatures> ({});
+
+  useEffect(() => {
+    setQasmFeatures({
+      customGates: import.meta.env.VITE_APP_COMPOSER_FEAT_CUSTOM_GATE === 'enabled',
+    });
+  }, []);
 
   useEffect(() => {
     return circuitService.onCircuitChange((c) => {
@@ -187,7 +195,9 @@ export default function Page() {
       <hr className={clsx([['w-full', 'my-4'], ['text-neutral-content']])} />
 
       <circuitContext.Provider value={circuitService}>
-        <QuantumCircuitComposer />
+        <QuantumCircuitComposer 
+          qasmFeatures={qasmFeatures}
+        />
       </circuitContext.Provider>
 
       {jobType === 'estimation' ? (
