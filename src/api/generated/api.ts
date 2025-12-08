@@ -824,6 +824,37 @@ export interface UsersGetOneUserResponse {
      * @memberof UsersGetOneUserResponse
      */
     'created_at'?: string;
+    /**
+     * 
+     * @type {Array<UsersLoginEvent>}
+     * @memberof UsersGetOneUserResponse
+     */
+    'login_events'?: Array<UsersLoginEvent>;
+}
+/**
+ * details of login event
+ * @export
+ * @interface UsersLoginEvent
+ */
+export interface UsersLoginEvent {
+    /**
+     * 
+     * @type {string}
+     * @memberof UsersLoginEvent
+     */
+    'event_date'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UsersLoginEvent
+     */
+    'user_agent'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UsersLoginEvent
+     */
+    'ip'?: string;
 }
 /**
  * user update data

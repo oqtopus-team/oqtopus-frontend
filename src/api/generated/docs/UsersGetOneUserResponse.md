@@ -11,6 +11,7 @@ Name | Type | Description | Notes
 **name** | **string** |  | [optional] [default to undefined]
 **organization** | **string** |  | [optional] [default to undefined]
 **created_at** | **string** |  | [optional] [default to undefined]
+**login_events** | [**Array&lt;UsersLoginEvent&gt;**](UsersLoginEvent.md) |  | [optional] [default to undefined]
 
 ## Example
 
@@ -23,6 +24,7 @@ const instance: UsersGetOneUserResponse = {
     name,
     organization,
     created_at,
+    login_events,
 };
 ```
 

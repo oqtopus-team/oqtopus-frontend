@@ -1,95 +1,87 @@
 import { useEffect, useState } from 'react';
 import clsx from 'clsx';
-import { Button, Chip, Collapse, IconButton, List, ListItem, ListItemText } from '@mui/material';
+import {
+  Button,
+  Chip,
+  Collapse,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  Stack,
+} from '@mui/material';
 import { MdExpandLess, MdExpandMore } from 'react-icons/md';
 import { useTranslation } from 'react-i18next';
 import { Auth } from 'aws-amplify';
 import { useNavigate } from 'react-router';
-
-interface ActivityLog {
-  id: string;
-  action: string;
-  timestamp: string;
-  ip: string;
-  device: string;
-  location: string;
-}
+import { DateTimeFormatter } from '@/pages/authenticated/_components/DateTimeFormatter';
+import { useApiTokenAPI, useUserAPI } from '@/backend/hook';
+import { isBefore } from 'date-fns';
+import { ApiTokenApiToken, UsersLoginEvent } from '@/api/generated';
+import { toast } from 'react-toastify';
+import { errorToastConfig, successToastConfig } from '@/config/toast';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 export function SecurityTab() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const { getApiToken, createApiToken, deleteApiToken } = useApiTokenAPI();
+  const { getCurrentUser } = useUserAPI();
 
-  const [mfaEnabled, setMfaEnabled] = useState(true);
-  const [isResetLoading, setIsResetLoading] = useState(false);
+  const [apiTokenData, setApiTokenData] = useState<ApiTokenApiToken | null>(null);
+  const [mfaData, setMfaData] = useState<string>('NOMFA');
+  const [recentActivity, setRecentActivity] = useState<UsersLoginEvent[]>([]);
+
   const [activityExpanded, setActivityExpanded] = useState(false);
-  const [apiKeyExpiry, setApiKeyExpiry] = useState('2025-12-31');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [showSecret, setShowSecret] = useState<boolean>(false);
 
   useEffect(() => {
     verifyMFAStatus();
+    getApiToken().then((res) => setApiTokenData(res as unknown as ApiTokenApiToken));
+    getCurrentUser().then((res) => {
+      if (res?.login_events) {
+        setRecentActivity(res.login_events);
+      }
+    });
   }, []);
 
   async function verifyMFAStatus() {
     const user = await Auth.currentAuthenticatedUser();
-    setMfaEnabled((await Auth.getPreferredMFA(user)) !== 'NOMFA');
+    setMfaData(await Auth.getPreferredMFA(user));
   }
-
-  // Mock activity data
-  const [recentActivity] = useState<ActivityLog[]>([
-    {
-      id: '1',
-      action: 'Login',
-      timestamp: '2024-11-24 10:30:00',
-      ip: '192.168.1.1',
-      device: 'Chrome on Windows',
-      location: 'Pabianice, Poland',
-    },
-    {
-      id: '2',
-      action: 'Password changed',
-      timestamp: '2024-11-23 14:22:00',
-      ip: '192.168.1.1',
-      device: 'Chrome on Windows',
-      location: 'Pabianice, Poland',
-    },
-    {
-      id: '3',
-      action: 'Login',
-      timestamp: '2024-11-23 09:15:00',
-      ip: '192.168.1.50',
-      device: 'Safari on iPhone',
-      location: 'Pabianice, Poland',
-    },
-    {
-      id: '4',
-      action: 'API Key generated',
-      timestamp: '2024-11-20 16:45:00',
-      ip: '192.168.1.1',
-      device: 'Chrome on Windows',
-      location: 'Pabianice, Poland',
-    },
-    {
-      id: '5',
-      action: 'Login',
-      timestamp: '2024-11-20 08:00:00',
-      ip: '192.168.1.1',
-      device: 'Chrome on Windows',
-      location: 'Pabianice, Poland',
-    },
-  ]);
 
   const handleResetMFA = async () => {
     navigate('/mfa-reset');
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('en-EN', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+  const handleDeleteApiToken = async () => {
+    try {
+      await deleteApiToken();
+      setApiTokenData(null);
+      toast(t('settings.security.deleteSuccess'), successToastConfig);
+    } catch (e: any) {
+      toast(e.message ?? t('common.errors.common'), errorToastConfig);
+    } finally {
+      setDeleteDialogOpen(false);
+    }
+  };
+
+  const handleCreateApiToken = async () => {
+    try {
+      const tokenData = await createApiToken();
+
+      setApiTokenData(tokenData as unknown as ApiTokenApiToken);
+
+      toast(t('settings.security.createSuccess'), successToastConfig);
+    } catch (e: any) {
+      toast(e.message ?? t('common.errors.common'), errorToastConfig);
+    }
   };
 
   return (
@@ -102,15 +94,17 @@ export function SecurityTab() {
         <div className={clsx('flex', 'items-center', 'gap-4')}>
           <span className={clsx('text-gray-700')}>{t('settings.security.multiFactorAuth')}:</span>
           <Chip
-            label={mfaEnabled ? t('settings.security.enabled') : t('settings.security.disabled')}
-            color={mfaEnabled ? 'success' : 'default'}
+            label={
+              mfaData !== 'NOMFA'
+                ? `${t('settings.security.enabled')} (${mfaData})`
+                : t('settings.security.disabled')
+            }
+            color={mfaData ? 'success' : 'default'}
             size="medium"
           />
         </div>
       </div>
-
       <hr className={clsx('border-gray-200')} />
-
       <div>
         <h3 className={clsx('text-xl', 'font-semibold', 'mb-4')}>
           {t('settings.security.resetMfa')}
@@ -125,21 +119,19 @@ export function SecurityTab() {
           color="warning"
           size="large"
           onClick={handleResetMFA}
-          disabled={isResetLoading || !mfaEnabled}
+          disabled={!mfaData}
         >
-          {isResetLoading ? t('settings.resetting') : t('settings.security.resetMfaButton')}
+          {t('settings.security.resetMfaButton')}
         </Button>
       </div>
-
       <hr className={clsx('border-gray-200')} />
-
       <div>
         <div
           className={clsx('flex', 'items-center', 'justify-between', 'mb-4', 'cursor-pointer')}
           onClick={() => setActivityExpanded(!activityExpanded)}
         >
           <h3 className={clsx('text-xl', 'font-semibold')}>
-            {t('settings.security.recentActivity')}
+            {t('settings.security.recentLoginActivity')}
           </h3>
           <IconButton>{activityExpanded ? <MdExpandLess /> : <MdExpandMore />}</IconButton>
         </div>
@@ -149,7 +141,7 @@ export function SecurityTab() {
             <List>
               {recentActivity.map((activity, index) => (
                 <ListItem
-                  key={activity.id}
+                  key={activity.event_date}
                   className={clsx(
                     'border-b',
                     'border-gray-200',
@@ -159,31 +151,26 @@ export function SecurityTab() {
                 >
                   <ListItemText
                     primary={
-                      <div className={clsx('flex', 'justify-between', 'items-start')}>
-                        <span className={clsx('font-medium')}>{activity.action}</span>
+                      <span className={clsx('flex', 'justify-between', 'items-start')}>
+                        <span className={clsx('font-medium')}>{t('settings.security.login')}</span>
                         <span className={clsx('text-sm', 'text-gray-500')}>
-                          {formatDate(activity.timestamp)}
+                          {DateTimeFormatter(t, i18n, activity.event_date)}
                         </span>
-                      </div>
+                      </span>
                     }
                     secondary={
-                      <div className={clsx('mt-1', 'text-sm', 'space-y-1')}>
-                        <div>
-                          <span className={clsx('text-gray-600')}>
-                            {t('settings.security.device')}: {activity.device}
-                          </span>
-                        </div>
-                        <div>
-                          <span className={clsx('text-gray-600')}>
-                            {t('settings.security.ipAddress')}: {activity.ip}
-                          </span>
-                        </div>
-                        <div>
-                          <span className={clsx('text-gray-600')}>
-                            {t('settings.security.location')}: {activity.location}
-                          </span>
-                        </div>
-                      </div>
+                      <span className={clsx('mt-1', 'text-sm', 'space-y-1')}>
+                        <span
+                          className="block max-w-[200px] truncate"
+                          title={activity.user_agent}
+                          style={{ maxWidth: '200px' }}
+                        >
+                          {t('settings.security.device')}: {activity.user_agent}
+                        </span>
+                        <span className={clsx('text-gray-600')}>
+                          {t('settings.security.ipAddress')}: {activity.ip}
+                        </span>
+                      </span>
                     }
                   />
                 </ListItem>
@@ -192,42 +179,97 @@ export function SecurityTab() {
           </div>
         </Collapse>
       </div>
-
       <hr className={clsx('border-gray-200')} />
-
       <div>
         <h3 className={clsx('text-xl', 'font-semibold', 'mb-4')}>
           {t('settings.security.apiKeyStatus')}
         </h3>
 
         <div className={clsx('space-y-3')}>
-          <div className={clsx('flex', 'items-center', 'gap-4')}>
-            <span className={clsx('text-gray-700', 'font-medium')}>
-              {t('settings.security.status')}:
-            </span>
-            <Chip label={t('settings.security.active')} color="success" size="medium" />
-          </div>
+          {!apiTokenData ? (
+            <Chip
+              label={t('settings.security.notCreated')}
+              color="warning"
+              className={clsx('mb-2')}
+            />
+          ) : (
+            <>
+              <div className={clsx('flex', 'items-center', 'gap-4')}>
+                <span className={clsx('text-gray-700', 'font-medium')}>
+                  {t('settings.security.status')}:
+                </span>
+                {apiTokenData?.api_token_expiration &&
+                !isBefore(new Date(apiTokenData.api_token_expiration), new Date()) ? (
+                  <Chip label={t('settings.security.active')} color="success" size="medium" />
+                ) : (
+                  <Chip label={t('settings.security.expired')} color="error" size="medium" />
+                )}
+              </div>
 
-          <div className={clsx('flex', 'items-center', 'gap-4')}>
-            <span className={clsx('text-gray-700', 'font-medium')}>
-              {t('settings.security.expiresOn')}:
-            </span>
-            <span className={clsx('text-gray-600')}>
-              {new Date(apiKeyExpiry).toLocaleDateString('en-EN', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </span>
-          </div>
+              <div className={clsx('flex', 'items-center', 'gap-4')}>
+                <span className={clsx('text-gray-700', 'font-medium')}>
+                  {t('settings.security.apiSecret')}:
+                </span>
+                <div className={clsx('flex', 'items-center', 'gap-2')}>
+                  <span className={clsx('text-gray-600', 'font-mono', 'text-sm')}>
+                    {showSecret ? apiTokenData?.api_token_secret : '••••••••••••••••'}
+                  </span>
+                  <button
+                    onClick={() => setShowSecret(!showSecret)}
+                    className={clsx(
+                      'text-gray-500',
+                      'hover:text-gray-700',
+                      'transition-colors',
+                      'cursor-pointer'
+                    )}
+                    aria-label={showSecret ? 'Hide secret' : 'Show secret'}
+                  >
+                    {showSecret ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                  </button>
+                </div>
+              </div>
 
-          <div className={clsx('mt-4')}>
-            <Button variant="outlined" color="primary" size="large">
+              <div className={clsx('flex', 'items-center', 'gap-4')}>
+                <span className={clsx('text-gray-700', 'font-medium')}>
+                  {t('settings.security.expiresOn')}:
+                </span>
+                <span className={clsx('text-gray-600')}>
+                  {DateTimeFormatter(t, i18n, apiTokenData?.api_token_expiration)}
+                </span>
+              </div>
+            </>
+          )}
+
+          <Stack direction="row" gap={2} className={clsx('mt-4')}>
+            <Button variant="outlined" color="primary" size="large" onClick={handleCreateApiToken}>
               {t('settings.security.regenerateKey')}
             </Button>
-          </div>
+            <Button
+              disabled={!apiTokenData}
+              variant="outlined"
+              color="error"
+              size="large"
+              onClick={() => setDeleteDialogOpen(true)}
+            >
+              {t('settings.security.deleteKey')}
+            </Button>
+          </Stack>
         </div>
       </div>
+      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+        <DialogTitle>{t('settings.security.confirmDelete')}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{t('settings.security.deleteConfirmMessage')}</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)} color="primary">
+            {t('settings.cancel')}
+          </Button>
+          <Button onClick={handleDeleteApiToken} color="error" variant="contained">
+            {t('settings.security.confirmDeleteButton')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

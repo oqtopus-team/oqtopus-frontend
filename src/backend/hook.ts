@@ -164,6 +164,24 @@ export const useUserAPI = () => {
   return { getCurrentUser, updateCurrentUser, deleteCurrentUser };
 };
 
+export const useApiTokenAPI = () => {
+  const api = useContext(userApiContext);
+
+  const getApiToken = async () => {
+    return api.apiToken.getApiToken().then((res) => res.data);
+  };
+
+  const createApiToken = async () => {
+    return api.apiToken.createApiToken().then(res => res.data);
+  };
+
+  const deleteApiToken = async () => {
+    return api.apiToken.deleteApiToken().then((res) => res.data);
+  }
+
+  return { getApiToken, createApiToken, deleteApiToken };
+};
+
 export const useAnnouncementsAPI = () => {
   const api = useContext(userApiContext);
 

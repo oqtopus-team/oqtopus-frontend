@@ -3,7 +3,6 @@ export default {
   save: '変更を保存',
   saving: '保存中...',
   updating: '更新中...',
-  resetting: 'リセット中...',
   cancel: 'キャンセル',
 
   tabs: {
@@ -50,15 +49,26 @@ export default {
     resetMfaButton: 'MFAをリセット',
     mfaResetSuccess: 'MFAが正常にリセットされました',
 
-    recentActivity: '最近のアクティビティ',
+    login: 'ログイン',
+    recentLoginActivity: '最近のログインアクティビティ',
     device: 'デバイス',
     ipAddress: 'IPアドレス',
     location: '場所',
 
     apiKeyStatus: 'APIキーステータス',
+    apiSecret: 'APIシークレット',
+    notCreated: '作成されていません',
     status: 'ステータス',
     active: '有効',
+    expired: '期限切れ',
     expiresOn: '有効期限',
     regenerateKey: 'APIキーを再生成',
+    deleteKey: 'APIキーを削除する',
+
+    confirmDelete: 'APIトークンの削除確認',
+    deleteConfirmMessage: 'APIトークンを削除してもよろしいですか？この操作は元に戻せません。',
+    confirmDeleteButton: 'APIキーを削除してもよろしいですか？',
+    createSuccess: "APIトークンが正常に作成されました",
+    deleteSuccess: 'APIトークンが正常に削除されました',
   },
-}
+};

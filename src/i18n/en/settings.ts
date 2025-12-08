@@ -3,7 +3,6 @@ export default {
   save: 'Save Changes',
   saving: 'Saving...',
   updating: 'Updating...',
-  resetting: 'Resetting...',
   cancel: 'Cancel',
 
   tabs: {
@@ -50,15 +49,26 @@ export default {
     resetMfaButton: 'Reset MFA',
     mfaResetSuccess: 'MFA has been reset successfully',
 
-    recentActivity: 'Recent Activity',
+    login: 'Login',
+    recentLoginActivity: 'Recent Login Activity',
     device: 'Device',
     ipAddress: 'IP Address',
     location: 'Location',
 
     apiKeyStatus: 'API Key Status',
+    apiSecret: 'API Secret',
+    notCreated: 'Not created',
     status: 'Status',
     active: 'Active',
+    expired: 'Expired',
     expiresOn: 'Expires on',
     regenerateKey: 'Regenerate API Key',
+    deleteKey: 'Delete API Key',
+
+    confirmDelete: 'Confirm API Token Deletion',
+    deleteConfirmMessage: 'Are you sure you want to delete API Token? This action cannot be undone.',
+    confirmDeleteButton: 'Are you sure you want to delete API Key?',
+    createSuccess: "API token successfully created",
+    deleteSuccess: "API token successfully deleted",
   },
 }
