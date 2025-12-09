@@ -80,10 +80,13 @@ Available options:
 
 Example usages:
   1) Use the latest stable version of official specification hosted in GitHub.
-      scripts/generate-openapi --src github:oqtopus-team/oqtopus-cloud --ref main -p /backend/oas/user/openapi.yaml
+      generate-openapi --src github:oqtopus-team/oqtopus-cloud --ref main -p /backend/oas/user/openapi.yaml
 
   2) Use a local development server of OQTOPUS cloud running on the same host machine:
-      scripts/generate-openapi --src http://localhost:8000 -p /oas/user/openapi.yaml
+      generate-openapi --src http://localhost:8000 -p /oas/user/openapi.yaml
+
+  3) Use the latest stable version of official specification hosted in AWS CloudFront.
+      generate-openapi --src http://example.cloudfront.net -p user.yaml
 
 ```
 
