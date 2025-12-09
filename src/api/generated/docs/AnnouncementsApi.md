@@ -1,6 +1,6 @@
 # AnnouncementsApi
 
-All URIs are relative to *http://localhost:8080*
+All URIs are relative to *https://438i5dp1z9.execute-api.ap-northeast-1.amazonaws.com/v1*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
