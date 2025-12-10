@@ -112,7 +112,8 @@ export default (props: ControlPanelProps) => {
                   mkProgram={props.mkProgram}
                   mkOperator={props.mkOperator}
                   isAdvancedSettingsOpen={false}
-                  displayFields={{ program: false }}
+                  jobType={props.jobType as JobsJobType}
+                  displayFields={{ program: false, type: false, operator: false }}
                 />
               );
             case 'siml':

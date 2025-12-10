@@ -77,7 +77,7 @@ const operatorItemSchema = (t: (key: string) => string) =>
     pauli: yup
       .string()
       .required(t('job.form.error_message.operator.pauli_required'))
-      .matches(/^([IXYZ][0-9]+)*$/, t('job.form.error_message.operator.pauli_match'))
+      .matches(/^([IXYZ]\s*[0-9]+\s*)*$/, t('job.form.error_message.operator.pauli_match'))
       .min(1, t('job.form.error_message.operator.pauli_empty')),
     coeff: yup.number().required(t('job.form.error_message.operator.coeff_required')),
   });
@@ -130,8 +130,11 @@ interface JobFormProps {
   mkProgram?: Program;
   mkOperator?: JobsOperatorItem[];
   isAdvancedSettingsOpen?: boolean;
+  jobType?: JobsJobType;
   displayFields?: {
     program?: boolean;
+    type?: boolean;
+    operator?: boolean;
   };
 }
 
@@ -140,7 +143,8 @@ export const JobForm = (componentProps: JobFormProps) => {
   const navigate = useNavigate();
   const { getDevices } = useDeviceAPI();
   const { submitJob } = useJobAPI();
-  const { displayFields = { program: true }, ...props } = componentProps;
+  const { displayFields = { program: true, type: true, operator: true }, ...props } =
+    componentProps;
   const [devices, setDevices] = useState<Device[]>([]);
 
   const {
@@ -160,7 +164,7 @@ export const JobForm = (componentProps: JobFormProps) => {
     defaultValues: {
       name: '',
       description: '',
-      type: JOB_TYPE_DEFAULT,
+      type: props.jobType ?? JOB_TYPE_DEFAULT,
       mitigation: '{}',
       programType: PROGRAM_TYPE_DEFAULT,
       program: '',
@@ -172,15 +176,14 @@ export const JobForm = (componentProps: JobFormProps) => {
     },
   });
 
-  const [mitigationType, mitigation, transpilerType, program, jobType, operator] =
-    watch([
-      'mitigationType',
-      'mitigation',
-      'transpilerType',
-      'program',
-      'type',
-      'operator',
-    ]);
+  const [mitigationType, mitigation, transpilerType, program, jobType, operator] = watch([
+    'mitigationType',
+    'mitigation',
+    'transpilerType',
+    'program',
+    'type',
+    'operator',
+  ]);
 
   useLayoutEffect(() => {
     getDevices().then((devices) => setDevices(devices));
@@ -209,9 +212,20 @@ export const JobForm = (componentProps: JobFormProps) => {
   useEffect(() => {
     if (props.mkProgram) {
       setValue('program', props.mkProgram?.program);
-      setValue('operator', props.mkOperator ?? [{ pauli: '', coeff: 1.0 }]);
     }
   }, [props.mkProgram?.program]);
+
+  useEffect(() => {
+    if (props.mkOperator) {
+      setValue('operator', props.mkOperator);
+    }
+  }, [props.mkOperator]);
+
+  useEffect(() => {
+    if (props.jobType) {
+      setValue('type', props.jobType);
+    }
+  }, [props.jobType]);
 
   // Change templates after changing types
   useEffect(() => {
@@ -221,7 +235,9 @@ export const JobForm = (componentProps: JobFormProps) => {
   }, [transpilerType]);
   useEffect(() => {
     if (mitigationType !== 'Custom') {
-      setValue('mitigation', JOB_FORM_MITIGATION_INFO_DEFAULTS[mitigationType], { shouldValidate: true });
+      setValue('mitigation', JOB_FORM_MITIGATION_INFO_DEFAULTS[mitigationType], {
+        shouldValidate: true,
+      });
     }
   }, [mitigationType]);
 
@@ -371,23 +387,25 @@ export const JobForm = (componentProps: JobFormProps) => {
               ))}
             </Select>
           </div>
-          <div
-            className={clsx(
-              '[&>*:first-child]:grid',
-              '[&>*:first-child]:gap-1',
-              '[&>*:first-child]:w-full'
-            )}
-          >
-            <Select
-              label="type"
-              {...register('type')}
-              errorMessage={errors.type && errors.type.message}
+          {displayFields?.type && (
+            <div
+              className={clsx(
+                '[&>*:first-child]:grid',
+                '[&>*:first-child]:gap-1',
+                '[&>*:first-child]:w-full'
+              )}
             >
-              {JOB_TYPES.map((jobType) => (
-                <option key={jobType}>{jobType}</option>
-              ))}
-            </Select>
-          </div>
+              <Select
+                label="type"
+                {...register('type')}
+                errorMessage={errors.type && errors.type.message}
+              >
+                {JOB_TYPES.map((jobType) => (
+                  <option key={jobType}>{jobType}</option>
+                ))}
+              </Select>
+            </div>
+          )}
         </div>
         <Accordion
           defaultExpanded={props.isAdvancedSettingsOpen ?? true}
@@ -470,6 +488,7 @@ export const JobForm = (componentProps: JobFormProps) => {
                   await trigger('operator');
                 }}
                 errors={errors.operator}
+                disabled={displayFields?.operator === false}
               />
             )}
             <Spacer className="h-7" />
@@ -603,18 +622,22 @@ const OperatorForm = ({
   current,
   set,
   errors = [],
+  disabled = false,
 }: {
   current: JobsOperatorItem[];
   set: (_: JobsOperatorItem[]) => Promise<void>;
   errors?:
     | Merge<FieldError, (Merge<FieldError, FieldErrorsImpl<JobsOperatorItem>> | undefined)[]>
     | undefined;
+  disabled?: boolean;
 }) => {
   const { t } = useTranslation();
 
   useEffect(() => {
-    set([{ pauli: '', coeff: 1.0 }]); // Initial setting form value
-  }, []);
+    if (!disabled && current.length === 0) {
+      set([{ pauli: '', coeff: 1.0 }]); // Initial setting form value
+    }
+  }, [disabled]);
 
   const handleCoeffInput = (index: number) => async (e: FormEvent<HTMLInputElement>) => {
     const coeff = (e.target as HTMLInputElement).value;
@@ -651,6 +674,7 @@ const OperatorForm = ({
                   value={current[index].coeff}
                   onInput={handleCoeffInput(index)}
                   errorMessage={errors[index]?.coeff?.message}
+                  disabled={disabled}
                 />
                 <Input
                   label={t('job.form.operator.pauli')}
@@ -658,27 +682,32 @@ const OperatorForm = ({
                   value={item.pauli}
                   onChange={handlePauliInput(index)}
                   errorMessage={errors[index]?.pauli?.message}
+                  disabled={disabled}
                 />
               </div>
             </div>
-            <Button
-              color="error"
-              size="small"
-              className={clsx('w-8', 'h-8', 'flex', 'justify-center', 'items-center')}
-              onClick={() => {
-                set(current.filter((_, i) => i !== index));
-              }}
-            >
-              x
-            </Button>
+            {!disabled && (
+              <Button
+                color="error"
+                size="small"
+                className={clsx('w-8', 'h-8', 'flex', 'justify-center', 'items-center')}
+                onClick={() => {
+                  set(current.filter((_, i) => i !== index));
+                }}
+              >
+                x
+              </Button>
+            )}
           </div>
         ))}
       </div>
-      <div className={clsx('w-min')}>
-        <Button color="secondary" size="small" onClick={handlePlusButtonClick}>
-          +
-        </Button>
-      </div>
+      {!disabled && (
+        <div className={clsx('w-min')}>
+          <Button color="secondary" size="small" onClick={handlePlusButtonClick}>
+            +
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
