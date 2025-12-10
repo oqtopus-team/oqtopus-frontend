@@ -60,7 +60,7 @@ const config: Config = {
       'gate-controlled': '#8255a7',
       'gate-parametrized': '#c13c3c',
       'gate-operation-border': '#8d8b63',
-      "gate-operation-enabled": '#fff3bf'
+      'gate-operation-enabled': '#fff3bf',
     },
     fontSize: {
       '2xs': '10px',
@@ -85,7 +85,7 @@ const config: Config = {
       },
       fontSize: {
         clamp: 'clamp(1rem, 5vw, 2.5rem)',
-      }
+      },
     },
   },
   plugins: [require('@tailwindcss/typography')],

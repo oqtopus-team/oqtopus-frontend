@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => ({
   build: {
     sourcemap: mode == 'development',
   },
-  publicDir: "public",
+  publicDir: 'public',
   test: {
     globals: true,
     environment: 'jsdom',

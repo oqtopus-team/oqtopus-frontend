@@ -42,17 +42,10 @@ const Logo = (): React.ReactElement => {
     >
       <img
         src={import.meta.env.VITE_APP_LOGO_IMAGE_URL}
-        className={clsx(
-          ['h-12', 'my-2', 'py-2']
-        )}        
+        className={clsx(['h-12', 'my-2', 'py-2'])}
         alt={import.meta.env.VITE_APP_APP_NAME_EN}
       />
-      <span
-        className={clsx(
-          ['cursor-pointer'],
-          ['hidden', 'sm:block'],
-        )}
-      >
+      <span className={clsx(['cursor-pointer'], ['hidden', 'sm:block'])}>
         {t('app.name.oqtopus')}
       </span>
     </div>

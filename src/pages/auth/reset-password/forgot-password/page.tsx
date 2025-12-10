@@ -44,12 +44,12 @@ export default function ForgotPasswordPage() {
               navigate('/confirm-password');
               return;
             }
-            toast(result.message, errorToastConfig)
+            toast(result.message, errorToastConfig);
             setProcessingFalse();
           })
           .catch((error) => {
-            const errorMsg = error.message ?? t('common.errors.default')
-            toast(errorMsg, errorToastConfig)
+            const errorMsg = error.message ?? t('common.errors.default');
+            toast(errorMsg, errorToastConfig);
           });
       };
     }
