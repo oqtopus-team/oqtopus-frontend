@@ -148,7 +148,7 @@ export default function Page() {
         } else {
           if (e.key === 'Delete') {
             circuitService.selectedGates.toReversed().forEach((g) => circuitService.removeGate(g));
-          } else if (e.key.toUpperCase() === 'G' && e.ctrlKey) {
+          } else if (qasmFeatures.customGates && e.key.toUpperCase() === 'G' && e.ctrlKey) {
             e.preventDefault();
             if (circuitService.selectedGates.length >= 2)
               circuitService.isCustomGateModalOpen = true;
