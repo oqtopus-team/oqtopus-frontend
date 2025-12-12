@@ -28,9 +28,9 @@ export default function ConfirmMFAPage() {
   const navigate = useNavigate();
   useDocumentTitle(t('signin.confirm.title'));
   const auth = useAuth();
-  const { processing, register, onSubmit, errors } = useFormProcessor(
+  const { processing, register, onSubmit, errors, reset, } = useFormProcessor( // 変更点 reset
     validationRules(t),
-    ({ setProcessingFalse }) => {
+    ({ setProcessingFalse, }) => {
       return (data) => {
         auth
           .confirmSignIn(data.totpCode)
@@ -40,11 +40,16 @@ export default function ConfirmMFAPage() {
               return;
             }
             toast(result.message, errorToastConfig);
+
+            reset(); // 変更点 reset追加
             setProcessingFalse();
           })
           .catch((error) => {
             const errorMsg = error.message ?? t('common.errors.default');
             toast(errorMsg, errorToastConfig);
+
+            reset(); // 変更点 例外のときもreset追加
+            setProcessingFalse();
           });
       };
     }
