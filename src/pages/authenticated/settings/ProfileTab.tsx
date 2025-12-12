@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import { errorToastConfig, successToastConfig } from '@/config/toast';
 import { useUserAPI } from '@/backend/hook';
 import { DateTimeFormatter } from '@/pages/authenticated/_components/DateTimeFormatter';
+import { SettingsGetSettingsResponseEditableFieldsEnum } from '@/api/generated';
 
 interface ProfileFormData {
   email?: string;
@@ -25,7 +26,11 @@ function UserFormSkeleton() {
   );
 }
 
-export function ProfileTab() {
+interface ProfileTabProps {
+  editableFields?: Array<SettingsGetSettingsResponseEditableFieldsEnum>;
+}
+
+export function ProfileTab({ editableFields = [] }: ProfileTabProps) {
   const { t, i18n } = useTranslation();
   const { getCurrentUser, updateCurrentUser } = useUserAPI();
   const {
@@ -82,7 +87,7 @@ export function ProfileTab() {
             />
             <TextField
               {...register('name')}
-              disabled={isSubmitting}
+              disabled={!editableFields.includes('name') || isSubmitting}
               fullWidth
               label={t('settings.profile.name')}
               variant="outlined"
@@ -95,7 +100,7 @@ export function ProfileTab() {
             />
             <TextField
               {...register('organization')}
-              disabled={isSubmitting}
+              disabled={!editableFields.includes('organization') || isSubmitting}
               fullWidth
               label={t('settings.profile.organization')}
               variant="outlined"

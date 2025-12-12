@@ -32,6 +32,8 @@ docs/JobsSubmitJobInfo.md
 docs/JobsSubmitJobRequest.md
 docs/JobsSubmitJobResponse.md
 docs/JobsTranspileResult.md
+docs/SettingsApi.md
+docs/SettingsGetSettingsResponse.md
 docs/SuccessSuccessResponse.md
 docs/UsersApi.md
 docs/UsersGetOneUserResponse.md

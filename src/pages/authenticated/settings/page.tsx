@@ -1,21 +1,29 @@
 import clsx from 'clsx';
 import { Tab, Tabs } from '@mui/material';
 import { useNavigate, useParams } from 'react-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProfileTab } from './ProfileTab';
 import { AccountTab } from './AccountTab';
 import { SecurityTab } from './SecurityTab';
+import { useSettingsAPI } from '@/backend/hook';
+import { SettingsGetSettingsResponse } from '@/api/generated';
 
 export function SettingsPage() {
   const params = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
 
+  const { getCurrentSettings } = useSettingsAPI();
+
+  const [settings, setSettings] = useState<SettingsGetSettingsResponse | null>();
+
   useEffect(() => {
     if (!params.tabId) {
       navigate('profile', { replace: true });
     }
+
+    getCurrentSettings().then((res) => setSettings(res));
   }, [params, navigate]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: string) => {
@@ -34,8 +42,8 @@ export function SettingsPage() {
         <Tab value="security" label={t('settings.tabs.security')} />
       </Tabs>
       <div className={clsx('mt-6')}>
-        {params.tabId === 'profile' && <ProfileTab />}
-        {params.tabId === 'account' && <AccountTab />}
+        {params.tabId === 'profile' && <ProfileTab editableFields={settings?.editable_fields}/>}
+        {params.tabId === 'account' && <AccountTab allowDeletion={settings?.allow_deletion}/>}
         {params.tabId === 'security' && <SecurityTab />}
       </div>
     </div>

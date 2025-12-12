@@ -48,7 +48,11 @@ const validationRules = (t: (key: string) => string): yup.ObjectSchema<AccountTa
       .oneOf([yup.ref('newPassword')], t('signup.form.error_message.confirm_password_mismatch')),
   });
 
-export function AccountTab() {
+interface AccountTabProps {
+  allowDeletion?: boolean;
+}
+
+export function AccountTab({ allowDeletion = false }: AccountTabProps) {
   const { t } = useTranslation();
   const { deleteCurrentUser } = useUserAPI();
   const auth = useAuth();
@@ -156,10 +160,8 @@ export function AccountTab() {
           </Button>
         </form>
       </div>
-
-      <hr className={clsx('border-gray-200')} />
-
-`      <div>
+      <hr className={clsx('border-gray-200')} />`{' '}
+      <div>
         <h3 className={clsx('text-xl', 'font-semibold', 'mb-4', 'text-red-600')}>
           {t('settings.account.deleteAccount')}
         </h3>
@@ -169,6 +171,7 @@ export function AccountTab() {
         </p>
 
         <Button
+          disabled={!allowDeletion}
           variant="outlined"
           color="error"
           size="large"
@@ -177,7 +180,6 @@ export function AccountTab() {
           {t('settings.account.deleteAccount')}
         </Button>
       </div>
-
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
         <DialogTitle>{t('settings.account.confirmDelete')}</DialogTitle>
         <DialogContent>

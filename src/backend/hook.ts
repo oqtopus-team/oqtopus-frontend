@@ -159,7 +159,7 @@ export const useUserAPI = () => {
 
   const deleteCurrentUser = async () => {
     return api.user.deleteCurrentUser().then((res) => res.data);
-  }
+  };
 
   return { getCurrentUser, updateCurrentUser, deleteCurrentUser };
 };
@@ -172,14 +172,24 @@ export const useApiTokenAPI = () => {
   };
 
   const createApiToken = async () => {
-    return api.apiToken.createApiToken().then(res => res.data);
+    return api.apiToken.createApiToken().then((res) => res.data);
   };
 
   const deleteApiToken = async () => {
     return api.apiToken.deleteApiToken().then((res) => res.data);
-  }
+  };
 
   return { getApiToken, createApiToken, deleteApiToken };
+};
+
+export const useSettingsAPI = () => {
+  const api = useContext(userApiContext);
+
+  const getCurrentSettings = async () => {
+    return api.settings.getCurrentSettings().then((res) => res.data);
+  };
+
+  return { getCurrentSettings };
 };
 
 export const useAnnouncementsAPI = () => {

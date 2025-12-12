@@ -7,6 +7,7 @@ interface UserAPI {
   apiToken: OAS.ApiTokenApi;
   announcements: OAS.AnnouncementsApi;
   user: OAS.UsersApi;
+  settings: OAS.SettingsApi;
 }
 
 export const newUserAPI = (config?: OAS.ConfigurationParameters): UserAPI => {
@@ -16,6 +17,7 @@ export const newUserAPI = (config?: OAS.ConfigurationParameters): UserAPI => {
     apiToken: new OAS.ApiTokenApi(new OAS.Configuration(config)),
     announcements: new OAS.AnnouncementsApi(new OAS.Configuration(config)),
     user: new OAS.UsersApi(new OAS.Configuration(config)),
+    settings: new OAS.SettingsApi(new OAS.Configuration(config)),
   };
 };
 

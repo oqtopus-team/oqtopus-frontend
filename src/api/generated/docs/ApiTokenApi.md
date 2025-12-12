@@ -9,7 +9,7 @@ All URIs are relative to *http://localhost:8080*
 |[**getApiToken**](#getapitoken) | **GET** /api-token | get api token|
 
 # **createApiToken**
-> Array<ApiTokenApiToken> createApiToken()
+> ApiTokenApiToken createApiToken()
 
 Create api token
 
@@ -33,7 +33,7 @@ This endpoint does not have any parameters.
 
 ### Return type
 
-**Array<ApiTokenApiToken>**
+**ApiTokenApiToken**
 
 ### Authorization
 
@@ -103,7 +103,7 @@ void (empty response body)
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getApiToken**
-> Array<ApiTokenApiToken> getApiToken()
+> ApiTokenApiToken getApiToken()
 
 Get api token
 
@@ -127,7 +127,7 @@ This endpoint does not have any parameters.
 
 ### Return type
 
-**Array<ApiTokenApiToken>**
+**ApiTokenApiToken**
 
 ### Authorization
 

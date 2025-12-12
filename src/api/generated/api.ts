@@ -776,6 +776,33 @@ export interface JobsTranspileResult {
     'virtual_physical_mapping': { [key: string]: any; } | null;
 }
 /**
+ * detail of settings response
+ * @export
+ * @interface SettingsGetSettingsResponse
+ */
+export interface SettingsGetSettingsResponse {
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof SettingsGetSettingsResponse
+     */
+    'editable_fields': Array<SettingsGetSettingsResponseEditableFieldsEnum>;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SettingsGetSettingsResponse
+     */
+    'allow_deletion': boolean;
+}
+
+export const SettingsGetSettingsResponseEditableFieldsEnum = {
+    Name: 'name',
+    Organization: 'organization'
+} as const;
+
+export type SettingsGetSettingsResponseEditableFieldsEnum = typeof SettingsGetSettingsResponseEditableFieldsEnum[keyof typeof SettingsGetSettingsResponseEditableFieldsEnum];
+
+/**
  * 
  * @export
  * @interface SuccessSuccessResponse
@@ -1220,7 +1247,7 @@ export const ApiTokenApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async createApiToken(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ApiTokenApiToken>>> {
+        async createApiToken(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ApiTokenApiToken>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.createApiToken(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ApiTokenApi.createApiToken']?.[localVarOperationServerIndex]?.url;
@@ -1244,7 +1271,7 @@ export const ApiTokenApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getApiToken(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ApiTokenApiToken>>> {
+        async getApiToken(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ApiTokenApiToken>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getApiToken(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ApiTokenApi.getApiToken']?.[localVarOperationServerIndex]?.url;
@@ -1266,7 +1293,7 @@ export const ApiTokenApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        createApiToken(options?: RawAxiosRequestConfig): AxiosPromise<Array<ApiTokenApiToken>> {
+        createApiToken(options?: RawAxiosRequestConfig): AxiosPromise<ApiTokenApiToken> {
             return localVarFp.createApiToken(options).then((request) => request(axios, basePath));
         },
         /**
@@ -1284,7 +1311,7 @@ export const ApiTokenApiFactory = function (configuration?: Configuration, baseP
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getApiToken(options?: RawAxiosRequestConfig): AxiosPromise<Array<ApiTokenApiToken>> {
+        getApiToken(options?: RawAxiosRequestConfig): AxiosPromise<ApiTokenApiToken> {
             return localVarFp.getApiToken(options).then((request) => request(axios, basePath));
         },
     };
@@ -2120,6 +2147,111 @@ export const ListJobsOrderEnum = {
     Asc: 'ASC'
 } as const;
 export type ListJobsOrderEnum = typeof ListJobsOrderEnum[keyof typeof ListJobsOrderEnum];
+
+
+/**
+ * SettingsApi - axios parameter creator
+ * @export
+ */
+export const SettingsApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Get current settings
+         * @summary Get current settings
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getCurrentSettings: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/system/settings`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication BearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * SettingsApi - functional programming interface
+ * @export
+ */
+export const SettingsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = SettingsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Get current settings
+         * @summary Get current settings
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getCurrentSettings(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SettingsGetSettingsResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getCurrentSettings(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SettingsApi.getCurrentSettings']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * SettingsApi - factory interface
+ * @export
+ */
+export const SettingsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = SettingsApiFp(configuration)
+    return {
+        /**
+         * Get current settings
+         * @summary Get current settings
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getCurrentSettings(options?: RawAxiosRequestConfig): AxiosPromise<SettingsGetSettingsResponse> {
+            return localVarFp.getCurrentSettings(options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * SettingsApi - object-oriented interface
+ * @export
+ * @class SettingsApi
+ * @extends {BaseAPI}
+ */
+export class SettingsApi extends BaseAPI {
+    /**
+     * Get current settings
+     * @summary Get current settings
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SettingsApi
+     */
+    public getCurrentSettings(options?: RawAxiosRequestConfig) {
+        return SettingsApiFp(this.configuration).getCurrentSettings(options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
 
 
 /**
