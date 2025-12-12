@@ -160,26 +160,29 @@ export function AccountTab({ allowDeletion = false }: AccountTabProps) {
           </Button>
         </form>
       </div>
-      <hr className={clsx('border-gray-200')} />`{' '}
-      <div>
-        <h3 className={clsx('text-xl', 'font-semibold', 'mb-4', 'text-red-600')}>
-          {t('settings.account.deleteAccount')}
-        </h3>
+      {allowDeletion && (
+        <>
+          <hr className={clsx('border-gray-200')} />
+          <div>
+            <h3 className={clsx('text-xl', 'font-semibold', 'mb-4', 'text-red-600')}>
+              {t('settings.account.deleteAccount')}
+            </h3>
 
-        <p className={clsx('text-gray-600', 'mb-4')}>
-          {t('settings.account.deleteAccountWarning')}
-        </p>
+            <p className={clsx('text-gray-600', 'mb-4')}>
+              {t('settings.account.deleteAccountWarning')}
+            </p>
 
-        <Button
-          disabled={!allowDeletion}
-          variant="outlined"
-          color="error"
-          size="large"
-          onClick={() => setDeleteDialogOpen(true)}
-        >
-          {t('settings.account.deleteAccount')}
-        </Button>
-      </div>
+            <Button
+              variant="outlined"
+              color="error"
+              size="large"
+              onClick={() => setDeleteDialogOpen(true)}
+            >
+              {t('settings.account.deleteAccount')}
+            </Button>
+          </div>
+        </>
+      )}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
         <DialogTitle>{t('settings.account.confirmDelete')}</DialogTitle>
         <DialogContent>
