@@ -1,4 +1,4 @@
-import { JobsOperatorItem, JobsSubmitJobInfo, JobsSubmitJobRequest } from '@/api/generated';
+import { JobsJobType, JobsOperatorItem, JobsSubmitJobInfo, JobsSubmitJobRequest } from '@/api/generated';
 import { Device } from '@/domain/types/Device';
 import { JobTypeType } from '@/domain/types/Job';
 import clsx from 'clsx';
