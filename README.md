@@ -85,9 +85,6 @@ Example usages:
   2) Use a local development server of OQTOPUS cloud running on the same host machine:
       generate-openapi --src http://localhost:8000 -p /oas/user/openapi.yaml
 
-  3) Use the latest stable version of official specification hosted in AWS CloudFront.
-      generate-openapi --src http://example.cloudfront.net -p user.yaml
-
 ```
 
 When running the generator manually, we recommend using it via the Bun script:
