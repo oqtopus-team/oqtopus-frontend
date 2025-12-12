@@ -11,7 +11,7 @@ frontend:
         - curl -fsSL https://bun.sh/install | bash
         - source /root/.bash_profile
         - bun install
-        - bun run --bun generate -- --src "http://d28brfon5yzvx5.cloudfront.net" -p "user.yaml"
+        - bun run --bun generate -- --src "https://438i5dp1z9.execute-api.ap-northeast-1.amazonaws.com/v1/openapi.yaml" -p ""
         - cp src/api/generated/openapi.yaml public/openapi.yaml
     build:
       commands:
