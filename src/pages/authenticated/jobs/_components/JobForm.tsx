@@ -327,12 +327,14 @@ export const JobForm = (componentProps: JobFormProps) => {
             autoFocus
             placeholder={t('job.form.name_placeholder')}
             label="name"
+            optional
             {...register('name')}
             errorMessage={errors.name && errors.name.message}
           />
           <Input
             placeholder={t('job.form.description_placeholder')}
             label="description"
+            optional
             {...register('description')}
             errorMessage={errors.description && errors.description.message}
           />
