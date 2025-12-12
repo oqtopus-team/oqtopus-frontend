@@ -31,9 +31,11 @@ export default {
     updatePassword: 'Update Password',
 
     deleteAccount: 'Delete Account',
-    deleteAccountWarning: 'This action is permanent and cannot be undone. All your data will be deleted.',
+    deleteAccountWarning:
+      'This action is permanent and cannot be undone. All your data will be deleted.',
     confirmDelete: 'Confirm Account Deletion',
-    deleteConfirmMessage: 'Are you sure you want to delete your account? This action cannot be undone.',
+    deleteConfirmMessage:
+      'Are you sure you want to delete your account? This action cannot be undone.',
     confirmDeleteButton: 'Yes, Delete My Account',
     accountDeleted: 'Account deletion request submitted',
   },
@@ -55,20 +57,29 @@ export default {
     ipAddress: 'IP Address',
     location: 'Location',
 
-    apiKeyStatus: 'API Key Status',
-    apiSecret: 'API Secret',
-    notCreated: 'Not created',
-    status: 'Status',
-    active: 'Active',
-    expired: 'Expired',
-    expiresOn: 'Expires on',
-    regenerateKey: 'Regenerate API Key',
-    deleteKey: 'Delete API Key',
+    apiToken: {
+      apiTokenStatus: 'API Token Status',
+      notCreated: 'Not created',
+      status: 'Status',
+      active: 'Active',
+      expired: 'Expired',
+      expiresOn: 'Expires on',
+      generateToken: 'Generate API Token',
+      deleteToken: 'Delete API Token',
+      createdTitle: 'API Token Created',
+      createdWarning:
+        'Important: Your API token is displayed only once upon creation. Please copy and store it in a secure location.',
+      afterCloseInfo:
+        'Once this window is closed, the token cannot be retrieved. You will only be able to generate a new one.',
+      okButton: 'I Understand',
+      copied: 'API Token copied successfully',
+    },
 
     confirmDelete: 'Confirm API Token Deletion',
-    deleteConfirmMessage: 'Are you sure you want to delete API Token? This action cannot be undone.',
-    confirmDeleteButton: 'Are you sure you want to delete API Key?',
-    createSuccess: "API token successfully created",
-    deleteSuccess: "API token successfully deleted",
+    deleteConfirmMessage:
+      'Are you sure you want to delete API Token? This action cannot be undone.',
+    confirmDeleteButton: 'Are you sure you want to delete API Token?',
+    createSuccess: 'API token successfully created',
+    deleteSuccess: 'API token successfully deleted',
   },
-}
+};

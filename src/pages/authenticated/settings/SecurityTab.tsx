@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import {
+  Box,
   Button,
   Chip,
   Collapse,
@@ -13,24 +14,27 @@ import {
   List,
   ListItem,
   ListItemText,
+  Skeleton,
   Stack,
+  Typography,
 } from '@mui/material';
 import { MdExpandLess, MdExpandMore } from 'react-icons/md';
 import { useTranslation } from 'react-i18next';
 import { Auth } from 'aws-amplify';
+import axios from 'axios';
 import { useNavigate } from 'react-router';
+import { FaCopy, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { DateTimeFormatter } from '@/pages/authenticated/_components/DateTimeFormatter';
 import { useApiTokenAPI, useUserAPI } from '@/backend/hook';
 import { isBefore } from 'date-fns';
 import { ApiTokenApiToken, UsersLoginEvent } from '@/api/generated';
 import { toast } from 'react-toastify';
 import { errorToastConfig, successToastConfig } from '@/config/toast';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 export function SecurityTab() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { getApiToken, createApiToken, deleteApiToken } = useApiTokenAPI();
+  const { createApiToken, deleteApiToken } = useApiTokenAPI();
   const { getCurrentUser } = useUserAPI();
 
   const [apiTokenData, setApiTokenData] = useState<ApiTokenApiToken | null>(null);
@@ -39,11 +43,28 @@ export function SecurityTab() {
 
   const [activityExpanded, setActivityExpanded] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [showSecret, setShowSecret] = useState<boolean>(false);
+  const [apiTokenDialogOpen, setApiTokenDialogOpen] = useState(false);
+  const [showSecret, setShowSecret] = useState(false);
+
+  const [loadingState, setLoadingState] = useState({ apiToken: false });
+
+  // TODO: Replace fetch request to API request after merging feature/#318-#319-api-key-security_improvement
+  async function getToken() {
+    setLoadingState({ ...loadingState, apiToken: true });
+    try {
+      const data = await axios.get('http://localhost:8080/api-token/status');
+
+      setApiTokenData({ ...apiTokenData, api_token_expiration: data.data?.api_token_expiration });
+    } catch (e: any) {
+      toast(e.message ?? t('common.errors.common'), errorToastConfig);
+    } finally {
+      setLoadingState({ ...loadingState, apiToken: false });
+    }
+  }
 
   useEffect(() => {
     verifyMFAStatus();
-    getApiToken().then((res) => setApiTokenData(res as unknown as ApiTokenApiToken));
+    getToken();
     getCurrentUser().then((res) => {
       if (res?.login_events) {
         setRecentActivity(res.login_events);
@@ -73,14 +94,37 @@ export function SecurityTab() {
   };
 
   const handleCreateApiToken = async () => {
+    setLoadingState({ ...loadingState, apiToken: true });
     try {
       const tokenData = await createApiToken();
 
       setApiTokenData(tokenData as unknown as ApiTokenApiToken);
 
+      setApiTokenDialogOpen(true);
+
       toast(t('settings.security.createSuccess'), successToastConfig);
     } catch (e: any) {
       toast(e.message ?? t('common.errors.common'), errorToastConfig);
+    } finally {
+      setLoadingState({ ...loadingState, apiToken: false });
+    }
+  };
+
+  const onApiTokenDialogClose = () => {
+    setApiTokenDialogOpen(false);
+    setShowSecret(false);
+  };
+
+  const onTokenCopy = async () => {
+    if (navigator.clipboard && apiTokenData?.api_token_secret) {
+      try {
+        await navigator.clipboard.writeText(apiTokenData?.api_token_secret);
+        toast(t('settings.security.apiToken.copied'), successToastConfig);
+      } catch (e: any) {
+        toast(e.message ?? t('common.errors.common'), errorToastConfig);
+      }
+    } else {
+      toast(t('common.errors.common'), errorToastConfig);
     }
   };
 
@@ -182,80 +226,80 @@ export function SecurityTab() {
       <hr className={clsx('border-gray-200')} />
       <div>
         <h3 className={clsx('text-xl', 'font-semibold', 'mb-4')}>
-          {t('settings.security.apiKeyStatus')}
+          {t('settings.security.apiToken.apiTokenStatus')}
         </h3>
 
         <div className={clsx('space-y-3')}>
-          {!apiTokenData ? (
-            <Chip
-              label={t('settings.security.notCreated')}
-              color="warning"
-              className={clsx('mb-2')}
-            />
+          {loadingState.apiToken ? (
+            <>
+              <Skeleton variant="rectangular" height={35} width={300} animation="wave" />
+              <Skeleton variant="rectangular" height={35} width={300} animation="wave" />
+            </>
           ) : (
             <>
-              <div className={clsx('flex', 'items-center', 'gap-4')}>
-                <span className={clsx('text-gray-700', 'font-medium')}>
-                  {t('settings.security.status')}:
-                </span>
-                {apiTokenData?.api_token_expiration &&
-                !isBefore(new Date(apiTokenData.api_token_expiration), new Date()) ? (
-                  <Chip label={t('settings.security.active')} color="success" size="medium" />
-                ) : (
-                  <Chip label={t('settings.security.expired')} color="error" size="medium" />
-                )}
-              </div>
-
-              <div className={clsx('flex', 'items-center', 'gap-4')}>
-                <span className={clsx('text-gray-700', 'font-medium')}>
-                  {t('settings.security.apiSecret')}:
-                </span>
-                <div className={clsx('flex', 'items-center', 'gap-2')}>
-                  <span className={clsx('text-gray-600', 'font-mono', 'text-sm')}>
-                    {showSecret ? apiTokenData?.api_token_secret : '••••••••••••••••'}
-                  </span>
-                  <button
-                    onClick={() => setShowSecret(!showSecret)}
-                    className={clsx(
-                      'text-gray-500',
-                      'hover:text-gray-700',
-                      'transition-colors',
-                      'cursor-pointer'
+              {!apiTokenData ? (
+                <Chip
+                  label={t('settings.security.apiToken.notCreated')}
+                  color="warning"
+                  className={clsx('mb-2')}
+                />
+              ) : (
+                <>
+                  <div className={clsx('flex', 'items-center', 'gap-4')}>
+                    <span className={clsx('text-gray-700', 'font-medium')}>
+                      {t('settings.security.apiToken.status')}:
+                    </span>
+                    {apiTokenData?.api_token_expiration &&
+                    !isBefore(new Date(apiTokenData.api_token_expiration), new Date()) ? (
+                      <Chip
+                        label={t('settings.security.apiToken.active')}
+                        color="success"
+                        size="medium"
+                      />
+                    ) : (
+                      <Chip
+                        label={t('settings.security.apiToken.expired')}
+                        color="error"
+                        size="medium"
+                      />
                     )}
-                    aria-label={showSecret ? 'Hide secret' : 'Show secret'}
-                  >
-                    {showSecret ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
-                  </button>
-                </div>
-              </div>
+                  </div>
 
-              <div className={clsx('flex', 'items-center', 'gap-4')}>
-                <span className={clsx('text-gray-700', 'font-medium')}>
-                  {t('settings.security.expiresOn')}:
-                </span>
-                <span className={clsx('text-gray-600')}>
-                  {DateTimeFormatter(t, i18n, apiTokenData?.api_token_expiration)}
-                </span>
-              </div>
+                  <div className={clsx('flex', 'items-center', 'gap-4')}>
+                    <span className={clsx('text-gray-700', 'font-medium')}>
+                      {t('settings.security.apiToken.expiresOn')}:
+                    </span>
+                    <span className={clsx('text-gray-600')}>
+                      {DateTimeFormatter(t, i18n, apiTokenData?.api_token_expiration)}
+                    </span>
+                  </div>
+                </>
+              )}
             </>
           )}
-
           <Stack direction="row" gap={2} className={clsx('mt-4')}>
-            <Button variant="outlined" color="primary" size="large" onClick={handleCreateApiToken}>
-              {t('settings.security.regenerateKey')}
+            <Button
+              disabled={loadingState.apiToken}
+              variant="outlined"
+              color="primary"
+              size="large"
+              onClick={handleCreateApiToken}
+            >
+              {t('settings.security.apiToken.generateToken')}
             </Button>
             <Button
-              disabled={!apiTokenData}
+              disabled={!apiTokenData || loadingState.apiToken}
               variant="outlined"
               color="error"
               size="large"
               onClick={() => setDeleteDialogOpen(true)}
             >
-              {t('settings.security.deleteKey')}
+              {t('settings.security.apiToken.deleteToken')}
             </Button>
           </Stack>
         </div>
       </div>
+
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
         <DialogTitle>{t('settings.security.confirmDelete')}</DialogTitle>
         <DialogContent>
@@ -267,6 +311,69 @@ export function SecurityTab() {
           </Button>
           <Button onClick={handleDeleteApiToken} color="error" variant="contained">
             {t('settings.security.confirmDeleteButton')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={apiTokenDialogOpen} onClose={onApiTokenDialogClose}>
+        <DialogTitle>{t('settings.security.apiToken.createdTitle')}</DialogTitle>
+
+        <DialogContent>
+          <DialogContentText sx={{ mb: 2 }}>
+            {t('settings.security.apiToken.createdWarning')}
+          </DialogContentText>
+
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              p: 2,
+              borderRadius: 1,
+              bgcolor: '#f5f5f5',
+              fontFamily: 'monospace',
+              fontSize: '0.95rem',
+              wordBreak: 'break-all',
+            }}
+          >
+            <span className={clsx('text-gray-600', 'font-mono', 'text-sm')}>
+              {showSecret ? apiTokenData?.api_token_secret : '••••••••••••••••'}
+            </span>
+            <Stack direction="row" gap={2}>
+              <button
+                onClick={onTokenCopy}
+                className={clsx(
+                  'text-gray-500',
+                  'hover:text-gray-700',
+                  'transition-colors',
+                  'cursor-pointer'
+                )}
+              >
+                <FaCopy size={20} />
+              </button>
+              <button
+                onClick={() => setShowSecret(!showSecret)}
+                className={clsx(
+                  'text-gray-500',
+                  'hover:text-gray-700',
+                  'transition-colors',
+                  'cursor-pointer'
+                )}
+                aria-label={showSecret ? 'Hide secret' : 'Show secret'}
+              >
+                {showSecret ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+              </button>
+            </Stack>
+          </Box>
+
+          <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
+            {t('settings.security.apiToken.afterCloseInfo')}
+          </Typography>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={onApiTokenDialogClose} variant="contained" color="primary">
+            {t('settings.security.apiToken.okButton')}
           </Button>
         </DialogActions>
       </Dialog>
