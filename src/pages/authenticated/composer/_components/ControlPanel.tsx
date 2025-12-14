@@ -1,4 +1,4 @@
-import { JobsOperatorItem, JobsSubmitJobInfo, JobsSubmitJobRequest } from '@/api/generated';
+import { JobsJobType, JobsOperatorItem, JobsSubmitJobInfo, JobsSubmitJobRequest } from '@/api/generated';
 import { Device } from '@/domain/types/Device';
 import { JobTypeType } from '@/domain/types/Job';
 import clsx from 'clsx';
@@ -112,7 +112,8 @@ export default (props: ControlPanelProps) => {
                   mkProgram={props.mkProgram}
                   mkOperator={props.mkOperator}
                   isAdvancedSettingsOpen={false}
-                  displayFields={{ program: false }}
+                  jobType={props.jobType as JobsJobType}
+                  displayFields={{ program: false, type: false, operator: false }}
                 />
               );
             case 'siml':

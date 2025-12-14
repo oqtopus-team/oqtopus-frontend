@@ -129,7 +129,8 @@ export default {
         pauli_empty: 'Pauli field cannot be empty',
         coeff_required: 'Coefficient field is required',
       },
-      deviceInsufficientQubits: "This device supports only {{deviceQubits}} qubits, but the program requires {{programQubits}}",
+      deviceInsufficientQubits:
+        'This device supports only {{deviceQubits}} qubits, but the program requires {{programQubits}}',
       invalid_json: 'Please enter correct JSON',
     },
     modal: {
