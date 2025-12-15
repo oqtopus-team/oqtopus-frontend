@@ -13,6 +13,7 @@ export const useFormProcessor = <T extends FieldValues>(
     register,
     handleSubmit,
     formState: { errors },
+    reset, // 変更点 reset追加
   } = useForm<T>({
     resolver: yupResolver(validationRules) as unknown as Resolver<T, any>,
   });
@@ -23,5 +24,5 @@ export const useFormProcessor = <T extends FieldValues>(
     process({ setProcessingFalse: () => setProcessing(false) })(data);
   });
 
-  return { processing, register, onSubmit, errors };
+  return { processing, register, onSubmit, errors, reset, }; // 変更点resetも返す
 };
