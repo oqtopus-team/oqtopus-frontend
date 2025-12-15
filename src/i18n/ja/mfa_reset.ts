@@ -1,5 +1,5 @@
 export default {
-  title: 'MFAリセットリクエスト',
+  title: 'MFA無効化リクエスト',
   form: {
     mail: 'メールアドレス',
     password: 'パスワード',
@@ -11,7 +11,7 @@ export default {
   },
   button: '送信する',
   alert: {
-    success: 'リクエストを受け付けました。',
+    success: 'MFA無効化リクエストを受け付けました。',
     failure: '認証に失敗しました。',
   },
 };

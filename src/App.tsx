@@ -13,7 +13,9 @@ import SetupMFAPage from '@/pages/auth/signup/mfa/page';
 import ResetPasswordLayout from '@/pages/auth/reset-password/layout';
 import ForgotPasswordPage from '@/pages/auth/reset-password/forgot-password/page';
 import ForgotPasswordConfirmPage from '@/pages/auth/reset-password/confirm-password/page';
-import ResetMFAPage from '@/pages/auth/reset-mfa/page';
+import InvalidateMFAPage from '@/pages/auth/reset-mfa/mfa-invalidation/page';
+import ConfirmResetMFAPage from '@/pages/auth/reset-mfa/mfa-confirmation-code/page';
+import ResetMFAPage from '@/pages/auth/reset-mfa/mfa-re-registration/page';
 import AuthenticatedLayout from '@/pages/authenticated/layout';
 import AuthenticatedDefaultLayout from '@/pages/authenticated/layout_default';
 import DashboardLayout from '@/pages/authenticated/layout_dashboard';
@@ -50,13 +52,15 @@ export const App: React.FunctionComponent = () => {
                 <Route path="mfa" element={<SetupMFAPage />} />
               </Route>
 
+              {/* reset password flow */}
               <Route element={<ResetPasswordLayout />} /* reset password flow */>
                 <Route path="forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="confirm-password" element={<ForgotPasswordConfirmPage />} />
               </Route>
 
-              {/* reset password flow */}
-              <Route path="mfa-reset" element={<ResetMFAPage />} />
+              <Route path="mfa-invalidation" element={<InvalidateMFAPage />} />
+              <Route path="mfa-confirmation-code" element={<ConfirmResetMFAPage />} />
+              <Route path="mfa-re-registration" element={<ResetMFAPage />} />
             </Route>
 
             <Route

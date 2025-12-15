@@ -35,25 +35,36 @@ export default function LoginPage() {
   const { processing, register, onSubmit, errors } = useFormProcessor(
     validationRules(t),
     ({ setProcessingFalse }) => {
-      return (data) => {
-        auth
-          .signIn(data.username, data.password)
-          .then(({ success, message }) => {
+      return async (data) => {
+        try {
+          const { success, message } = await auth.signIn(data.username, data.password);
+          if (success) {
+            navigate('/confirm-mfa');
+            return;
+          }
+          toast(t(message), errorToastConfig);
+          if (message === 'signup.confirm.form.mfa_setup_request') {
+            // if MFA is not set, execute MFA reset flow
+            // this will send a confirmation code to the user's email and redirect to the confirm code page
+            const { success, message } = await auth.startMfaReset(data.username, data.password);
             if (success) {
-              navigate('/confirm-mfa');
-              return;
+              // if MFA reset is successful, redirect to confirm code page
+              // transfer username and password to the next page
+              navigate('/mfa-confirmation-code', {
+                state: { username: data.username, accessToken: message },
+              });
+            } else {
+              // if something goes wrong, alert the user and redirect to login
+              alert(message);
+              navigate('/login');
             }
-            toast(t(message), errorToastConfig);
-            if (message === 'signup.confirm.form.mfa_setup_request') {
-              navigate('/mfa');
-              return;
-            }
-            setProcessingFalse();
-          })
-          .catch((error) => {
-            const errorMsg = error.message ?? t('common.errors.default');
-            toast(errorMsg, errorToastConfig);
-          });
+            return;
+          }
+          setProcessingFalse();
+        } catch (error) {
+          const errorMsg = error instanceof Error ? error.message : t('common.errors.default');
+          toast(errorMsg, errorToastConfig);
+        }
       };
     }
   );
