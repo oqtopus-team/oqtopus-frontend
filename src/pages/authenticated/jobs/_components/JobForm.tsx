@@ -39,7 +39,7 @@ import { toast } from 'react-toastify';
 import i18next, { TFunction } from 'i18next';
 
 interface FormInput {
-  name: string;
+  name?: string;
   description?: string;
   shots: number;
   deviceId: string;
@@ -84,7 +84,7 @@ const operatorItemSchema = (t: (key: string) => string) =>
 
 const validationRules = (t: TFunction<'translation', undefined>): yup.ObjectSchema<FormInput> =>
   yup.object({
-    name: yup.string().required(t('job.form.error_message.name')),
+    name: yup.string(),
     description: yup.string(),
     shots: yup
       .number()
@@ -343,12 +343,14 @@ export const JobForm = (componentProps: JobFormProps) => {
             autoFocus
             placeholder={t('job.form.name_placeholder')}
             label="name"
+            optional
             {...register('name')}
             errorMessage={errors.name && errors.name.message}
           />
           <Input
             placeholder={t('job.form.description_placeholder')}
             label="description"
+            optional
             {...register('description')}
             errorMessage={errors.description && errors.description.message}
           />
