@@ -33,6 +33,7 @@ export const AuthContext = createContext({} as UseAuth);
 
 export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const auth = useProvideAuth();
+  debugger
   return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
 };
 
@@ -48,9 +49,12 @@ const useProvideAuth = (): UseAuth => {
   useEffect(() => {
     Auth.currentAuthenticatedUser()
       .then((result: any) => {
+        debugger;
         setUsername(result.username);
         if (Object.prototype.hasOwnProperty.call(result, 'preferredMFA')) {
-          if (result.preferredMFA === 'SOFTWARE_TOKEN_MFA') {
+          if (import.meta.env.DEV === true 
+            || result.preferredMFA === 'SOFTWARE_TOKEN_MFA'
+          ) {
             setIsAuthenticated(true);
             setInitialized(true);
           }
