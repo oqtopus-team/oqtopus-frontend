@@ -49,7 +49,6 @@ const useProvideAuth = (): UseAuth => {
   useEffect(() => {
     Auth.currentAuthenticatedUser()
       .then((result: any) => {
-        debugger;
         setUsername(result.username);
         if (Object.prototype.hasOwnProperty.call(result, 'preferredMFA')) {
           if (import.meta.env.DEV === true 
