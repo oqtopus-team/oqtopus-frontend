@@ -21,6 +21,7 @@ export const staticCircuitProps = (): Props => ({
 interface Props {
   fixedQubitNumber: boolean;
   static: boolean;
+  enableCustomGates?: boolean;
 }
 
 export default (props: Props) => {
@@ -268,44 +269,48 @@ export default (props: Props) => {
                 {t('composer.actions.duplicate')}
               </div>
             </Button>
-            <Button
-              color={canGroupGates ? 'secondary' : 'disabled'}
-              disabled={!canGroupGates}
-              style={{ marginBottom: '1.25rem' }}
-              onClick={() => {
-                circuitService.isCustomGateModalOpen = true;
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: '0.25rem',
-                }}
-              >
-                <FaObjectGroup />
-                {t('composer.actions.group')}
-              </div>
-            </Button>
-            <Button
-              color={canUngroupGates ? 'secondary' : 'disabled'}
-              disabled={!canUngroupGates}
-              style={{ marginBottom: '1.25rem' }}
-              onClick={() => circuitService.ungroupSelectedGates()}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: '0.25rem',
-                }}
-              >
-                <FaObjectUngroup />
-                {t('composer.actions.ungroup')}
-              </div>
-            </Button>
+            {props.enableCustomGates &&
+              <>
+                <Button
+                  color={canGroupGates ? 'secondary' : 'disabled'}
+                  disabled={!canGroupGates}
+                  style={{ marginBottom: '1.25rem' }}
+                  onClick={() => {
+                    circuitService.isCustomGateModalOpen = true;
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                    }}
+                  >
+                    <FaObjectGroup />
+                    {t('composer.actions.group')}
+                  </div>
+                </Button>
+                <Button
+                  color={canUngroupGates ? 'secondary' : 'disabled'}
+                  disabled={!canUngroupGates}
+                  style={{ marginBottom: '1.25rem' }}
+                  onClick={() => circuitService.ungroupSelectedGates()}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                    }}
+                  >
+                    <FaObjectUngroup />
+                    {t('composer.actions.ungroup')}
+                  </div>
+                </Button>
+              </>
+            }
           </div>
         )}
       </div>
