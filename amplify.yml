@@ -4,9 +4,14 @@ frontend:
   phases:
     preBuild:
       commands:
+        # Set Node.js version (AWS Amplify uses nvm)
+        - nvm install 20
+        - nvm use 20
+        - node --version
         # install bun
         - curl -fsSL https://bun.sh/install | bash
         - source /root/.bash_profile
+        - bun --version
         - bun install
         # - bun generate -- --src "github:oqtopus-team/oqtopus-cloud" --ref develop --path "/backend/oas/user/openapi.yaml"
     build:
