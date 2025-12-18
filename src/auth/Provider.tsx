@@ -33,7 +33,6 @@ export const AuthContext = createContext({} as UseAuth);
 
 export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const auth = useProvideAuth();
-  debugger
   return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
 };
 
