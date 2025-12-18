@@ -138,6 +138,15 @@ export default function Page() {
       'keydown',
       (e) => {
         if (currentFocus === '' || currentFocus === 'panel') return;
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          if (currentFocus === 'observable') {
+            observableCircuitService.selectedGates = [];
+          } else {
+            circuitService.selectedGates = [];
+          }
+          return;
+        }
 
         if (currentFocus === 'observable') {
           if (e.key === 'Delete') {
