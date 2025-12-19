@@ -404,7 +404,6 @@ const Loadmore = (props: { handleClick: () => void }) => {
 };
 
 const generateSearchParams = (params: JobSearchParams): string => {
-  console.log('params', params);
   const searchParams = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
     if (value === undefined || value === '') {
