@@ -9,6 +9,7 @@ docs/AnnouncementsGetAnnouncementResponse.md
 docs/AnnouncementsGetAnnouncementsListResponse.md
 docs/ApiTokenApi.md
 docs/ApiTokenApiToken.md
+docs/ApiTokenApiTokenStatus.md
 docs/DeviceApi.md
 docs/DevicesDeviceInfo.md
 docs/ErrorBadRequest.md

@@ -34,7 +34,7 @@ import { errorToastConfig, successToastConfig } from '@/config/toast';
 export function SecurityTab() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { createApiToken, deleteApiToken } = useApiTokenAPI();
+  const { createApiToken, deleteApiToken, getApiTokenStatus } = useApiTokenAPI();
   const { getCurrentUser } = useUserAPI();
 
   const [apiTokenData, setApiTokenData] = useState<ApiTokenApiToken | null>(null);
@@ -48,13 +48,12 @@ export function SecurityTab() {
 
   const [loadingState, setLoadingState] = useState({ apiToken: false });
 
-  // TODO: Replace fetch request to API request after merging feature/#318-#319-api-key-security_improvement
   async function getToken() {
     setLoadingState({ ...loadingState, apiToken: true });
     try {
-      const data = await axios.get('http://localhost:8080/api-token/status');
+      const data = await getApiTokenStatus();
 
-      setApiTokenData({ ...apiTokenData, api_token_expiration: data.data?.api_token_expiration });
+      setApiTokenData({ ...apiTokenData, api_token_expiration: data.api_token_expiration });
     } catch (e: any) {
       toast(e.message ?? t('common.errors.common'), errorToastConfig);
     } finally {
@@ -98,7 +97,7 @@ export function SecurityTab() {
     try {
       const tokenData = await createApiToken();
 
-      setApiTokenData(tokenData as unknown as ApiTokenApiToken);
+      setApiTokenData(tokenData);
 
       setApiTokenDialogOpen(true);
 
@@ -118,7 +117,7 @@ export function SecurityTab() {
   const onTokenCopy = async () => {
     if (navigator.clipboard && apiTokenData?.api_token_secret) {
       try {
-        await navigator.clipboard.writeText(apiTokenData?.api_token_secret);
+        await navigator.clipboard.writeText(`${apiTokenData?.api_token_id}.${apiTokenData?.api_token_secret}`);
         toast(t('settings.security.apiToken.copied'), successToastConfig);
       } catch (e: any) {
         toast(e.message ?? t('common.errors.common'), errorToastConfig);
@@ -337,7 +336,7 @@ export function SecurityTab() {
             }}
           >
             <span className={clsx('text-gray-600', 'font-mono', 'text-sm')}>
-              {showSecret ? apiTokenData?.api_token_secret : '••••••••••••••••'}
+              {showSecret ? `${apiTokenData?.api_token_id}.${apiTokenData?.api_token_secret}` : '••••••••••••••••'}
             </span>
             <Stack direction="row" gap={2}>
               <button

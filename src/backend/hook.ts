@@ -167,8 +167,8 @@ export const useUserAPI = () => {
 export const useApiTokenAPI = () => {
   const api = useContext(userApiContext);
 
-  const getApiToken = async () => {
-    return api.apiToken.getApiToken().then((res) => res.data);
+  const getApiTokenStatus = async () => {
+    return api.apiToken.getApiTokenStatus().then((res) => res.data);
   };
 
   const createApiToken = async () => {
@@ -179,7 +179,7 @@ export const useApiTokenAPI = () => {
     return api.apiToken.deleteApiToken().then((res) => res.data);
   };
 
-  return { getApiToken, createApiToken, deleteApiToken };
+  return { getApiTokenStatus, createApiToken, deleteApiToken };
 };
 
 export const useSettingsAPI = () => {

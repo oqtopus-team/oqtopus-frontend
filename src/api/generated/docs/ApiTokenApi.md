@@ -6,7 +6,7 @@ All URIs are relative to *http://localhost:8080*
 |------------- | ------------- | -------------|
 |[**createApiToken**](#createapitoken) | **POST** /api-token | create api token|
 |[**deleteApiToken**](#deleteapitoken) | **DELETE** /api-token | delete api token|
-|[**getApiToken**](#getapitoken) | **GET** /api-token | get api token|
+|[**getApiTokenStatus**](#getapitokenstatus) | **GET** /api-token/status | get api token status|
 
 # **createApiToken**
 > ApiTokenApiToken createApiToken()
@@ -102,10 +102,10 @@ void (empty response body)
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **getApiToken**
-> ApiTokenApiToken getApiToken()
+# **getApiTokenStatus**
+> ApiTokenApiTokenStatus getApiTokenStatus()
 
-Get api token
+Get api token status
 
 ### Example
 
@@ -118,7 +118,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new ApiTokenApi(configuration);
 
-const { status, data } = await apiInstance.getApiToken();
+const { status, data } = await apiInstance.getApiTokenStatus();
 ```
 
 ### Parameters
@@ -127,7 +127,7 @@ This endpoint does not have any parameters.
 
 ### Return type
 
-**ApiTokenApiToken**
+**ApiTokenApiTokenStatus**
 
 ### Authorization
 
@@ -142,7 +142,7 @@ This endpoint does not have any parameters.
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Return api token |  -  |
+|**200** | Return api token status |  -  |
 |**403** | Frobidden |  -  |
 |**404** | Not Found |  -  |
 |**500** | Internal Server Error |  -  |

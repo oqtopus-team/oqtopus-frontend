@@ -86,6 +86,12 @@ export interface AnnouncementsGetAnnouncementsListResponse {
  */
 export interface ApiTokenApiToken {
     /**
+     * The api token id
+     * @type {string}
+     * @memberof ApiTokenApiToken
+     */
+    'api_token_id'?: string;
+    /**
      * The api token secret
      * @type {string}
      * @memberof ApiTokenApiToken
@@ -95,6 +101,19 @@ export interface ApiTokenApiToken {
      * The expiration date of the api token
      * @type {string}
      * @memberof ApiTokenApiToken
+     */
+    'api_token_expiration'?: string;
+}
+/**
+ * 
+ * @export
+ * @interface ApiTokenApiTokenStatus
+ */
+export interface ApiTokenApiTokenStatus {
+    /**
+     * The expiration date of the api token
+     * @type {string}
+     * @memberof ApiTokenApiTokenStatus
      */
     'api_token_expiration'?: string;
 }
@@ -1198,13 +1217,13 @@ export const ApiTokenApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
-         * Get api token
-         * @summary get api token
+         * Get api token status
+         * @summary get api token status
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getApiToken: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api-token`;
+        getApiTokenStatus: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api-token/status`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -1266,15 +1285,15 @@ export const ApiTokenApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Get api token
-         * @summary get api token
+         * Get api token status
+         * @summary get api token status
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getApiToken(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ApiTokenApiToken>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getApiToken(options);
+        async getApiTokenStatus(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ApiTokenApiTokenStatus>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getApiTokenStatus(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['ApiTokenApi.getApiToken']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['ApiTokenApi.getApiTokenStatus']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
@@ -1306,13 +1325,13 @@ export const ApiTokenApiFactory = function (configuration?: Configuration, baseP
             return localVarFp.deleteApiToken(options).then((request) => request(axios, basePath));
         },
         /**
-         * Get api token
-         * @summary get api token
+         * Get api token status
+         * @summary get api token status
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getApiToken(options?: RawAxiosRequestConfig): AxiosPromise<ApiTokenApiToken> {
-            return localVarFp.getApiToken(options).then((request) => request(axios, basePath));
+        getApiTokenStatus(options?: RawAxiosRequestConfig): AxiosPromise<ApiTokenApiTokenStatus> {
+            return localVarFp.getApiTokenStatus(options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -1347,14 +1366,14 @@ export class ApiTokenApi extends BaseAPI {
     }
 
     /**
-     * Get api token
-     * @summary get api token
+     * Get api token status
+     * @summary get api token status
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ApiTokenApi
      */
-    public getApiToken(options?: RawAxiosRequestConfig) {
-        return ApiTokenApiFp(this.configuration).getApiToken(options).then((request) => request(this.axios, this.basePath));
+    public getApiTokenStatus(options?: RawAxiosRequestConfig) {
+        return ApiTokenApiFp(this.configuration).getApiTokenStatus(options).then((request) => request(this.axios, this.basePath));
     }
 }
 
