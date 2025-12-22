@@ -55,7 +55,7 @@ export default {
     ipAddress: 'IPアドレス',
     location: '場所',
 
-    "apiToken": {
+    apiToken: {
       apiTokenStatus: 'APIトークンのステータス',
       notCreated: '作成されていません',
       status: 'ステータス',
@@ -64,17 +64,19 @@ export default {
       expiresOn: '有効期限',
       generateToken: 'APIトークンを生成する',
       deleteToken: 'APIトークンの削除',
-      "createdTitle": "APIトークンが作成されました",
-      "createdWarning": "ご注意ください。APIトークンは作成時に一度のみ表示されます。必ずコピーして安全な場所に保管してください。",
-      "afterCloseInfo": "このウィンドウを閉じた後は、トークンを再度確認することはできません。新しいトークンの発行のみ可能となります。",
-      "okButton": "確認しました",
-      copied: 'APIトークンが正常にコピーされました'
+      createdTitle: 'APIトークンが作成されました',
+      createdWarning:
+        'ご注意ください。APIトークンは作成時に一度のみ表示されます。必ずコピーして安全な場所に保管してください。',
+      afterCloseInfo:
+        'このウィンドウを閉じた後は、トークンを再度確認することはできません。新しいトークンの発行のみ可能となります。',
+      okButton: '確認しました',
+      copied: 'APIトークンが正常にコピーされました',
     },
 
     confirmDelete: 'APIトークンの削除確認',
     deleteConfirmMessage: 'APIトークンを削除してもよろしいですか？この操作は元に戻せません。',
     confirmDeleteButton: 'API トークンを削除してもよろしいですか?',
-    createSuccess: "APIトークンが正常に作成されました",
+    createSuccess: 'APIトークンが正常に作成されました',
     deleteSuccess: 'APIトークンが正常に削除されました',
   },
 };

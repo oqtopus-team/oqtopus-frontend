@@ -172,15 +172,14 @@ export const JobForm = (componentProps: JobFormProps) => {
     },
   });
 
-  const [mitigationType, mitigation, transpilerType, program, jobType, operator] =
-    watch([
-      'mitigationType',
-      'mitigation',
-      'transpilerType',
-      'program',
-      'type',
-      'operator',
-    ]);
+  const [mitigationType, mitigation, transpilerType, program, jobType, operator] = watch([
+    'mitigationType',
+    'mitigation',
+    'transpilerType',
+    'program',
+    'type',
+    'operator',
+  ]);
 
   useLayoutEffect(() => {
     getDevices().then((devices) => setDevices(devices));
@@ -221,7 +220,9 @@ export const JobForm = (componentProps: JobFormProps) => {
   }, [transpilerType]);
   useEffect(() => {
     if (mitigationType !== 'Custom') {
-      setValue('mitigation', JOB_FORM_MITIGATION_INFO_DEFAULTS[mitigationType], { shouldValidate: true });
+      setValue('mitigation', JOB_FORM_MITIGATION_INFO_DEFAULTS[mitigationType], {
+        shouldValidate: true,
+      });
     }
   }, [mitigationType]);
 

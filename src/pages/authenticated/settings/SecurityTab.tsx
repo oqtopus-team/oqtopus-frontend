@@ -117,7 +117,9 @@ export function SecurityTab() {
   const onTokenCopy = async () => {
     if (navigator.clipboard && apiTokenData?.api_token_secret) {
       try {
-        await navigator.clipboard.writeText(`${apiTokenData?.api_token_id}.${apiTokenData?.api_token_secret}`);
+        await navigator.clipboard.writeText(
+          `${apiTokenData?.api_token_id}.${apiTokenData?.api_token_secret}`
+        );
         toast(t('settings.security.apiToken.copied'), successToastConfig);
       } catch (e: any) {
         toast(e.message ?? t('common.errors.common'), errorToastConfig);
@@ -336,7 +338,9 @@ export function SecurityTab() {
             }}
           >
             <span className={clsx('text-gray-600', 'font-mono', 'text-sm')}>
-              {showSecret ? `${apiTokenData?.api_token_id}.${apiTokenData?.api_token_secret}` : '••••••••••••••••'}
+              {showSecret
+                ? `${apiTokenData?.api_token_id}.${apiTokenData?.api_token_secret}`
+                : '••••••••••••••••'}
             </span>
             <Stack direction="row" gap={2}>
               <button
