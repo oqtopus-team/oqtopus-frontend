@@ -22,7 +22,7 @@ export function generateQASMCode(
     '// Sent from OQTOPUS composer',
     `// ${circuitJSONString}`,
     'OPENQASM 3;',
-    'include "stdgates.inc"',
+    'include "stdgates.inc";',
     ...mapGateDefinitionsToCode(gateDefinitions),
     `qubit[${rowCount}] q;`,
     `bit[${rowCount}] c;`,
