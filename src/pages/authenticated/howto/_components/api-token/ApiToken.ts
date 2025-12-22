@@ -100,8 +100,8 @@ export async function getApiToken(api: ApiTokenApi): Promise<GetApiTokenResponse
   const currentLang = i18next.language;
 
   return api
-    .getApiToken()
-    .then((res) => {
+    .getApiTokenStatus()
+    .then((res: any) => {
       // cast to any because the response type is cannot access
       // the properties api_token_secret and api_token_expiration
       const data: any = res.data;
@@ -116,7 +116,7 @@ export async function getApiToken(api: ApiTokenApi): Promise<GetApiTokenResponse
         },
       };
     })
-    .catch((error) => {
+    .catch((error: any) => {
       const message = ((): string => {
         if (error.response.status === 403) {
           return API_TOKEN_API_MESSAGE(currentLang).unavailable;
