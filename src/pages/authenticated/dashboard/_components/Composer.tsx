@@ -25,9 +25,7 @@ export const Composer = (): React.ReactElement => {
       <p className="text-xs">{t('dashboard.composer.description')}</p>
       <Spacer className="h-3" />
       <circuitContext.Provider value={circuitService}>
-        <QuantumCircuitComposer 
-          qasmFeatures={{}}
-        />
+        <QuantumCircuitComposer qasmFeatures={{}} />
       </circuitContext.Provider>
     </>
   );

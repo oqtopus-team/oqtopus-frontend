@@ -269,7 +269,7 @@ export default (props: Props) => {
                 {t('composer.actions.duplicate')}
               </div>
             </Button>
-            {props.enableCustomGates &&
+            {props.enableCustomGates && (
               <>
                 <Button
                   color={canGroupGates ? 'secondary' : 'disabled'}
@@ -310,7 +310,7 @@ export default (props: Props) => {
                   </div>
                 </Button>
               </>
-            }
+            )}
           </div>
         )}
       </div>
