@@ -76,7 +76,7 @@ export default function Page() {
     setBusy(false);
   };
 
-  const [qasmFeatures, setQasmFeatures] = useState<QasmFeatures> ({});
+  const [qasmFeatures, setQasmFeatures] = useState<QasmFeatures>({});
 
   useEffect(() => {
     setQasmFeatures({
@@ -195,9 +195,7 @@ export default function Page() {
       <hr className={clsx([['w-full', 'my-4'], ['text-neutral-content']])} />
 
       <circuitContext.Provider value={circuitService}>
-        <QuantumCircuitComposer 
-          qasmFeatures={qasmFeatures}
-        />
+        <QuantumCircuitComposer qasmFeatures={qasmFeatures} />
       </circuitContext.Provider>
 
       {jobType === 'estimation' ? (

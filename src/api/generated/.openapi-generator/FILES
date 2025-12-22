@@ -9,6 +9,7 @@ docs/AnnouncementsGetAnnouncementResponse.md
 docs/AnnouncementsGetAnnouncementsListResponse.md
 docs/ApiTokenApi.md
 docs/ApiTokenApiToken.md
+docs/ApiTokenApiTokenStatus.md
 docs/DeviceApi.md
 docs/DevicesDeviceInfo.md
 docs/ErrorBadRequest.md
@@ -32,6 +33,12 @@ docs/JobsSubmitJobInfo.md
 docs/JobsSubmitJobRequest.md
 docs/JobsSubmitJobResponse.md
 docs/JobsTranspileResult.md
+docs/SettingsApi.md
+docs/SettingsGetSettingsResponse.md
 docs/SuccessSuccessResponse.md
+docs/UsersApi.md
+docs/UsersGetOneUserResponse.md
+docs/UsersLoginEvent.md
+docs/UsersUpdateUserRequest.md
 git_push.sh
 index.ts

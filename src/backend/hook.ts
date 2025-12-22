@@ -5,6 +5,7 @@ import {
   GetAnnouncementsListOrderEnum,
   JobsGetJobsResponse,
   JobsSubmitJobRequest,
+  UsersUpdateUserRequest,
 } from '@/api/generated';
 import { Job, JobSearchParams } from '@/domain/types/Job';
 import { Device } from '@/domain/types/Device';
@@ -144,6 +145,52 @@ const convertDeviceResult = (device: DevicesDeviceInfo): Device => ({
   calibratedAt: device.calibrated_at ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   description: device.description,
 });
+
+export const useUserAPI = () => {
+  const api = useContext(userApiContext);
+
+  const getCurrentUser = async () => {
+    return api.user.getCurrentUser().then((res) => res.data);
+  };
+
+  const updateCurrentUser = async (userData: UsersUpdateUserRequest) => {
+    return api.user.updateCurrentUser(userData);
+  };
+
+  const deleteCurrentUser = async () => {
+    return api.user.deleteCurrentUser().then((res) => res.data);
+  };
+
+  return { getCurrentUser, updateCurrentUser, deleteCurrentUser };
+};
+
+export const useApiTokenAPI = () => {
+  const api = useContext(userApiContext);
+
+  const getApiTokenStatus = async () => {
+    return api.apiToken.getApiTokenStatus().then((res) => res.data);
+  };
+
+  const createApiToken = async () => {
+    return api.apiToken.createApiToken().then((res) => res.data);
+  };
+
+  const deleteApiToken = async () => {
+    return api.apiToken.deleteApiToken().then((res) => res.data);
+  };
+
+  return { getApiTokenStatus, createApiToken, deleteApiToken };
+};
+
+export const useSettingsAPI = () => {
+  const api = useContext(userApiContext);
+
+  const getCurrentSettings = async () => {
+    return api.settings.getCurrentSettings().then((res) => res.data);
+  };
+
+  return { getCurrentSettings };
+};
 
 export const useAnnouncementsAPI = () => {
   const api = useContext(userApiContext);

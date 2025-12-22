@@ -19,7 +19,6 @@
     border-radius: 0.25rem;
 }
 
-
 @media (max-width: 768px) {
     .application-sidebar {
         display: none;
