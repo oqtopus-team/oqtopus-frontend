@@ -12,6 +12,7 @@ import DownloadJobButton from './DownloadJobButton';
 import { TruncateText } from '@/pages/authenticated/_components/TruncateText';
 import { toast } from 'react-toastify';
 import { errorToastConfig, successToastConfig } from '@/config/toast';
+import { BsTrash, BsXCircle } from 'react-icons/bs';
 
 interface JobProps {
   job: Job;
@@ -126,7 +127,10 @@ const OperationButtons = ({ job, onClickCancel, onClickDelete }: ButtonProps) =>
   return (
     <div className={clsx('flex', 'gap-2')}>
       <Button color="error" onClick={() => setDeleteModalShow(true)}>
-        {t('job.list.operation.delete')}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <BsTrash />
+          <span>{t('job.list.operation.delete')}</span>
+        </div>
       </Button>
       <ConfirmModal
         show={deleteModalShow}
@@ -138,7 +142,10 @@ const OperationButtons = ({ job, onClickCancel, onClickDelete }: ButtonProps) =>
       {canCancel(job.status) && (
         <>
           <Button color="secondary" onClick={() => setCancelModalShow(true)}>
-            {t('job.list.operation.cancel')}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <BsXCircle />
+          <span>{t('job.list.operation.cancel')}</span>
+        </div>
           </Button>
           <ConfirmModal
             show={cancelModalShow}
