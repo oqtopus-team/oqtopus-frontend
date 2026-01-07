@@ -13,6 +13,7 @@ import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
 import { toast } from 'react-toastify';
 import { errorToastConfig, infoToastConfig } from '@/config/toast';
+import { createPasswordConfirmSchema, createPasswordSchema } from '@/config/validation/passwordSchemas';
 
 interface FormInput {
   password: string;
@@ -22,24 +23,18 @@ interface FormInput {
 
 const validationRules = (t: (key: string) => string): yup.ObjectSchema<FormInput> =>
   yup.object({
-    password: yup
-      .string()
-      .required(t('forgot_password.confirm.form.error_message.password_enter'))
-      .matches(/(?=.*[a-z])/, t('forgot_password.confirm.form.error_message.password_lowercase'))
-      .matches(/(?=.*[A-Z])/, t('forgot_password.confirm.form.error_message.password_uppercase'))
-      .matches(/(?=.*[0-9])/, t('forgot_password.confirm.form.error_message.password_number'))
-      .matches(
-        /(?=.*[!-/:-@[-`{-~])/,
-        t('forgot_password.confirm.form.error_message.password_special')
-      )
-      .min(8, t('forgot_password.confirm.form.error_message.password_min')),
-    confirm_password: yup
-      .string()
-      .required(t('forgot_password.confirm.form.error_message.confirm_password_enter'))
-      .oneOf(
-        [yup.ref('password')],
-        t('forgot_password.confirm.form.error_message.confirm_password_mismatch')
-      ),
+    password: createPasswordSchema({
+      required: t('forgot_password.confirm.form.error_message.password_enter'),
+      lowercase: t('forgot_password.confirm.form.error_message.password_lowercase'),
+      uppercase: t('forgot_password.confirm.form.error_message.password_uppercase'),
+      number: t('forgot_password.confirm.form.error_message.password_number'),
+      special: t('forgot_password.confirm.form.error_message.password_special'),
+      min: t('forgot_password.confirm.form.error_message.password_min'),
+    }, 8),
+    confirm_password: createPasswordConfirmSchema('password', {
+      required: t('forgot_password.confirm.form.error_message.confirm_password_enter'),
+      mismatch: t('forgot_password.confirm.form.error_message.confirm_password_mismatch'),
+    }),
     code: yup.string().required(t('forgot_password.confirm.form.error_message.code_enter')),
   });
 
