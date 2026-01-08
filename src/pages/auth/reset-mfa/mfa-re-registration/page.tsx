@@ -1,18 +1,16 @@
-import { useState, useLayoutEffect } from 'react';
+import { useState, useLayoutEffect, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import * as yup from 'yup';
 import { useTranslation, Trans } from 'react-i18next';
 import clsx from 'clsx';
 import { useAuth } from '@/auth/hook';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import { Button } from '@/pages/_components/Button';
 import { Input } from '@/pages/_components/Input';
 import { FormTitle } from '../../_components/FormTitle';
 import { useFormProcessor } from '@/pages/_hooks/form';
 import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
-import { toast } from 'react-toastify';
-import { errorToastConfig, infoToastConfig, successToastConfig } from '@/config/toast';
 
 interface FormInput {
   totpCode: string;
@@ -20,48 +18,56 @@ interface FormInput {
 
 const validationRules = (t: (key: string) => string): yup.ObjectSchema<FormInput> =>
   yup.object({
-    totpCode: yup.string().required(t('mfa.form.error_message.totp_code')),
+    totpCode: yup.string().required(t('mfa.reset.form.error_message.totp_code')),
   });
 
 export default function SetupMFAPage() {
   const auth = useAuth();
+  const location = useLocation();
+  const { username, accessToken, secret } = location.state || {};
   const navigate = useNavigate();
   const [qrLoading, setQRLoading] = useState(false);
 
+  const { t } = useTranslation();
+  useDocumentTitle(t('mfa.reset.title'));
+
+  useEffect(() => {
+    if (!username || !accessToken) {
+      alert(t('mfa.form.error_message.unexpected'));
+      navigate('/login', { replace: true });
+    }
+  }, [username, accessToken, t, navigate]);
+
+  if (!username || !accessToken) {
+    return null;
+  }
+
   useLayoutEffect(() => {
-    auth
-      .setUpMfa()
-      .then((result) => {
-        if (result.success) {
-          setQRLoading(true);
-        } else {
-          toast(result.message, errorToastConfig);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    if (secret) {
+      setQRLoading(true);
+    } else {
+      setQRLoading(false);
+      console.error('No secret provided in location state');
+    }
+    auth.setQRCodeFromSecret(username, secret);
   }, []);
 
-  const { t } = useTranslation();
-  useDocumentTitle(t('mfa.signup.title'));
   const { processing, register, onSubmit, errors } = useFormProcessor(
     validationRules(t),
     ({ setProcessingFalse }) => {
       return (data) => {
         auth
-          .confirmMfa(data.totpCode)
+          .resetMfa(accessToken, data.totpCode)
           .then((result) => {
             if (result.success) {
               navigate('/dashboard');
               return;
             }
-            toast(result.message, errorToastConfig);
+            alert(result.message);
             setProcessingFalse();
           })
           .catch((error) => {
-            const errorMsg = error.message ?? t('common.errors.default');
-            toast(errorMsg, errorToastConfig);
+            console.log(error);
           });
       };
     }
@@ -69,7 +75,7 @@ export default function SetupMFAPage() {
 
   return (
     <div className={clsx('w-[300px]', 'pt-8', 'text-sm')}>
-      <FormTitle>{t('mfa.signup.title')}</FormTitle>
+      <FormTitle>{t('mfa.reset.title')}</FormTitle>
       <Spacer className="h-4" />
       <p className={clsx('text-xs', 'leading-[1.8]')}>
         <Trans i18nKey={'mfa.explanation01'} />

@@ -40,5 +40,13 @@ export default {
     signup_failed_prereq:
       'Sign up failed.\nPre-registration is required for sign up.\nIf you have not registered, please contact the administrator.',
     authentication_failed: 'Authentication failed.',
+    record_overlap: 'The email address you entered is already registered.',
+    signup:
+      'Sign up failed.\nPre-registration is required for sign up.\nIf you have not registered yet, please contact the administrator.',
+    setup_totp: 'Failed to set up TOTP.',
+    send_code: 'Failed to send the confirmation code required for MFA reset.',
+    verify_code: 'Failed to verify the confirmation code.',
+    refresh_token: 'Failed to refresh API token.',
+    unexpected: 'An unexpected error occurred.',
   },
 };
