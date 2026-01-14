@@ -6,7 +6,7 @@ detail of user response
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**id** | **number** |  | [default to undefined]
+**id** | **number** |  | [optional] [default to undefined]
 **email** | **string** |  | [optional] [default to undefined]
 **name** | **string** |  | [optional] [default to undefined]
 **organization** | **string** |  | [optional] [default to undefined]
