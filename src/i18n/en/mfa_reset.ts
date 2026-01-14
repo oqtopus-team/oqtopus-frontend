@@ -1,5 +1,5 @@
 export default {
-  title: 'MFA reset request',
+  title: 'MFA invalidation request',
   form: {
     mail: 'Email address',
     password: 'Password',
@@ -11,7 +11,7 @@ export default {
   },
   button: 'Send',
   alert: {
-    success: 'Your request has been accepted.',
+    success: 'Your request to invalidate MFA has been accepted.',
     failure: 'Failed to authenticate.',
   },
 };
