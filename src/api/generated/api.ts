@@ -812,6 +812,18 @@ export interface SettingsGetSettingsResponse {
      * @memberof SettingsGetSettingsResponse
      */
     'allow_deletion': boolean;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof SettingsGetSettingsResponse
+     */
+    'visible_fields': Array<SettingsGetSettingsResponseVisibleFieldsEnum>;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SettingsGetSettingsResponse
+     */
+    'login_history_enabled': boolean;
 }
 
 export const SettingsGetSettingsResponseEditableFieldsEnum = {
@@ -820,6 +832,15 @@ export const SettingsGetSettingsResponseEditableFieldsEnum = {
 } as const;
 
 export type SettingsGetSettingsResponseEditableFieldsEnum = typeof SettingsGetSettingsResponseEditableFieldsEnum[keyof typeof SettingsGetSettingsResponseEditableFieldsEnum];
+export const SettingsGetSettingsResponseVisibleFieldsEnum = {
+    Id: 'id',
+    Name: 'name',
+    Email: 'email',
+    Organization: 'organization',
+    CreatedAt: 'created_at'
+} as const;
+
+export type SettingsGetSettingsResponseVisibleFieldsEnum = typeof SettingsGetSettingsResponseVisibleFieldsEnum[keyof typeof SettingsGetSettingsResponseVisibleFieldsEnum];
 
 /**
  * 

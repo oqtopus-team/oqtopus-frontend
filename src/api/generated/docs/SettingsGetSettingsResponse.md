@@ -8,6 +8,8 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **editable_fields** | **Array&lt;string&gt;** |  | [default to undefined]
 **allow_deletion** | **boolean** |  | [default to undefined]
+**visible_fields** | **Array&lt;string&gt;** |  | [default to undefined]
+**login_history_enabled** | **boolean** |  | [default to undefined]
 
 ## Example
 
@@ -17,6 +19,8 @@ import { SettingsGetSettingsResponse } from './api';
 const instance: SettingsGetSettingsResponse = {
     editable_fields,
     allow_deletion,
+    visible_fields,
+    login_history_enabled,
 };
 ```
 
