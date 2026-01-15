@@ -30,7 +30,7 @@ const validationRules = (t: (key: string) => string): yup.ObjectSchema<FormInput
       number: t('forgot_password.confirm.form.error_message.password_number'),
       special: t('forgot_password.confirm.form.error_message.password_special'),
       min: t('forgot_password.confirm.form.error_message.password_min'),
-    }, 8),
+    }, 12),
     confirm_password: createPasswordConfirmSchema('password', {
       required: t('forgot_password.confirm.form.error_message.confirm_password_enter'),
       mismatch: t('forgot_password.confirm.form.error_message.confirm_password_mismatch'),
