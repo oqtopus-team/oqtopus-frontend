@@ -7,6 +7,7 @@ export const Input = forwardRef<
   {
     label?: string;
     errorMessage?: string;
+    optional?: boolean;
   } & ComponentPropsWithRef<'input'>
 >(({ label, type, errorMessage, className, ...props }, ref) => {
   const [hidden, setHidden] = useState(true);
@@ -21,7 +22,12 @@ export const Input = forwardRef<
 
   return (
     <div className={clsx('grid', 'gap-1', 'w-full')}>
-      {label && <p className="text-xs">{label}</p>}
+      {label &&
+        <div className={clsx('flex', 'gap-1', 'items-center')}>
+          <p className="text-xs">{label}</p>
+          {props.optional && <span className={clsx('text-sm', 'font-sans', 'italic', 'text-neutral-content')}>optional</span>}
+        </div>
+      }
       {type === 'password' ? (
         <div className={clsx('flex', 'items-center')}>
           <input

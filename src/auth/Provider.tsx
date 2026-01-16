@@ -50,7 +50,9 @@ const useProvideAuth = (): UseAuth => {
       .then((result: any) => {
         setUsername(result.username);
         if (Object.prototype.hasOwnProperty.call(result, 'preferredMFA')) {
-          if (result.preferredMFA === 'SOFTWARE_TOKEN_MFA') {
+          if (import.meta.env.DEV === true 
+            || result.preferredMFA === 'SOFTWARE_TOKEN_MFA'
+          ) {
             setIsAuthenticated(true);
             setInitialized(true);
           }
