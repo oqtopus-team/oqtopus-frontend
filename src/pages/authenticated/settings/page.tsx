@@ -42,7 +42,12 @@ export function SettingsPage() {
         <Tab value="security" label={t('settings.tabs.security')} />
       </Tabs>
       <div className={clsx('mt-6')}>
-        {params.tabId === 'profile' && <ProfileTab editableFields={settings?.editable_fields} />}
+        {params.tabId === 'profile' && (
+          <ProfileTab
+            editableFields={settings?.editable_fields}
+            visibleFields={settings?.visible_fields}
+          />
+        )}
         {params.tabId === 'account' && <AccountTab allowDeletion={settings?.allow_deletion} />}
         {params.tabId === 'security' && <SecurityTab />}
       </div>

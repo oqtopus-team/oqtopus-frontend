@@ -7,7 +7,10 @@ import { toast } from 'react-toastify';
 import { errorToastConfig, successToastConfig } from '@/config/toast';
 import { useUserAPI } from '@/backend/hook';
 import { DateTimeFormatter } from '@/pages/authenticated/_components/DateTimeFormatter';
-import { SettingsGetSettingsResponseEditableFieldsEnum } from '@/api/generated';
+import {
+  SettingsGetSettingsResponseEditableFieldsEnum,
+  SettingsGetSettingsResponseVisibleFieldsEnum,
+} from '@/api/generated';
 
 interface ProfileFormData {
   email?: string;
@@ -28,9 +31,10 @@ function UserFormSkeleton() {
 
 interface ProfileTabProps {
   editableFields?: Array<SettingsGetSettingsResponseEditableFieldsEnum>;
+  visibleFields?: Array<SettingsGetSettingsResponseVisibleFieldsEnum>;
 }
 
-export function ProfileTab({ editableFields = [] }: ProfileTabProps) {
+export function ProfileTab({ editableFields = [], visibleFields }: ProfileTabProps) {
   const { t, i18n } = useTranslation();
   const { getCurrentUser, updateCurrentUser } = useUserAPI();
   const {
@@ -80,57 +84,65 @@ export function ProfileTab({ editableFields = [] }: ProfileTabProps) {
           <UserFormSkeleton />
         ) : (
           <Stack spacing={3} direction="column">
-            <TextField
-              fullWidth
-              label={t('settings.profile.email')}
-              disabled
-              helperText={t('settings.profile.emailReadonly')}
-              variant="outlined"
-              slotProps={{
-                inputLabel: {
-                  shrink: true,
-                },
-              }}
-              {...register('email')}
-            />
-            <TextField
-              {...register('name')}
-              disabled={!editableFields.includes('name') || isSubmitting}
-              fullWidth
-              label={t('settings.profile.name')}
-              variant="outlined"
-              required
-              slotProps={{
-                inputLabel: {
-                  shrink: true,
-                },
-              }}
-            />
-            <TextField
-              {...register('organization')}
-              disabled={!editableFields.includes('organization') || isSubmitting}
-              fullWidth
-              label={t('settings.profile.organization')}
-              variant="outlined"
-              slotProps={{
-                inputLabel: {
-                  shrink: true,
-                },
-              }}
-            />
-            <TextField
-              {...register('created_at')}
-              fullWidth
-              label={t('settings.profile.created_at')}
-              disabled
-              helperText={t('settings.profile.created_at')}
-              variant="outlined"
-              slotProps={{
-                inputLabel: {
-                  shrink: true,
-                },
-              }}
-            />
+            {visibleFields?.includes('email') && (
+              <TextField
+                fullWidth
+                label={t('settings.profile.email')}
+                disabled
+                helperText={t('settings.profile.emailReadonly')}
+                variant="outlined"
+                slotProps={{
+                  inputLabel: {
+                    shrink: true,
+                  },
+                }}
+                {...register('email')}
+              />
+            )}
+            {visibleFields?.includes('name') && (
+              <TextField
+                {...register('name')}
+                disabled={!editableFields.includes('name') || isSubmitting}
+                fullWidth
+                label={t('settings.profile.name')}
+                variant="outlined"
+                required
+                slotProps={{
+                  inputLabel: {
+                    shrink: true,
+                  },
+                }}
+              />
+            )}
+            {visibleFields?.includes('organization') && (
+              <TextField
+                {...register('organization')}
+                disabled={!editableFields.includes('organization') || isSubmitting}
+                fullWidth
+                label={t('settings.profile.organization')}
+                variant="outlined"
+                slotProps={{
+                  inputLabel: {
+                    shrink: true,
+                  },
+                }}
+              />
+            )}
+            {visibleFields?.includes('created_at') && (
+              <TextField
+                {...register('created_at')}
+                fullWidth
+                label={t('settings.profile.created_at')}
+                disabled
+                helperText={t('settings.profile.created_at')}
+                variant="outlined"
+                slotProps={{
+                  inputLabel: {
+                    shrink: true,
+                  },
+                }}
+              />
+            )}
           </Stack>
         )}
 
