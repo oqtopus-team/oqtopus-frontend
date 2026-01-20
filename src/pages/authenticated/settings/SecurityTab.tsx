@@ -21,17 +21,23 @@ import {
 import { MdExpandLess, MdExpandMore } from 'react-icons/md';
 import { useTranslation } from 'react-i18next';
 import { Auth } from 'aws-amplify';
-import axios from 'axios';
 import { useNavigate } from 'react-router';
 import { FaCopy, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { DateTimeFormatter } from '@/pages/authenticated/_components/DateTimeFormatter';
 import { useApiTokenAPI, useUserAPI } from '@/backend/hook';
 import { isBefore } from 'date-fns';
-import { ApiTokenApiToken, UsersLoginEvent } from '@/api/generated';
+import {
+  ApiTokenApiToken,
+  UsersLoginEvent,
+} from '@/api/generated';
 import { toast } from 'react-toastify';
 import { errorToastConfig, successToastConfig } from '@/config/toast';
 
-export function SecurityTab() {
+interface SecurityTabProps {
+  login_history_enabled: boolean
+}
+
+export function SecurityTab({login_history_enabled}: SecurityTabProps) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { createApiToken, deleteApiToken, getApiTokenStatus } = useApiTokenAPI();
@@ -170,61 +176,67 @@ export function SecurityTab() {
         </Button>
       </div>
       <hr className={clsx('border-gray-200')} />
-      <div>
-        <div
-          className={clsx('flex', 'items-center', 'justify-between', 'mb-4', 'cursor-pointer')}
-          onClick={() => setActivityExpanded(!activityExpanded)}
-        >
-          <h3 className={clsx('text-xl', 'font-semibold')}>
-            {t('settings.security.recentLoginActivity')}
-          </h3>
-          <IconButton>{activityExpanded ? <MdExpandLess /> : <MdExpandMore />}</IconButton>
-        </div>
+      {login_history_enabled && (
+        <>
+          <div>
+            <div
+              className={clsx('flex', 'items-center', 'justify-between', 'mb-4', 'cursor-pointer')}
+              onClick={() => setActivityExpanded(!activityExpanded)}
+            >
+              <h3 className={clsx('text-xl', 'font-semibold')}>
+                {t('settings.security.recentLoginActivity')}
+              </h3>
+              <IconButton>{activityExpanded ? <MdExpandLess /> : <MdExpandMore />}</IconButton>
+            </div>
 
-        <Collapse in={activityExpanded}>
-          <div className={clsx('bg-gray-50', 'rounded-lg', 'p-4')}>
-            <List>
-              {recentActivity.map((activity, index) => (
-                <ListItem
-                  key={activity.event_date}
-                  className={clsx(
-                    'border-b',
-                    'border-gray-200',
-                    index === recentActivity.length - 1 && 'border-b-0'
-                  )}
-                  divider={index !== recentActivity.length - 1}
-                >
-                  <ListItemText
-                    primary={
-                      <span className={clsx('flex', 'justify-between', 'items-start')}>
-                        <span className={clsx('font-medium')}>{t('settings.security.login')}</span>
-                        <span className={clsx('text-sm', 'text-gray-500')}>
-                          {DateTimeFormatter(t, i18n, activity.event_date)}
-                        </span>
-                      </span>
-                    }
-                    secondary={
-                      <span className={clsx('mt-1', 'text-sm', 'space-y-1')}>
-                        <span
-                          className="block max-w-[200px] truncate"
-                          title={activity.user_agent}
-                          style={{ maxWidth: '200px' }}
-                        >
-                          {t('settings.security.device')}: {activity.user_agent}
-                        </span>
-                        <span className={clsx('text-gray-600')}>
-                          {t('settings.security.ipAddress')}: {activity.ip}
-                        </span>
-                      </span>
-                    }
-                  />
-                </ListItem>
-              ))}
-            </List>
+            <Collapse in={activityExpanded}>
+              <div className={clsx('bg-gray-50', 'rounded-lg', 'p-4')}>
+                <List>
+                  {recentActivity.map((activity, index) => (
+                    <ListItem
+                      key={activity.event_date}
+                      className={clsx(
+                        'border-b',
+                        'border-gray-200',
+                        index === recentActivity.length - 1 && 'border-b-0'
+                      )}
+                      divider={index !== recentActivity.length - 1}
+                    >
+                      <ListItemText
+                        primary={
+                          <span className={clsx('flex', 'justify-between', 'items-start')}>
+                            <span className={clsx('font-medium')}>
+                              {t('settings.security.login')}
+                            </span>
+                            <span className={clsx('text-sm', 'text-gray-500')}>
+                              {DateTimeFormatter(t, i18n, activity.event_date)}
+                            </span>
+                          </span>
+                        }
+                        secondary={
+                          <span className={clsx('mt-1', 'text-sm', 'space-y-1')}>
+                            <span
+                              className="block max-w-[200px] truncate"
+                              title={activity.user_agent}
+                              style={{ maxWidth: '200px' }}
+                            >
+                              {t('settings.security.device')}: {activity.user_agent}
+                            </span>
+                            <span className={clsx('text-gray-600')}>
+                              {t('settings.security.ipAddress')}: {activity.ip}
+                            </span>
+                          </span>
+                        }
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              </div>
+            </Collapse>
           </div>
-        </Collapse>
-      </div>
-      <hr className={clsx('border-gray-200')} />
+          <hr className={clsx('border-gray-200')} />
+        </>
+      )}
       <div>
         <h3 className={clsx('text-xl', 'font-semibold', 'mb-4')}>
           {t('settings.security.apiToken.apiTokenStatus')}

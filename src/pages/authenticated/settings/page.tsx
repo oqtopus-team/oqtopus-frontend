@@ -49,7 +49,9 @@ export function SettingsPage() {
           />
         )}
         {params.tabId === 'account' && <AccountTab allowDeletion={settings?.allow_deletion} />}
-        {params.tabId === 'security' && <SecurityTab />}
+        {params.tabId === 'security' && (
+          <SecurityTab login_history_enabled={Boolean(settings?.login_history_enabled)} />
+        )}
       </div>
     </div>
   );
