@@ -76,7 +76,7 @@ export default function Page() {
     setBusy(false);
   };
 
-  const [qasmFeatures, setQasmFeatures] = useState<QasmFeatures> ({});
+  const [qasmFeatures, setQasmFeatures] = useState<QasmFeatures>({});
 
   useEffect(() => {
     setQasmFeatures({
@@ -138,6 +138,15 @@ export default function Page() {
       'keydown',
       (e) => {
         if (currentFocus === '' || currentFocus === 'panel') return;
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          if (currentFocus === 'observable') {
+            observableCircuitService.selectedGates = [];
+          } else {
+            circuitService.selectedGates = [];
+          }
+          return;
+        }
 
         if (currentFocus === 'observable') {
           if (e.key === 'Delete') {
@@ -195,9 +204,7 @@ export default function Page() {
       <hr className={clsx([['w-full', 'my-4'], ['text-neutral-content']])} />
 
       <circuitContext.Provider value={circuitService}>
-        <QuantumCircuitComposer 
-          qasmFeatures={qasmFeatures}
-        />
+        <QuantumCircuitComposer qasmFeatures={qasmFeatures} />
       </circuitContext.Provider>
 
       {jobType === 'estimation' ? (

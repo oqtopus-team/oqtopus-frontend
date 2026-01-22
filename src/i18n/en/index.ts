@@ -10,6 +10,7 @@ import job from './job';
 import mfa from './mfa';
 import mfa_reset from './mfa_reset';
 import announcements from './announcements';
+import settings from './settings';
 import sidebar from './sidebar';
 import signin from './signin';
 import signup from './signup';
@@ -28,6 +29,7 @@ export default {
     mfa,
     mfa_reset,
     announcements,
+    settings,
     sidebar,
     signin,
     signup,
