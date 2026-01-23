@@ -10,7 +10,9 @@ frontend:
         - bun install
         # - bun generate -- --src "github:oqtopus-team/oqtopus-cloud" --ref develop --path "/backend/oas/user/openapi.yaml"
         # download favicon
-        - curl $FAVICON_URL --output ./public/favicon.svg
+        - if [ -n "$FAVICON_URL" ]; then
+            curl $FAVICON_URL --output ./public/favicon.svg
+          fi 
     build:
       commands:
         - bun run build
