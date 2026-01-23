@@ -9,6 +9,8 @@ frontend:
         - source /root/.bash_profile
         - bun install
         # - bun generate -- --src "github:oqtopus-team/oqtopus-cloud" --ref develop --path "/backend/oas/user/openapi.yaml"
+        # download favicon
+        - curl $FAVICON_URL --output ./public/favicon.svg
     build:
       commands:
         - bun run build
