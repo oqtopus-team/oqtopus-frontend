@@ -6,6 +6,7 @@ export default {
     job: 'Job',
     document: 'API documentation',
     announcements: 'Announcements',
+    settings: 'Settings',
     logout: 'Logout',
   },
 };

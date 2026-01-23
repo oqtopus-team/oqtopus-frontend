@@ -10,7 +10,7 @@ export interface QasmFeatures {
 
 export interface QuantumCircuitComposerProps {
   fixedQubitNumber?: boolean;
-  qasmFeatures: QasmFeatures
+  qasmFeatures: QasmFeatures;
 }
 
 export default (props: QuantumCircuitComposerProps) => {
@@ -21,9 +21,9 @@ export default (props: QuantumCircuitComposerProps) => {
           <QuantumGatePalette />
         </div>
 
-        <QuantumCircuitCanvas 
-          static={false} 
-          fixedQubitNumber={props.fixedQubitNumber ?? false} 
+        <QuantumCircuitCanvas
+          static={false}
+          fixedQubitNumber={props.fixedQubitNumber ?? false}
           enableCustomGates={props.qasmFeatures?.customGates}
         />
       </DndContextProvider>
