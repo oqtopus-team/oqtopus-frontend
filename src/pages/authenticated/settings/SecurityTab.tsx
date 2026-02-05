@@ -26,18 +26,15 @@ import { FaCopy, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { DateTimeFormatter } from '@/pages/authenticated/_components/DateTimeFormatter';
 import { useApiTokenAPI, useUserAPI } from '@/backend/hook';
 import { isBefore } from 'date-fns';
-import {
-  ApiTokenApiToken,
-  UsersLoginEvent,
-} from '@/api/generated';
+import { ApiTokenApiToken, UsersLoginEvent } from '@/api/generated';
 import { toast } from 'react-toastify';
 import { errorToastConfig, successToastConfig } from '@/config/toast';
 
 interface SecurityTabProps {
-  login_history_enabled: boolean
+  login_history_enabled: boolean;
 }
 
-export function SecurityTab({login_history_enabled}: SecurityTabProps) {
+export function SecurityTab({ login_history_enabled }: SecurityTabProps) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { createApiToken, deleteApiToken, getApiTokenStatus } = useApiTokenAPI();

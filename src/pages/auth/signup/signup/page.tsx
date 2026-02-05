@@ -29,14 +29,17 @@ interface FormInput {
 const validationRules = (t: (key: string) => string): yup.ObjectSchema<FormInput> =>
   yup.object({
     username: createEmailSchema(t),
-    password: createPasswordSchema({
-      required: t('signup.form.error_message.password_enter'),
-      lowercase: t('signup.form.error_message.password_lowercase'),
-      uppercase: t('signup.form.error_message.password_uppercase'),
-      number: t('signup.form.error_message.password_number'),
-      special: t('signup.form.error_message.password_special'),
-      min: t('signup.form.error_message.password_min'),
-    }, 12),
+    password: createPasswordSchema(
+      {
+        required: t('signup.form.error_message.password_enter'),
+        lowercase: t('signup.form.error_message.password_lowercase'),
+        uppercase: t('signup.form.error_message.password_uppercase'),
+        number: t('signup.form.error_message.password_number'),
+        special: t('signup.form.error_message.password_special'),
+        min: t('signup.form.error_message.password_min'),
+      },
+      12
+    ),
     confirm_password: createPasswordConfirmSchema('password', {
       required: t('signup.form.error_message.confirm_password_enter'),
       mismatch: t('signup.form.error_message.confirm_password_mismatch'),
