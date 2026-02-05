@@ -754,8 +754,10 @@ describe('JobListPage', () => {
       renderComponent();
 
       await waitFor(() => {
-        expect(mockGetLatestJobs).toHaveBeenCalledTimes(1);
+        expect(screen.getByTestId('job-item-job-1')).toBeInTheDocument();
       });
+
+      expect(mockGetLatestJobs).toHaveBeenCalledTimes(1);
 
       const reloadButton = screen.getByTitle('Reload');
       fireEvent.click(reloadButton);
