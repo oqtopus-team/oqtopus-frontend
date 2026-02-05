@@ -133,7 +133,7 @@ describe('DeviceList', () => {
 
   it('renders empty table when no devices are returned', async () => {
     mockGetDevices.mockResolvedValue([]);
-    
+
     renderWithRouter(<DeviceList />);
 
     await waitFor(() => {
@@ -148,7 +148,7 @@ describe('DeviceList', () => {
 
   it('renders devices in table when devices are returned', async () => {
     mockGetDevices.mockResolvedValue(mockDevices);
-    
+
     renderWithRouter(<DeviceList />);
 
     await waitFor(() => {
@@ -169,7 +169,7 @@ describe('DeviceList', () => {
 
   it('renders device status components correctly', async () => {
     mockGetDevices.mockResolvedValue(mockDevices);
-    
+
     renderWithRouter(<DeviceList />);
 
     await waitFor(() => {
@@ -182,13 +182,13 @@ describe('DeviceList', () => {
 
   it('renders navigation links for device names', async () => {
     mockGetDevices.mockResolvedValue(mockDevices);
-    
+
     renderWithRouter(<DeviceList />);
 
     await waitFor(() => {
-      const deviceLinks = screen.getAllByRole('link').filter(link => 
-        link.getAttribute('href')?.startsWith('/device/')
-      );
+      const deviceLinks = screen
+        .getAllByRole('link')
+        .filter((link) => link.getAttribute('href')?.startsWith('/device/'));
       expect(deviceLinks).toHaveLength(2);
       expect(deviceLinks[0]).toHaveAttribute('href', '/device/device-1');
       expect(deviceLinks[1]).toHaveAttribute('href', '/device/device-2');
@@ -197,14 +197,14 @@ describe('DeviceList', () => {
 
   it('applies correct CSS classes to device name links', async () => {
     mockGetDevices.mockResolvedValue(mockDevices);
-    
+
     renderWithRouter(<DeviceList />);
 
     await waitFor(() => {
-      const deviceLinks = screen.getAllByRole('link').filter(link => 
-        link.getAttribute('href')?.startsWith('/device/')
-      );
-      deviceLinks.forEach(link => {
+      const deviceLinks = screen
+        .getAllByRole('link')
+        .filter((link) => link.getAttribute('href')?.startsWith('/device/'));
+      deviceLinks.forEach((link) => {
         expect(link).toHaveClass('text-link');
       });
     });
@@ -218,21 +218,21 @@ describe('DeviceList', () => {
 
     const thead = table.querySelector('thead');
     const tbody = table.querySelector('tbody');
-    
+
     expect(thead).toBeInTheDocument();
     expect(tbody).toBeInTheDocument();
   });
 
   it('renders devices with all required table data', async () => {
     mockGetDevices.mockResolvedValue([mockDevices[0]]);
-    
+
     renderWithRouter(<DeviceList />);
 
     await waitFor(() => {
       // Check that all table cells are rendered for the device
       const tableRows = screen.getByRole('table').querySelectorAll('tbody tr');
       expect(tableRows).toHaveLength(1);
-      
+
       const tableCells = tableRows[0].querySelectorAll('td');
       expect(tableCells).toHaveLength(4); // name, status, qubits, type
     });

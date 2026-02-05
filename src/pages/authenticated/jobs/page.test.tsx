@@ -360,7 +360,12 @@ describe('JobListPage', () => {
 
     it('filters jobs by job ID in client-side filtering', async () => {
       const jobsWithDifferentIds = [
-        { ...mockJobs[0], id: 'job-123', name: 'Different Name', description: 'Different Description' },
+        {
+          ...mockJobs[0],
+          id: 'job-123',
+          name: 'Different Name',
+          description: 'Different Description',
+        },
         { ...mockJobs[1], id: 'job-456', name: 'Another Name', description: 'Another Description' },
         { ...mockJobs[2], id: 'job-789', name: 'Third Name', description: 'Third Description' },
       ];
@@ -387,7 +392,12 @@ describe('JobListPage', () => {
 
     it('filters jobs by job name in client-side filtering', async () => {
       const jobsWithDifferentNames = [
-        { ...mockJobs[0], id: 'job-1', name: 'Machine Learning Job', description: 'ML Description' },
+        {
+          ...mockJobs[0],
+          id: 'job-1',
+          name: 'Machine Learning Job',
+          description: 'ML Description',
+        },
         { ...mockJobs[1], id: 'job-2', name: 'Data Processing Job', description: 'DP Description' },
         { ...mockJobs[2], id: 'job-3', name: 'Analysis Job', description: 'Analysis Description' },
       ];
@@ -414,9 +424,24 @@ describe('JobListPage', () => {
 
     it('filters jobs by job description in client-side filtering', async () => {
       const jobsWithDifferentDescriptions = [
-        { ...mockJobs[0], id: 'job-1', name: 'Job One', description: 'This job processes quantum algorithms' },
-        { ...mockJobs[1], id: 'job-2', name: 'Job Two', description: 'This job analyzes classical data' },
-        { ...mockJobs[2], id: 'job-3', name: 'Job Three', description: 'This job runs simulations' },
+        {
+          ...mockJobs[0],
+          id: 'job-1',
+          name: 'Job One',
+          description: 'This job processes quantum algorithms',
+        },
+        {
+          ...mockJobs[1],
+          id: 'job-2',
+          name: 'Job Two',
+          description: 'This job analyzes classical data',
+        },
+        {
+          ...mockJobs[2],
+          id: 'job-3',
+          name: 'Job Three',
+          description: 'This job runs simulations',
+        },
       ];
 
       mockGetLatestJobs.mockResolvedValue(jobsWithDifferentDescriptions);
@@ -442,9 +467,19 @@ describe('JobListPage', () => {
     // TODO: Remove .skip after removing search sensitivity on the backend
     it.skip('shows all jobs when search query matches multiple fields', async () => {
       const jobsWithMatchingFields = [
-        { ...mockJobs[0], id: 'test-job-1', name: 'Regular Job', description: 'Regular description' },
+        {
+          ...mockJobs[0],
+          id: 'test-job-1',
+          name: 'Regular Job',
+          description: 'Regular description',
+        },
         { ...mockJobs[1], id: 'job-2', name: 'Test Job Name', description: 'Regular description' },
-        { ...mockJobs[2], id: 'job-3', name: 'Regular Job', description: 'This is a test description' },
+        {
+          ...mockJobs[2],
+          id: 'job-3',
+          name: 'Regular Job',
+          description: 'This is a test description',
+        },
       ];
 
       mockGetLatestJobs.mockResolvedValue(jobsWithMatchingFields);
@@ -568,7 +603,9 @@ describe('JobListPage', () => {
       fireEvent.click(deleteButton);
 
       expect(screen.getByTestId('confirm-modal')).toBeInTheDocument();
-      expect(screen.getByText('Are you sure you want to delete selected jobs?')).toBeInTheDocument();
+      expect(
+        screen.getByText('Are you sure you want to delete selected jobs?')
+      ).toBeInTheDocument();
     });
 
     it('shows cancel confirmation modal', async () => {
@@ -585,7 +622,9 @@ describe('JobListPage', () => {
       fireEvent.click(cancelButton);
 
       expect(screen.getByTestId('confirm-modal')).toBeInTheDocument();
-      expect(screen.getByText('Are you sure you want to cancel selected jobs?')).toBeInTheDocument();
+      expect(
+        screen.getByText('Are you sure you want to cancel selected jobs?')
+      ).toBeInTheDocument();
     });
 
     it('performs bulk delete operation', async () => {
@@ -664,9 +703,7 @@ describe('JobListPage', () => {
       }));
       const secondPageJobs = [mockJobs[2]];
 
-      mockGetLatestJobs
-        .mockResolvedValueOnce(firstPageJobs)
-        .mockResolvedValueOnce(secondPageJobs);
+      mockGetLatestJobs.mockResolvedValueOnce(firstPageJobs).mockResolvedValueOnce(secondPageJobs);
 
       renderComponent();
 
@@ -701,9 +738,12 @@ describe('JobListPage', () => {
         expect(mockGetLatestJobs).toHaveBeenCalled();
       });
 
-      await waitFor(() => {
-        expect(screen.queryByTestId('load-more')).not.toBeInTheDocument();
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          expect(screen.queryByTestId('load-more')).not.toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
     });
   });
 
@@ -780,7 +820,7 @@ describe('JobListPage', () => {
 
   describe('Loading States', () => {
     it('shows bulk delete loading state', async () => {
-      mockDeleteJob.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
+      mockDeleteJob.mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 100)));
 
       renderComponent();
 
@@ -801,7 +841,7 @@ describe('JobListPage', () => {
     });
 
     it('shows bulk cancel loading state', async () => {
-      mockCancelJob.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
+      mockCancelJob.mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 100)));
 
       renderComponent();
 

@@ -3,7 +3,10 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { Announcements } from './Announcements';
 import { useAnnouncementsAPI } from '@/backend/hook';
 import { useTranslation } from 'react-i18next';
-import { AnnouncementsGetAnnouncementResponse, GetAnnouncementsListOrderEnum } from '@/api/generated';
+import {
+  AnnouncementsGetAnnouncementResponse,
+  GetAnnouncementsListOrderEnum,
+} from '@/api/generated';
 
 vi.mock('@/backend/hook');
 vi.mock('react-i18next');
@@ -16,7 +19,9 @@ vi.mock('@/pages/authenticated/dashboard/_components/AnnouncementPost', () => ({
   ),
 }));
 vi.mock('@/pages/_components/Spacer', () => ({
-  Spacer: ({ className }: { className: string }) => <div className={className} data-testid="spacer" />,
+  Spacer: ({ className }: { className: string }) => (
+    <div className={className} data-testid="spacer" />
+  ),
 }));
 vi.mock('./announcement.module.css', () => ({
   default: {
@@ -134,7 +139,7 @@ describe('Announcements', () => {
   });
 
   it('displays "no announcements" message when all announcements are not publishable', async () => {
-    const nonPublishableAnnouncements = mockAnnouncements.filter(a => !a.publishable);
+    const nonPublishableAnnouncements = mockAnnouncements.filter((a) => !a.publishable);
     mockGetAnnouncements.mockResolvedValue(nonPublishableAnnouncements);
 
     render(<Announcements />);
@@ -160,7 +165,7 @@ describe('Announcements', () => {
   });
 
   it('renders announcements with correct content', async () => {
-    const publishableAnnouncements = mockAnnouncements.filter(a => a.publishable);
+    const publishableAnnouncements = mockAnnouncements.filter((a) => a.publishable);
     mockGetAnnouncements.mockResolvedValue(publishableAnnouncements);
 
     render(<Announcements />);
@@ -174,7 +179,7 @@ describe('Announcements', () => {
   });
 
   it('passes style props to AnnouncementPost components', async () => {
-    const publishableAnnouncements = mockAnnouncements.filter(a => a.publishable);
+    const publishableAnnouncements = mockAnnouncements.filter((a) => a.publishable);
     mockGetAnnouncements.mockResolvedValue(publishableAnnouncements);
 
     const customStyle = { backgroundColor: 'red', padding: '10px' };
