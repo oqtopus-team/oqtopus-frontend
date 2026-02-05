@@ -11,6 +11,11 @@ import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
 import { toast } from 'react-toastify';
 import { errorToastConfig, successToastConfig } from '@/config/toast';
+import {
+  createEmailSchema,
+  createPasswordConfirmSchema,
+  createPasswordSchema,
+} from '@/config/validation/passwordSchemas';
 
 interface FormInput {
   username: string;
@@ -23,23 +28,19 @@ interface FormInput {
 
 const validationRules = (t: (key: string) => string): yup.ObjectSchema<FormInput> =>
   yup.object({
-    username: yup
-      .string()
-      .required(t('signup.form.error_message.mail_address_enter'))
-      .max(100, t('signup.form.error_message.mail_address_max'))
-      .email(t('signup.form.error_message.mail_address_valid')),
-    password: yup
-      .string()
-      .required(t('signup.form.error_message.password_enter'))
-      .matches(/(?=.*[a-z])/, t('signup.form.error_message.password_lowercase'))
-      .matches(/(?=.*[A-Z])/, t('signup.form.error_message.password_uppercase'))
-      .matches(/(?=.*[0-9])/, t('signup.form.error_message.password_number'))
-      .matches(/(?=.*[!-/:-@[-`{-~])/, t('signup.form.error_message.password_special'))
-      .min(12, t('signup.form.error_message.password_min')),
-    confirm_password: yup
-      .string()
-      .required(t('signup.form.error_message.confirm_password_enter'))
-      .oneOf([yup.ref('password')], t('signup.form.error_message.confirm_password_mismatch')),
+    username: createEmailSchema(t),
+    password: createPasswordSchema({
+      required: t('signup.form.error_message.password_enter'),
+      lowercase: t('signup.form.error_message.password_lowercase'),
+      uppercase: t('signup.form.error_message.password_uppercase'),
+      number: t('signup.form.error_message.password_number'),
+      special: t('signup.form.error_message.password_special'),
+      min: t('signup.form.error_message.password_min'),
+    }, 12),
+    confirm_password: createPasswordConfirmSchema('password', {
+      required: t('signup.form.error_message.confirm_password_enter'),
+      mismatch: t('signup.form.error_message.confirm_password_mismatch'),
+    }),
   });
 
 export default function SignUpPage() {
