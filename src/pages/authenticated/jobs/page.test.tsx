@@ -175,6 +175,8 @@ const mockTranslation = {
       'job.list.register_button': 'Register Job',
       'job.list.delete_selected': 'Delete Selected',
       'job.list.cancel_selected': 'Cancel Selected',
+      'job.list.operation.delete': 'Delete Selected',
+      'job.list.operation.cancel': 'Cancel Selected',
       'job.list.table.id': 'ID',
       'job.list.table.name': 'Name',
       'job.list.table.device': 'Device',
@@ -572,8 +574,8 @@ describe('JobListPage', () => {
         expect(screen.getByTestId('job-item-job-1')).toBeInTheDocument();
       });
 
-      const deleteButton = screen.getByText('Delete Selected');
-      const cancelButton = screen.getByText('Cancel Selected');
+      const deleteButton = screen.getByText('Delete Selected').closest('button')!;
+      const cancelButton = screen.getByText('Cancel Selected').closest('button')!;
 
       expect(deleteButton).toHaveAttribute('data-color', 'disabled');
       expect(cancelButton).toHaveAttribute('data-color', 'disabled');
@@ -689,7 +691,7 @@ describe('JobListPage', () => {
       const checkbox = screen.getByTestId('job-checkbox-job-1');
       fireEvent.click(checkbox);
 
-      const cancelButton = screen.getByText('Cancel Selected');
+      const cancelButton = screen.getByText('Cancel Selected').closest('button')!;
       expect(cancelButton).toHaveAttribute('data-color', 'disabled');
     });
   });

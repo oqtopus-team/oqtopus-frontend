@@ -248,7 +248,7 @@ describe('Announcements', () => {
     expect(titleContainer).toHaveClass('flex', 'justify-between', 'items-center');
 
     const title = screen.getByText('Announcements');
-    expect(title).toHaveClass('text-base', 'font-bold', 'text-primary');
+    expect(title).toHaveClass('text-2xl', 'font-bold', 'text-primary');
 
     const gridContainer = screen.getByText('No announcements available').parentElement;
     expect(gridContainer).toHaveClass('grid', 'gap-[23px]');
