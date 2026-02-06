@@ -28,7 +28,7 @@ export default function ConfirmMFAPage() {
   const navigate = useNavigate();
   useDocumentTitle(t('signin.confirm.title'));
   const auth = useAuth();
-  const { processing, register, onSubmit, errors, reset, } = useFormProcessor( // 変更点 reset
+  const { processing, register, onSubmit, errors, reset, } = useFormProcessor(
     validationRules(t),
     ({ setProcessingFalse, }) => {
       return (data) => {
@@ -41,14 +41,14 @@ export default function ConfirmMFAPage() {
             }
             toast(result.message, errorToastConfig);
 
-            reset(); // 変更点 reset追加
+            reset();
             setProcessingFalse();
           })
           .catch((error) => {
             const errorMsg = error.message ?? t('common.errors.default');
             toast(errorMsg, errorToastConfig);
 
-            reset(); // 変更点 例外のときもreset追加
+            reset();
             setProcessingFalse();
           });
       };

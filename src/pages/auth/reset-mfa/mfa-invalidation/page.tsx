@@ -11,6 +11,7 @@ import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
 import { toast } from 'react-toastify';
 import { errorToastConfig, successToastConfig } from '@/config/toast';
+import { useAuth } from '@/auth/hook';
 
 interface FormInput {
   username: string;
@@ -29,15 +30,19 @@ const validationRules = (t: (key: string) => string): yup.ObjectSchema<FormInput
 export default function ResetMFAPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const auth = useAuth();
   useDocumentTitle(t('mfa_reset.title'));
   const { processing, register, onSubmit, errors } = useFormProcessor(
     validationRules(t),
     ({ setProcessingFalse }) => {
       return (data) => {
         resetMfa(data.username, data.password)
-          .then((result) => {
+          .then(async (result) => {
             if (result) {
               toast(t('mfa_reset.alert.success'), successToastConfig);
+              if (auth.signOut){
+                await auth.signOut();
+              }
               navigate('/login');
             } else {
               toast(t('mfa_reset.alert.failure'), errorToastConfig);

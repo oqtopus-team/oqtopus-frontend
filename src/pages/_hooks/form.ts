@@ -13,16 +13,16 @@ export const useFormProcessor = <T extends FieldValues>(
     register,
     handleSubmit,
     formState: { errors },
-    reset, // 変更点 reset追加
+    reset,
   } = useForm<T>({
     resolver: yupResolver(validationRules) as unknown as Resolver<T, any>,
   });
 
   const onSubmit = handleSubmit((data) => {
-    if (processing) return; // ダブルクリック防止
+    if (processing) return;
     setProcessing(true);
     process({ setProcessingFalse: () => setProcessing(false) })(data);
   });
 
-  return { processing, register, onSubmit, errors, reset, }; // 変更点resetも返す
+  return { processing, register, onSubmit, errors, reset, };
 };
