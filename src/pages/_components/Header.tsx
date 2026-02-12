@@ -8,8 +8,8 @@ import { useAuth } from '@/auth/hook';
 import { IconButton } from '@mui/material';
 import { FaMoon } from 'react-icons/fa';
 import { MdOutlineWbSunny } from 'react-icons/md';
-import { useEffect, useMemo } from 'react';
-import { ThemeOptions, useTheme } from '@/pages/theme/useTheme';
+import { useMemo } from 'react';
+import { ThemeOptions, useTheme } from '@/theme/useTheme';
 
 export const Header = (): React.ReactElement => {
   return (
@@ -79,7 +79,7 @@ const LanguageSelector = (): React.ReactElement => {
   const { t } = useTranslation();
   return (
     <Select
-      className={clsx(
+        className={clsx(
         '!w-[100px]',
         'border-primary',
         'text-primary',
