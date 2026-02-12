@@ -2,6 +2,7 @@ export default {
   title: 'Quantum Circuit Composer',
   description:
     'A tool that allows you to design, visualize, and run quantum circuits. You can create circuits by dragging and dropping.',
+  advanced_options: "Advanced Options",
   tool_palette: {
     job_type: 'Job Type',
   },

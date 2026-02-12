@@ -26,18 +26,15 @@ import { FaCopy, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { DateTimeFormatter } from '@/pages/authenticated/_components/DateTimeFormatter';
 import { useApiTokenAPI, useUserAPI } from '@/backend/hook';
 import { isBefore } from 'date-fns';
-import {
-  ApiTokenApiToken,
-  UsersLoginEvent,
-} from '@/api/generated';
+import { ApiTokenApiToken, UsersLoginEvent } from '@/api/generated';
 import { toast } from 'react-toastify';
 import { errorToastConfig, successToastConfig } from '@/config/toast';
 
 interface SecurityTabProps {
-  login_history_enabled: boolean
+  login_history_enabled: boolean;
 }
 
-export function SecurityTab({login_history_enabled}: SecurityTabProps) {
+export function SecurityTab({ login_history_enabled }: SecurityTabProps) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { createApiToken, deleteApiToken, getApiTokenStatus } = useApiTokenAPI();
@@ -186,7 +183,9 @@ export function SecurityTab({login_history_enabled}: SecurityTabProps) {
               <h3 className={clsx('text-xl', 'font-semibold')}>
                 {t('settings.security.recentLoginActivity')}
               </h3>
-              <IconButton>{activityExpanded ? <MdExpandLess /> : <MdExpandMore />}</IconButton>
+              <IconButton sx={{ color: 'rgb(var(--base-content))' }}>
+                {activityExpanded ? <MdExpandLess /> : <MdExpandMore />}
+              </IconButton>
             </div>
 
             <Collapse in={activityExpanded}>
@@ -216,13 +215,13 @@ export function SecurityTab({login_history_enabled}: SecurityTabProps) {
                         secondary={
                           <span className={clsx('mt-1', 'text-sm', 'space-y-1')}>
                             <span
-                              className="block max-w-[200px] truncate"
+                              className="block max-w-[200px] truncate text-base-content"
                               title={activity.user_agent}
                               style={{ maxWidth: '200px' }}
                             >
                               {t('settings.security.device')}: {activity.user_agent}
                             </span>
-                            <span className={clsx('text-gray-600')}>
+                            <span className={clsx('text-gray-600', 'text-base-content')}>
                               {t('settings.security.ipAddress')}: {activity.ip}
                             </span>
                           </span>
@@ -329,10 +328,10 @@ export function SecurityTab({login_history_enabled}: SecurityTabProps) {
       </Dialog>
 
       <Dialog open={apiTokenDialogOpen} onClose={onApiTokenDialogClose}>
-        <DialogTitle>{t('settings.security.apiToken.createdTitle')}</DialogTitle>
+        <DialogTitle className={clsx(['bg-base-card', 'text-base-content'])}>{t('settings.security.apiToken.createdTitle')}</DialogTitle>
 
-        <DialogContent>
-          <DialogContentText sx={{ mb: 2 }}>
+        <DialogContent className={clsx(['bg-base-card'])}>
+          <DialogContentText sx={{ mb: 2, color: 'rgb(var(--base-content))' }}>
             {t('settings.security.apiToken.createdWarning')}
           </DialogContentText>
 
@@ -343,7 +342,8 @@ export function SecurityTab({login_history_enabled}: SecurityTabProps) {
               alignItems: 'center',
               p: 2,
               borderRadius: 1,
-              bgcolor: '#f5f5f5',
+              bgcolor: 'rgb(var(--base-card))',
+              color: 'rgb(var(--base-content))',
               fontFamily: 'monospace',
               fontSize: '0.95rem',
               wordBreak: 'break-all',
@@ -381,12 +381,12 @@ export function SecurityTab({login_history_enabled}: SecurityTabProps) {
             </Stack>
           </Box>
 
-          <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
+          <Typography variant="body2" sx={{ mt: 2, color: 'rgb(var(--base-content))' }}>
             {t('settings.security.apiToken.afterCloseInfo')}
           </Typography>
         </DialogContent>
 
-        <DialogActions>
+        <DialogActions className={clsx(['bg-base-card', 'text-base-content'])}>
           <Button onClick={onApiTokenDialogClose} variant="contained" color="primary">
             {t('settings.security.apiToken.okButton')}
           </Button>

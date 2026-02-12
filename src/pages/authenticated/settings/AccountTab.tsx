@@ -106,6 +106,21 @@ export function AccountTab({ allowDeletion = false }: AccountTabProps) {
     }
   };
 
+  const passwordFields = [
+    {
+      name: 'currentPassword' as const,
+      label: t('settings.account.currentPassword'),
+    },
+    {
+      name: 'newPassword' as const,
+      label: t('settings.account.newPassword'),
+    },
+    {
+      name: 'newPasswordConfirm' as const,
+      label: t('settings.account.confirmPassword'),
+    },
+  ] as const;
+
   return (
     <div className={clsx('max-w-2xl', 'space-y-8')}>
       <div>
@@ -114,41 +129,32 @@ export function AccountTab({ allowDeletion = false }: AccountTabProps) {
         </h3>
 
         <form onSubmit={handleSubmit(handlePasswordSubmit)} className={clsx('space-y-4')}>
-          <TextField
-            {...register('currentPassword')}
-            autoComplete="off"
-            fullWidth
-            type="password"
-            label={t('settings.account.currentPassword')}
-            variant="outlined"
-            required
-            error={Boolean(errors.currentPassword)}
-            helperText={errors.currentPassword?.message}
-          />
-
-          <TextField
-            {...register('newPassword')}
-            autoComplete="off"
-            fullWidth
-            type="password"
-            label={t('settings.account.newPassword')}
-            variant="outlined"
-            required
-            error={Boolean(errors.newPassword)}
-            helperText={errors.newPassword?.message}
-          />
-
-          <TextField
-            {...register('newPasswordConfirm')}
-            autoComplete="off"
-            fullWidth
-            type="password"
-            label={t('settings.account.confirmPassword')}
-            variant="outlined"
-            required
-            error={Boolean(errors.newPasswordConfirm)}
-            helperText={errors.newPasswordConfirm?.message}
-          />
+          {passwordFields.map((field) => (
+            <TextField
+              key={field.name}
+              {...register(field.name)}
+              autoComplete="off"
+              fullWidth
+              type="password"
+              label={field.label}
+              variant="outlined"
+              required
+              error={Boolean(errors[field.name])}
+              helperText={errors[field.name]?.message}
+              slotProps={{
+                inputLabel: {
+                  shrink: true,
+                  className: '!text-neutral-content [&.Mui-disabled]:!text-neutral-content',
+                },
+                input: {
+                  className: '!text-base-content',
+                },
+                formHelperText: {
+                  className: '!text-neutral-content [&.Mui-disabled]:!text-neutral-content',
+                },
+              }}
+            />
+          ))}
 
           <Button
             type="submit"
