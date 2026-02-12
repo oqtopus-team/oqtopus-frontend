@@ -8,7 +8,8 @@ import { useAuth } from '@/auth/hook';
 import { IconButton } from '@mui/material';
 import { FaMoon } from 'react-icons/fa';
 import { MdOutlineWbSunny } from 'react-icons/md';
-import useDarkMode, { ThemeOptions } from '@/pages/_hooks/useDarkMode';
+import { useEffect, useMemo } from 'react';
+import { ThemeOptions, useTheme } from '@/pages/theme/useTheme';
 
 export const Header = (): React.ReactElement => {
   return (
@@ -31,6 +32,13 @@ const Logo = (): React.ReactElement => {
   const { isAuthenticated } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { theme } = useTheme();
+
+  const logoSrc = useMemo(
+    () =>
+      `${import.meta.env.VITE_APP_LOGO_IMAGE_URL}${theme === ThemeOptions.DARK ? '.webp' : '.png'}`,
+    [theme]
+  );
 
   const handleLogoClick = () => {
     if (isAuthenticated) {
@@ -49,7 +57,7 @@ const Logo = (): React.ReactElement => {
       onClick={handleLogoClick}
     >
       <img
-        src={import.meta.env.VITE_APP_LOGO_IMAGE_URL}
+        src={logoSrc}
         className={clsx(['h-12', 'my-2', 'py-2'])}
         alt={import.meta.env.VITE_APP_APP_NAME_EN}
       />
@@ -57,9 +65,7 @@ const Logo = (): React.ReactElement => {
         className={clsx('flex', 'flex-col', 'items-center', 'text-center', 'gap-1')}
         style={{ fontSize: '10px', lineHeight: '12px' }}
       >
-        <span style={{ fontSize: '1.5em' }}>
-          {t('app.logo.title')}
-        </span>
+        <span style={{ fontSize: '1.5em' }}>{t('app.logo.title')}</span>
         <p className={clsx('whitespace-pre')}>{t('app.logo.subtitle')}</p>
       </div>
       <span className={clsx(['cursor-pointer'], ['hidden', 'sm:block'])}>
@@ -73,7 +79,13 @@ const LanguageSelector = (): React.ReactElement => {
   const { t } = useTranslation();
   return (
     <Select
-      className={clsx('!w-[100px]', 'border-primary', 'text-primary', 'outline-primary', 'bg-base-100')}
+      className={clsx(
+        '!w-[100px]',
+        'border-primary',
+        'text-primary',
+        'outline-primary',
+        'bg-base-100'
+      )}
       onChange={async (e: React.ChangeEvent<HTMLSelectElement>) => {
         if (languages.includes(e.target.value)) {
           i18next.changeLanguage(e.target.value);
@@ -93,7 +105,7 @@ const LanguageSelector = (): React.ReactElement => {
 };
 
 const ThemeSwitch = () => {
-  const { theme, setTheme } = useDarkMode();
+  const { theme, setTheme } = useTheme();
   const Icon = theme === ThemeOptions.DARK ? MdOutlineWbSunny : FaMoon;
 
   const switchDarkTheme = () => {

@@ -26,7 +26,6 @@ export const AnnouncementPost = ({ announcement, style: propsStyle }: PostProps)
     if (!contentRef.current) return;
 
     const observer = new ResizeObserver((entries) => {
-      console.log('observer work');
       const entry = entries[0];
       const scrollHeight = entry.target.scrollHeight;
 
