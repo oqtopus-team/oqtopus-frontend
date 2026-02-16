@@ -16,9 +16,6 @@ export const Header = (): React.ReactElement => {
     <header className={clsx('bg-base-100', 'relative', 'px-8', 'z-50')}>
       <div className={clsx('flex', 'justify-between')}>
         <Logo />
-        <IconButton>
-          <i className="bi bi-brightness-high-fill"></i>
-        </IconButton>
         <div className={clsx('flex', 'items-center', 'gap-7')}>
           <LanguageSelector />
           <ThemeSwitch />
@@ -34,11 +31,16 @@ const Logo = (): React.ReactElement => {
   const navigate = useNavigate();
   const { theme } = useTheme();
 
-  const logoSrc = useMemo(
-    () =>
-      `${import.meta.env.VITE_APP_LOGO_IMAGE_URL}${theme === ThemeOptions.DARK ? '.webp' : '.png'}`,
-    [theme]
-  );
+  const logoSrc = useMemo(() => {
+    const baseUrl = import.meta.env.VITE_APP_LOGO_IMAGE_URL;
+    const ext = theme === ThemeOptions.DARK ? '.webp' : '.png';
+
+    if (/\.(png|webp|jpg|jpeg|svg)$/i.test(baseUrl)) {
+      return baseUrl.replace(/\.[^.]+$/, ext);
+    }
+
+    return `${baseUrl}${ext}`;
+  }, [theme]);
 
   const handleLogoClick = () => {
     if (isAuthenticated) {
