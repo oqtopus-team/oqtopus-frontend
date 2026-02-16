@@ -2,7 +2,7 @@ import { useContext } from "react"
 import { QulacsSimulatorContext } from "./Provider"
 import { CircuitInfo, ObservableInfo } from "qulacs-wasm-simulator-client";
 import { samplingProbabilityMapFromSamplingMap } from "./utils";
-import { GatePosition, ParametricExpectedValueResult, ShotResult, StateVectorWithExpectationValue } from "./types";
+import { GatePosition, ParametricExpectedValueResult, ShotResult, QuantumCircuitEvaluationResult } from "./types";
 import { Complex } from "qulacs-wasm-simulator-client/lib/main/type/common";
 
 export type UseQulacsSimulatorHook = () => {
@@ -11,10 +11,10 @@ export type UseQulacsSimulatorHook = () => {
     shot: number,
   ) => ShotResult;
 
-  getStateVectorWithExpectationValue: (
+  evalQuantumCircuitAndObservable: (
     circuitInfo: CircuitInfo,
     observableInfo: ObservableInfo,
-  ) => StateVectorWithExpectationValue;
+  ) => QuantumCircuitEvaluationResult;
 
   /**
    * Takes the position of a single parametric quantum gate,
@@ -45,15 +45,16 @@ export const useQulacsSimulator: UseQulacsSimulatorHook = () => {
       shot,
     );
     return {
+      shotNumber: shot,
       samplingMap,
       samplingProbabilityMap,
     };
   };
 
-  const getStateVectorWithExpectationValue = (
+  const evalQuantumCircuitAndObservable = (
     circuitInfo: CircuitInfo,
     objectiveInfo: ObservableInfo,
-  ): StateVectorWithExpectationValue => {
+  ): QuantumCircuitEvaluationResult => {
     const result = client.getStateVectorWithExpectationValue({
       circuitInfo: circuitInfo,
       observableInfo: objectiveInfo,
@@ -102,7 +103,7 @@ export const useQulacsSimulator: UseQulacsSimulatorHook = () => {
 
   return {
     startShots,
-    getStateVectorWithExpectationValue,
+    evalQuantumCircuitAndObservable,
     requestParametricExpectedValue,
   };
 }

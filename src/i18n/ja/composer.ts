@@ -21,7 +21,7 @@ export default {
   },
   control_panel: {
     exec: {
-      tab_label: '実行',
+      tab_label: 'バックエンド実行',
       job_name: 'ジョブ名',
       name_placeholder: 'ジョブ名を入力してください',
       job_desc: '説明',
@@ -36,7 +36,13 @@ export default {
         'デバイス {{deviceId}} は {{qubitsCount}} 量子ビット以下の量子回路をサポートしています。',
     },
     siml: {
-      tab_label: 'シミュレーション',
+      tab_label: 'ローカルシミュレーション',
+      circuit_evaluation: '量子回路評価',
+      state_vector: '状態ベクトル(確率振幅)',
+      observable_evaluation: '可観測量の評価',
+      sampling: 'サンプリング実行',
+      sampling_shots: 'ショット数',
+      sampling_result: 'サンプリング結果',
     },
     settings: {
       tab_label: '設定',

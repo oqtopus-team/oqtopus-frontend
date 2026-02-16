@@ -1,7 +1,6 @@
 import {
   JobsJobType,
   JobsOperatorItem,
-  JobsSubmitJobInfo,
   JobsSubmitJobRequest,
 } from '@/api/generated';
 import { Device } from '@/domain/types/Device';
@@ -10,6 +9,7 @@ import clsx from 'clsx';
 import { ReactNode, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { JobForm } from '@/pages/authenticated/jobs/_components/JobForm';
+import { LocalSimulationTabContent } from './LocalSimulationTabContent';
 
 export type TabPanelItem = { id: string; label: string; disabled: boolean };
 
@@ -100,10 +100,10 @@ export interface ControlPanelProps {
 export default (props: ControlPanelProps) => {
   const { t } = useTranslation();
 
-  const tabItems = ['exec', 'siml'].map((id) => ({
+  const tabItems = ['siml', 'exec'].map((id) => ({
     id,
     label: t(`composer.control_panel.${id}.tab_label`),
-    disabled: id == 'siml',
+    disabled: false,
   }));
   return (
     <>
@@ -111,6 +111,16 @@ export default (props: ControlPanelProps) => {
         tabItems={tabItems}
         tabContent={(item) => {
           switch (item.id) {
+            case 'siml':
+              return (
+                <LocalSimulationTabContent
+                  jobType={props.jobType}
+                  qubitNumber={props.mkProgram.qubitNumber}
+                  program={props.mkProgram.program}
+                  observable={props.jobType == "estimation" ? props.mkOperator: undefined}
+                />
+              );
+
             case 'exec':
               return (
                 <JobForm
@@ -121,8 +131,7 @@ export default (props: ControlPanelProps) => {
                   displayFields={{ program: false, type: false, operator: false }}
                 />
               );
-            case 'siml':
-              return <></>;
+
             default:
               return null;
           }

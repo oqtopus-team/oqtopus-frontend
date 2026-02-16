@@ -54,6 +54,7 @@ const config: Config = {
       'modal-bg': '#000000',
 
       // Tab panel
+      'chart-title': '#5e5e5e',
 
       // Quantum Circuit colors
       'gate-atomic': '#5179d5',
