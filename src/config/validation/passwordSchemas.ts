@@ -14,10 +14,7 @@ interface PasswordConfirmErrorKeys {
   mismatch: string;
 }
 
-export const createPasswordSchema = (
-  errorKeys: PasswordErrorKeys,
-  minLength: number = 12
-) =>
+export const createPasswordSchema = (errorKeys: PasswordErrorKeys, minLength: number = 12) =>
   yup
     .string()
     .required(errorKeys.required)

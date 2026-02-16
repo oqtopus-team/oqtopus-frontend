@@ -18,7 +18,10 @@ import { toast } from 'react-toastify';
 import { errorToastConfig, successToastConfig } from '@/config/toast';
 import { useUserAPI } from '@/backend/hook';
 import { useAuth } from '@/auth/hook';
-import { createPasswordConfirmSchema, createPasswordSchema } from '@/config/validation/passwordSchemas';
+import {
+  createPasswordConfirmSchema,
+  createPasswordSchema,
+} from '@/config/validation/passwordSchemas';
 
 interface AccountTabFormData {
   currentPassword: string;
@@ -35,14 +38,17 @@ const defaultFormValues: AccountTabFormData = {
 const validationRules = (t: (key: string) => string): yup.ObjectSchema<AccountTabFormData> =>
   yup.object({
     currentPassword: yup.string().required(),
-    newPassword: createPasswordSchema({
-      required: t('signup.form.error_message.password_enter'),
-      lowercase: t('signup.form.error_message.password_lowercase'),
-      uppercase: t('signup.form.error_message.password_uppercase'),
-      number: t('signup.form.error_message.password_number'),
-      special: t('signup.form.error_message.password_special'),
-      min: t('signup.form.error_message.password_min'),
-    }, 12),
+    newPassword: createPasswordSchema(
+      {
+        required: t('signup.form.error_message.password_enter'),
+        lowercase: t('signup.form.error_message.password_lowercase'),
+        uppercase: t('signup.form.error_message.password_uppercase'),
+        number: t('signup.form.error_message.password_number'),
+        special: t('signup.form.error_message.password_special'),
+        min: t('signup.form.error_message.password_min'),
+      },
+      12
+    ),
     newPasswordConfirm: createPasswordConfirmSchema('newPassword', {
       required: t('signup.form.error_message.confirm_password_enter'),
       mismatch: t('signup.form.error_message.confirm_password_mismatch'),
