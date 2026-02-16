@@ -4,6 +4,6 @@ export default {
   },
   logo: {
     title: 'OQTOPUS',
-    subtitle: 'オペレーターとユーザーのための\nオープン量子ツールチェーン',
+    subtitle: 'Open Quantum Toolchain\nfor Operators & Users',
   },
 };
