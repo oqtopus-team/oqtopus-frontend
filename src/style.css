@@ -84,10 +84,10 @@
     --login-explanation-bg: 25 25 25;
     --scrollbar-bg: 30 30 30;
     --scrollbar-thumb: 80 80 80;
-    --table-border: 60 60 60;
+    --table-border: 74 74 74;
     --cmd-bg: 35 35 35;
     --modal-bg: 0 0 0;
-    --box-shadow-color: 0 0 0;
+    --box-shadow-color: 110 125 145;
 
     /* Quantum Circuit colors */
     --gate-atomic: 81 121 213;
