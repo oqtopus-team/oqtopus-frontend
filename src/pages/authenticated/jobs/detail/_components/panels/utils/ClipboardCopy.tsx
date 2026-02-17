@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import clsx from 'clsx';
-import { BsCopy } from "react-icons/bs";
+import { BsCopy } from 'react-icons/bs';
 import { useTranslation } from 'react-i18next';
 
 export interface ClipboardCopyProps {

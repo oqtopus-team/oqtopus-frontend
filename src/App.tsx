@@ -33,7 +33,7 @@ const Announcements = lazy(
   async () => await import('@/pages/authenticated/dashboard/_components/Announcements')
 );
 
-import './style.css'
+import './style.css';
 
 export const App: React.FunctionComponent = () => {
   return (

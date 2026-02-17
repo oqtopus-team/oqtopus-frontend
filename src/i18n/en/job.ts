@@ -61,7 +61,7 @@ export default {
       message: 'Message',
       simulator: 'Simulator',
       mitigation: 'Mitigation',
-      program: 'Program'
+      program: 'Program',
     },
     program: {
       nodata: 'Data does not exist.',
@@ -113,7 +113,7 @@ export default {
     button: 'Submit',
     submit_and_view_job_button: 'Submit and view job',
     submitting: 'Processing your request...',
-    program_sample: "Program sample",
+    program_sample: 'Program sample',
     operator: {
       pauli: 'Operator (Pauli string)',
       coeff: 'Coefficient',

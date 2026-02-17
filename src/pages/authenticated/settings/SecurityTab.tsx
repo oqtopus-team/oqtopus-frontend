@@ -328,7 +328,9 @@ export function SecurityTab({ login_history_enabled }: SecurityTabProps) {
       </Dialog>
 
       <Dialog open={apiTokenDialogOpen} onClose={onApiTokenDialogClose}>
-        <DialogTitle className={clsx(['bg-base-card', 'text-base-content'])}>{t('settings.security.apiToken.createdTitle')}</DialogTitle>
+        <DialogTitle className={clsx(['bg-base-card', 'text-base-content'])}>
+          {t('settings.security.apiToken.createdTitle')}
+        </DialogTitle>
 
         <DialogContent className={clsx(['bg-base-card'])}>
           <DialogContentText sx={{ mb: 2, color: 'rgb(var(--base-content))' }}>

@@ -405,7 +405,6 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
             maxZoom={MAX_ZOOM}
             onZoom={handleZoom}
             onZoomEnd={handleZoom}
-
           />
         </div>
       </Card>

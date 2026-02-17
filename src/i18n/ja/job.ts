@@ -113,9 +113,9 @@ export default {
     button: '送信する',
     submit_and_view_job_button: '送信して詳細を確認',
     submitting: 'リクエストを処理中...',
-    'operator': {
-      'pauli': '演算子（パウリ文字列）',
-      'coeff': '係数',
+    operator: {
+      pauli: '演算子（パウリ文字列）',
+      coeff: '係数',
     },
     program_sample: 'プログラムサンプル',
     toast: {

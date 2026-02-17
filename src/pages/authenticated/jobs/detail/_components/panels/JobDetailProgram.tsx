@@ -12,7 +12,7 @@ import { circuitContext, QuantumCircuitService } from '@/pages/authenticated/com
 import { Switch } from '@mui/material';
 import { parseCircuitJSON } from '@/pages/authenticated/composer/qasm';
 import { DndContextProvider } from '@/pages/authenticated/composer/dragging';
-import { BsCodeSlash } from "react-icons/bs";
+import { BsCodeSlash } from 'react-icons/bs';
 
 export interface JobDetailProgramProps {
   program: string[];

@@ -81,7 +81,7 @@ const LanguageSelector = (): React.ReactElement => {
   const { t } = useTranslation();
   return (
     <Select
-        className={clsx(
+      className={clsx(
         '!w-[100px]',
         'border-primary',
         'text-primary',

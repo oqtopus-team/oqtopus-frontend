@@ -442,8 +442,17 @@ export const JobForm = (componentProps: JobFormProps) => {
           >
             {displayFields?.program && (
               <>
-                <div className={clsx('flex', 'justify-between', '[&_*]:bg-base-card', 'text-base-content')}>
-                  <p className={clsx('font-bold', 'text-primary')}>{t('job.detail.info.program')}</p>
+                <div
+                  className={clsx(
+                    'flex',
+                    'justify-between',
+                    '[&_*]:bg-base-card',
+                    'text-base-content'
+                  )}
+                >
+                  <p className={clsx('font-bold', 'text-primary')}>
+                    {t('job.detail.info.program')}
+                  </p>
                   <Select
                     disabled={Boolean(props.mkProgram?.program)}
                     labelLeft={t('job.form.program_sample')}
@@ -499,8 +508,17 @@ export const JobForm = (componentProps: JobFormProps) => {
             >
               {/* transpiler */}
               <>
-                <div className={clsx('flex', 'justify-between', '[&_*]:bg-base-card', 'text-base-content')}>
-                  <p className={clsx('font-bold', 'text-primary')}>{t('job.detail.info.transpiler')}</p>
+                <div
+                  className={clsx(
+                    'flex',
+                    'justify-between',
+                    '[&_*]:bg-base-card',
+                    'text-base-content'
+                  )}
+                >
+                  <p className={clsx('font-bold', 'text-primary')}>
+                    {t('job.detail.info.transpiler')}
+                  </p>
                   <Select
                     labelLeft={t('common.type')}
                     {...register('transpilerType')}
@@ -523,7 +541,12 @@ export const JobForm = (componentProps: JobFormProps) => {
               <Spacer className="h-2" />
               <TextArea
                 {...register('transpiler')}
-                className={clsx('h-[16rem]','bg-base-card', 'text-base-content', transpilerType !== 'Custom' && 'hidden')}
+                className={clsx(
+                  'h-[16rem]',
+                  'bg-base-card',
+                  'text-base-content',
+                  transpilerType !== 'Custom' && 'hidden'
+                )}
                 placeholder={t('job.form.transpiler_placeholder')}
                 errorMessage={errors.transpiler && errors.transpiler.message}
               />
@@ -532,11 +555,13 @@ export const JobForm = (componentProps: JobFormProps) => {
                 <Spacer className="h-4" />
                 <Divider />
                 <Spacer className="h-4" />
-                <p className={clsx('font-bold', 'text-primary')}>{t('job.detail.info.simulator')}</p>
+                <p className={clsx('font-bold', 'text-primary')}>
+                  {t('job.detail.info.simulator')}
+                </p>
                 <Spacer className="h-2" />
               </>
               <TextArea
-                className={clsx('h-[16rem]','bg-base-card', 'text-base-content')}
+                className={clsx('h-[16rem]', 'bg-base-card', 'text-base-content')}
                 placeholder={t('job.form.simulator_placeholder')}
                 {...register('simulator')}
                 errorMessage={errors.simulator && errors.simulator.message}
@@ -547,7 +572,9 @@ export const JobForm = (componentProps: JobFormProps) => {
                 <Divider />
                 <Spacer className="h-4" />
                 <div className={clsx('flex', 'justify-between')}>
-                  <p className={clsx('font-bold', 'text-primary')}>{t('job.detail.info.mitigation')}</p>
+                  <p className={clsx('font-bold', 'text-primary')}>
+                    {t('job.detail.info.mitigation')}
+                  </p>
                   <Select
                     className={clsx('bg-base-card', 'text-base-content')}
                     {...register('mitigationType')}
@@ -567,7 +594,12 @@ export const JobForm = (componentProps: JobFormProps) => {
                 <Spacer className="h-2" />
               </>
               <TextArea
-                className={clsx('h-[16rem]','bg-base-card', 'text-base-content', mitigationType !== 'Custom' && 'hidden')}
+                className={clsx(
+                  'h-[16rem]',
+                  'bg-base-card',
+                  'text-base-content',
+                  mitigationType !== 'Custom' && 'hidden'
+                )}
                 {...register('mitigation')}
                 placeholder={t('job.form.mitigation_placeholder')}
                 value={mitigation}
