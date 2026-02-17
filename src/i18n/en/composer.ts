@@ -43,6 +43,10 @@ export default {
       sampling: 'Sampling Execution',
       sampling_shots: 'Shots',
       sampling_result: 'Sampling Result',
+      expectation_value_estimation: 'Expectation Value Estimation',
+      expectation_value: 'Expectation Value',
+      observable: 'Observable',
+      parameter_sweep: 'Sweep by circuit parameter',
     },
     settings: {
       tab_label: 'Settings',

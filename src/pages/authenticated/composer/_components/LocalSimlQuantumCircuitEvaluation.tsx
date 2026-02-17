@@ -35,7 +35,8 @@ export const QuantumCircuitEvaluation: React.FC<Props> = (props) => {
   return (
     <div
       className={clsx([
-        ['flex', 'items-center'],
+        ['flex', 'items-center',],
+        ['select-none', 'cursor-default'],
       ])}
     >
       <EvaluationStateVectorChart

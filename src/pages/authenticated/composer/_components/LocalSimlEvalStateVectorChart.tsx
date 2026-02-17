@@ -59,12 +59,11 @@ export const EvaluationStateVectorChart: React.FC<Props> = (props) => {
         {t('composer.control_panel.siml.state_vector')}
       </div>
       <div
-        className={clsx(["m-2"])}
+        className={clsx(["m-2", "outline-none"])}
         style={{ width: "400px", height: "320px" }}
       >
         <ResponsiveContainer width="100%" height="100%">
-
-          <BarChart data={props.data}>
+          <BarChart data={props.data} tabIndex={-1}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name">
               <Label

@@ -43,6 +43,10 @@ export default {
       sampling: 'サンプリング実行',
       sampling_shots: 'ショット数',
       sampling_result: 'サンプリング結果',
+      expectation_value_estimation: '期待値推定',
+      expectation_value: '期待値',
+      observable: '可観測量',
+      parameter_sweep: '量子回路パラメータによる掃引',
     },
     settings: {
       tab_label: '設定',

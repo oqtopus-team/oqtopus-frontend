@@ -6,10 +6,15 @@ import {
 import { Device } from '@/domain/types/Device';
 import { JobTypeType } from '@/domain/types/Job';
 import clsx from 'clsx';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { JobForm } from '@/pages/authenticated/jobs/_components/JobForm';
 import { LocalSimulationTabContent } from './LocalSimulationTabContent';
+import { RealComposerGate } from '../composer';
+import { GatePosition } from '@/backend/qulacs/types';
+import { isParametrizedGate } from '../gates';
+import { circuitContext } from '../circuit';
+import composer from '@/i18n/en/composer';
 
 export type TabPanelItem = { id: string; label: string; disabled: boolean };
 
@@ -48,7 +53,7 @@ export const TabPanels = (props: TabPanelsProps) => {
                     ? ['bg-base-card', 'text-primary']
                     : ['bg-gray-bg'],
               ])}
-              onClick={tabItem.disabled ? () => {} : handleTabItemClick(tabItem.id)}
+              onClick={tabItem.disabled ? () => { } : handleTabItemClick(tabItem.id)}
               key={`tab-${i}`}
             >
               <div
@@ -99,12 +104,33 @@ export interface ControlPanelProps {
 
 export default (props: ControlPanelProps) => {
   const { t } = useTranslation();
-
   const tabItems = ['siml', 'exec'].map((id) => ({
     id,
     label: t(`composer.control_panel.${id}.tab_label`),
     disabled: false,
   }));
+  const composerCircuitService = useContext(circuitContext);
+  const [selectedGates, setSelectedGates] = useState<RealComposerGate[]>([]);
+
+  useEffect(() => {
+    composerCircuitService.onSelectedGatesChange(gs => {
+      setSelectedGates(gs);
+    })
+  });
+
+  const selectedParametricGatePosition = useMemo(() => {
+    if (selectedGates.length == 1) {
+      const selectedGate = selectedGates[0];
+      if (isParametrizedGate(selectedGate)) {
+        return {
+          step: selectedGate.column,
+          index: selectedGate.row
+        };
+      }
+    }
+    return undefined;
+  }, [selectedGates]);
+
   return (
     <>
       <TabPanels
@@ -117,7 +143,8 @@ export default (props: ControlPanelProps) => {
                   jobType={props.jobType}
                   qubitNumber={props.mkProgram.qubitNumber}
                   program={props.mkProgram.program}
-                  observable={props.jobType == "estimation" ? props.mkOperator: undefined}
+                  observable={props.jobType == "estimation" ? props.mkOperator : undefined}
+                  selectedParametricGatePosition={selectedParametricGatePosition}
                 />
               );
 

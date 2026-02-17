@@ -41,11 +41,11 @@ const parsePauliGateType = (op: string): undefined | PauliGateType => {
     case "i": return PauliGateType.I;
     case "x": return PauliGateType.X;
     case "y": return PauliGateType.Y;
-    case "z": return PauliGateType.X;
+    case "z": return PauliGateType.Z;
   }
 }
 
-const parsePauliString = (pauli: string, qubitNumber: number): PauliGateType[] => {
+export const parsePauliString = (pauli: string, qubitNumber: number): PauliGateType[] => {
   const step = (inp: string, parsed: PauliGateType[]) => {
     if (inp == "") return parsed; 
     const op = inp.slice(0, 1);
@@ -67,9 +67,9 @@ const parsePauliString = (pauli: string, qubitNumber: number): PauliGateType[] =
 };
 export const convertComposerGate = (gate: ComposerGate): WasmQuantumGateData[] => {
   switch (gate._tag) {
-    case "emptyCell": return [];
-    case "multiRowGateBlock": return [];
-    case "multiRowGateEmptyBlock": return [];
+    case "emptyCell": return [["i", gate.row]];
+    case "multiRowGateBlock": return [["i", gate.row]];
+    case "multiRowGateEmptyBlock": return [["i", gate.row]];
     case "$custom_gate": throw new Error("Custom gates are not supported.");
   }
   return [convertQuantumGate(gate)];
@@ -92,11 +92,11 @@ export const convertQuantumGate = (gate: QuantumGate): WasmQuantumGateData => {
     
     // In the cases of parametric one-qubit gates:
     case "rx":
-      return ["rotx", gate.rotationAngle, gate.targets[0]] as WasmOneQubitRotationGateData;
+      return ["rx", gate.targets[0], -1 * gate.rotationAngle] as WasmOneQubitRotationGateData;
     case "ry":
-      return ["roty", gate.rotationAngle, gate.targets[0]] as WasmOneQubitRotationGateData;
+      return ["ry", gate.targets[0], -1 * gate.rotationAngle] as WasmOneQubitRotationGateData;
     case "rz":
-      return ["rotz", gate.rotationAngle, gate.targets[0]] as WasmOneQubitRotationGateData;
+      return ["rz", gate.targets[0], -1 * gate.rotationAngle] as WasmOneQubitRotationGateData;
 
     // In the cases of controlled gates: 
     case "cx":
