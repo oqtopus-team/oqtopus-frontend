@@ -110,7 +110,7 @@ export const CodeEditor = forwardRef<
     themeLink.href = theme.href;
   }
 
-  function copyBackgroundFromTheme() {
+  function copyBackgroundAndColorFromTheme() {
     if (!preRef.current) return {};
 
     const style = getComputedStyle(preRef.current);
@@ -145,7 +145,10 @@ export const CodeEditor = forwardRef<
       )}
       <Spacer className="h-2" />
       <div className={clsx(['grid', 'gap-1'], ['h-64', 'max-h-64', 'overflow-auto'])}>
-        <div className={clsx('flex', 'flex-row', 'rounded')} style={copyBackgroundFromTheme()}>
+        <div
+          className={clsx('flex', 'flex-row', 'rounded')}
+          style={copyBackgroundAndColorFromTheme()}
+        >
           <div className="code-editor-line-numbers">
             {code.split('\n').map((_, i) => (
               <>
