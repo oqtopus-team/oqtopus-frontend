@@ -20,7 +20,6 @@ import AuthenticatedLayout from '@/pages/authenticated/layout';
 import AuthenticatedDefaultLayout from '@/pages/authenticated/layout_default';
 import DashboardLayout from '@/pages/authenticated/layout_dashboard';
 import { SettingsPage } from '@/pages/authenticated/settings/page';
-
 // ログイン後の画面はlazyload
 const JobList = lazy(async () => await import('@/pages/authenticated/jobs/page'));
 const JobDetail = lazy(async () => await import('@/pages/authenticated/jobs/detail/page'));
