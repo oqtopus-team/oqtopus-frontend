@@ -61,7 +61,6 @@ export interface ShotResult {
   /**
    * Sampling execution result
    *
-   * The length is equal to UIInformation#shot received at task execution time.
    * Each value is an integer representing which basis state the sampling result collapsed to.
    * The ordering of basis states follows the same order as the elements of the complex probability distribution vector.
    *

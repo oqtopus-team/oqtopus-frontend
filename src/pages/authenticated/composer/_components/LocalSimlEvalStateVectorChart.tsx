@@ -4,15 +4,15 @@ import {
   BarChart,
   BarShapeProps,
   CartesianGrid,
-  Cell,
   Label,
   Rectangle,
   ResponsiveContainer,
   Tooltip,
+  TooltipContentProps,
   XAxis,
   YAxis,
-  type TooltipProps,
 } from 'recharts';
+
 import { Complex } from "../misc";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
@@ -30,13 +30,39 @@ export interface Props {
 
 const createHSL = (value: number) => `hsl(${value * 180}, 100%, 70%)`;
 
+const renderImaginaryPart = (value: number) => (value >= 0 ? `+i${value}` : `-i${(-1) * value}`);
+
+const CustomTooltip = (props: TooltipContentProps<number, string>) => {
+  if (props.active && props.payload && props.payload.length > 0) {
+    const data = props.payload[0].payload as AmplitudeChartPoint;
+
+    return (
+      <div className="m-0 p-2.5 bg-primary-content border border-neutral-content whitespace-nowrap shadow-sm rounded">
+        <p className="m-0 font-medium text-base-content">{data.name}</p>
+
+        <div className="text-base-content text-xs mt-1 space-y-0.5">
+          <p className="m-0">
+            stateVectorAbsoluted: {data.stateVectorAbsoluted}
+          </p>
+          <p className="m-0">
+            stateVectorArgument: {data.stateVectorArgument}
+          </p>
+          <p className="m-0">
+            stateVector: {data.stateVector.re}
+            {renderImaginaryPart(data.stateVector.im)}
+          </p>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 const AmplitudeBarRectangle = (props: BarShapeProps) => {
   return (
     <Rectangle
       {...props}
-      fill="#FF6666"
-      stroke={"#FF6666"}
-      strokeWidth={2}
+      fill={createHSL(props.payload["stateVectorArgument"])}
     />
   );
 }
@@ -79,10 +105,11 @@ export const EvaluationStateVectorChart: React.FC<Props> = (props) => {
                 position="insideBottomLeft"
               />
             </YAxis>
-            {/* <Tooltip
-            wrapperStyle={{ outline: 'none' }}
-            content={<CustomTooltip />}
-          /> */}
+            <Tooltip
+              wrapperStyle={{ outline: 'none' }}
+              wrapperClassName="bg-white"
+              content={CustomTooltip}
+            />
             <Bar
               dataKey="stateVectorAbsoluted"
               isAnimationActive={true}

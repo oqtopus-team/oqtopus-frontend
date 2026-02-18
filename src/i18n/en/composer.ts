@@ -47,6 +47,7 @@ export default {
       expectation_value: 'Expectation Value',
       observable: 'Observable',
       parameter_sweep: 'Sweep by circuit parameter',
+      argument_color_map: 'Argument color map',
     },
     settings: {
       tab_label: 'Settings',

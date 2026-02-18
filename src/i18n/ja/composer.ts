@@ -47,6 +47,7 @@ export default {
       expectation_value: '期待値',
       observable: '可観測量',
       parameter_sweep: '量子回路パラメータによる掃引',
+      argument_color_map: '位相角カラーマップ',
     },
     settings: {
       tab_label: '設定',
