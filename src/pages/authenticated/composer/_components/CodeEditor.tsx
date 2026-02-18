@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 type Props = {
   disabled: boolean;
   fixedTheme?: ThemeKind;
+  errorMessage?: string;
   code: string;
 };
 
@@ -51,11 +52,7 @@ const themesMap: Record<ThemeKind, Theme> = {
 
 export const CodeEditor = forwardRef<
   HTMLTextAreaElement,
-  {
-    label?: string;
-    errorMessage?: string;
-  } & ComponentPropsWithRef<'textarea'> &
-    Props
+  ComponentPropsWithRef<'textarea'> & Props
 >(({ code, disabled, fixedTheme, errorMessage, ...props }, ref) => {
   const { t } = useTranslation();
 
@@ -68,7 +65,7 @@ export const CodeEditor = forwardRef<
   );
 
   useEffect(() => {
-    loadTheme(selectedTheme);
+    loadTheme(selectedTheme, false);
   }, []);
 
   useEffect(() => {
@@ -91,7 +88,7 @@ export const CodeEditor = forwardRef<
     }
   };
 
-  function loadTheme(newTheme: ThemeKind) {
+  function loadTheme(newTheme: ThemeKind, updateStateOnLoad = true) {
     const theme = themesMap[newTheme];
     if (!theme) return;
 
@@ -105,8 +102,10 @@ export const CodeEditor = forwardRef<
     }
 
     themeLink.onload = () => {
-      localStorage.setItem('prism-code-theme', newTheme);
-      setSelectedTheme(newTheme);
+      if (updateStateOnLoad) {
+        localStorage.setItem('prism-code-theme', newTheme);
+        setSelectedTheme(newTheme);
+      }
     };
     themeLink.href = theme.href;
   }
