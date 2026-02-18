@@ -1,35 +1,179 @@
-// import Prism from 'prismjs';
-// import 'prismjs/components/prism-qasm';
-import { useEffect, useRef } from 'react';
+import Prism from 'prismjs';
+import 'prismjs/components/prism-openqasm';
+import { ComponentPropsWithRef, forwardRef, useEffect, useRef, useState } from 'react';
+import clsx from 'clsx';
+import { Select } from '@/pages/_components/Select';
+import './CodeEditor.css';
+import { Spacer } from '@/pages/_components/Spacer';
 
 type Props = {
+  disabled: boolean;
+  fixedTheme?: ThemeKind;
   code: string;
 };
 
-export default function CodeEditor({ code }: Props) {
-  const codeBlock = useRef<HTMLElement>(null);
+const themes = ['default', 'solarizedlight', 'dark', 'okaidia', 'tomorrow', 'twilight'] as const;
+
+type ThemeKind = (typeof themes)[number];
+
+type Theme = {
+  href: string;
+  type: 'light' | 'dark';
+};
+
+const themesMap: Record<ThemeKind, Theme> = {
+  default: {
+    href: '/prism-code-themes/prism.css',
+    type: 'light',
+  },
+  solarizedlight: {
+    href: '/prism-code-themes/prism-solarizedlight.css',
+    type: 'light',
+  },
+  dark: {
+    href: '/prism-code-themes/prism-dark.css',
+    type: 'dark',
+  },
+  okaidia: {
+    href: '/prism-code-themes/prism-okaidia.css',
+    type: 'dark',
+  },
+  tomorrow: {
+    href: '/prism-code-themes/prism-tomorrow.css',
+    type: 'dark',
+  },
+  twilight: {
+    href: '/prism-code-themes/prism-twilight.css',
+    type: 'dark',
+  },
+};
+
+export const CodeEditor = forwardRef<
+  HTMLTextAreaElement,
+  {
+    label?: string;
+    errorMessage?: string;
+  } & ComponentPropsWithRef<'textarea'> &
+    Props
+>(({ code, label, disabled, fixedTheme, errorMessage, className, ...props }, ref) => {
+  const preRef = useRef<HTMLPreElement>(null);
+  const codeRef = useRef<HTMLElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const [selectedTheme, setSelectedTheme] = useState<ThemeKind>(
+    fixedTheme ?? (localStorage.getItem('prism-code-theme') as ThemeKind) ?? 'default'
+  );
 
   useEffect(() => {
-    if (!codeBlock.current) return;
-    // Prism.highlightElement(codeBlock.current);
+    loadTheme(selectedTheme);
+  }, []);
+
+  useEffect(() => {
+    if (!codeRef.current || !textareaRef.current) return;
+
+    codeRef.current.textContent = code;
+    Prism.highlightElement(codeRef.current);
+
+    textareaRef.current.style.height = 'auto';
+    textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    codeRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
   }, [code]);
 
+  const setRefs = (node: any) => {
+    textareaRef.current = node;
+    if (typeof ref === 'function') {
+      ref(node);
+    } else {
+      if (ref) ref.current = node;
+    }
+  };
+
+  function loadTheme(newTheme: ThemeKind) {
+    const theme = themesMap[newTheme];
+    if (!theme) return;
+
+    let themeLink = document.getElementById('prism-theme') as HTMLLinkElement;
+
+    if (!themeLink) {
+      themeLink = document.createElement('link');
+      themeLink.id = 'prism-theme';
+      themeLink.rel = 'stylesheet';
+      document.head.appendChild(themeLink);
+    }
+
+    themeLink.onload = () => {
+      localStorage.setItem('prism-code-theme', newTheme);
+      setSelectedTheme(newTheme);
+    };
+    themeLink.href = theme.href;
+  }
+
+  function copyBackgroundFromTheme() {
+    if (!preRef.current) return {};
+
+    const style = getComputedStyle(preRef.current);
+
+    return {
+      background: style.background,
+      color: style.color,
+    };
+  }
+
+  const theme = themesMap[selectedTheme] ?? themesMap.default;
+
   return (
-    <div>
-      <pre>
-        <code ref={codeBlock} className="language-qasm">
-          {`
-            OPENQASM 3;
-            include "stdgates.inc";
-            
-            qubit[2] q;
-            bit[2] c;
-            
-            h q[0];
-            cx q[0], q[1];
-          `}
-        </code>
-      </pre>
-    </div>
+    <>
+      {!fixedTheme && (
+        <div className={clsx('flex', 'justify-end')}>
+          <Select
+            value={selectedTheme}
+            labelLeft="theme"
+            onChange={(e) => {
+              loadTheme(e.target.value as ThemeKind);
+            }}
+            size="xs"
+          >
+            {Object.entries(themesMap).map(([key, theme]) => (
+              <option key={key} value={key}>
+                {`${key} (${theme.type})`}
+              </option>
+            ))}
+          </Select>
+        </div>
+      )}
+      <Spacer className="h-2" />
+      <div className={clsx(['grid', 'gap-1'], ['h-64', 'max-h-64', 'overflow-auto'])}>
+        <div className={clsx('flex', 'flex-row', 'rounded')} style={copyBackgroundFromTheme()}>
+          <div className="code-editor-line-numbers">
+            {code.split('\n').map((_, i) => (
+              <>
+                {/* prism classes used to base line number color on token from prism, to adjust to theme changes */}
+                <span className="token punctuation">{i + 1}</span>
+                <br />
+              </>
+            ))}
+          </div>
+          <div className="qasm-code-editor-code-container">
+            <pre ref={preRef} className="qasm-code-editor-code-pre">
+              <code ref={codeRef} className="qasm-code-editor-code language-qasm" />
+            </pre>
+
+            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', padding: '10px' }}>
+              <textarea
+                ref={setRefs}
+                className="qasm-code-editor-text-area"
+                style={{
+                  caretColor: theme.type === 'light' ? 'black' : 'white',
+                }}
+                {...props}
+                disabled={disabled}
+                value={code}
+                spellCheck="false"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
-}
+});

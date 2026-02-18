@@ -4,6 +4,7 @@ import { Spacer } from '@/pages/_components/Spacer';
 import SimpleBar from 'simplebar-react';
 import 'simplebar-react/dist/simplebar.min.css';
 import ClipboardCopy from './utils/ClipboardCopy';
+import { CodeEditor } from '@/pages/authenticated/composer/_components/CodeEditor';
 
 export interface JobDetailTranspiledProgramProps {
   transpiledProgram?: string;
@@ -30,7 +31,7 @@ export const JobDetailTranspiledProgram: React.FC<JobDetailTranspiledProgramProp
         <div className={clsx('relative')}>
           <div className={clsx('p-3', 'rounded', 'bg-cmd-bg', 'text-sm')}>
             <SimpleBar style={{ maxHeight: jobInfo.maxHeight }}>
-              <div className={clsx('whitespace-pre-wrap')}>{text}</div>
+              <CodeEditor disabled={true} code={text} fixedTheme="default" />
             </SimpleBar>
           </div>
           <ClipboardCopy text={text} />

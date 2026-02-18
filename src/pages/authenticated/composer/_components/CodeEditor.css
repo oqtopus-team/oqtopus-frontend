@@ -1,0 +1,69 @@
+.code-editor-line-numbers {
+    font-family:'Fira Code', 'Consolas', monospace;
+    font-size: 14px;
+    line-height: 21px;
+    width: 2.25rem;
+    text-align: right;
+    border-right: solid 2px transparent;
+    height: 100%;
+    padding: 10px 2px;
+}
+
+.qasm-code-editor-code-container {
+    flex-grow: 1;
+    position: relative;
+}
+
+.qasm-code-editor-code-container .qasm-code-editor-code-pre {
+    margin: 0;
+    border: 0;
+    outline: 0;
+    padding: 10px;
+    pointer-events: none;
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-height: 200px;
+    font-family:'Fira Code', 'Consolas', monospace;
+    font-size: 14px;
+    line-height: 21px;
+    letter-spacing: 0;
+    tab-size: 4;
+    overflow: hidden;
+}
+
+.qasm-code-editor-code-container .qasm-code-editor-code-pre::before, 
+.qasm-code-editor-code-container .qasm-code-editor-code-pre::after {
+    content: none;
+}
+
+.qasm-code-editor-code-container .qasm-code-editor-code {
+    display: block;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 14px;
+    line-height: 21px;
+    letter-spacing: 0;
+    tab-size: 4;
+}
+
+.qasm-code-editor-code-container .qasm-code-editor-text-area {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 0;
+    border: none;
+    outline: none;
+    resize: none;
+    background: transparent;
+    color: transparent;
+    caret-color: black;
+    font: inherit;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 14px;
+    line-height: 21px;
+    letter-spacing: 0;
+    tab-size: 4;
+    overflow: hidden;
+}

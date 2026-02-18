@@ -12,6 +12,7 @@ import { circuitContext, QuantumCircuitService } from '@/pages/authenticated/com
 import { Switch } from '@mui/material';
 import { parseCircuitJSON } from '@/pages/authenticated/composer/qasm';
 import { DndContextProvider } from '@/pages/authenticated/composer/dragging';
+import { CodeEditor } from '@/pages/authenticated/composer/_components/CodeEditor';
 
 export interface JobDetailProgramProps {
   program: string[];
@@ -79,7 +80,7 @@ export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
             <div className={clsx('relative')}>
               <div className={clsx('p-3', 'rounded', 'bg-cmd-bg', 'text-sm')}>
                 <SimpleBar style={{ maxHeight: jobInfo.maxHeight }}>
-                  <div className={clsx('whitespace-pre-wrap')}>{text}</div>
+                  <CodeEditor disabled={true} code={text} fixedTheme="default" />
                 </SimpleBar>
               </div>
               <ClipboardCopy text={text} />
