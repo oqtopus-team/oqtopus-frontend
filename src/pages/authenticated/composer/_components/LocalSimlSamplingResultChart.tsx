@@ -9,6 +9,7 @@ import {
   Line,
   ResponsiveContainer,
   Tooltip,
+  TooltipContentProps,
   XAxis,
   YAxis,
   type TooltipProps,
@@ -24,6 +25,25 @@ export interface Props {
   shot: number;
   data: SamplingChartPoint[];
 }
+
+const CustomTooltip = (props: TooltipContentProps<number, string>) => {
+  if (props.active && props.payload && props.payload.length > 0) {
+    const data = props.payload[0].payload as SamplingChartPoint;
+    return (
+      <div className="m-0 p-2.5 bg-primary-content border border-neutral-content whitespace-nowrap shadow-sm rounded">
+        <p className="m-0 font-medium text-base-content">{data.name}</p>
+
+        <div className="text-gray-600 text-sm mt-1 space-y-0.5">
+          {data.count != null && (
+            <p className="m-0 text-[#3f51b5]">
+              Count: {data.count}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+};
 
 export const SimulatorResultSamplingChart: React.FC<Props> = ({ data, shot }) => {
   const { t } = useTranslation();
@@ -69,10 +89,11 @@ export const SimulatorResultSamplingChart: React.FC<Props> = ({ data, shot }) =>
                 position="insideBottomLeft"
               />
             </YAxis>
-            {/* <Tooltip
-          wrapperStyle={{ outline: 'none' }}
-          content={<CustomTooltip />}
-        /> */}
+            <Tooltip
+              wrapperStyle={{ outline: 'none' }}
+              wrapperClassName="bg-white"
+              content={CustomTooltip}
+            />
             <Bar
               dataKey="count"
               yAxisId="1"

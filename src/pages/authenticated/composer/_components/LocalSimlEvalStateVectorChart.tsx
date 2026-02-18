@@ -1,4 +1,3 @@
-import React, { useTransition } from "react";
 import {
   Bar,
   BarChart,
@@ -67,6 +66,8 @@ const AmplitudeBarRectangle = (props: BarShapeProps) => {
   );
 }
 
+const colormapCls = `bg-[linear-gradient(90deg,hsl(0,100%,70%),hsl(60,100%,70%),hsl(120,100%,70%),hsl(180,100%,70%),hsl(240,100%,70%),hsl(300,100%,70%),hsl(360,100%,70%))]`;
+
 export const EvaluationStateVectorChart: React.FC<Props> = (props) => {
   const { t } = useTranslation();
   return (
@@ -86,9 +87,9 @@ export const EvaluationStateVectorChart: React.FC<Props> = (props) => {
       </div>
       <div
         className={clsx(["m-2", "outline-none"])}
-        style={{ width: "400px", height: "320px" }}
+        style={{ width: "400px", height: "280px" }}
       >
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="85%">
           <BarChart data={props.data} tabIndex={-1}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name">
@@ -116,7 +117,23 @@ export const EvaluationStateVectorChart: React.FC<Props> = (props) => {
               shape={AmplitudeBarRectangle}
             />
           </BarChart>
+          <div className={clsx(['w-[400px]', 'mt-2', 'pr-7', 'flex', 'items-end'])}>
+            <span className={clsx(['text-xs', 'text-base-content'])}>
+              argument colormap
+            </span>
+            <div className={clsx([['w-full', 'flex', 'flex-col']])}>
+              <div className={clsx([['h-[12px]'], colormapCls])} />
+              <div className={clsx(['grid', 'grid-cols-5', 'text-xs', 'text-neutral-content'])}>
+                <div className={clsx(['text-left'])}>0</div>
+                <div className={clsx(['text-center'])}>π/2</div>
+                <div className={clsx(['text-center'])}>π</div>
+                <div className={clsx(['text-center'])}>3π/2</div>
+                <div className={clsx(['text-right'])}>2π</div>
+              </div>
+            </div>
+          </div>
         </ResponsiveContainer>
+
       </div>
     </div>
   );

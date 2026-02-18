@@ -6,7 +6,6 @@ import * as QulacsWasmClientType from "qulacs-wasm-simulator-client/lib/main/cli
 import { QuantumGate } from "./gates";
 import { QuantumCircuit } from "./circuit";
 import { ComposerGate } from "./composer";
-import { Observable } from "./observable";
 import { JobsOperatorItem } from "@/api/generated";
 
 export const convertCircuit = (circuit: QuantumCircuit, qubitNumber: number): QulacsWasmClientType.CircuitInfo => {
@@ -84,19 +83,24 @@ export const convertQuantumGate = (gate: QuantumGate): WasmQuantumGateData => {
       return [gate._tag, gate.targets[0]] as WasmPauliGateData;      
     case "h":
     case "s":
-    case "sx":
     case "t":
-    case "tdg":
-    case "sdg":
       return [gate._tag, gate.targets[0]] as WasmOneQubitGateData;
-    
+
+      // Following gates are not supported by Qulacs simulator!
+    case "sx":
+      // return ["sqrtx", gate.targets[0]] as unknown as WasmOneQubitGateData;
+    case "tdg":
+      // return ["tdag", gate.targets[0]] as unknown as WasmOneQubitGateData;
+    case "sdg":
+      // return ["sdag", gate.targets[0]] as unknown as WasmOneQubitGateData;
+      throw new Error("Unsupported gate type.")    
     // In the cases of parametric one-qubit gates:
     case "rx":
-      return ["rx", gate.targets[0], -1 * gate.rotationAngle] as WasmOneQubitRotationGateData;
+      return ["rotx", gate.targets[0], gate.rotationAngle] as WasmOneQubitRotationGateData;
     case "ry":
-      return ["ry", gate.targets[0], -1 * gate.rotationAngle] as WasmOneQubitRotationGateData;
+      return ["roty", gate.targets[0], gate.rotationAngle] as WasmOneQubitRotationGateData;
     case "rz":
-      return ["rz", gate.targets[0], -1 * gate.rotationAngle] as WasmOneQubitRotationGateData;
+      return ["rotz", gate.targets[0], gate.rotationAngle] as WasmOneQubitRotationGateData;
 
     // In the cases of controlled gates: 
     case "cx":
