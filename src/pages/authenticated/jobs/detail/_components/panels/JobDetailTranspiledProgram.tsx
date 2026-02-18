@@ -31,7 +31,13 @@ export const JobDetailTranspiledProgram: React.FC<JobDetailTranspiledProgramProp
         <div className={clsx('relative')}>
           <div className={clsx('p-3', 'rounded', 'bg-cmd-bg', 'text-sm')}>
             <SimpleBar style={{ maxHeight: jobInfo.maxHeight }}>
-              <CodeEditor disabled={true} code={text} fixedTheme="default" />
+              <CodeEditor
+                disabled={true}
+                code={text}
+                fixedTheme={
+                  window.matchMedia('(prefers-color-scheme: dark)').matches ? 'okaidia' : 'default'
+                }
+              />
             </SimpleBar>
           </div>
           <ClipboardCopy text={text} />
