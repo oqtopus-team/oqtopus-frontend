@@ -8,6 +8,125 @@ import { Card } from '@/pages/_components/Card';
 import useWindowSize from '@/pages/_hooks/UseWindowSize';
 import 'simplebar-react/dist/simplebar.min.css';
 import { Button } from '@/pages/_components/Button';
+import { Select } from '@/pages/_components/Select';
+
+// Types for metric selection
+type QubitMetric = 'readout_error' | 't1' | 't2' | 'single_qubit_gate_error';
+type CouplingMetric = 'two_qubit_gate_error' | 'gate_duration';
+
+interface MetricOption {
+  value: string;
+  label: string;
+  unit?: string;
+}
+
+// Metric options for dropdowns
+const QUBIT_METRICS: MetricOption[] = [
+  { value: 'readout_error', label: 'Readout Error', unit: '%' },
+  { value: 't1', label: 'T1 Relaxation Time', unit: 'μs' },
+  { value: 't2', label: 'T2 Dephasing Time', unit: 'μs' },
+  { value: 'single_qubit_gate_error', label: 'Single-Qubit Gate Error', unit: '%' },
+];
+
+const COUPLING_METRICS: MetricOption[] = [
+  { value: 'two_qubit_gate_error', label: 'Two-Qubit Gate Error / CNOT Error', unit: '%' },
+  { value: 'gate_duration', label: 'Gate Duration', unit: 'ns' },
+];
+
+// color mapping utilities
+const getMetricValue = (data: any, metric: string): number | null => {
+  switch (metric) {
+    case 'readout_error':
+      return data.meas_error?.readout_assignment_error ?? null;
+    case 't1':
+      return data.qubit_lifetime?.t1 ?? null;
+    case 't2':
+      return data.qubit_lifetime?.t2 ?? null;
+    case 'single_qubit_gate_error':
+      return data.fidelity !== null && data.fidelity !== undefined ? 1 - data.fidelity : null;
+    case 'two_qubit_gate_error':
+      return data.fidelity !== null && data.fidelity !== undefined ? 1 - data.fidelity : null;
+    case 'gate_duration':
+      return data.gate_duration?.rzx90 ?? null;
+    default:
+      return null;
+  }
+};
+
+const isHigherBetter = (metric: string): boolean => {
+  return ['t1', 't2'].includes(metric);
+};
+
+const getColorForMetric = (value: number | null, min: number, max: number, metric: string): string => {
+  if (value === null || isNaN(value) || min === max) {
+    return '#808080'; // Gray for missing data
+  }
+
+  const normalized = Math.max(0, Math.min(1, (value - min) / (max - min)));
+  const adjustedValue = isHigherBetter(metric) ? 1 - normalized : normalized;
+
+  let r, g, b;
+  if (adjustedValue < 0.5) {
+    // Green to Yellow
+    r = Math.round(255 * (adjustedValue * 2));
+    g = 255;
+    b = 0;
+  } else {
+    // Yellow to Red
+    r = 255;
+    g = Math.round(255 * (2 - adjustedValue * 2));
+    b = 0;
+  }
+
+  return `rgb(${r}, ${g}, ${b})`;
+};
+
+// Color Legend Component
+const ColorLegend: React.FC<{
+  metric: string;
+  range: { min: number; max: number };
+  unit?: string;
+}> = ({ metric, range, unit }) => {
+  const metricOption = [...QUBIT_METRICS, ...COUPLING_METRICS].find(m => m.value === metric);
+  const displayUnit = unit || metricOption?.unit || '';
+
+  const formatValue = (value: number): string => {
+    if (displayUnit === '%') {
+      return `${(value * 100).toFixed(2)}%`;
+    }
+    return value.toFixed(2);
+  };
+
+  const gradientStops = [];
+  for (let i = 0; i <= 10; i++) {
+    const value = range.min + (range.max - range.min) * (i / 10);
+    const color = getColorForMetric(value, range.min, range.max, metric);
+    gradientStops.push(`${color} ${i * 10}%`);
+  }
+
+  const gradientStyle = {
+    background: `linear-gradient(to right, ${gradientStops.join(', ')})`,
+    height: '20px',
+    borderRadius: '4px',
+    border: '1px solid #ccc',
+  };
+
+  return (
+    <div style={{ marginTop: '15px' }}>
+      <h4 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>
+        {metricOption?.label || metric} Color Scale
+      </h4>
+      <div style={gradientStyle}></div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginTop: '4px' }}>
+        <span>{formatValue(range.min)} {displayUnit}</span>
+        <span>{formatValue(range.max)} {displayUnit}</span>
+      </div>
+      <div style={{ fontSize: '11px', color: '#666', marginTop: '4px' }}>
+        <span style={{ color: '#808080' }}>■</span> Gray: Missing data
+      </div>
+    </div>
+  );
+};
 
 type NodeObject<NodeType = {}> = NodeType & {
   id?: string | number;
@@ -50,16 +169,40 @@ const createCouplingMapKey = (control: number, target: number): string => {
   return `${first}-${second}`;
 };
 
-const createNodeData = (qubits: any[]): { nodeData: any[]; tempNodeMap: Map<string, object> } => {
+const calculateMetricRange = (data: any[], metric: string): { min: number; max: number } => {
+  const values = data
+    .map(item => getMetricValue(item, metric))
+    .filter(value => value !== null && !isNaN(value)) as number[];
+
+  if (values.length === 0) {
+    return { min: 0, max: 1 };
+  }
+
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+
+  return { min, max };
+};
+
+const createNodeData = (
+  qubits: any[],
+  selectedMetric: QubitMetric,
+  metricRange: { min: number; max: number }
+): { nodeData: any[]; tempNodeMap: Map<string, object> } => {
   try {
     const tempNodeMap = new Map<string, object>();
     const nodeData = qubits.map((qubit: any) => {
       tempNodeMap.set(qubit.id.toString(), qubit);
+      const metricValue = getMetricValue(qubit, selectedMetric);
+      const color = getColorForMetric(metricValue, metricRange.min, metricRange.max, selectedMetric);
+
       return {
         id: qubit.id.toString(),
         label: `${qubit.id}`,
         fx: scalePosition(qubit.position.x),
         fy: scalePosition(qubit.position.y * -1), // multiply by -1 to flip the y-axis
+        color: color,
+        metricValue: metricValue,
       };
     });
     return { nodeData, tempNodeMap };
@@ -70,7 +213,9 @@ const createNodeData = (qubits: any[]): { nodeData: any[]; tempNodeMap: Map<stri
 };
 
 const createEdgeData = (
-  couplings: any[]
+  couplings: any[],
+  selectedMetric: CouplingMetric,
+  metricRange: { min: number; max: number }
 ): { edgeData: LinkObject[]; tempCouplingMap: Map<string, object> } => {
   try {
     const tempCouplingMap = new Map<string, object>();
@@ -83,10 +228,16 @@ const createEdgeData = (
       } else {
         tempCouplingMap.set(key, { [id]: coupling });
       }
+
+      const metricValue = getMetricValue(coupling, selectedMetric);
+      const color = getColorForMetric(metricValue, metricRange.min, metricRange.max, selectedMetric);
+
       return {
         id: id,
         source: coupling.control.toString(),
         target: coupling.target.toString(),
+        color: color,
+        metricValue: metricValue,
       };
     });
     return { edgeData, tempCouplingMap };
@@ -112,6 +263,12 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
   const [isValidDeviceInfo, setIsValidDeviceInfo] = useState<boolean>(true);
   const [hoveredNodeId, setHoveredNodeId] = useState<string | number | null>(null);
   const [hoveredLinkId, setHoveredLinkId] = useState<string | null>(null);
+
+  // metric selection state
+  const [selectedQubitMetric, setSelectedQubitMetric] = useState<QubitMetric>('readout_error');
+  const [selectedCouplingMetric, setSelectedCouplingMetric] = useState<CouplingMetric>('two_qubit_gate_error');
+  const [qubitMetricRange, setQubitMetricRange] = useState<{ min: number; max: number }>({ min: 0, max: 1 });
+  const [couplingMetricRange, setCouplingMetricRange] = useState<{ min: number; max: number }>({ min: 0, max: 1 });
 
   // ForceGraph2D not exporting ref types
   const fgRef = useRef<any>(null);
@@ -237,8 +394,15 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
 
       if (!parsedDeviceInfo.qubits || !parsedDeviceInfo.couplings) return;
 
-      const { nodeData, tempNodeMap } = createNodeData(parsedDeviceInfo.qubits);
-      const { edgeData, tempCouplingMap } = createEdgeData(parsedDeviceInfo.couplings);
+      // Calculate metric ranges
+      const qubitRange = calculateMetricRange(parsedDeviceInfo.qubits, selectedQubitMetric);
+      const couplingRange = calculateMetricRange(parsedDeviceInfo.couplings, selectedCouplingMetric);
+
+      setQubitMetricRange(qubitRange);
+      setCouplingMetricRange(couplingRange);
+
+      const { nodeData, tempNodeMap } = createNodeData(parsedDeviceInfo.qubits, selectedQubitMetric, qubitRange);
+      const { edgeData, tempCouplingMap } = createEdgeData(parsedDeviceInfo.couplings, selectedCouplingMetric, couplingRange);
 
       if (nodeData.length === 0) {
         setIsValidDeviceInfo(false);
@@ -251,7 +415,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
       setIsValidDeviceInfo(false);
       console.error('Failed to update topology data:', err);
     }
-  }, [deviceInfo]);
+  }, [deviceInfo, selectedQubitMetric, selectedCouplingMetric]);
 
   useEffect(() => {
     // Delay to ensure the canvas is rendered
@@ -283,6 +447,18 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
             <JSONCodeBlock json={strHoveredInfo} />
           </SimpleBar>
         )}
+
+        {/* Color Scale Legends */}
+        <div style={{ marginTop: '20px' }}>
+          <ColorLegend
+            metric={selectedQubitMetric}
+            range={qubitMetricRange}
+          />
+          <ColorLegend
+            metric={selectedCouplingMetric}
+            range={couplingMetricRange}
+          />
+        </div>
       </Card>
       <Card className={clsx(['col-start-2', 'col-end-3', 'relative'])}>
         <div style={{ zIndex: 1000, position: 'absolute', bottom: '25px', right: '25px' }}>
@@ -294,39 +470,76 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
             width: '100%',
             zIndex: 9999,
             display: 'flex',
-            alignItems: 'center',
-            background: '#fff',
+            flexDirection: 'column',
+            gap: '10px',
           }}
         >
-          <Button size="small" onClick={handleFitToView}>
-            {t('device.detail.topology_info.fit_to_view')}
-          </Button>
-          <input
-            type="range"
-            min={MIN_ZOOM}
-            max={MAX_ZOOM}
-            step={0.1}
-            value={zoomLevel}
-            onChange={(e) => {
-              if (fgRef.current && typeof fgRef.current.zoom === 'function') {
-                fgRef.current.zoom(e.target.value);
-              }
-            }}
-            style={{
-              width: '200px',
-              height: '4px',
-              borderRadius: '2px',
-              background: '#ddd',
-              outline: 'none',
-              cursor: 'pointer',
-              flex: 1,
-              marginLeft: '10px',
-            }}
-          />
+          {/* Metric Selection Controls */}
+          <div style={{ display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <label style={{ fontSize: '14px', fontWeight: 'bold' }}>Qubit Metric:</label>
+              <Select
+                value={selectedQubitMetric}
+                onChange={(e) => setSelectedQubitMetric(e.target.value as QubitMetric)}
+                size="xs"
+                style={{ minWidth: '180px' }}
+              >
+                {QUBIT_METRICS.map(metric => (
+                  <option key={metric.value} value={metric.value}>
+                    {metric.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <label style={{ fontSize: '14px', fontWeight: 'bold' }}>Coupling Metric:</label>
+              <Select
+                value={selectedCouplingMetric}
+                onChange={(e) => setSelectedCouplingMetric(e.target.value as CouplingMetric)}
+                size="xs"
+                style={{ minWidth: '180px' }}
+              >
+                {COUPLING_METRICS.map(metric => (
+                  <option key={metric.value} value={metric.value}>
+                    {metric.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          </div>
+
+          {/* Zoom Controls */}
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Button size="small" onClick={handleFitToView}>
+              {t('device.detail.topology_info.fit_to_view')}
+            </Button>
+            <input
+              type="range"
+              min={MIN_ZOOM}
+              max={MAX_ZOOM}
+              step={0.1}
+              value={zoomLevel}
+              onChange={(e) => {
+                if (fgRef.current && typeof fgRef.current.zoom === 'function') {
+                  fgRef.current.zoom(e.target.value);
+                }
+              }}
+              style={{
+                width: '200px',
+                height: '4px',
+                borderRadius: '2px',
+                outline: 'none',
+                cursor: 'pointer',
+                flex: 1,
+                marginLeft: '10px',
+              }}
+            />
+          </div>
         </div>
         <div ref={divRef}>
           <ForceGraph2D
             ref={fgRef}
+            backgroundColor={divRef.current?.style?.backgroundColor}
             graphData={topologyData}
             nodeCanvasObject={(
               node: NodeObject,
@@ -338,7 +551,8 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
               if (node.x !== undefined && node.y !== undefined) {
                 ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
               }
-              ctx.fillStyle = '#4887fa';
+              // Use dynamic color from node data, fallback to default blue
+              ctx.fillStyle = (node as any).color || '#4887fa';
               ctx.fill();
               ctx.strokeStyle = node.id === hoveredNodeId ? '#fc6464' : 'white';
               ctx.lineWidth = 3 / globalScale;
@@ -388,7 +602,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
                 ctx.stroke();
 
                 // Drawing the inner line
-                const innerStrokeColor = '#4887fa';
+                const innerStrokeColor = (link as any).color || '#4887fa';
 
                 ctx.beginPath();
                 ctx.moveTo(startX, startY);
@@ -399,14 +613,14 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
               }
             }}
             enableNodeDrag={false}
-            onNodeHover={handleHoverNode}
-            onLinkHover={handleHoverLink}
+            onNodeClick={handleHoverNode}
+            onLinkClick={handleHoverLink}
             height={divSize.height}
             width={divSize.width}
-            backgroundColor={'white'}
             maxZoom={MAX_ZOOM}
             onZoom={handleZoom}
             onZoomEnd={handleZoom}
+
           />
         </div>
       </Card>
