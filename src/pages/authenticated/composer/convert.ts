@@ -96,11 +96,11 @@ export const convertQuantumGate = (gate: QuantumGate): WasmQuantumGateData => {
       throw new Error("Unsupported gate type.")    
     // In the cases of parametric one-qubit gates:
     case "rx":
-      return ["rotx", gate.targets[0], gate.rotationAngle] as WasmOneQubitRotationGateData;
+      return ["rx", gate.targets[0], (-1) * gate.rotationAngle] as WasmOneQubitRotationGateData;
     case "ry":
-      return ["roty", gate.targets[0], gate.rotationAngle] as WasmOneQubitRotationGateData;
+      return ["ry", gate.targets[0], (-1) * gate.rotationAngle] as WasmOneQubitRotationGateData;
     case "rz":
-      return ["rotz", gate.targets[0], gate.rotationAngle] as WasmOneQubitRotationGateData;
+      return ["rz", gate.targets[0], (-1) * gate.rotationAngle] as WasmOneQubitRotationGateData;
 
     // In the cases of controlled gates: 
     case "cx":
