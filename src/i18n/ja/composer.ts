@@ -63,4 +63,7 @@ export default {
       gate_already_defined: '指定された名前のゲートは既に定義されています。',
     },
   },
+  code_editor: {
+    theme: 'テーマ',
+  },
 };

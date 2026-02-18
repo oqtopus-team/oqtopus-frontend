@@ -468,7 +468,6 @@ export const JobForm = (componentProps: JobFormProps) => {
                 <CodeEditor
                   code={program}
                   disabled={Boolean(props.mkProgram?.program)}
-                  className={clsx('h-[16rem]')}
                   placeholder={t('job.form.program_placeholder')}
                   {...register('program')}
                   errorMessage={errors.program && errors.program.message}

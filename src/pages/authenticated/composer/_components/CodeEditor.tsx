@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { Select } from '@/pages/_components/Select';
 import './CodeEditor.css';
 import { Spacer } from '@/pages/_components/Spacer';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   disabled: boolean;
@@ -55,7 +56,9 @@ export const CodeEditor = forwardRef<
     errorMessage?: string;
   } & ComponentPropsWithRef<'textarea'> &
     Props
->(({ code, label, disabled, fixedTheme, errorMessage, className, ...props }, ref) => {
+>(({ code, disabled, fixedTheme, errorMessage, ...props }, ref) => {
+  const { t } = useTranslation();
+
   const preRef = useRef<HTMLPreElement>(null);
   const codeRef = useRef<HTMLElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -127,7 +130,7 @@ export const CodeEditor = forwardRef<
         <div className={clsx('flex', 'justify-end')}>
           <Select
             value={selectedTheme}
-            labelLeft="theme"
+            labelLeft={t('composer.code_editor.theme')}
             onChange={(e) => {
               loadTheme(e.target.value as ThemeKind);
             }}
@@ -174,6 +177,9 @@ export const CodeEditor = forwardRef<
           </div>
         </div>
       </div>
+      {errorMessage && (
+        <p className={clsx('text-xs', 'text-error', 'font-semibold')}>{errorMessage}</p>
+      )}
     </>
   );
 });
