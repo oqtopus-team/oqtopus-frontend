@@ -63,13 +63,6 @@ const Logo = (): React.ReactElement => {
         className={clsx(['h-12', 'my-2', 'py-2'])}
         alt={import.meta.env.VITE_APP_APP_NAME_EN}
       />
-      <div
-        className={clsx('flex', 'flex-col', 'items-center', 'text-center', 'gap-1')}
-        style={{ fontSize: '10px', lineHeight: '12px' }}
-      >
-        <span style={{ fontSize: '1.5em' }}>{t('app.logo.title')}</span>
-        <p className={clsx('whitespace-pre')}>{t('app.logo.subtitle')}</p>
-      </div>
       <span className={clsx(['cursor-pointer'], ['hidden', 'sm:block'])}>
         {t('app.name.oqtopus')}
       </span>
