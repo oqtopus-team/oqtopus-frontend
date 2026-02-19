@@ -36,6 +36,7 @@ export const JobSearchForm = ({
             onChange={(e) =>
               setParams({ ...params, query: e.target.value === '' ? undefined : e.target.value })
             }
+            className={clsx('bg-base-card')}
           />
         </div>
         <div className="flex-1">
@@ -53,6 +54,7 @@ export const JobSearchForm = ({
                 }
                 setParams({ ...params, status: e.currentTarget.value });
               }}
+              className={clsx('bg-base-card')}
             >
               <option></option>
               {JOB_STATUSES.map((status, idx) => (

@@ -12,6 +12,7 @@ import { circuitContext, QuantumCircuitService } from '@/pages/authenticated/com
 import { Switch } from '@mui/material';
 import { parseCircuitJSON } from '@/pages/authenticated/composer/qasm';
 import { DndContextProvider } from '@/pages/authenticated/composer/dragging';
+import { BsCodeSlash } from 'react-icons/bs';
 
 export interface JobDetailProgramProps {
   program: string[];
@@ -54,7 +55,7 @@ export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
         {sentFromComposer ? (
           <div className="flex items-center">
             <span className={clsx([['text-primary', 'cursor-pointer', 'm-2']])}>
-              <img src="/img/common/icon-code.svg" width={32} height={32} />
+              <BsCodeSlash />
             </span>
             <Switch value={showCode} onChange={() => setShowCode(!showCode)} />
             <span className={clsx([['text-primary', 'cursor-pointer', 'm-2']])}>
