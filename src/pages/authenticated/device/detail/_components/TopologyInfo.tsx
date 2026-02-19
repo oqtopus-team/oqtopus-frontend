@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import clsx from 'clsx';
 import { ForceGraph2D } from 'react-force-graph';
 import { useTranslation } from 'react-i18next';
@@ -57,45 +57,74 @@ const isHigherBetter = (metric: string): boolean => {
   return ['t1', 't2'].includes(metric);
 };
 
-const getColorForMetric = (value: number | null, min: number, max: number, metric: string): string => {
-  if (value === null || isNaN(value) || min === max) {
+const getColorForMetric = (
+  value: number | null,
+  min: number,
+  max: number,
+  metric: string
+): string => {
+  if (value === null || isNaN(value)) {
     return '#808080'; // Gray for missing data
+  }
+
+  if (min === max) {
+    return 'rgb(0, 255, 0)';
   }
 
   const normalized = Math.max(0, Math.min(1, (value - min) / (max - min)));
   const adjustedValue = isHigherBetter(metric) ? 1 - normalized : normalized;
 
-  let r, g, b;
+  let r, g;
   if (adjustedValue < 0.5) {
-    // Green to Yellow
     r = Math.round(255 * (adjustedValue * 2));
     g = 255;
-    b = 0;
   } else {
-    // Yellow to Red
     r = 255;
     g = Math.round(255 * (2 - adjustedValue * 2));
-    b = 0;
   }
 
-  return `rgb(${r}, ${g}, ${b})`;
+  return `rgb(${r}, ${g}, 0)`;
+};
+
+// Function to calculate median
+const calculateMedian = (data: any[], metric: string): number | null => {
+  const values = data
+    .map((item) => getMetricValue(item, metric))
+    .filter((value) => value !== null && !isNaN(value)) as number[];
+
+  if (values.length === 0) {
+    return null;
+  }
+
+  const sortedValues = values.sort((a, b) => a - b);
+  const middle = Math.floor(sortedValues.length / 2);
+
+  if (sortedValues.length % 2 === 0) {
+    return (sortedValues[middle - 1] + sortedValues[middle]) / 2;
+  } else {
+    return sortedValues[middle];
+  }
 };
 
 // Color Legend Component
 const ColorLegend: React.FC<{
   metric: string;
   range: { min: number; max: number };
+  data?: any[];
   unit?: string;
-}> = ({ metric, range, unit }) => {
-  const metricOption = [...QUBIT_METRICS, ...COUPLING_METRICS].find(m => m.value === metric);
+}> = ({ metric, range, data, unit }) => {
+  const metricOption = [...QUBIT_METRICS, ...COUPLING_METRICS].find((m) => m.value === metric);
   const displayUnit = unit || metricOption?.unit || '';
 
   const formatValue = (value: number): string => {
     if (displayUnit === '%') {
-      return `${(value * 100).toFixed(2)}%`;
+      return `${(value * 100).toFixed(2)}`;
     }
     return value.toFixed(2);
   };
+
+  // Calculate median if data is provided
+  const median = data ? calculateMedian(data, metric) : null;
 
   const gradientStops = [];
   for (let i = 0; i <= 10; i++) {
@@ -104,25 +133,55 @@ const ColorLegend: React.FC<{
     gradientStops.push(`${color} ${i * 10}%`);
   }
 
-  const gradientStyle = {
-    background: `linear-gradient(to right, ${gradientStops.join(', ')})`,
-    height: '20px',
-    borderRadius: '4px',
-    border: '1px solid #ccc',
-  };
+  // Calculate median position for the arrow
+  const medianPosition =
+    median !== null && range.max !== range.min
+      ? ((median - range.min) / (range.max - range.min)) * 100
+      : null;
 
   return (
-    <div style={{ marginTop: '15px' }}>
-      <h4 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>
+    <div className="mt-4">
+      <h4 className="text-sm font-bold mb-6">
         {metricOption?.label || metric} Color Scale
       </h4>
-      <div style={gradientStyle}></div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginTop: '4px' }}>
-        <span>{formatValue(range.min)} {displayUnit}</span>
-        <span>{formatValue(range.max)} {displayUnit}</span>
+
+      <div className="relative">
+        {/* Median label + arrow */}
+        {median !== null && medianPosition !== null && (
+          <div
+            className="absolute -top-5 flex flex-col items-center"
+            style={{
+              left: `${medianPosition}%`,
+              transform: 'translateX(-50%)',
+            }}
+          >
+            <span className="text-xs font-medium text-gray-300 whitespace-nowrap">
+              Median: {formatValue(median)} {displayUnit}
+            </span>
+            <span className="text-xs leading-none text-gray-300">▼</span>
+          </div>
+        )}
+
+        {/* Gradient bar */}
+        <div
+          className="h-5 rounded border border-gray-400"
+          style={{
+            background: `linear-gradient(to right, ${gradientStops.join(', ')})`,
+          }}
+        />
       </div>
-      <div style={{ fontSize: '11px', color: '#666', marginTop: '4px' }}>
-        <span style={{ color: '#808080' }}>■</span> Gray: Missing data
+
+      <div className="flex justify-between text-xs mt-1">
+        <span>
+          {formatValue(range.min)} {displayUnit}
+        </span>
+        <span>
+          {formatValue(range.max)} {displayUnit}
+        </span>
+      </div>
+
+      <div className="text-xs text-gray-500 mt-1">
+        <span className="text-gray-400">■</span> Gray: Missing data
       </div>
     </div>
   );
@@ -171,8 +230,8 @@ const createCouplingMapKey = (control: number, target: number): string => {
 
 const calculateMetricRange = (data: any[], metric: string): { min: number; max: number } => {
   const values = data
-    .map(item => getMetricValue(item, metric))
-    .filter(value => value !== null && !isNaN(value)) as number[];
+    .map((item) => getMetricValue(item, metric))
+    .filter((value) => value !== null && !isNaN(value)) as number[];
 
   if (values.length === 0) {
     return { min: 0, max: 1 };
@@ -194,7 +253,12 @@ const createNodeData = (
     const nodeData = qubits.map((qubit: any) => {
       tempNodeMap.set(qubit.id.toString(), qubit);
       const metricValue = getMetricValue(qubit, selectedMetric);
-      const color = getColorForMetric(metricValue, metricRange.min, metricRange.max, selectedMetric);
+      const color = getColorForMetric(
+        metricValue,
+        metricRange.min,
+        metricRange.max,
+        selectedMetric
+      );
 
       return {
         id: qubit.id.toString(),
@@ -230,7 +294,12 @@ const createEdgeData = (
       }
 
       const metricValue = getMetricValue(coupling, selectedMetric);
-      const color = getColorForMetric(metricValue, metricRange.min, metricRange.max, selectedMetric);
+      const color = getColorForMetric(
+        metricValue,
+        metricRange.min,
+        metricRange.max,
+        selectedMetric
+      );
 
       return {
         id: id,
@@ -266,9 +335,20 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
 
   // metric selection state
   const [selectedQubitMetric, setSelectedQubitMetric] = useState<QubitMetric>('readout_error');
-  const [selectedCouplingMetric, setSelectedCouplingMetric] = useState<CouplingMetric>('two_qubit_gate_error');
-  const [qubitMetricRange, setQubitMetricRange] = useState<{ min: number; max: number }>({ min: 0, max: 1 });
-  const [couplingMetricRange, setCouplingMetricRange] = useState<{ min: number; max: number }>({ min: 0, max: 1 });
+  const [selectedCouplingMetric, setSelectedCouplingMetric] =
+    useState<CouplingMetric>('two_qubit_gate_error');
+  const [qubitMetricRange, setQubitMetricRange] = useState<{ min: number; max: number }>({
+    min: 0,
+    max: 1,
+  });
+  const [couplingMetricRange, setCouplingMetricRange] = useState<{ min: number; max: number }>({
+    min: 0,
+    max: 1,
+  });
+
+  // data for median calculation
+  const [qubitsData, setQubitsData] = useState<any[]>([]);
+  const [couplingsData, setCouplingsData] = useState<any[]>([]);
 
   // ForceGraph2D not exporting ref types
   const fgRef = useRef<any>(null);
@@ -394,15 +474,30 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
 
       if (!parsedDeviceInfo.qubits || !parsedDeviceInfo.couplings) return;
 
+      // Store data for median calculation
+      setQubitsData(parsedDeviceInfo.qubits);
+      setCouplingsData(parsedDeviceInfo.couplings);
+
       // Calculate metric ranges
       const qubitRange = calculateMetricRange(parsedDeviceInfo.qubits, selectedQubitMetric);
-      const couplingRange = calculateMetricRange(parsedDeviceInfo.couplings, selectedCouplingMetric);
+      const couplingRange = calculateMetricRange(
+        parsedDeviceInfo.couplings,
+        selectedCouplingMetric
+      );
 
       setQubitMetricRange(qubitRange);
       setCouplingMetricRange(couplingRange);
 
-      const { nodeData, tempNodeMap } = createNodeData(parsedDeviceInfo.qubits, selectedQubitMetric, qubitRange);
-      const { edgeData, tempCouplingMap } = createEdgeData(parsedDeviceInfo.couplings, selectedCouplingMetric, couplingRange);
+      const { nodeData, tempNodeMap } = createNodeData(
+        parsedDeviceInfo.qubits,
+        selectedQubitMetric,
+        qubitRange
+      );
+      const { edgeData, tempCouplingMap } = createEdgeData(
+        parsedDeviceInfo.couplings,
+        selectedCouplingMetric,
+        couplingRange
+      );
 
       if (nodeData.length === 0) {
         setIsValidDeviceInfo(false);
@@ -450,13 +545,11 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
 
         {/* Color Scale Legends */}
         <div style={{ marginTop: '20px' }}>
-          <ColorLegend
-            metric={selectedQubitMetric}
-            range={qubitMetricRange}
-          />
+          <ColorLegend metric={selectedQubitMetric} range={qubitMetricRange} data={qubitsData} />
           <ColorLegend
             metric={selectedCouplingMetric}
             range={couplingMetricRange}
+            data={couplingsData}
           />
         </div>
       </Card>
@@ -484,7 +577,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
                 size="xs"
                 style={{ minWidth: '180px' }}
               >
-                {QUBIT_METRICS.map(metric => (
+                {QUBIT_METRICS.map((metric) => (
                   <option key={metric.value} value={metric.value}>
                     {metric.label}
                   </option>
@@ -499,7 +592,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
                 size="xs"
                 style={{ minWidth: '180px' }}
               >
-                {COUPLING_METRICS.map(metric => (
+                {COUPLING_METRICS.map((metric) => (
                   <option key={metric.value} value={metric.value}>
                     {metric.label}
                   </option>
@@ -561,7 +654,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
               const label = node.label || '';
               const fontSize = 12 / globalScale;
               ctx.font = `${fontSize}px Arial Bold`;
-              ctx.fillStyle = 'white';
+              ctx.fillStyle = 'black';
               ctx.textAlign = 'center';
               ctx.textBaseline = 'middle';
               if (node.x !== undefined && node.y !== undefined) {
@@ -620,7 +713,6 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
             maxZoom={MAX_ZOOM}
             onZoom={handleZoom}
             onZoomEnd={handleZoom}
-
           />
         </div>
       </Card>
