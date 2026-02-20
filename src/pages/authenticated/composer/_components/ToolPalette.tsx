@@ -20,6 +20,7 @@ export default (props: ToolPaletteProps) => {
   return (
     <div className={clsx([['w-full']])}>
       <Select
+        className={clsx(['color-base-content', 'bg-base-card'])}
         labelLeft={t('composer.tool_palette.job_type')}
         defaultValue={'sampling'}
         onChange={(ev: React.ChangeEvent<HTMLSelectElement>) => {
