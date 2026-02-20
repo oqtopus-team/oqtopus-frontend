@@ -79,7 +79,7 @@ export const LocalSimulationTabContent: React.FC<Props> = (props) => {
         );
         setEvaluationResult(newEvaluationResult);
 
-        if (props.jobType === "estimation" 
+        if (props.jobType === "estimation"
           && props.selectedParametricGatePosition !== undefined
         ) {
           const newParametricExpectationValue =
@@ -89,7 +89,6 @@ export const LocalSimulationTabContent: React.FC<Props> = (props) => {
               51,
               props.selectedParametricGatePosition
             );
-            console.log(newParametricExpectationValue)
           setParametricExpectationValue(newParametricExpectationValue);
         }
       } catch (e) {
