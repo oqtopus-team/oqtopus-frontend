@@ -43,6 +43,7 @@
     "react-json-formatter": "^0.4.0",
     "react-router": "^7.10.1",
     "react-toastify": "^11.0.5",
+    "react-tooltip": "^5.30.0",
     "simplebar-react": "^3.3.2",
     "swagger-ui-react": "^5.31.0",
     "yup": "^1.7.1"
