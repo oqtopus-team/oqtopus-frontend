@@ -565,6 +565,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
             display: 'flex',
             flexDirection: 'column',
             gap: '10px',
+            alignItems: 'center',
           }}
         >
           {/* Metric Selection Controls */}
@@ -575,6 +576,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
                 value={selectedQubitMetric}
                 onChange={(e) => setSelectedQubitMetric(e.target.value as QubitMetric)}
                 size="xs"
+                className={clsx('text-base-content', 'bg-base-card')}
                 style={{ minWidth: '180px' }}
               >
                 {QUBIT_METRICS.map((metric) => (
@@ -590,6 +592,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
                 value={selectedCouplingMetric}
                 onChange={(e) => setSelectedCouplingMetric(e.target.value as CouplingMetric)}
                 size="xs"
+                className={clsx('text-base-content', 'bg-base-card')}
                 style={{ minWidth: '180px' }}
               >
                 {COUPLING_METRICS.map((metric) => (
