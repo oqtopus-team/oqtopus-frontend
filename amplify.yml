@@ -4,11 +4,20 @@ frontend:
   phases:
     preBuild:
       commands:
+        # Set Node.js version (AWS Amplify uses nvm)
+        - nvm install 20
+        - nvm use 20
         # install bun
         - curl -fsSL https://bun.sh/install | bash
         - source /root/.bash_profile
+        - bun --version
+        - rm -rf node_modules
         - bun install
         # - bun generate -- --src "github:oqtopus-team/oqtopus-cloud" --ref develop --path "/backend/oas/user/openapi.yaml"
+        # download favicon
+        - if [ -n "$FAVICON_SRC_S3" ]; then
+            aws s3 cp "s3://$OQTOPUS_FRONTEND_BUILD_BUCKET/$FAVICON_SRC_S3" ./public/favicon.svg;
+          fi 
     build:
       commands:
         - bun run build
@@ -18,4 +27,4 @@ frontend:
       - '**/*'
   cache:
     paths:
-      - node_modules/**/*
+      - ~/.bun/install/cache/**/*

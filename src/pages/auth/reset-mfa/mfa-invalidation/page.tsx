@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import { useNavigate } from 'react-router';
 import { Input } from '@/pages/_components/Input';
 import { Button } from '@/pages/_components/Button';
-import { FormTitle } from '../_components/FormTitle';
+import { FormTitle } from '../../_components/FormTitle';
 import { useFormProcessor } from '@/pages/_hooks/form';
 import { resetMfa } from '@/backend/MfaApi';
 import { Spacer } from '@/pages/_components/Spacer';

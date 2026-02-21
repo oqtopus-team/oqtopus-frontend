@@ -295,7 +295,6 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
             zIndex: 9999,
             display: 'flex',
             alignItems: 'center',
-            background: '#fff',
           }}
         >
           <Button size="small" onClick={handleFitToView}>
@@ -316,7 +315,6 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
               width: '200px',
               height: '4px',
               borderRadius: '2px',
-              background: '#ddd',
               outline: 'none',
               cursor: 'pointer',
               flex: 1,
@@ -327,6 +325,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
         <div ref={divRef}>
           <ForceGraph2D
             ref={fgRef}
+            backgroundColor={divRef.current?.style?.backgroundColor}
             graphData={topologyData}
             nodeCanvasObject={(
               node: NodeObject,
@@ -403,7 +402,6 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
             onLinkHover={handleHoverLink}
             height={divSize.height}
             width={divSize.width}
-            backgroundColor={'white'}
             maxZoom={MAX_ZOOM}
             onZoom={handleZoom}
             onZoomEnd={handleZoom}

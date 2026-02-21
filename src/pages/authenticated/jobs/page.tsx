@@ -19,6 +19,8 @@ import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
 import { useJobAPI } from '@/backend/hook';
 import { ConfirmModal } from '@/pages/_components/ConfirmModal';
+import { BsTrashFill, BsXCircleFill } from 'react-icons/bs';
+import { list } from 'postcss';
 
 const PAGE_SIZE = 10; // The limit of items to fetch in one request
 
@@ -271,14 +273,20 @@ export default function JobListPage() {
               disabled={isDeleteSelectedDisabled()}
               onClick={() => setShowBulkDeleteModal(true)}
             >
-              {t('job.list.delete_selected')}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <BsTrashFill />
+                <span>{t('job.list.operation.delete')}</span>
+              </div>
             </Button>
             <Button
               color={isCancelSelectedDisabled() ? 'disabled' : 'secondary'}
               disabled={isCancelSelectedDisabled()}
               onClick={() => setShowBulkCancelModal(true)}
             >
-              {t('job.list.cancel_selected')}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <BsXCircleFill />
+                <span>{t('job.list.operation.cancel')}</span>
+              </div>
             </Button>
           </section>
           <InfiniteScroll
@@ -404,7 +412,6 @@ const Loadmore = (props: { handleClick: () => void }) => {
 };
 
 const generateSearchParams = (params: JobSearchParams): string => {
-  console.log('params', params);
   const searchParams = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
     if (value === undefined || value === '') {

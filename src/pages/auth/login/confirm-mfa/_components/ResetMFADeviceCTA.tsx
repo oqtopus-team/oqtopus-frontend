@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import i18next from 'i18next';
 import { NavLink } from 'react-router';
 
-const URI = '/mfa-reset';
+const URI = '/mfa-invalidation';
 
 export const ResetMFADeviceCTA = () => (
   <div className={clsx('text-xs')}>
@@ -11,15 +11,17 @@ export const ResetMFADeviceCTA = () => (
         MFAデバイスをリセットしたい場合
         <br />
         <NavLink to={URI} className="text-link">
-          MFAリセット
+          MFA無効化
         </NavLink>
+        を先に行ってください。
       </>
     ) : (
       <>
         If you want to reset the MFA device
         <br />
+        First,{' '}
         <NavLink to={URI} className="text-link">
-          MFA reset.
+          invalidate the MFA.
         </NavLink>
       </>
     )}
