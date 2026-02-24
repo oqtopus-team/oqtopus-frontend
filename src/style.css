@@ -1,0 +1,98 @@
+:root {
+    /* Primitive colors */
+    --primary: 72 135 250;
+    --primary-content: 255 255 255;
+    --secondary: 56 189 247;
+    --secondary-content: 255 255 255;
+    --base-100: 240 248 255;
+    --base-card: 255 255 255;
+    --base-content: 45 45 45;
+    --neutral-content: 149 147 147;
+    --info: 56 189 247;
+    --info-content: 255 255 255;
+    --info-base-content: 72 135 250;
+    --error: 252 100 100;
+    --error-content: 255 255 255;
+    --error-base-content: 102 0 0;
+    --success: 235 250 237;
+    --success-base-content: 65 103 70;
+    --disable-bg: 209 213 219;
+    --disable-content: 120 124 130;
+    --gray-bg: 239 239 240;
+
+    /* Exclusive colors */
+    --divider-bg: 229 231 235;
+    --status-device-red: 252 100 100;
+    --status-device-green: 67 215 135;
+    --status-job-submitted: 76 175 80;
+    --status-job-ready: 255 193 7;
+    --status-job-running: 33 150 243;
+    --status-job-succeeded: 67 215 135;
+    --status-job-failed: 252 100 100;
+    --status-job-cancelled: 158 158 158;
+    --status-job-unknown: 95 95 95;
+    --login-explanation-bg: 248 248 248;
+    --scrollbar-bg: 245 245 245;
+    --scrollbar-thumb: 196 196 196;
+    --table-border: 217 217 217;
+    --cmd-bg: 243 244 246;
+    --modal-bg: 0 0 0;
+    --box-shadow-color: 13 26 38;
+
+
+    /* Quantum Circuit colors */
+    --gate-atomic: 81 121 213;
+    --gate-controlled: 130 85 167;
+    --gate-parametrized: 193 60 60;
+    --gate-operation-border: 141 139 99;
+    --gate-operation-enabled: 255 243 191;
+}
+
+.dark {
+    /* Primitive colors */
+    --primary: 91 155 255;
+    --primary-content: 10 10 10;
+    --secondary: 56 189 247;
+    --secondary-content: 10 10 10;
+    --base-100: 18 18 18;
+    --base-card: 30 30 30;
+    --base-content: 230 230 230;
+    --neutral-content: 160 160 160;
+    --info: 56 189 247;
+    --info-content: 10 10 10;
+    --info-base-content: 100 170 255;
+    --error: 252 100 100;
+    --error-content: 10 10 10;
+    --error-base-content: 255 150 150;
+    --success: 30 50 35;
+    --success-base-content: 150 220 160;
+    --disable-bg: 60 60 60;
+    --disable-content: 140 140 140;
+    --gray-bg: 40 40 40;
+
+    /* Exclusive colors */
+    --divider-bg: 60 60 60;
+    --status-device-red: 252 100 100;
+    --status-device-green: 67 215 135;
+    --status-job-submitted: 76 175 80;
+    --status-job-ready: 255 193 7;
+    --status-job-running: 33 150 243;
+    --status-job-succeeded: 67 215 135;
+    --status-job-failed: 252 100 100;
+    --status-job-cancelled: 158 158 158;
+    --status-job-unknown: 160 160 160;
+    --login-explanation-bg: 25 25 25;
+    --scrollbar-bg: 30 30 30;
+    --scrollbar-thumb: 80 80 80;
+    --table-border: 74 74 74;
+    --cmd-bg: 35 35 35;
+    --modal-bg: 0 0 0;
+    --box-shadow-color: 110 125 145;
+
+    /* Quantum Circuit colors */
+    --gate-atomic: 81 121 213;
+    --gate-controlled: 130 85 167;
+    --gate-parametrized: 193 60 60;
+    --gate-operation-border: 180 175 120;
+    --gate-operation-enabled: 100 95 50;
+}
