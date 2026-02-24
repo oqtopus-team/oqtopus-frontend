@@ -10,6 +10,14 @@ export default {
       description: 'Description',
       description_placeholder: 'Enter description',
       button: 'Search',
+      from: 'From',
+      to: 'To',
+      today: 'Today',
+      last_7_days: 'Last 7 days',
+      last_30_days: 'Last 30 days',
+      error_message: {
+        from_is_after_to: 'Date from must be before date to',
+      },
     },
     table: {
       id: 'Job ID',

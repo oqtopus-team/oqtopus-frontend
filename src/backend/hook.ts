@@ -40,8 +40,8 @@ export const useJobAPI = () => {
     return api.job
       .listJobs(
         'job_id,name,description,device_id,status,submitted_at',
-        undefined,
-        undefined,
+        params.from ? new Date(params.from).toISOString() : undefined,
+        params.to ? new Date(params.to).toISOString() : undefined,
         params.query ?? '',
         page,
         pageSize,

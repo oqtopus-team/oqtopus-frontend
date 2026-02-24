@@ -10,6 +10,14 @@ export default {
       description: '説明',
       description_placeholder: 'Enter description',
       button: '検索',
+      from: '開始日',
+      to: '終了日',
+      today: '今日',
+      last_7_days: '過去7日間',
+      last_30_days: '過去30日間',
+      error_message: {
+        from_is_after_to: '開始日は終了日より前でなければなりません',
+      },
     },
     table: {
       id: 'ジョブID',
