@@ -9,6 +9,7 @@ import useWindowSize from '@/pages/_hooks/UseWindowSize';
 import 'simplebar-react/dist/simplebar.min.css';
 import { Button } from '@/pages/_components/Button';
 import { Select } from '@/pages/_components/Select';
+import useDarkMode from '@/pages/_hooks/useDarkMode';
 
 // Types for metric selection
 type QubitMetric = 'readout_error' | 't1' | 't2' | 'single_qubit_gate_error';
@@ -113,6 +114,8 @@ const ColorLegend: React.FC<{
   data?: any[];
   unit?: string;
 }> = ({ metric, range, data, unit }) => {
+  const { t } = useTranslation();
+
   const metricOption = [...QUBIT_METRICS, ...COUPLING_METRICS].find((m) => m.value === metric);
   const displayUnit = unit || metricOption?.unit || '';
 
@@ -141,9 +144,7 @@ const ColorLegend: React.FC<{
 
   return (
     <div className="mt-4">
-      <h4 className="text-sm font-bold mb-6">
-        {metricOption?.label || metric} Color Scale
-      </h4>
+      <h4 className="text-sm font-bold mb-6">{metricOption?.label || metric} {t('device.detail.topology_info.color_scale')}</h4>
 
       <div className="relative">
         {/* Median label + arrow */}
@@ -155,10 +156,12 @@ const ColorLegend: React.FC<{
               transform: 'translateX(-50%)',
             }}
           >
-            <span className="text-xs font-medium text-gray-300 whitespace-nowrap">
-              Median: {formatValue(median)} {displayUnit}
+            <span className="text-xs font-medium whitespace-nowrap">
+              {t('device.detail.topology_info.median')}: {formatValue(median)} {displayUnit}
             </span>
-            <span className="text-xs leading-none text-gray-300">▼</span>
+            <span className="text-xs leading-none" style={{ color: '#000000' }}>
+              ▼
+            </span>
           </div>
         )}
 
@@ -178,10 +181,6 @@ const ColorLegend: React.FC<{
         <span>
           {formatValue(range.max)} {displayUnit}
         </span>
-      </div>
-
-      <div className="text-xs text-gray-500 mt-1">
-        <span className="text-gray-400">■</span> Gray: Missing data
       </div>
     </div>
   );
@@ -321,6 +320,7 @@ const MAX_ZOOM = 3;
 
 export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ deviceInfo }) => {
   const { t } = useTranslation();
+  const { theme } = useDarkMode();
 
   const [topologyData, setTopologyData] = useState<{ nodes: NodeObject[]; links: LinkObject[] }>({
     nodes: [],
@@ -571,7 +571,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
           {/* Metric Selection Controls */}
           <div style={{ display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <label style={{ fontSize: '14px', fontWeight: 'bold' }}>Qubit Metric:</label>
+              <label style={{ fontSize: '14px', fontWeight: 'bold' }}>{t('device.detail.topology_info.qubit_metric')}:</label>
               <Select
                 value={selectedQubitMetric}
                 onChange={(e) => setSelectedQubitMetric(e.target.value as QubitMetric)}
@@ -587,7 +587,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
               </Select>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <label style={{ fontSize: '14px', fontWeight: 'bold' }}>Coupling Metric:</label>
+              <label style={{ fontSize: '14px', fontWeight: 'bold' }}>{t('device.detail.topology_info.coupling_metric')}:</label>
               <Select
                 value={selectedCouplingMetric}
                 onChange={(e) => setSelectedCouplingMetric(e.target.value as CouplingMetric)}
