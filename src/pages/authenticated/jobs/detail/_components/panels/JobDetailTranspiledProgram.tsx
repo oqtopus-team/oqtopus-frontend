@@ -5,6 +5,7 @@ import SimpleBar from 'simplebar-react';
 import 'simplebar-react/dist/simplebar.min.css';
 import ClipboardCopy from './utils/ClipboardCopy';
 import { CodeEditor } from '@/pages/authenticated/composer/_components/CodeEditor';
+import { ThemeOptions, useTheme } from '@/theme/useTheme';
 
 export interface JobDetailTranspiledProgramProps {
   transpiledProgram?: string;
@@ -16,6 +17,7 @@ export const JobDetailTranspiledProgram: React.FC<JobDetailTranspiledProgramProp
   jobInfo: JobDetailTranspiledProgramProps
 ) => {
   const { t } = useTranslation();
+  const { theme } = useTheme();
   const text = jobInfo.transpiledProgram ?? '';
   return (
     <>
@@ -34,9 +36,7 @@ export const JobDetailTranspiledProgram: React.FC<JobDetailTranspiledProgramProp
               <CodeEditor
                 disabled={true}
                 code={text}
-                fixedTheme={
-                  window.matchMedia('(prefers-color-scheme: dark)').matches ? 'okaidia' : 'default'
-                }
+                fixedTheme={ThemeOptions.DARK ? 'okaidia' : 'default'}
               />
             </SimpleBar>
           </div>

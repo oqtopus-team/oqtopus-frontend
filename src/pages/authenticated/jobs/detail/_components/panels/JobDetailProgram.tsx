@@ -14,6 +14,7 @@ import { parseCircuitJSON } from '@/pages/authenticated/composer/qasm';
 import { DndContextProvider } from '@/pages/authenticated/composer/dragging';
 import { CodeEditor } from '@/pages/authenticated/composer/_components/CodeEditor';
 import { BsCodeSlash } from 'react-icons/bs';
+import { ThemeOptions, useTheme } from '@/theme/useTheme';
 
 export interface JobDetailProgramProps {
   program: string[];
@@ -33,6 +34,7 @@ export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
   const sentFromComposer = isSentFromComposer(text);
   const [circuitService] = useState<QuantumCircuitService>(new QuantumCircuitService(0, 0, []));
   const [showCode, setShowCode] = useState(false);
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (isSentFromComposer(text)) {
@@ -84,11 +86,7 @@ export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
                   <CodeEditor
                     disabled={true}
                     code={text}
-                    fixedTheme={
-                      window.matchMedia('(prefers-color-scheme: dark)').matches
-                        ? 'okaidia'
-                        : 'default'
-                    }
+                    fixedTheme={theme == ThemeOptions.DARK ? 'okaidia' : 'default'}
                   />
                 </SimpleBar>
               </div>

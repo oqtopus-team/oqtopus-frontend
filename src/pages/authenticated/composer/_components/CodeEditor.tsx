@@ -6,6 +6,7 @@ import { Select } from '@/pages/_components/Select';
 import './CodeEditor.css';
 import { Spacer } from '@/pages/_components/Spacer';
 import { useTranslation } from 'react-i18next';
+import { ThemeOptions, useTheme } from '@/theme/useTheme';
 
 type Props = {
   disabled: boolean;
@@ -60,13 +61,22 @@ export const CodeEditor = forwardRef<
   const codeRef = useRef<HTMLElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const { theme: appTheme } = useTheme();
+
   const [selectedTheme, setSelectedTheme] = useState<ThemeKind>(
-    fixedTheme ?? (localStorage.getItem('prism-code-theme') as ThemeKind) ?? 'default'
+    fixedTheme ??
+      (localStorage.getItem('prism-code-theme') as ThemeKind) ??
+      defaultThemeBasedOnAppTheme()
   );
 
   useEffect(() => {
     loadTheme(selectedTheme, false);
   }, []);
+
+  useEffect(() => {
+    if (!fixedTheme) return;
+    loadTheme(fixedTheme);
+  }, [fixedTheme]);
 
   useEffect(() => {
     if (!codeRef.current || !textareaRef.current) return;
@@ -87,6 +97,15 @@ export const CodeEditor = forwardRef<
       if (ref) ref.current = node;
     }
   };
+
+  function defaultThemeBasedOnAppTheme(): ThemeKind {
+    switch (appTheme) {
+      case ThemeOptions.LIGHT:
+        return 'default';
+      case ThemeOptions.DARK:
+        return 'okaidia';
+    }
+  }
 
   function loadTheme(newTheme: ThemeKind, updateStateOnLoad = true) {
     const theme = themesMap[newTheme];
@@ -126,7 +145,7 @@ export const CodeEditor = forwardRef<
   return (
     <>
       {!fixedTheme && (
-        <div className={clsx('flex', 'justify-end')}>
+        <div className={clsx('flex', 'justify-end', '[&_*]:bg-base-card', 'text-base-content')}>
           <Select
             value={selectedTheme}
             labelLeft={t('composer.code_editor.theme')}
