@@ -39,13 +39,15 @@ jobs:
             if (/^feat(\(.+\))?:/.test(lowerTitle)) {
               labelsToAdd.push("feature");
             } else if (/^fix(\(.+\))?:/.test(lowerTitle)) {
-              labelsToAdd.push("fix");
+              labelsToAdd.push("bugfix");
             } else if (/^chore(\(.+\))?:/.test(lowerTitle)) {
               labelsToAdd.push("chore");
             }
 
-            // Detect breaking change
-            if (/!:/ .test(title) || /breaking change/i.test(body)) {
+            // Detect breaking change via Markdown heading
+            const breakingHeadingRegex = /^\s*#{1,6}\s+Breaking Changes\s*$/im;
+
+            if (breakingHeadingRegex.test(body)) {
               labelsToAdd.push("breaking changes");
             }
 
