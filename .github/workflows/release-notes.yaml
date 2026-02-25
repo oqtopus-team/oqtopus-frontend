@@ -17,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v3
+
       - name: Generate release notes
         env:
           GH_TOKEN: ${{ github.token }}
