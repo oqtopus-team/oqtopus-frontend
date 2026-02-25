@@ -24,5 +24,5 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const script = require('./.github/scripts/release-notes.js');
-            await script({ github, context, core });
+            const script = await import('./.github/scripts/release-pr-notes.js');
+            await script.default({ github, context, core });
