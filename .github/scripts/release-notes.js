@@ -17,8 +17,7 @@
  * - Labels are already auto-assigned
  * - GitHub Actions provides github/context/core
  */
-
-module.exports = async ({ github, context, core }) => {
+export default async function ({ github, context, core }) {
   const owner = context.repo.owner;
   const repo = context.repo.repo;
   const prNumber = context.payload.pull_request.number;
