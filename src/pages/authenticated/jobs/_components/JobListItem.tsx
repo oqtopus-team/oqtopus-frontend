@@ -12,6 +12,9 @@ import DownloadJobButton from './DownloadJobButton';
 import { TruncateText } from '@/pages/authenticated/_components/TruncateText';
 import { toast } from 'react-toastify';
 import { errorToastConfig, successToastConfig } from '@/config/toast';
+import { BsTrash, BsXCircle } from 'react-icons/bs';
+import { Tooltip } from 'react-tooltip';
+import 'react-tooltip/dist/react-tooltip.css';
 
 interface JobProps {
   job: Job;
@@ -125,9 +128,18 @@ const OperationButtons = ({ job, onClickCancel, onClickDelete }: ButtonProps) =>
 
   return (
     <div className={clsx('flex', 'gap-2')}>
-      <Button color="error" onClick={() => setDeleteModalShow(true)}>
-        {t('job.list.operation.delete')}
+      <Button
+      color="error"
+      onClick={() => setDeleteModalShow(true)}
+      data-tooltip-id="delete-tooltip"
+      data-tooltip-content={t('job.list.operation.delete')}
+      aria-label={t('job.list.operation.delete')}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <BsTrash />
+        </div>
       </Button>
+      <Tooltip id="delete-tooltip" place="top" />
       <ConfirmModal
         show={deleteModalShow}
         onHide={() => setDeleteModalShow(false)}
@@ -137,9 +149,17 @@ const OperationButtons = ({ job, onClickCancel, onClickDelete }: ButtonProps) =>
       />
       {canCancel(job.status) && (
         <>
-          <Button color="secondary" onClick={() => setCancelModalShow(true)}>
-            {t('job.list.operation.cancel')}
+          <Button
+          color="secondary"
+          onClick={() => setCancelModalShow(true)}
+          data-tooltip-id="cancel-tooltip"
+          data-tooltip-content={t('job.list.operation.cancel')}
+          aria-label={t('job.list.operation.cancel')}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <BsXCircle />
+        </div>
           </Button>
+          <Tooltip id="cancel-tooltip" place="top" />
           <ConfirmModal
             show={cancelModalShow}
             onHide={() => setCancelModalShow(false)}

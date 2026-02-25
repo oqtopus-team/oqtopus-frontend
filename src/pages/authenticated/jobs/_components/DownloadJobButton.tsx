@@ -2,6 +2,9 @@ import { Job, JobFileData, JobFileDataInfo, JobTypeType } from '@/domain/types/J
 import { Button } from '@/pages/_components/Button';
 import { CSSProperties, useState } from 'react';
 import { BsDownload } from 'react-icons/bs';
+import { useTranslation } from 'react-i18next';
+import { Tooltip } from 'react-tooltip';
+import 'react-tooltip/dist/react-tooltip.css';
 
 type DownloadJobButtonProps = {
   job?: Job | null;
@@ -9,6 +12,7 @@ type DownloadJobButtonProps = {
 };
 
 export default function DownloadJobButton({ job, style }: DownloadJobButtonProps) {
+  const { t } = useTranslation();
   const [downloadInProgress, setDownloadInProgress] = useState(false);
 
   function downloadJob() {
@@ -48,13 +52,19 @@ export default function DownloadJobButton({ job, style }: DownloadJobButtonProps
   }
 
   return (
-    <Button
-      style={style}
-      color="secondary"
-      onClick={downloadJob}
-      disabled={!job || downloadInProgress}
-    >
-      <BsDownload />
-    </Button>
+    <>
+      <Button
+        style={style}
+        color="secondary"
+        onClick={downloadJob}
+        disabled={!job || downloadInProgress}
+        data-tooltip-id="download-tooltip"
+        data-tooltip-content={t('job.list.operation.download')}
+        aria-label={t('job.list.operation.download')}
+      >
+        <BsDownload />
+      </Button>
+      <Tooltip id="download-tooltip" place="top" />
+    </>
   );
 }
