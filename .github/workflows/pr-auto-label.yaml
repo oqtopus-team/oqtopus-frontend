@@ -26,7 +26,7 @@ jobs:
 
             // Detect Conventional Commit type from PR title
             if (/^feat(\(.+\))?:/.test(lowerTitle)) {
-              labelsToAdd.push("feat");
+              labelsToAdd.push("feature");
             } else if (/^fix(\(.+\))?:/.test(lowerTitle)) {
               labelsToAdd.push("fix");
             } else if (/^chore(\(.+\))?:/.test(lowerTitle)) {
