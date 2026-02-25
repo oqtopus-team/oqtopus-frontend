@@ -1,0 +1,113 @@
+name: Release PR Notes
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  release-notes:
+    # Run only for release PR: develop -> main
+    if: github.event.pull_request.head.ref == 'develop'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Generate release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          TMP_BREAKING=$(mktemp)
+          TMP_FEAT=$(mktemp)
+          TMP_FIX=$(mktemp)
+          TMP_CHORE=$(mktemp)
+          TMP_OTHER=$(mktemp)
+
+          # Compare commits between main and develop
+          COMMITS=$(gh api repos/$REPO/compare/main...develop --jq '.commits[].sha')
+
+          declare -A seen
+
+          for sha in $COMMITS; do
+            PR_JSON=$(gh api repos/$REPO/commits/$sha/pulls)
+
+            NUMBER=$(echo "$PR_JSON" | jq -r '.[0].number // empty')
+            TITLE=$(echo "$PR_JSON" | jq -r '.[0].title // empty')
+            MERGED=$(echo "$PR_JSON" | jq -r '.[0].merged_at // empty')
+            AUTHOR=$(echo "$PR_JSON" | jq -r '.[0].user.login // empty')
+            URL=$(echo "$PR_JSON" | jq -r '.[0].html_url // empty')
+            LABELS=$(echo "$PR_JSON" | jq -r '.[0].labels[].name // empty')
+
+            # Skip if invalid or already processed
+            if [[ -z "$NUMBER" || -z "$MERGED" || -n "${seen[$NUMBER]}" ]]; then
+              continue
+            fi
+
+            LINE="- [#$NUMBER]($URL) $TITLE (@$AUTHOR)"
+
+            # Classification priority:
+            # breaking > feat > fix > chore > other
+            if echo "$LABELS" | grep -qi '^breaking changes$'; then
+              echo "$LINE" >> "$TMP_BREAKING"
+            elif echo "$LABELS" | grep -qi '^feat$'; then
+              echo "$LINE" >> "$TMP_FEAT"
+            elif echo "$LABELS" | grep -qi '^fix$'; then
+              echo "$LINE" >> "$TMP_FIX"
+            elif echo "$LABELS" | grep -qi '^chore$'; then
+              echo "$LINE" >> "$TMP_CHORE"
+            else
+              echo "$LINE" >> "$TMP_OTHER"
+            fi
+
+            seen[$NUMBER]=1
+          done
+
+          # Build PR body
+          {
+            echo "# Release Notes"
+            echo ""
+
+            if [[ -s "$TMP_BREAKING" ]]; then
+              echo "## ⚠️ Breaking Changes"
+              echo ""
+              sort -u "$TMP_BREAKING"
+              echo ""
+            fi
+
+            if [[ -s "$TMP_FEAT" ]]; then
+              echo "## ✨ Features"
+              echo ""
+              sort -u "$TMP_FEAT"
+              echo ""
+            fi
+
+            if [[ -s "$TMP_FIX" ]]; then
+              echo "## 🐛 Bug Fixes"
+              echo ""
+              sort -u "$TMP_FIX"
+              echo ""
+            fi
+
+            if [[ -s "$TMP_CHORE" ]]; then
+              echo "## 🧹 Chores"
+              echo ""
+              sort -u "$TMP_CHORE"
+              echo ""
+            fi
+
+            if [[ -s "$TMP_OTHER" ]]; then
+              echo "## Other Changes"
+              echo ""
+              sort -u "$TMP_OTHER"
+              echo ""
+            fi
+          } > body.md
+
+          # Overwrite PR description
+          gh pr edit $PR_NUMBER --body-file body.md
