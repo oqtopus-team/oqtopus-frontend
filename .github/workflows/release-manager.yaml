@@ -25,5 +25,13 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const script = await import('./.github/scripts/release-manager.js');
-            await script({ github, context, core });
+            const path = require('path');
+
+            // Resolve script path from repository root (important!)
+            const scriptPath = path.join(
+              process.env.GITHUB_WORKSPACE,
+              '.github/scripts/release-manager.js'
+            );
+
+            const script = await import(`file://${scriptPath}`);
+            await script.default({ github, context, core });
