@@ -47,7 +47,7 @@ jobs:
             const { data: pr } = await github.rest.pulls.create({
               owner,
               repo,
-              title: `Release: ${today}`,
+              title: `Release ${today}`,
               head,
               base,
               body: "Auto-generated release PR. Release notes will be updated automatically.",
