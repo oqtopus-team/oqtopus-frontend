@@ -41,17 +41,19 @@ jobs:
               return;
             }
 
-            // Create new release PR
-            const today = new Date().toISOString().slice(0, 10);
+            // Create new release PR (JST)
+            const today = new Date().toLocaleDateString("en-CA", {
+              timeZone: "Asia/Tokyo",
+            }); // -> YYYY-MM-DD
 
             const { data: pr } = await github.rest.pulls.create({
               owner,
               repo,
-              title: `Release: ${today}`,
+              title: `Release ${today}`,
               head,
               base,
               body: "Auto-generated release PR. Release notes will be updated automatically.",
               maintainer_can_modify: true,
             });
-
+            
             console.log("Created release PR:", pr.html_url);
