@@ -3,57 +3,27 @@ name: Release PR Manager
 on:
   pull_request:
     types: [closed]
+    branches:
+      - develop
 
 permissions:
   contents: read
   pull-requests: write
 
 jobs:
-  ensure-release-pr:
-    # Run only when a PR is merged into develop
-    if: >
-      github.event.pull_request.merged == true &&
-      github.event.pull_request.base.ref == 'develop'
+  release-pr:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
-      - name: Ensure release PR exists
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run release PR manager
         uses: actions/github-script@v7
         with:
           script: |
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-
-            const base = "main";
-            const head = "develop";
-
-            // Check existing open release PR
-            const { data: prs } = await github.rest.pulls.list({
-              owner,
-              repo,
-              state: "open",
-              base,
-              head: `${owner}:${head}`,
-            });
-
-            if (prs.length > 0) {
-              console.log("Release PR already exists:", prs[0].html_url);
-              return;
-            }
-
-            // Create new release PR (JST)
-            const today = new Date().toLocaleDateString("en-CA", {
-              timeZone: "Asia/Tokyo",
-            }); // -> YYYY-MM-DD
-
-            const { data: pr } = await github.rest.pulls.create({
-              owner,
-              repo,
-              title: `Release ${today}`,
-              head,
-              base,
-              body: "Auto-generated release PR. Release notes will be updated automatically.",
-              maintainer_can_modify: true,
-            });
-            
-            console.log("Created release PR:", pr.html_url);
+            const script = require('./.github/scripts/release-manager.js');
+            await script({ github, context, core });
