@@ -27,7 +27,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-
         run: |
           TMP_BREAKING=$(mktemp)
           TMP_FEAT=$(mktemp)
