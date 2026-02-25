@@ -24,7 +24,18 @@ jobs:
             const lowerTitle = title.toLowerCase();
             const labelsToAdd = [];
 
-            // Detect Conventional Commit type from PR title
+
+            // ----------------------------
+            // Release PR detection
+            // ----------------------------
+            // Matches: "Release YYYY-MM-DD"
+            if (/^Release\s/i.test(title)) {
+              labels.add("release");
+            }
+
+            // ----------------------------
+            // Conventional commit detection
+            // ----------------------------
             if (/^feat(\(.+\))?:/.test(lowerTitle)) {
               labelsToAdd.push("feature");
             } else if (/^fix(\(.+\))?:/.test(lowerTitle)) {
