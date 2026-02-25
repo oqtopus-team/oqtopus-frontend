@@ -30,7 +30,7 @@ jobs:
             // ----------------------------
             // Matches: "Release YYYY-MM-DD"
             if (/^Release\s/i.test(title)) {
-              labels.add("release");
+              labelsToAdd.add("release");
             }
 
             // ----------------------------
