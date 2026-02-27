@@ -760,13 +760,13 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
               ctx.stroke();
 
               const label = node.label || '';
-              const fontSize = 14 / globalScale;
+              const fontSize = 16 / globalScale;
               ctx.font = `${fontSize}px Arial Bold`;
               ctx.textAlign = 'center';
               ctx.textBaseline = 'middle';
               if (node.x !== undefined && node.y !== undefined) {
                 ctx.strokeStyle = '#0f172a';
-                ctx.lineWidth = 3.2 / globalScale;
+                ctx.lineWidth = 3.6 / globalScale;
                 ctx.strokeText(label, node.x, node.y);
                 ctx.fillStyle = '#f8fafc';
                 ctx.fillText(label, node.x, node.y);
