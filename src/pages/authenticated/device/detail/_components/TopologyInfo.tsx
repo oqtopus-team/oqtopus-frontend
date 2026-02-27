@@ -143,6 +143,30 @@ const getColorFromScale = (ratio: number): string => {
   return `rgb(${mixed.r}, ${mixed.g}, ${mixed.b})`;
 };
 
+const getLabelTextColor = (backgroundColor: string): string => {
+  const color = backgroundColor.trim().toLowerCase();
+
+  const hexMatch = /^#([0-9a-f]{6})$/i.exec(color);
+  if (hexMatch) {
+    const rgb = hexToRgb(`#${hexMatch[1]}`);
+    if (rgb) {
+      const luminance = 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
+      return luminance > 145 ? '#0f172a' : '#f8fafc';
+    }
+  }
+
+  const rgbMatch = /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i.exec(color);
+  if (rgbMatch) {
+    const r = Number(rgbMatch[1]);
+    const g = Number(rgbMatch[2]);
+    const b = Number(rgbMatch[3]);
+    const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    return luminance > 145 ? '#0f172a' : '#f8fafc';
+  }
+
+  return '#f8fafc';
+};
+
 const getColorForMetric = (
   value: number | null,
   min: number,
@@ -747,6 +771,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
             ) => {
               const radius = 18 / globalScale;
               const nodeColor = (node as any).color || '#4887fa';
+              const labelTextColor = getLabelTextColor(nodeColor);
 
               ctx.beginPath();
               if (node.x !== undefined && node.y !== undefined) {
@@ -765,11 +790,12 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
               ctx.textAlign = 'center';
               ctx.textBaseline = 'middle';
               if (node.x !== undefined && node.y !== undefined) {
-                ctx.strokeStyle = '#0f172a';
-                ctx.lineWidth = 3.6 / globalScale;
-                ctx.strokeText(label, node.x, node.y);
-                ctx.fillStyle = '#f8fafc';
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
+                ctx.shadowBlur = 2 / globalScale;
+                ctx.fillStyle = labelTextColor;
                 ctx.fillText(label, node.x, node.y);
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
               }
             }}
             linkCanvasObject={(
