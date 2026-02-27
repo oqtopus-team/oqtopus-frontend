@@ -103,12 +103,13 @@ export const parseIndexedPauliGate: ObservableParser<[PauliGateType, number]> =
   );
 
 export const parsePauliString: ObservableParser<PauliGateType[]> =
-  P.many(parseIndexedPauliGate).then(gates =>
-    Parser.pure(gates
-      // sort by qubit index
-      .toSorted((l, r) => l[1] - r[1])
-      // extract gate name
-      .map(gi => gi[0])
+  P.many(parseIndexedPauliGate)
+    .then(gates =>
+      Parser.pure(gates
+        // sort by qubit index
+        .toSorted((l, r) => l[1] - r[1])
+        // extract gate name
+        .map(gi => gi[0])
     )
   );
 

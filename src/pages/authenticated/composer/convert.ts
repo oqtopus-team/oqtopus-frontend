@@ -3,6 +3,7 @@
 
 import { PauliGateType, WasmOneControlOneTargetGateData, WasmOneQubitGateData, WasmOneQubitRotationGateData, WasmPauliGateData, WasmQuantumGateData } from "qulacs-wasm-simulator-client";
 import * as QulacsWasmClientType from "qulacs-wasm-simulator-client/lib/main/client/QulacsSimulatorAppClient/ClientType";
+import * as P from "./parser/observable/parser";
 import { QuantumGate } from "./gates";
 import { QuantumCircuit } from "./circuit";
 import { ComposerGate } from "./composer";
@@ -35,34 +36,20 @@ export const convertObservable = (
   }
 }
 
-const parsePauliGateType = (op: string): undefined | PauliGateType => {
-  switch (op) {
-    case "i": return PauliGateType.I;
-    case "x": return PauliGateType.X;
-    case "y": return PauliGateType.Y;
-    case "z": return PauliGateType.Z;
-  }
-}
-
 export const parsePauliString = (pauli: string, qubitNumber: number): PauliGateType[] => {
-  const step = (inp: string, parsed: PauliGateType[]) => {
-    if (inp == "") return parsed; 
-    const op = inp.slice(0, 1);
-    const idx = inp.slice(1, 2);
-    const tl = inp.slice(2);
-    const parsedOp = parsePauliGateType (op.toLowerCase());
-    if (!parsedOp) {
-      throw new Error("Unexpected Pauli operator string.")
-    }
-    const parsedIdx = Number(idx);
-    if (isNaN(parsedIdx) || parsedIdx > qubitNumber) {
-      throw new Error("Unexpected Pauli operator index");
-    } 
-    const next = parsed.slice();
-    next[parsedIdx] = parsedOp; 
-    return step(tl, next);
+  const parseResult = P.parseObservable(pauli);
+  switch (parseResult._tag) {
+    case "ParseOk":
+      const gates = parseResult.value;
+      if (gates.length > qubitNumber) {
+        // TODO: better error handling 
+        throw new Error("incorrect qubit index")
+      }
+      return gates;
+    case "ParseFail":
+      throw new Error(parseResult.value);
   }
-  return step(pauli.trim(), [])
+
 };
 export const convertComposerGate = (gate: ComposerGate): WasmQuantumGateData[] => {
   switch (gate._tag) {
