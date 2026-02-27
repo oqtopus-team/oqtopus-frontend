@@ -9,7 +9,6 @@ import useWindowSize from '@/pages/_hooks/UseWindowSize';
 import 'simplebar-react/dist/simplebar.min.css';
 import { Button } from '@/pages/_components/Button';
 import { Select } from '@/pages/_components/Select';
-import useDarkMode from '@/pages/_hooks/useDarkMode';
 
 // Types for metric selection
 type QubitMetric = 'readout_error' | 't1' | 't2' | 'single_qubit_gate_error';
@@ -58,6 +57,21 @@ const isHigherBetter = (metric: string): boolean => {
   return ['t1', 't2'].includes(metric);
 };
 
+type RgbColor = { r: number; g: number; b: number };
+
+const GOOD_METRIC_COLOR: RgbColor = { r: 219, g: 234, b: 254 };
+const BAD_METRIC_COLOR: RgbColor = { r: 29, g: 78, b: 216 };
+const FLAT_METRIC_COLOR: RgbColor = { r: 96, g: 165, b: 250 };
+const MISSING_METRIC_COLOR = '#94a3b8';
+
+const interpolateRgbColor = (from: RgbColor, to: RgbColor, ratio: number): string => {
+  const clampedRatio = Math.max(0, Math.min(1, ratio));
+  const r = Math.round(from.r + (to.r - from.r) * clampedRatio);
+  const g = Math.round(from.g + (to.g - from.g) * clampedRatio);
+  const b = Math.round(from.b + (to.b - from.b) * clampedRatio);
+  return `rgb(${r}, ${g}, ${b})`;
+};
+
 const getColorForMetric = (
   value: number | null,
   min: number,
@@ -65,26 +79,17 @@ const getColorForMetric = (
   metric: string
 ): string => {
   if (value === null || isNaN(value)) {
-    return '#808080'; // Gray for missing data
+    return MISSING_METRIC_COLOR;
   }
 
   if (min === max) {
-    return 'rgb(0, 255, 0)';
+    return interpolateRgbColor(FLAT_METRIC_COLOR, FLAT_METRIC_COLOR, 0.5);
   }
 
   const normalized = Math.max(0, Math.min(1, (value - min) / (max - min)));
   const adjustedValue = isHigherBetter(metric) ? 1 - normalized : normalized;
-
-  let r, g;
-  if (adjustedValue < 0.5) {
-    r = Math.round(255 * (adjustedValue * 2));
-    g = 255;
-  } else {
-    r = 255;
-    g = Math.round(255 * (2 - adjustedValue * 2));
-  }
-
-  return `rgb(${r}, ${g}, 0)`;
+  const emphasizedValue = Math.pow(adjustedValue, 0.8);
+  return interpolateRgbColor(GOOD_METRIC_COLOR, BAD_METRIC_COLOR, emphasizedValue);
 };
 
 // Function to calculate median
@@ -132,7 +137,8 @@ const ColorLegend: React.FC<{
   const gradientStops = [];
   for (let i = 0; i <= 10; i++) {
     const value = range.min + (range.max - range.min) * (i / 10);
-    const color = getColorForMetric(value, range.min, range.max, metric);
+    const colorValue = isHigherBetter(metric) ? range.max - (value - range.min) : value;
+    const color = getColorForMetric(colorValue, range.min, range.max, metric);
     gradientStops.push(`${color} ${i * 10}%`);
   }
 
@@ -144,7 +150,9 @@ const ColorLegend: React.FC<{
 
   return (
     <div className="mt-4">
-      <h4 className="text-sm font-bold mb-6">{metricOption?.label || metric} {t('device.detail.topology_info.color_scale')}</h4>
+      <h4 className="text-sm font-bold mb-6">
+        {metricOption?.label || metric} {t('device.detail.topology_info.color_scale')}
+      </h4>
 
       <div className="relative">
         {/* Median label + arrow */}
@@ -320,7 +328,15 @@ const MAX_ZOOM = 3;
 
 export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ deviceInfo }) => {
   const { t } = useTranslation();
-  const { theme } = useDarkMode();
+  const [isDarkTheme, setIsDarkTheme] = useState<boolean>(() => {
+    return (
+      typeof document !== 'undefined' &&
+      document.documentElement.classList.contains('dark')
+    );
+  });
+  const nodeStrokeColor = isDarkTheme ? '#f8fafc' : '#0f172a';
+  const nodeHoverStrokeColor = isDarkTheme ? '#fcd34d' : '#1d4ed8';
+  const linkHoverStrokeColor = isDarkTheme ? '#fcd34d' : '#1d4ed8';
 
   const [topologyData, setTopologyData] = useState<{ nodes: NodeObject[]; links: LinkObject[] }>({
     nodes: [],
@@ -368,6 +384,21 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
   const heddingRef = useRef<HTMLDivElement>(null);
 
   const strHoveredInfo = JSON.stringify(hoveredInfo);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const root = document.documentElement;
+    const updateTheme = () => setIsDarkTheme(root.classList.contains('dark'));
+
+    updateTheme();
+    const observer = new MutationObserver(updateTheme);
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+
+    return () => observer.disconnect();
+  }, []);
 
   const handleZoom = useCallback(() => {
     if (fgRef.current && typeof fgRef.current.zoom === 'function') {
@@ -571,7 +602,9 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
           {/* Metric Selection Controls */}
           <div style={{ display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <label style={{ fontSize: '14px', fontWeight: 'bold' }}>{t('device.detail.topology_info.qubit_metric')}:</label>
+              <label style={{ fontSize: '14px', fontWeight: 'bold' }}>
+                {t('device.detail.topology_info.qubit_metric')}:
+              </label>
               <Select
                 value={selectedQubitMetric}
                 onChange={(e) => setSelectedQubitMetric(e.target.value as QubitMetric)}
@@ -587,7 +620,9 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
               </Select>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <label style={{ fontSize: '14px', fontWeight: 'bold' }}>{t('device.detail.topology_info.coupling_metric')}:</label>
+              <label style={{ fontSize: '14px', fontWeight: 'bold' }}>
+                {t('device.detail.topology_info.coupling_metric')}:
+              </label>
               <Select
                 value={selectedCouplingMetric}
                 onChange={(e) => setSelectedCouplingMetric(e.target.value as CouplingMetric)}
@@ -643,24 +678,29 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
               globalScale: number
             ) => {
               const radius = 18 / globalScale;
+              const nodeColor = (node as any).color || '#4887fa';
+
               ctx.beginPath();
               if (node.x !== undefined && node.y !== undefined) {
                 ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
               }
               // Use dynamic color from node data, fallback to default blue
-              ctx.fillStyle = (node as any).color || '#4887fa';
+              ctx.fillStyle = nodeColor;
               ctx.fill();
-              ctx.strokeStyle = node.id === hoveredNodeId ? '#fc6464' : 'white';
-              ctx.lineWidth = 3 / globalScale;
+              ctx.strokeStyle = node.id === hoveredNodeId ? nodeHoverStrokeColor : nodeStrokeColor;
+              ctx.lineWidth = node.id === hoveredNodeId ? 4 / globalScale : 3.4 / globalScale;
               ctx.stroke();
 
               const label = node.label || '';
-              const fontSize = 12 / globalScale;
+              const fontSize = 14 / globalScale;
               ctx.font = `${fontSize}px Arial Bold`;
-              ctx.fillStyle = 'black';
               ctx.textAlign = 'center';
               ctx.textBaseline = 'middle';
               if (node.x !== undefined && node.y !== undefined) {
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 3.2 / globalScale;
+                ctx.strokeText(label, node.x, node.y);
+                ctx.fillStyle = '#f8fafc';
                 ctx.fillText(label, node.x, node.y);
               }
             }}
@@ -686,7 +726,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
               ) {
                 // Drawing the outer line
                 const outerStrokeColor = clsx({
-                  '#fc6464': couplingKey === hoveredLinkId,
+                  [linkHoverStrokeColor]: couplingKey === hoveredLinkId,
                   transparent: couplingKey !== hoveredLinkId,
                 });
 
