@@ -59,17 +59,88 @@ const isHigherBetter = (metric: string): boolean => {
 
 type RgbColor = { r: number; g: number; b: number };
 
-const GOOD_METRIC_COLOR: RgbColor = { r: 219, g: 234, b: 254 };
-const BAD_METRIC_COLOR: RgbColor = { r: 29, g: 78, b: 216 };
-const FLAT_METRIC_COLOR: RgbColor = { r: 96, g: 165, b: 250 };
 const MISSING_METRIC_COLOR = '#94a3b8';
+const VIRIDIS_COLOR_SCALE: string[] = [
+  '#440154',
+  '#46085c',
+  '#481467',
+  '#482173',
+  '#472d7b',
+  '#453882',
+  '#424086',
+  '#3f4889',
+  '#3d4e8a',
+  '#3a538b',
+  '#37588c',
+  '#345d8d',
+  '#31688e',
+  '#2e6e8e',
+  '#2c728e',
+  '#2a788e',
+  '#287d8e',
+  '#25828e',
+  '#23878e',
+  '#218c8d',
+  '#21918c',
+  '#22968b',
+  '#239b89',
+  '#25a186',
+  '#29a783',
+  '#2fac80',
+  '#35b179',
+  '#3db771',
+  '#46bd6a',
+  '#51c362',
+  '#5ec962',
+  '#6ed05b',
+  '#7ed655',
+  '#8fdc4f',
+  '#a0e249',
+  '#b1e745',
+  '#c2eb42',
+  '#d4ef40',
+  '#e5f03f',
+  '#f5ee3f',
+  '#fde724',
+];
 
-const interpolateRgbColor = (from: RgbColor, to: RgbColor, ratio: number): string => {
+const interpolateRgbColor = (from: RgbColor, to: RgbColor, ratio: number): RgbColor => {
   const clampedRatio = Math.max(0, Math.min(1, ratio));
-  const r = Math.round(from.r + (to.r - from.r) * clampedRatio);
-  const g = Math.round(from.g + (to.g - from.g) * clampedRatio);
-  const b = Math.round(from.b + (to.b - from.b) * clampedRatio);
-  return `rgb(${r}, ${g}, ${b})`;
+  return {
+    r: Math.round(from.r + (to.r - from.r) * clampedRatio),
+    g: Math.round(from.g + (to.g - from.g) * clampedRatio),
+    b: Math.round(from.b + (to.b - from.b) * clampedRatio),
+  };
+};
+
+const hexToRgb = (hex: string): RgbColor | null => {
+  const match = /^#([0-9a-f]{6})$/i.exec(hex);
+  if (!match) {
+    return null;
+  }
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(match[1].slice(i, i + 2), 16));
+  return { r, g, b };
+};
+
+const getColorFromScale = (ratio: number): string => {
+  const clampedRatio = Math.max(0, Math.min(1, ratio));
+  const maxIndex = VIRIDIS_COLOR_SCALE.length - 1;
+  const position = clampedRatio * maxIndex;
+  const lowerIndex = Math.floor(position);
+  const upperIndex = Math.min(maxIndex, Math.ceil(position));
+
+  const lowerColor = hexToRgb(VIRIDIS_COLOR_SCALE[lowerIndex]);
+  const upperColor = hexToRgb(VIRIDIS_COLOR_SCALE[upperIndex]);
+  if (!lowerColor || !upperColor) {
+    return VIRIDIS_COLOR_SCALE[lowerIndex] ?? MISSING_METRIC_COLOR;
+  }
+
+  if (lowerIndex === upperIndex) {
+    return VIRIDIS_COLOR_SCALE[lowerIndex];
+  }
+
+  const mixed = interpolateRgbColor(lowerColor, upperColor, position - lowerIndex);
+  return `rgb(${mixed.r}, ${mixed.g}, ${mixed.b})`;
 };
 
 const getColorForMetric = (
@@ -83,13 +154,11 @@ const getColorForMetric = (
   }
 
   if (min === max) {
-    return interpolateRgbColor(FLAT_METRIC_COLOR, FLAT_METRIC_COLOR, 0.5);
+    return VIRIDIS_COLOR_SCALE[Math.floor(VIRIDIS_COLOR_SCALE.length / 2)];
   }
 
   const normalized = Math.max(0, Math.min(1, (value - min) / (max - min)));
-  const adjustedValue = isHigherBetter(metric) ? 1 - normalized : normalized;
-  const emphasizedValue = Math.pow(adjustedValue, 0.8);
-  return interpolateRgbColor(GOOD_METRIC_COLOR, BAD_METRIC_COLOR, emphasizedValue);
+  return getColorFromScale(normalized);
 };
 
 // Function to calculate median
@@ -137,8 +206,7 @@ const ColorLegend: React.FC<{
   const gradientStops = [];
   for (let i = 0; i <= 10; i++) {
     const value = range.min + (range.max - range.min) * (i / 10);
-    const colorValue = isHigherBetter(metric) ? range.max - (value - range.min) : value;
-    const color = getColorForMetric(colorValue, range.min, range.max, metric);
+    const color = getColorForMetric(value, range.min, range.max, metric);
     gradientStops.push(`${color} ${i * 10}%`);
   }
 
