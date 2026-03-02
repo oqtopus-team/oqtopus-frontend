@@ -44,7 +44,7 @@ export default {
       nodata: 'データが存在しません',
       invalid_device_info: 'トポロジー情報が無効です',
       fit_to_view: '画面に合わせる',
-      qubit_metric: 'クビット指標',
+      qubit_metric: '量子ビット',
       coupling_metric: '結合指標',
       color_scale: 'カラースケール',
     },

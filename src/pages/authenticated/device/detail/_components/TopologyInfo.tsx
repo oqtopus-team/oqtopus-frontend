@@ -250,10 +250,14 @@ const ColorLegend: React.FC<{
         {/* Median label + arrow */}
         {median !== null && medianPosition !== null && (
           <div
-            className="absolute -top-5 flex flex-col items-center"
+            className="absolute -top-5 flex flex-col"
             style={{
               left: `${medianPosition}%`,
-              transform: 'translateX(-50%)',
+              ...(medianPosition < 20
+                ? { transform: 'translateX(0%)', alignItems: 'flex-start' }
+                : medianPosition > 80
+                  ? { transform: 'translateX(-100%)', alignItems: 'flex-end' }
+                  : { transform: 'translateX(-50%)', alignItems: 'center' }),
             }}
           >
             <span className="text-xs font-medium whitespace-nowrap">
@@ -421,10 +425,7 @@ const MAX_ZOOM = 3;
 export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ deviceInfo }) => {
   const { t } = useTranslation();
   const [isDarkTheme, setIsDarkTheme] = useState<boolean>(() => {
-    return (
-      typeof document !== 'undefined' &&
-      document.documentElement.classList.contains('dark')
-    );
+    return typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
   });
   const nodeStrokeColor = isDarkTheme ? '#f8fafc' : '#0f172a';
   const nodeHoverStrokeColor = isDarkTheme ? '#fcd34d' : '#1d4ed8';
