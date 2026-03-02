@@ -86,7 +86,7 @@ export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
                   <CodeEditor
                     disabled={true}
                     code={text}
-                    fixedTheme={theme == ThemeOptions.DARK ? 'okaidia' : 'default'}
+                    fixedTheme={theme === ThemeOptions.DARK ? 'okaidia' : 'default'}
                   />
                 </SimpleBar>
               </div>

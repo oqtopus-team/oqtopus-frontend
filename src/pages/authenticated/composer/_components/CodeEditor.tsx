@@ -120,12 +120,16 @@ export const CodeEditor = forwardRef<
       document.head.appendChild(themeLink);
     }
 
-    themeLink.onload = () => {
-      if (updateStateOnLoad) {
-        localStorage.setItem('prism-code-theme', newTheme);
-        setSelectedTheme(newTheme);
-      }
-    };
+    themeLink.addEventListener(
+      'load',
+      () => {
+        if (updateStateOnLoad) {
+          localStorage.setItem('prism-code-theme', newTheme);
+          setSelectedTheme(newTheme);
+        }
+      },
+      { once: true }
+    );
     themeLink.href = theme.href;
   }
 

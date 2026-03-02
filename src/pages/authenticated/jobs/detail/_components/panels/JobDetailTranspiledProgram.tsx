@@ -36,7 +36,7 @@ export const JobDetailTranspiledProgram: React.FC<JobDetailTranspiledProgramProp
               <CodeEditor
                 disabled={true}
                 code={text}
-                fixedTheme={ThemeOptions.DARK ? 'okaidia' : 'default'}
+                fixedTheme={theme === ThemeOptions.DARK ? 'okaidia' : 'default'}
               />
             </SimpleBar>
           </div>
