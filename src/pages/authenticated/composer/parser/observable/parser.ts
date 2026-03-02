@@ -102,17 +102,30 @@ export const parseIndexedPauliGate: ObservableParser<[PauliGateType, number]> =
     )
   );
 
+/**
+ * The parsed result is an array of Pauli matrix type, sorted according to the qubit index.
+ */
 export const parsePauliString: ObservableParser<PauliGateType[]> =
   P.many(parseIndexedPauliGate)
-    .then(gates =>
-      Parser.pure(gates
-        // sort by qubit index
-        .toSorted((l, r) => l[1] - r[1])
-        // extract gate name
-        .map(gi => gi[0])
-    )
-  );
+    .map(gates => {
+      const arranged: Record<number, PauliGateType> = gates.reduce((acc, [gate, i]) => ({ ...acc, [i]: gate }), {});
+      return Array.from(
+        { length: Math.max(...Object.keys(arranged).map(Number)) + 1 },
+        (_, i) => arranged[i] ?? PauliGateType.I
+      )
+    });
 
+/**
+ * Parser for Pauli strings: parses an input string like `"X0 Y1 Z2"` into `["x", "y", "z"]`.
+ *
+ * There are three points worth mentioning:
+ * 1. The order of Pauli matrices acting on each qubit does not matter.
+ *    For instance, parsing the input string `"X0 Z2 Y1"` yields `["x", "y", "z"]`.
+ * 2. Whitespace of arbitrary length is ignored during parsing, so
+ *    parsing the two inputs `"X0Y1Z2I3"` and `"X0  Y1   X  2   I    3"` produces the same result.
+ * 3. If the input lacks Pauli matrices on some qubits, like `"X0 Y2 Z5"`, the identity is inserted into the parsed result.
+ *    So the result of parsing the former should be `["x", "i", "y", "i", "i", "z"]`.
+ */
 export const parseObservable = (operatorString: string): ParseResult<string, PauliGateType[]> => {
   const reportError = <T>(res: ParseResult<RangedError, unknown>): ParseResult<string, T> => {
     switch (res._tag) {

@@ -9,7 +9,6 @@ export interface Parser<S, E, T> {
   mapError: <F>(f: (e: E) => F) => Parser<S, F, T>;
   then: <U>(f: (t: T) => Parser<S, E, U>) => Parser<S, E, U>;
   or: (fallback: Parser<S, E, T>) => Parser<S, E, T>;
-  [Symbol.iterator](): Generator<Parser<S, E, T>, T, any>;
 };
 
 const mapParser = <S, E, T, U>(f: (t: T) => U, p: RunParser<S, E, T>): Parser<S, E, U> => {
@@ -73,10 +72,6 @@ export const Parser = <S, E, T>(parserFn: (s: S) => [ParseResult<E, T>, S]): Par
     mapError: <F>(f: (e: E) => F) => mapErrorParser(f, parser),
     then: <U>(f: (t: T) => Parser<S, E, U>) => bindParser(f, parser),
     or: (fallback: Parser<S, E, T>) => altParser(parser, fallback),
-
-    *[Symbol.iterator]() {
-      return (yield this);
-    }
   };
   return parser;
 }
@@ -85,24 +80,6 @@ Parser.fail = <S, E, T>(e: E): Parser<S, E, T> => Parser((s) => [ParseFail(e), s
 Parser.pure = <S, E, A>(a: A): Parser<S, E, A> => Parser((s) => [ParseOk(a), s]);
 Parser.apply = <S, E, A, B>(f: Parser<S, E, (a: A) => B>, p: Parser<S, E, A>) => applyParser(f, p);
 
-Parser.do = function <S, E, T>(
-  genFn: () => Generator<Parser<S, E, T>, T, T>
-): Parser<S, E, T> {
-  const gen = genFn();
-
-  const step = (value?: any): any => {
-    const result = gen.next(value);
-
-    if (result.done) {
-      return Parser.pure(result.value);
-    }
-
-    const p = result.value;
-    return p.then((v) => step(v));
-  };
-
-  return step();
-};
 export const many = <S, E, T>(p: Parser<S, E, T>): Parser<S, E, T[]> => {
   const step = (buf: T[], s: S): [T[], S] => {
     const [r, next] = p.runParser(s);
