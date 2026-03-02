@@ -11,10 +11,8 @@ import { useTranslation } from 'react-i18next';
 import { JobForm } from '@/pages/authenticated/jobs/_components/JobForm';
 import { LocalSimulationTabContent } from './LocalSimulationTabContent';
 import { RealComposerGate } from '../composer';
-import { GatePosition } from '@/backend/qulacs/types';
 import { isParametrizedGate } from '../gates';
 import { circuitContext } from '../circuit';
-import composer from '@/i18n/en/composer';
 
 export type TabPanelItem = { id: string; label: string; disabled: boolean };
 
@@ -113,10 +111,10 @@ export default (props: ControlPanelProps) => {
   const [selectedGates, setSelectedGates] = useState<RealComposerGate[]>([]);
 
   useEffect(() => {
-    composerCircuitService.onSelectedGatesChange(gs => {
+    return composerCircuitService.onSelectedGatesChange(gs => {
       setSelectedGates(gs);
     })
-  });
+  }, [composerCircuitService]);
 
   const selectedParametricGatePosition = useMemo(() => {
     if (selectedGates.length == 1) {
