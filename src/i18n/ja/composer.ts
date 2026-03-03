@@ -22,7 +22,7 @@ export default {
   },
   control_panel: {
     exec: {
-      tab_label: '実行',
+      tab_label: 'バックエンド実行',
       job_name: 'ジョブ名',
       name_placeholder: 'ジョブ名を入力してください',
       job_desc: '説明',
@@ -37,7 +37,18 @@ export default {
         'デバイス {{deviceId}} は {{qubitsCount}} 量子ビット以下の量子回路をサポートしています。',
     },
     siml: {
-      tab_label: 'シミュレーション',
+      tab_label: 'ローカルシミュレーション',
+      circuit_evaluation: '量子回路評価',
+      state_vector: '状態ベクトル(確率振幅)',
+      observable_evaluation: '可観測量の評価',
+      sampling: 'サンプリング実行',
+      sampling_shots: 'ショット数',
+      sampling_result: 'サンプリング結果',
+      expectation_value_estimation: '期待値推定',
+      expectation_value: '期待値',
+      observable: '可観測量',
+      parameter_sweep: '量子回路パラメータによる掃引',
+      argument_color_map: '位相角カラーマップ',
     },
     settings: {
       tab_label: '設定',
@@ -63,5 +74,8 @@ export default {
         'ゲート名は文字、数字、アンダースコアのみで構成される必要があります。また、文字またはアンダースコアで始まる必要があります。',
       gate_already_defined: '指定された名前のゲートは既に定義されています。',
     },
+  },
+  code_editor: {
+    theme: 'テーマ',
   },
 };

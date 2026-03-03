@@ -22,7 +22,7 @@ export default {
   },
   control_panel: {
     exec: {
-      tab_label: 'Execution',
+      tab_label: 'Backend Execution',
       job_name: 'Job Name',
       name_placeholder: 'Enter job name.',
       job_desc: 'Job Description',
@@ -37,7 +37,18 @@ export default {
         'The device {{deviceId}} supports quantum circuits of {{qubitsCount}} qubits or fewer.',
     },
     siml: {
-      tab_label: 'Simulation',
+      tab_label: 'Local Simulation',
+      circuit_evaluation: 'Quantum Circuit Evaluation',
+      state_vector: 'State Vector (Probability Amplitude)',
+      observable_evaluation: 'Observable Evaluation',
+      sampling: 'Sampling Execution',
+      sampling_shots: 'Shots',
+      sampling_result: 'Sampling Result',
+      expectation_value_estimation: 'Expectation Value Estimation',
+      expectation_value: 'Expectation Value',
+      observable: 'Observable',
+      parameter_sweep: 'Sweep by circuit parameter',
+      argument_color_map: 'Argument color map',
     },
     settings: {
       tab_label: 'Settings',
@@ -63,5 +74,8 @@ export default {
         'A gate name must start with a letter or an underscore. It must consist only of letters, numbers, and underscores.',
       gate_already_defined: 'Gate with provided name is already defined.',
     },
+  },
+  code_editor: {
+    theme: 'theme',
   },
 };

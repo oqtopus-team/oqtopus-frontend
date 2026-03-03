@@ -53,6 +53,7 @@ const config: Config = {
       'table-border': 'rgb(var(--table-border) / <alpha-value>)',
       'cmd-bg': 'rgb(var(--cmd-bg) / <alpha-value>)',
       'modal-bg': 'rgb(var(--modal-bg) / <alpha-value>)',
+      'chart-title': 'rgb(var(--chart-title) / <alpha-value>)',
 
       // Quantum Circuit colors
       'gate-atomic': 'rgb(var(--gate-atomic) / <alpha-value>)',

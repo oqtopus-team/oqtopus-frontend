@@ -85,6 +85,7 @@ export default function SignUpPage() {
           {...register('username')}
           label={t('signup.form.mail')}
           errorMessage={errors.username?.message}
+          className={clsx('bg-base-card')}
         />
         <Spacer className="h-5" />
         <Input
@@ -94,6 +95,7 @@ export default function SignUpPage() {
           {...register('password')}
           label={t('signup.form.password')}
           errorMessage={errors.password?.message}
+          className={clsx('bg-base-card')}
         />
         <Spacer className="h-2.5" />
         <p
@@ -114,6 +116,7 @@ export default function SignUpPage() {
           {...register('confirm_password')}
           label={t('signup.form.confirm_password')}
           errorMessage={errors.confirm_password?.message}
+          className={clsx('bg-base-card')}
         />
         <Spacer className="h-5" />
         <Button type="submit" color="secondary" loading={processing}>

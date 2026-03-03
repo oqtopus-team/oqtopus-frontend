@@ -93,6 +93,7 @@ export default function SetupMFAPage() {
           {...register('totpCode')}
           label={t('mfa.form.totp_code')}
           errorMessage={errors.totpCode?.message}
+          className={clsx('bg-base-card')}
         />
         <Spacer className="h-5" />
         <Button type="submit" color="secondary" loading={processing}>
