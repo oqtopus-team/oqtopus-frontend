@@ -70,6 +70,7 @@ export default function ForgotPasswordPage() {
           label={t('forgot_password.form.mail')}
           errorMessage={errors.email?.message}
           {...register('email')}
+          className={clsx('bg-base-card')}
         />
         <Spacer className="h-5" />
         <Button type="submit" color="secondary" loading={processing}>

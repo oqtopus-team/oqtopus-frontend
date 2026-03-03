@@ -73,6 +73,7 @@ export default function ConfirmResetMFAPage() {
           {...register('verificationCode')}
           label={t('mfa.confirm.form.code')}
           errorMessage={errors.verificationCode?.message}
+          className={clsx('bg-base-card')}
         />
         <Spacer className="h-2.5" />
         <p className={clsx('text-xs', 'leading-[1.8]')}>{t('mfa.confirm.form.code_explanation')}</p>
