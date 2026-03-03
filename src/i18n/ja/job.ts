@@ -58,6 +58,7 @@ export default {
       description: '説明',
       job_type: 'ジョブタイプ',
       device_id: 'デバイスID',
+      transpiler: 'トランスパイラ',
       shots: 'ショット数',
       status: 'ステータス',
       submitted_at: 'Submit 日時',
@@ -66,6 +67,9 @@ export default {
       ended_at: '終了日時',
       execution_time: '実行時間 (秒)',
       message: 'メッセージ',
+      simulator: 'シミュレーター',
+      mitigation: '緩和',
+      program: 'プログラム',
     },
     program: {
       nodata: 'データが存在しません',
@@ -117,6 +121,11 @@ export default {
     button: '送信する',
     submit_and_view_job_button: '送信して詳細を確認',
     submitting: 'リクエストを処理中...',
+    operator: {
+      pauli: '演算子（パウリ文字列）',
+      coeff: '係数',
+    },
+    program_sample: 'プログラムサンプル',
     toast: {
       success: '成功: ジョブが正常に送信されました',
       error: '失敗: ジョブの送信に失敗しました',
@@ -136,6 +145,9 @@ export default {
       deviceInsufficientQubits:
         'このデバイスは{{deviceQubits}}量子ビットのみをサポートしていますが、プログラムには{{programQubits}}量子ビットが必要です',
       invalid_json: '正しいJSON形式で入力してください',
+    },
+    modal: {
+      overwrite_program: 'このプログラムを上書きしてもよろしいですか？',
     },
   },
 };

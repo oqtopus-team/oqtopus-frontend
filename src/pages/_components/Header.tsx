@@ -5,15 +5,21 @@ import { Select } from './Select';
 import i18next from 'i18next';
 import { useNavigate } from 'react-router';
 import { useAuth } from '@/auth/hook';
+import { IconButton } from '@mui/material';
+import { FaMoon } from 'react-icons/fa';
+import { MdOutlineWbSunny } from 'react-icons/md';
+import { useMemo } from 'react';
+import { ThemeOptions, useTheme } from '@/theme/useTheme';
 
 export const Header = (): React.ReactElement => {
   return (
     <header className={clsx('bg-base-100', 'relative', 'px-8', 'z-50')}>
       <div className={clsx('flex', 'justify-between')}>
         <Logo />
-        <span className={clsx('flex', 'items-center', 'gap-7')}>
+        <div className={clsx('flex', 'items-center', 'gap-7')}>
           <LanguageSelector />
-        </span>
+          <ThemeSwitch />
+        </div>
       </div>
     </header>
   );
@@ -23,6 +29,18 @@ const Logo = (): React.ReactElement => {
   const { isAuthenticated } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { theme } = useTheme();
+
+  const logoSrc = useMemo(() => {
+    const baseUrl = import.meta.env.VITE_APP_LOGO_IMAGE_URL;
+    const ext = theme === ThemeOptions.DARK ? '.webp' : '.png';
+
+    if (/\.(png|webp|jpg|jpeg|svg)$/i.test(baseUrl)) {
+      return baseUrl.replace(/\.[^.]+$/, ext);
+    }
+
+    return `${baseUrl}${ext}`;
+  }, [theme]);
 
   const handleLogoClick = () => {
     if (isAuthenticated) {
@@ -41,7 +59,7 @@ const Logo = (): React.ReactElement => {
       onClick={handleLogoClick}
     >
       <img
-        src={import.meta.env.VITE_APP_LOGO_IMAGE_URL}
+        src={logoSrc}
         className={clsx(['h-12', 'my-2', 'py-2'])}
         alt={import.meta.env.VITE_APP_APP_NAME_EN}
       />
@@ -56,7 +74,13 @@ const LanguageSelector = (): React.ReactElement => {
   const { t } = useTranslation();
   return (
     <Select
-      className={clsx('!w-[100px]', 'border-primary', 'text-primary', 'outline-primary')}
+      className={clsx(
+        '!w-[100px]',
+        'border-primary',
+        'text-primary',
+        'outline-primary',
+        'bg-base-100'
+      )}
       onChange={async (e: React.ChangeEvent<HTMLSelectElement>) => {
         if (languages.includes(e.target.value)) {
           i18next.changeLanguage(e.target.value);
@@ -72,5 +96,21 @@ const LanguageSelector = (): React.ReactElement => {
         );
       })}
     </Select>
+  );
+};
+
+const ThemeSwitch = () => {
+  const { theme, setTheme } = useTheme();
+  const Icon = theme === ThemeOptions.DARK ? MdOutlineWbSunny : FaMoon;
+
+  const switchDarkTheme = () => {
+    const themeToSet = theme === ThemeOptions.LIGHT ? ThemeOptions.DARK : ThemeOptions.LIGHT;
+    setTheme(themeToSet);
+  };
+
+  return (
+    <IconButton color="primary" size="small" onClick={switchDarkTheme}>
+      <Icon />
+    </IconButton>
   );
 };

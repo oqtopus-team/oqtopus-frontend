@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import clsx from 'clsx';
 import { ForceGraph2D } from 'react-force-graph';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +8,287 @@ import { Card } from '@/pages/_components/Card';
 import useWindowSize from '@/pages/_hooks/UseWindowSize';
 import 'simplebar-react/dist/simplebar.min.css';
 import { Button } from '@/pages/_components/Button';
+import { Select } from '@/pages/_components/Select';
+
+// Types for metric selection
+type QubitMetric = 'readout_error' | 't1' | 't2' | 'single_qubit_gate_error';
+type CouplingMetric = 'two_qubit_gate_error' | 'gate_duration';
+
+interface MetricOption {
+  value: string;
+  label: string;
+  unit?: string;
+}
+
+// Metric options for dropdowns
+const QUBIT_METRICS: MetricOption[] = [
+  { value: 'readout_error', label: 'Readout Error', unit: '%' },
+  { value: 't1', label: 'T1 Relaxation Time', unit: 'μs' },
+  { value: 't2', label: 'T2 Dephasing Time', unit: 'μs' },
+  { value: 'single_qubit_gate_error', label: 'Single-Qubit Gate Error', unit: '%' },
+];
+
+const COUPLING_METRICS: MetricOption[] = [
+  { value: 'two_qubit_gate_error', label: 'Two-Qubit Gate Error / CNOT Error', unit: '%' },
+  { value: 'gate_duration', label: 'Gate Duration', unit: 'ns' },
+];
+
+// color mapping utilities
+const getMetricValue = (data: any, metric: string): number | null => {
+  switch (metric) {
+    case 'readout_error':
+      return data.meas_error?.readout_assignment_error ?? null;
+    case 't1':
+      return data.qubit_lifetime?.t1 ?? null;
+    case 't2':
+      return data.qubit_lifetime?.t2 ?? null;
+    case 'single_qubit_gate_error':
+      return data.fidelity !== null && data.fidelity !== undefined ? 1 - data.fidelity : null;
+    case 'two_qubit_gate_error':
+      return data.fidelity !== null && data.fidelity !== undefined ? 1 - data.fidelity : null;
+    case 'gate_duration':
+      return data.gate_duration?.rzx90 ?? null;
+    default:
+      return null;
+  }
+};
+
+const isHigherBetter = (metric: string): boolean => {
+  return ['t1', 't2'].includes(metric);
+};
+
+type RgbColor = { r: number; g: number; b: number };
+
+const MISSING_METRIC_COLOR = '#94a3b8';
+const VIRIDIS_COLOR_SCALE: string[] = [
+  '#440154',
+  '#46085c',
+  '#481467',
+  '#482173',
+  '#472d7b',
+  '#453882',
+  '#424086',
+  '#3f4889',
+  '#3d4e8a',
+  '#3a538b',
+  '#37588c',
+  '#345d8d',
+  '#31688e',
+  '#2e6e8e',
+  '#2c728e',
+  '#2a788e',
+  '#287d8e',
+  '#25828e',
+  '#23878e',
+  '#218c8d',
+  '#21918c',
+  '#22968b',
+  '#239b89',
+  '#25a186',
+  '#29a783',
+  '#2fac80',
+  '#35b179',
+  '#3db771',
+  '#46bd6a',
+  '#51c362',
+  '#5ec962',
+  '#6ed05b',
+  '#7ed655',
+  '#8fdc4f',
+  '#a0e249',
+  '#b1e745',
+  '#c2eb42',
+  '#d4ef40',
+  '#e5f03f',
+  '#f5ee3f',
+  '#fde724',
+];
+
+const interpolateRgbColor = (from: RgbColor, to: RgbColor, ratio: number): RgbColor => {
+  const clampedRatio = Math.max(0, Math.min(1, ratio));
+  return {
+    r: Math.round(from.r + (to.r - from.r) * clampedRatio),
+    g: Math.round(from.g + (to.g - from.g) * clampedRatio),
+    b: Math.round(from.b + (to.b - from.b) * clampedRatio),
+  };
+};
+
+const hexToRgb = (hex: string): RgbColor | null => {
+  const match = /^#([0-9a-f]{6})$/i.exec(hex);
+  if (!match) {
+    return null;
+  }
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(match[1].slice(i, i + 2), 16));
+  return { r, g, b };
+};
+
+const getColorFromScale = (ratio: number): string => {
+  const clampedRatio = Math.max(0, Math.min(1, ratio));
+  const maxIndex = VIRIDIS_COLOR_SCALE.length - 1;
+  const position = clampedRatio * maxIndex;
+  const lowerIndex = Math.floor(position);
+  const upperIndex = Math.min(maxIndex, Math.ceil(position));
+
+  const lowerColor = hexToRgb(VIRIDIS_COLOR_SCALE[lowerIndex]);
+  const upperColor = hexToRgb(VIRIDIS_COLOR_SCALE[upperIndex]);
+  if (!lowerColor || !upperColor) {
+    return VIRIDIS_COLOR_SCALE[lowerIndex] ?? MISSING_METRIC_COLOR;
+  }
+
+  if (lowerIndex === upperIndex) {
+    return VIRIDIS_COLOR_SCALE[lowerIndex];
+  }
+
+  const mixed = interpolateRgbColor(lowerColor, upperColor, position - lowerIndex);
+  return `rgb(${mixed.r}, ${mixed.g}, ${mixed.b})`;
+};
+
+const getLabelTextColor = (backgroundColor: string): string => {
+  const color = backgroundColor.trim().toLowerCase();
+
+  const hexMatch = /^#([0-9a-f]{6})$/i.exec(color);
+  if (hexMatch) {
+    const rgb = hexToRgb(`#${hexMatch[1]}`);
+    if (rgb) {
+      const luminance = 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
+      return luminance > 145 ? '#0f172a' : '#f8fafc';
+    }
+  }
+
+  const rgbMatch = /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i.exec(color);
+  if (rgbMatch) {
+    const r = Number(rgbMatch[1]);
+    const g = Number(rgbMatch[2]);
+    const b = Number(rgbMatch[3]);
+    const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    return luminance > 145 ? '#0f172a' : '#f8fafc';
+  }
+
+  return '#f8fafc';
+};
+
+const getColorForMetric = (
+  value: number | null,
+  min: number,
+  max: number,
+  metric: string
+): string => {
+  if (value === null || isNaN(value)) {
+    return MISSING_METRIC_COLOR;
+  }
+
+  if (min === max) {
+    return VIRIDIS_COLOR_SCALE[Math.floor(VIRIDIS_COLOR_SCALE.length / 2)];
+  }
+
+  const normalized = Math.max(0, Math.min(1, (value - min) / (max - min)));
+  return getColorFromScale(normalized);
+};
+
+// Function to calculate median
+const calculateMedian = (data: any[], metric: string): number | null => {
+  const values = data
+    .map((item) => getMetricValue(item, metric))
+    .filter((value) => value !== null && !isNaN(value)) as number[];
+
+  if (values.length === 0) {
+    return null;
+  }
+
+  const sortedValues = values.sort((a, b) => a - b);
+  const middle = Math.floor(sortedValues.length / 2);
+
+  if (sortedValues.length % 2 === 0) {
+    return (sortedValues[middle - 1] + sortedValues[middle]) / 2;
+  } else {
+    return sortedValues[middle];
+  }
+};
+
+// Color Legend Component
+const ColorLegend: React.FC<{
+  metric: string;
+  range: { min: number; max: number };
+  data?: any[];
+  unit?: string;
+}> = ({ metric, range, data, unit }) => {
+  const { t } = useTranslation();
+
+  const metricOption = [...QUBIT_METRICS, ...COUPLING_METRICS].find((m) => m.value === metric);
+  const displayUnit = unit || metricOption?.unit || '';
+
+  const formatValue = (value: number): string => {
+    if (displayUnit === '%') {
+      return `${(value * 100).toFixed(2)}`;
+    }
+    return value.toFixed(2);
+  };
+
+  // Calculate median if data is provided
+  const median = data ? calculateMedian(data, metric) : null;
+
+  const gradientStops = [];
+  for (let i = 0; i <= 10; i++) {
+    const value = range.min + (range.max - range.min) * (i / 10);
+    const color = getColorForMetric(value, range.min, range.max, metric);
+    gradientStops.push(`${color} ${i * 10}%`);
+  }
+
+  // Calculate median position for the arrow
+  const medianPosition =
+    median !== null && range.max !== range.min
+      ? ((median - range.min) / (range.max - range.min)) * 100
+      : null;
+
+  return (
+    <div className="mt-4">
+      <h4 className="text-sm font-bold mb-6">
+        {metricOption?.label || metric} {t('device.detail.topology_info.color_scale')}
+      </h4>
+
+      <div className="relative">
+        {/* Median label + arrow */}
+        {median !== null && medianPosition !== null && (
+          <div
+            className="absolute -top-5 flex flex-col"
+            style={{
+              left: `${medianPosition}%`,
+              ...(medianPosition < 20
+                ? { transform: 'translateX(0%)', alignItems: 'flex-start' }
+                : medianPosition > 80
+                  ? { transform: 'translateX(-100%)', alignItems: 'flex-end' }
+                  : { transform: 'translateX(-50%)', alignItems: 'center' }),
+            }}
+          >
+            <span className="text-xs font-medium whitespace-nowrap">
+              {t('device.detail.topology_info.median')}: {formatValue(median)} {displayUnit}
+            </span>
+            <span className="text-xs leading-none" style={{ color: '#000000' }}>
+              ▼
+            </span>
+          </div>
+        )}
+
+        {/* Gradient bar */}
+        <div
+          className="h-5 rounded border border-gray-400"
+          style={{
+            background: `linear-gradient(to right, ${gradientStops.join(', ')})`,
+          }}
+        />
+      </div>
+
+      <div className="flex justify-between text-xs mt-1">
+        <span>
+          {formatValue(range.min)} {displayUnit}
+        </span>
+        <span>
+          {formatValue(range.max)} {displayUnit}
+        </span>
+      </div>
+    </div>
+  );
+};
 
 type NodeObject<NodeType = {}> = NodeType & {
   id?: string | number;
@@ -50,16 +331,45 @@ const createCouplingMapKey = (control: number, target: number): string => {
   return `${first}-${second}`;
 };
 
-const createNodeData = (qubits: any[]): { nodeData: any[]; tempNodeMap: Map<string, object> } => {
+const calculateMetricRange = (data: any[], metric: string): { min: number; max: number } => {
+  const values = data
+    .map((item) => getMetricValue(item, metric))
+    .filter((value) => value !== null && !isNaN(value)) as number[];
+
+  if (values.length === 0) {
+    return { min: 0, max: 1 };
+  }
+
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+
+  return { min, max };
+};
+
+const createNodeData = (
+  qubits: any[],
+  selectedMetric: QubitMetric,
+  metricRange: { min: number; max: number }
+): { nodeData: any[]; tempNodeMap: Map<string, object> } => {
   try {
     const tempNodeMap = new Map<string, object>();
     const nodeData = qubits.map((qubit: any) => {
       tempNodeMap.set(qubit.id.toString(), qubit);
+      const metricValue = getMetricValue(qubit, selectedMetric);
+      const color = getColorForMetric(
+        metricValue,
+        metricRange.min,
+        metricRange.max,
+        selectedMetric
+      );
+
       return {
         id: qubit.id.toString(),
         label: `${qubit.id}`,
         fx: scalePosition(qubit.position.x),
         fy: scalePosition(qubit.position.y * -1), // multiply by -1 to flip the y-axis
+        color: color,
+        metricValue: metricValue,
       };
     });
     return { nodeData, tempNodeMap };
@@ -70,7 +380,9 @@ const createNodeData = (qubits: any[]): { nodeData: any[]; tempNodeMap: Map<stri
 };
 
 const createEdgeData = (
-  couplings: any[]
+  couplings: any[],
+  selectedMetric: CouplingMetric,
+  metricRange: { min: number; max: number }
 ): { edgeData: LinkObject[]; tempCouplingMap: Map<string, object> } => {
   try {
     const tempCouplingMap = new Map<string, object>();
@@ -83,10 +395,21 @@ const createEdgeData = (
       } else {
         tempCouplingMap.set(key, { [id]: coupling });
       }
+
+      const metricValue = getMetricValue(coupling, selectedMetric);
+      const color = getColorForMetric(
+        metricValue,
+        metricRange.min,
+        metricRange.max,
+        selectedMetric
+      );
+
       return {
         id: id,
         source: coupling.control.toString(),
         target: coupling.target.toString(),
+        color: color,
+        metricValue: metricValue,
       };
     });
     return { edgeData, tempCouplingMap };
@@ -101,6 +424,12 @@ const MAX_ZOOM = 3;
 
 export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ deviceInfo }) => {
   const { t } = useTranslation();
+  const [isDarkTheme, setIsDarkTheme] = useState<boolean>(() => {
+    return typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+  });
+  const nodeStrokeColor = isDarkTheme ? '#f8fafc' : '#0f172a';
+  const nodeHoverStrokeColor = isDarkTheme ? '#fcd34d' : '#1d4ed8';
+  const linkHoverStrokeColor = isDarkTheme ? '#fcd34d' : '#1d4ed8';
 
   const [topologyData, setTopologyData] = useState<{ nodes: NodeObject[]; links: LinkObject[] }>({
     nodes: [],
@@ -112,6 +441,23 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
   const [isValidDeviceInfo, setIsValidDeviceInfo] = useState<boolean>(true);
   const [hoveredNodeId, setHoveredNodeId] = useState<string | number | null>(null);
   const [hoveredLinkId, setHoveredLinkId] = useState<string | null>(null);
+
+  // metric selection state
+  const [selectedQubitMetric, setSelectedQubitMetric] = useState<QubitMetric>('readout_error');
+  const [selectedCouplingMetric, setSelectedCouplingMetric] =
+    useState<CouplingMetric>('two_qubit_gate_error');
+  const [qubitMetricRange, setQubitMetricRange] = useState<{ min: number; max: number }>({
+    min: 0,
+    max: 1,
+  });
+  const [couplingMetricRange, setCouplingMetricRange] = useState<{ min: number; max: number }>({
+    min: 0,
+    max: 1,
+  });
+
+  // data for median calculation
+  const [qubitsData, setQubitsData] = useState<any[]>([]);
+  const [couplingsData, setCouplingsData] = useState<any[]>([]);
 
   // ForceGraph2D not exporting ref types
   const fgRef = useRef<any>(null);
@@ -131,6 +477,21 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
   const heddingRef = useRef<HTMLDivElement>(null);
 
   const strHoveredInfo = JSON.stringify(hoveredInfo);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const root = document.documentElement;
+    const updateTheme = () => setIsDarkTheme(root.classList.contains('dark'));
+
+    updateTheme();
+    const observer = new MutationObserver(updateTheme);
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+
+    return () => observer.disconnect();
+  }, []);
 
   const handleZoom = useCallback(() => {
     if (fgRef.current && typeof fgRef.current.zoom === 'function') {
@@ -237,8 +598,30 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
 
       if (!parsedDeviceInfo.qubits || !parsedDeviceInfo.couplings) return;
 
-      const { nodeData, tempNodeMap } = createNodeData(parsedDeviceInfo.qubits);
-      const { edgeData, tempCouplingMap } = createEdgeData(parsedDeviceInfo.couplings);
+      // Store data for median calculation
+      setQubitsData(parsedDeviceInfo.qubits);
+      setCouplingsData(parsedDeviceInfo.couplings);
+
+      // Calculate metric ranges
+      const qubitRange = calculateMetricRange(parsedDeviceInfo.qubits, selectedQubitMetric);
+      const couplingRange = calculateMetricRange(
+        parsedDeviceInfo.couplings,
+        selectedCouplingMetric
+      );
+
+      setQubitMetricRange(qubitRange);
+      setCouplingMetricRange(couplingRange);
+
+      const { nodeData, tempNodeMap } = createNodeData(
+        parsedDeviceInfo.qubits,
+        selectedQubitMetric,
+        qubitRange
+      );
+      const { edgeData, tempCouplingMap } = createEdgeData(
+        parsedDeviceInfo.couplings,
+        selectedCouplingMetric,
+        couplingRange
+      );
 
       if (nodeData.length === 0) {
         setIsValidDeviceInfo(false);
@@ -251,7 +634,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
       setIsValidDeviceInfo(false);
       console.error('Failed to update topology data:', err);
     }
-  }, [deviceInfo]);
+  }, [deviceInfo, selectedQubitMetric, selectedCouplingMetric]);
 
   useEffect(() => {
     // Delay to ensure the canvas is rendered
@@ -283,6 +666,16 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
             <JSONCodeBlock json={strHoveredInfo} />
           </SimpleBar>
         )}
+
+        {/* Color Scale Legends */}
+        <div style={{ marginTop: '20px' }}>
+          <ColorLegend metric={selectedQubitMetric} range={qubitMetricRange} data={qubitsData} />
+          <ColorLegend
+            metric={selectedCouplingMetric}
+            range={couplingMetricRange}
+            data={couplingsData}
+          />
+        </div>
       </Card>
       <Card className={clsx(['col-start-2', 'col-end-3', 'relative'])}>
         <div style={{ zIndex: 1000, position: 'absolute', bottom: '25px', right: '25px' }}>
@@ -294,39 +687,83 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
             width: '100%',
             zIndex: 9999,
             display: 'flex',
+            flexDirection: 'column',
+            gap: '10px',
             alignItems: 'center',
-            background: '#fff',
           }}
         >
-          <Button size="small" onClick={handleFitToView}>
-            {t('device.detail.topology_info.fit_to_view')}
-          </Button>
-          <input
-            type="range"
-            min={MIN_ZOOM}
-            max={MAX_ZOOM}
-            step={0.1}
-            value={zoomLevel}
-            onChange={(e) => {
-              if (fgRef.current && typeof fgRef.current.zoom === 'function') {
-                fgRef.current.zoom(e.target.value);
-              }
-            }}
-            style={{
-              width: '200px',
-              height: '4px',
-              borderRadius: '2px',
-              background: '#ddd',
-              outline: 'none',
-              cursor: 'pointer',
-              flex: 1,
-              marginLeft: '10px',
-            }}
-          />
+          {/* Metric Selection Controls */}
+          <div style={{ display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <label style={{ fontSize: '14px', fontWeight: 'bold' }}>
+                {t('device.detail.topology_info.qubit_metric')}:
+              </label>
+              <Select
+                value={selectedQubitMetric}
+                onChange={(e) => setSelectedQubitMetric(e.target.value as QubitMetric)}
+                size="xs"
+                className={clsx('text-base-content', 'bg-base-card')}
+                style={{ minWidth: '180px' }}
+              >
+                {QUBIT_METRICS.map((metric) => (
+                  <option key={metric.value} value={metric.value}>
+                    {metric.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <label style={{ fontSize: '14px', fontWeight: 'bold' }}>
+                {t('device.detail.topology_info.coupling_metric')}:
+              </label>
+              <Select
+                value={selectedCouplingMetric}
+                onChange={(e) => setSelectedCouplingMetric(e.target.value as CouplingMetric)}
+                size="xs"
+                className={clsx('text-base-content', 'bg-base-card')}
+                style={{ minWidth: '180px' }}
+              >
+                {COUPLING_METRICS.map((metric) => (
+                  <option key={metric.value} value={metric.value}>
+                    {metric.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          </div>
+
+          {/* Zoom Controls */}
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Button size="small" onClick={handleFitToView}>
+              {t('device.detail.topology_info.fit_to_view')}
+            </Button>
+            <input
+              type="range"
+              min={MIN_ZOOM}
+              max={MAX_ZOOM}
+              step={0.1}
+              value={zoomLevel}
+              onChange={(e) => {
+                if (fgRef.current && typeof fgRef.current.zoom === 'function') {
+                  fgRef.current.zoom(e.target.value);
+                }
+              }}
+              style={{
+                width: '200px',
+                height: '4px',
+                borderRadius: '2px',
+                outline: 'none',
+                cursor: 'pointer',
+                flex: 1,
+                marginLeft: '10px',
+              }}
+            />
+          </div>
         </div>
         <div ref={divRef}>
           <ForceGraph2D
             ref={fgRef}
+            backgroundColor={divRef.current?.style?.backgroundColor}
             graphData={topologyData}
             nodeCanvasObject={(
               node: NodeObject,
@@ -334,24 +771,32 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
               globalScale: number
             ) => {
               const radius = 18 / globalScale;
+              const nodeColor = (node as any).color || '#4887fa';
+              const labelTextColor = getLabelTextColor(nodeColor);
+
               ctx.beginPath();
               if (node.x !== undefined && node.y !== undefined) {
                 ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
               }
-              ctx.fillStyle = '#4887fa';
+              // Use dynamic color from node data, fallback to default blue
+              ctx.fillStyle = nodeColor;
               ctx.fill();
-              ctx.strokeStyle = node.id === hoveredNodeId ? '#fc6464' : 'white';
-              ctx.lineWidth = 3 / globalScale;
+              ctx.strokeStyle = node.id === hoveredNodeId ? nodeHoverStrokeColor : nodeStrokeColor;
+              ctx.lineWidth = node.id === hoveredNodeId ? 4 / globalScale : 3.4 / globalScale;
               ctx.stroke();
 
               const label = node.label || '';
-              const fontSize = 12 / globalScale;
+              const fontSize = 16 / globalScale;
               ctx.font = `${fontSize}px Arial Bold`;
-              ctx.fillStyle = 'white';
               ctx.textAlign = 'center';
               ctx.textBaseline = 'middle';
               if (node.x !== undefined && node.y !== undefined) {
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
+                ctx.shadowBlur = 2 / globalScale;
+                ctx.fillStyle = labelTextColor;
                 ctx.fillText(label, node.x, node.y);
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
               }
             }}
             linkCanvasObject={(
@@ -376,7 +821,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
               ) {
                 // Drawing the outer line
                 const outerStrokeColor = clsx({
-                  '#fc6464': couplingKey === hoveredLinkId,
+                  [linkHoverStrokeColor]: couplingKey === hoveredLinkId,
                   transparent: couplingKey !== hoveredLinkId,
                 });
 
@@ -388,7 +833,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
                 ctx.stroke();
 
                 // Drawing the inner line
-                const innerStrokeColor = '#4887fa';
+                const innerStrokeColor = (link as any).color || '#4887fa';
 
                 ctx.beginPath();
                 ctx.moveTo(startX, startY);
@@ -399,11 +844,10 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
               }
             }}
             enableNodeDrag={false}
-            onNodeHover={handleHoverNode}
-            onLinkHover={handleHoverLink}
+            onNodeClick={handleHoverNode}
+            onLinkClick={handleHoverLink}
             height={divSize.height}
             width={divSize.width}
-            backgroundColor={'white'}
             maxZoom={MAX_ZOOM}
             onZoom={handleZoom}
             onZoomEnd={handleZoom}

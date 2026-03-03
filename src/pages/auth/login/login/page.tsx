@@ -86,6 +86,7 @@ export default function LoginPage() {
           {...register('username')}
           label={t('signin.form.mail')}
           errorMessage={errors.username && errors.username.message}
+          className={clsx('bg-base-card')}
         />
         <Spacer className="h-5" />
         <Input
@@ -95,6 +96,7 @@ export default function LoginPage() {
           {...register('password')}
           label={t('signin.form.password')}
           errorMessage={errors.password && errors.password.message}
+          className={clsx('bg-base-card')}
         />
         <Spacer className="h-2.5" />
         <NavLink to="/forgot-password" className={clsx('text-link', 'text-xs')}>

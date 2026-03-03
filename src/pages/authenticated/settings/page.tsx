@@ -37,9 +37,21 @@ export function SettingsPage() {
       </div>
 
       <Tabs value={params.tabId} onChange={handleTabChange} className={clsx('mb-6')}>
-        <Tab value="profile" label={t('settings.tabs.profile')} />
-        <Tab value="account" label={t('settings.tabs.account')} />
-        <Tab value="security" label={t('settings.tabs.security')} />
+        <Tab
+          value="profile"
+          label={t('settings.tabs.profile')}
+          className="!text-base-content aria-selected:!text-primary"
+        />
+        <Tab
+          value="account"
+          label={t('settings.tabs.account')}
+          className="!text-base-content aria-selected:!text-primary"
+        />
+        <Tab
+          value="security"
+          label={t('settings.tabs.security')}
+          className="!text-base-content aria-selected:!text-primary"
+        />
       </Tabs>
       <div className={clsx('mt-6')}>
         {params.tabId === 'profile' && (

@@ -18,6 +18,7 @@ import { QuantumGate, supportedGates } from './gates';
 import ObservableComposer from './_components/ObservableComposer';
 import { Observable } from './observable';
 import { errorToastConfig, successToastConfig } from '@/config/toast';
+import "./page.css";
 
 const renderOperator = (obs: Observable): JobsOperatorItem[] => {
   return [...new Array(obs.operators.length)].map((_, i) => {
@@ -220,18 +221,20 @@ export default function Page() {
       ) : null}
 
       <div id="control-panel-container">
-        <ControlPanel
-          onSubmit={handleSubmitJob}
-          devices={devices}
-          jobId={jobId}
-          jobType={jobType}
-          busy={busy}
-          mkProgram={{
-            program: generateQASMCode(circuit, Object.values(circuitService.customGates)),
-            qubitNumber: circuit.length,
-          }}
-          mkOperator={renderOperator(observable)}
-        />
+        <circuitContext.Provider value={circuitService}>
+          <ControlPanel
+            onSubmit={handleSubmitJob}
+            devices={devices}
+            jobId={jobId}
+            jobType={jobType}
+            busy={busy}
+            mkProgram={{
+              program: generateQASMCode(circuit, Object.values(circuitService.customGates)),
+              qubitNumber: circuit.length,
+            }}
+            mkOperator={renderOperator(observable)}
+          />
+        </circuitContext.Provider>
       </div>
     </>
   );
