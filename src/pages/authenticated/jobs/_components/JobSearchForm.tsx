@@ -163,6 +163,7 @@ export const JobSearchForm = ({
                     'text-xs',
                     'focus:outline-primary',
                     'max-w-[10rem]',
+                    'bg-base-card',
                     hasDateRangeError ? ['border-error'] : []
                   )}
                   placeholderText="yyyy-MM-dd HH:mm"
@@ -190,6 +191,7 @@ export const JobSearchForm = ({
                     'text-xs',
                     'focus:outline-primary',
                     'max-w-[10rem]',
+                    'bg-base-card',
                     hasDateRangeError ? ['border-error'] : []
                   )}
                   placeholderText="yyyy-MM-dd HH:mm"
