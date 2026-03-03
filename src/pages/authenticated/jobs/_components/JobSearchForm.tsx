@@ -40,7 +40,7 @@ const datetimePresets: Record<PresetOption, PresetFn> = {
     const from = new Date(now);
     const to = new Date(now);
 
-    from.setDate(now.getDate() - 30);
+    from.setDate(now.getDate() - 29);
     from.setHours(0, 0, 0, 0);
     to.setHours(23, 59, 59, 999);
 
@@ -75,8 +75,10 @@ export const JobSearchForm = ({
   }
 
   function validateDateRange(from: string | undefined, to: string | undefined): boolean {
-    if (!from || !to) return true;
-
+    if (!from || !to) {
+      setHasDateRangeError(false);
+      return true;
+    }
     const isFromBeforeTo = new Date(from) <= new Date(to);
 
     setHasDateRangeError(!isFromBeforeTo);

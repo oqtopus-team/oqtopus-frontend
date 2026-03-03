@@ -48,8 +48,10 @@ export default function JobListPage() {
       urlSearchParams.forEach((value, key) => {
         if (key === 'status' && JOB_STATUSES.includes(value as JobStatusType)) {
           params.status = value as JobStatusType;
-        } else if (key === 'query' || key === 'from' || key === 'to') {
+        } else if (key === 'query') {
           params[key] = value;
+        } else if (key === 'from' || key === 'to') {
+          if (isValidDateString(value)) params[key] = value;
         }
       });
       return params;
@@ -150,10 +152,17 @@ export default function JobListPage() {
         mappedParams.status = value as JobStatusType;
       } else if (key === 'query') {
         mappedParams[key] = value;
+      } else if (key === 'from' || key === 'to') {
+        if (isValidDateString(value)) mappedParams[key] = value;
       }
     });
 
     return mappedParams;
+  };
+
+  const isValidDateString = (dateString: string): boolean => {
+    const date = new Date(dateString);
+    return !Number.isNaN(date.getTime());
   };
 
   const handleJobSelectionChange = (job: Job, selected: boolean) => {
