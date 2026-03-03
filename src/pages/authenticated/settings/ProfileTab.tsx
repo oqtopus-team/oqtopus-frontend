@@ -4,7 +4,7 @@ import { Button, Skeleton, Stack, TextField, TextFieldProps } from '@mui/materia
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
-import { errorToastConfig, successToastConfig } from '@/config/toast';
+import { successToastConfig } from '@/config/toast';
 import { useUserAPI } from '@/backend/hook';
 import { DateTimeFormatter } from '@/pages/authenticated/_components/DateTimeFormatter';
 import {
@@ -47,21 +47,18 @@ export function ProfileTab({ editableFields = [], visibleFields }: ProfileTabPro
 
   const [isLoading, setIsLoading] = useState(true);
 
-  const onSubmit = async (data: ProfileFormData) => {
-    try {
-      // Only send editable fields
-      const updateData: ProfileFormData = {};
-      if (editableFields.includes('name')) {
-        updateData.name = data.name;
-      }
-      if (editableFields.includes('organization')) {
-        updateData.organization = data.organization;
-      }
-      await updateCurrentUser(updateData);
-      toast(t('settings.profile.saved'), successToastConfig);
-    } catch (e) {
-      toast(t('common.errors.default'), errorToastConfig);
+  const onSubmit = (data: ProfileFormData) => {
+    // Only send editable fields
+    const updateData: ProfileFormData = {};
+    if (editableFields.includes('name')) {
+      updateData.name = data.name;
     }
+    if (editableFields.includes('organization')) {
+      updateData.organization = data.organization;
+    }
+    updateCurrentUser(updateData).then(() => {
+      toast(t('settings.profile.saved'), successToastConfig);
+    });
   };
 
   useEffect(() => {

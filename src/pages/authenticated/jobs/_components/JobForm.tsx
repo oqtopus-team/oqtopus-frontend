@@ -268,38 +268,32 @@ export const JobForm = (componentProps: JobFormProps) => {
   const onSubmit = async (data: FormInput) => {
     if (isSubmitting) {
       toast.info(t('job.form.submitting'));
-      return;
+      return Promise.resolve(undefined);
     }
 
-    try {
-      const res = await submitJob({
-        name: data.name,
-        description: data.description,
-        device_id: data.deviceId,
-        shots: data.shots,
-        job_type: data.type,
-        job_info: {
-          program: [data.program],
-          operator: data.type === 'estimation' ? data.operator : undefined,
-        },
-        transpiler_info: JSON.parse(data.transpiler ?? ''),
-        simulator_info: JSON.parse(data.simulator ?? ''),
-        mitigation_info: JSON.parse(data.mitigation ?? ''),
-      });
+    return submitJob({
+      name: data.name,
+      description: data.description,
+      device_id: data.deviceId,
+      shots: data.shots,
+      job_type: data.type,
+      job_info: {
+        program: [data.program],
+        operator: data.type === 'estimation' ? data.operator : undefined,
+      },
+      transpiler_info: JSON.parse(data.transpiler ?? ''),
+      simulator_info: JSON.parse(data.simulator ?? ''),
+      mitigation_info: JSON.parse(data.mitigation ?? ''),
+    }).then((res) => {
       toast.success(t('job.form.toast.success'));
       return res;
-    } catch (e) {
-      console.error(e);
-      toast.error(t('job.form.toast.error'));
-    }
+    });
   };
 
   const onSubmitWithRedirection = async (data: FormInput) => {
-    try {
-      const res = await onSubmit(data);
+    const res = await onSubmit(data);
+    if (res) {
       navigate('/jobs/' + res);
-    } catch (e) {
-      console.log(e);
     }
   };
 

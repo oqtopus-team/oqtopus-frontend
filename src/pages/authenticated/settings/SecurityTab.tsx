@@ -28,7 +28,7 @@ import { useApiTokenAPI, useUserAPI } from '@/backend/hook';
 import { isBefore } from 'date-fns';
 import { ApiTokenApiToken, UsersLoginEvent } from '@/api/generated';
 import { toast } from 'react-toastify';
-import { errorToastConfig, successToastConfig } from '@/config/toast';
+import { successToastConfig } from '@/config/toast';
 
 interface SecurityTabProps {
   login_history_enabled: boolean;
@@ -57,8 +57,6 @@ export function SecurityTab({ login_history_enabled }: SecurityTabProps) {
       const data = await getApiTokenStatus();
 
       setApiTokenData({ ...apiTokenData, api_token_expiration: data.api_token_expiration });
-    } catch (e: any) {
-      toast(e.message ?? t('common.errors.common'), errorToastConfig);
     } finally {
       setLoadingState({ ...loadingState, apiToken: false });
     }
@@ -88,8 +86,6 @@ export function SecurityTab({ login_history_enabled }: SecurityTabProps) {
       await deleteApiToken();
       setApiTokenData(null);
       toast(t('settings.security.deleteSuccess'), successToastConfig);
-    } catch (e: any) {
-      toast(e.message ?? t('common.errors.common'), errorToastConfig);
     } finally {
       setDeleteDialogOpen(false);
     }
@@ -105,8 +101,6 @@ export function SecurityTab({ login_history_enabled }: SecurityTabProps) {
       setApiTokenDialogOpen(true);
 
       toast(t('settings.security.createSuccess'), successToastConfig);
-    } catch (e: any) {
-      toast(e.message ?? t('common.errors.common'), errorToastConfig);
     } finally {
       setLoadingState({ ...loadingState, apiToken: false });
     }
@@ -117,18 +111,13 @@ export function SecurityTab({ login_history_enabled }: SecurityTabProps) {
     setShowSecret(false);
   };
 
-  const onTokenCopy = async () => {
+  const onTokenCopy = () => {
     if (navigator.clipboard && apiTokenData?.api_token_secret) {
-      try {
-        await navigator.clipboard.writeText(
-          `${apiTokenData?.api_token_id}.${apiTokenData?.api_token_secret}`
-        );
-        toast(t('settings.security.apiToken.copied'), successToastConfig);
-      } catch (e: any) {
-        toast(e.message ?? t('common.errors.common'), errorToastConfig);
-      }
-    } else {
-      toast(t('common.errors.common'), errorToastConfig);
+      navigator.clipboard
+        .writeText(`${apiTokenData?.api_token_id}.${apiTokenData?.api_token_secret}`)
+        .then(() => {
+          toast(t('settings.security.apiToken.copied'), successToastConfig);
+        });
     }
   };
 

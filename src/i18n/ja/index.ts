@@ -3,6 +3,7 @@ import common from './common';
 import composer from './composer';
 import dashboard from './dashboard';
 import device from './device';
+import errors from './errors';
 import forgot_password from './forgot_password';
 import header from './header';
 import howto from './howto';
@@ -22,6 +23,7 @@ export default {
     composer,
     dashboard,
     device,
+    errors,
     forgot_password,
     header,
     howto,

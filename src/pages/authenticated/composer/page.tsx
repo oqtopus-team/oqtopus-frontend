@@ -17,7 +17,7 @@ import { generateQASMCode } from './qasm';
 import { QuantumGate, supportedGates } from './gates';
 import ObservableComposer from './_components/ObservableComposer';
 import { Observable } from './observable';
-import { errorToastConfig, successToastConfig } from '@/config/toast';
+import { successToastConfig } from '@/config/toast';
 
 const renderOperator = (obs: Observable): JobsOperatorItem[] => {
   return [...new Array(obs.operators.length)].map((_, i) => {
@@ -182,8 +182,6 @@ export default function Page() {
       const jobId = await jobApi.submitJob(req);
       toast(t('job.form.toast.success'), successToastConfig);
       setJobId(jobId);
-    } catch (e) {
-      toast(t('job.form.toast.error'), errorToastConfig);
     } finally {
       setBusy(false);
     }
