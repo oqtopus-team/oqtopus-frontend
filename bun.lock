@@ -1,6 +1,5 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 1,
   "workspaces": {
     "": {
       "name": "oqtopus-frontend",
@@ -22,6 +21,7 @@
         "i18next-browser-languagedetector": "^8.2.0",
         "marked": "^15.0.12",
         "mathjax": "^3.2.2",
+        "prismjs": "^1.30.0",
         "qasm-ts": "^2.1.2",
         "qrcode.react": "^4.2.0",
         "qulacs-wasm-simulator-client": "^0.0.3",

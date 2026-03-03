@@ -75,9 +75,7 @@ export default {
       gate_already_defined: 'Gate with provided name is already defined.',
     },
   },
-  simulator_result: {
-    title: 'Simulation Result',
-    evaluation_title: 'Quantum Circuit & Observable Evaluation',
-    sampling_title: 'Sampling Execution Rsult',
-  }
+  code_editor: {
+    theme: 'theme',
+  },
 };
