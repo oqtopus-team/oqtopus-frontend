@@ -64,4 +64,7 @@ export default {
       gate_already_defined: 'Gate with provided name is already defined.',
     },
   },
+  code_editor: {
+    theme: 'theme',
+  },
 };

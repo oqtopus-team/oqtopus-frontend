@@ -36,6 +36,7 @@ import * as yup from 'yup';
 import { Device } from '@/domain/types/Device';
 import { toast } from 'react-toastify';
 import i18next, { TFunction } from 'i18next';
+import { CodeEditor } from '../../composer/_components/CodeEditor';
 
 interface FormInput {
   name?: string;
@@ -473,9 +474,9 @@ export const JobForm = (componentProps: JobFormProps) => {
                 <Spacer className="h-2" />
 
                 {/* programs */}
-                <TextArea
+                <CodeEditor
+                  code={program}
                   disabled={Boolean(props.mkProgram?.program)}
-                  className={clsx('h-[16rem]', 'bg-base-card', 'text-base-content')}
                   placeholder={t('job.form.program_placeholder')}
                   {...register('program')}
                   errorMessage={errors.program && errors.program.message}
