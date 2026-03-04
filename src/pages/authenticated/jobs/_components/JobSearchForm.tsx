@@ -8,6 +8,8 @@ import 'react-datepicker/dist/react-datepicker.css';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
+import { locales } from '../../_components/DateTimeFormatter';
+import { enUS } from 'date-fns/locale';
 
 const presetOptions = ['today', 'last7Days', 'last30Days'] as const;
 type PresetOption = (typeof presetOptions)[number];
@@ -57,7 +59,7 @@ export const JobSearchForm = ({
   setParams: React.Dispatch<React.SetStateAction<JobSearchParams>>;
   onSubmit: () => void;
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [hasDateRangeError, setHasDateRangeError] = useState(false);
 
@@ -84,6 +86,8 @@ export const JobSearchForm = ({
     setHasDateRangeError(!isFromBeforeTo);
     return isFromBeforeTo;
   }
+
+  const dateFormat = i18n.language === 'ja' ? 'yyyy/MM/dd HH:mm' : 'dd/MM/yyyy HH:mm';
 
   return (
     <form
@@ -157,6 +161,7 @@ export const JobSearchForm = ({
                   <p className="text-xs">{t('job.list.search.from')}</p>
                 </div>
                 <DatePicker
+                  locale={locales[i18n.language as keyof typeof locales] ?? enUS}
                   className={clsx(
                     ['border', 'rounded'],
                     ['py-1.5', 'px-3'],
@@ -166,7 +171,7 @@ export const JobSearchForm = ({
                     'bg-base-card',
                     hasDateRangeError ? ['border-error'] : []
                   )}
-                  placeholderText="yyyy-MM-dd HH:mm"
+                  placeholderText={dateFormat}
                   showTimeSelect
                   selected={params.from ? new Date(params.from) : undefined}
                   isClearable={true}
@@ -177,7 +182,7 @@ export const JobSearchForm = ({
                       from: startDate?.toISOString(),
                     });
                   }}
-                  dateFormat="yyyy-MM-dd HH:mm"
+                  dateFormat={dateFormat}
                 />
               </div>
               <div>
@@ -185,6 +190,7 @@ export const JobSearchForm = ({
                   <p className="text-xs">{t('job.list.search.to')}</p>
                 </div>
                 <DatePicker
+                  locale={locales[i18n.language as keyof typeof locales] ?? enUS}
                   className={clsx(
                     ['border', 'rounded'],
                     ['py-1.5', 'px-3'],
@@ -194,7 +200,7 @@ export const JobSearchForm = ({
                     'bg-base-card',
                     hasDateRangeError ? ['border-error'] : []
                   )}
-                  placeholderText="yyyy-MM-dd HH:mm"
+                  placeholderText={dateFormat}
                   showTimeSelect
                   selected={params.to ? new Date(params.to) : undefined}
                   isClearable={true}
@@ -205,7 +211,7 @@ export const JobSearchForm = ({
                       to: endDate?.toISOString(),
                     });
                   }}
-                  dateFormat="yyyy-MM-dd HH:mm"
+                  dateFormat={dateFormat}
                 />
               </div>
             </div>
