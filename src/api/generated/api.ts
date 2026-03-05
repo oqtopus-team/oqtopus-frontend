@@ -1970,8 +1970,9 @@ export const JobApiAxiosParamCreator = function (configuration?: Configuration) 
      * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time or search text with \'start_time\', \'end_time\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
      * @summary List all quantum jobs
      * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
-     * @param {string} [startTime] Allows to filter the list of jobs to fetch by creation time. If specified only jobs with creation time  (createdAt property) &gt;&#x3D; start_time are returned.
-     * @param {string} [endTiime] Allows to filter the list of jobs to fetch by to creation time. If specified only jobs with creation time (createdAt property) &lt;&#x3D; end_time are returned.
+     * @param {string} [startTime] Allows to filter the list of jobs to fetch by submission time. If specified only jobs with submission time (submitted_at property) &gt;&#x3D; start_time are returned.
+     * @param {string} [endTime] Allows to filter the list of jobs to fetch by to submission time. If specified only jobs with submission time (submitted_at property) &lt;&#x3D; end_time are returned.
+     * @param {JobsJobStatus} [status] Allows to filter the list of jobs to fetch by job\&#39;s status. If specified only jobs which status is equal to provided status are returned.
      * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s id, name and description. If specified only jobs which id, name or description contains specified search string are returned.
      * @param {number} [page] Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned.
      * @param {number} [size] Configure number of jobs per page
@@ -1982,7 +1983,8 @@ export const JobApiAxiosParamCreator = function (configuration?: Configuration) 
     listJobs: async (
       fields?: string,
       startTime?: string,
-      endTiime?: string,
+      endTime?: string,
+      status?: JobsJobStatus,
       q?: string,
       page?: number,
       size?: number,
@@ -2014,9 +2016,13 @@ export const JobApiAxiosParamCreator = function (configuration?: Configuration) 
           (startTime as any) instanceof Date ? (startTime as any).toISOString() : startTime;
       }
 
-      if (endTiime !== undefined) {
-        localVarQueryParameter['end_tiime'] =
-          (endTiime as any) instanceof Date ? (endTiime as any).toISOString() : endTiime;
+      if (endTime !== undefined) {
+        localVarQueryParameter['end_time'] =
+          (endTime as any) instanceof Date ? (endTime as any).toISOString() : endTime;
+      }
+
+      if (status !== undefined) {
+        localVarQueryParameter['status'] = status;
       }
 
       if (q !== undefined) {
@@ -2226,8 +2232,9 @@ export const JobApiFp = function (configuration?: Configuration) {
      * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time or search text with \'start_time\', \'end_time\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
      * @summary List all quantum jobs
      * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
-     * @param {string} [startTime] Allows to filter the list of jobs to fetch by creation time. If specified only jobs with creation time  (createdAt property) &gt;&#x3D; start_time are returned.
-     * @param {string} [endTiime] Allows to filter the list of jobs to fetch by to creation time. If specified only jobs with creation time (createdAt property) &lt;&#x3D; end_time are returned.
+     * @param {string} [startTime] Allows to filter the list of jobs to fetch by submission time. If specified only jobs with submission time (submitted_at property) &gt;&#x3D; start_time are returned.
+     * @param {string} [endTime] Allows to filter the list of jobs to fetch by to submission time. If specified only jobs with submission time (submitted_at property) &lt;&#x3D; end_time are returned.
+     * @param {JobsJobStatus} [status] Allows to filter the list of jobs to fetch by job\&#39;s status. If specified only jobs which status is equal to provided status are returned.
      * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s id, name and description. If specified only jobs which id, name or description contains specified search string are returned.
      * @param {number} [page] Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned.
      * @param {number} [size] Configure number of jobs per page
@@ -2238,7 +2245,8 @@ export const JobApiFp = function (configuration?: Configuration) {
     async listJobs(
       fields?: string,
       startTime?: string,
-      endTiime?: string,
+      endTime?: string,
+      status?: JobsJobStatus,
       q?: string,
       page?: number,
       size?: number,
@@ -2250,7 +2258,8 @@ export const JobApiFp = function (configuration?: Configuration) {
       const localVarAxiosArgs = await localVarAxiosParamCreator.listJobs(
         fields,
         startTime,
-        endTiime,
+        endTime,
+        status,
         q,
         page,
         size,
@@ -2371,8 +2380,9 @@ export const JobApiFactory = function (
      * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time or search text with \'start_time\', \'end_time\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
      * @summary List all quantum jobs
      * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
-     * @param {string} [startTime] Allows to filter the list of jobs to fetch by creation time. If specified only jobs with creation time  (createdAt property) &gt;&#x3D; start_time are returned.
-     * @param {string} [endTiime] Allows to filter the list of jobs to fetch by to creation time. If specified only jobs with creation time (createdAt property) &lt;&#x3D; end_time are returned.
+     * @param {string} [startTime] Allows to filter the list of jobs to fetch by submission time. If specified only jobs with submission time (submitted_at property) &gt;&#x3D; start_time are returned.
+     * @param {string} [endTime] Allows to filter the list of jobs to fetch by to submission time. If specified only jobs with submission time (submitted_at property) &lt;&#x3D; end_time are returned.
+     * @param {JobsJobStatus} [status] Allows to filter the list of jobs to fetch by job\&#39;s status. If specified only jobs which status is equal to provided status are returned.
      * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s id, name and description. If specified only jobs which id, name or description contains specified search string are returned.
      * @param {number} [page] Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned.
      * @param {number} [size] Configure number of jobs per page
@@ -2383,7 +2393,8 @@ export const JobApiFactory = function (
     listJobs(
       fields?: string,
       startTime?: string,
-      endTiime?: string,
+      endTime?: string,
+      status?: JobsJobStatus,
       q?: string,
       page?: number,
       size?: number,
@@ -2391,7 +2402,7 @@ export const JobApiFactory = function (
       options?: RawAxiosRequestConfig
     ): AxiosPromise<Array<JobsGetJobsResponse>> {
       return localVarFp
-        .listJobs(fields, startTime, endTiime, q, page, size, order, options)
+        .listJobs(fields, startTime, endTime, status, q, page, size, order, options)
         .then((request) => request(axios, basePath));
     },
     /**
@@ -2493,8 +2504,9 @@ export class JobApi extends BaseAPI {
    * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time or search text with \'start_time\', \'end_time\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
    * @summary List all quantum jobs
    * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
-   * @param {string} [startTime] Allows to filter the list of jobs to fetch by creation time. If specified only jobs with creation time  (createdAt property) &gt;&#x3D; start_time are returned.
-   * @param {string} [endTiime] Allows to filter the list of jobs to fetch by to creation time. If specified only jobs with creation time (createdAt property) &lt;&#x3D; end_time are returned.
+   * @param {string} [startTime] Allows to filter the list of jobs to fetch by submission time. If specified only jobs with submission time (submitted_at property) &gt;&#x3D; start_time are returned.
+   * @param {string} [endTime] Allows to filter the list of jobs to fetch by to submission time. If specified only jobs with submission time (submitted_at property) &lt;&#x3D; end_time are returned.
+   * @param {JobsJobStatus} [status] Allows to filter the list of jobs to fetch by job\&#39;s status. If specified only jobs which status is equal to provided status are returned.
    * @param {string} [q] Allows to filter the list of jobs to fetch by job\&#39;s id, name and description. If specified only jobs which id, name or description contains specified search string are returned.
    * @param {number} [page] Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned.
    * @param {number} [size] Configure number of jobs per page
@@ -2506,7 +2518,8 @@ export class JobApi extends BaseAPI {
   public listJobs(
     fields?: string,
     startTime?: string,
-    endTiime?: string,
+    endTime?: string,
+    status?: JobsJobStatus,
     q?: string,
     page?: number,
     size?: number,
@@ -2514,7 +2527,7 @@ export class JobApi extends BaseAPI {
     options?: RawAxiosRequestConfig
   ) {
     return JobApiFp(this.configuration)
-      .listJobs(fields, startTime, endTiime, q, page, size, order, options)
+      .listJobs(fields, startTime, endTime, status, q, page, size, order, options)
       .then((request) => request(this.axios, this.basePath));
   }
 

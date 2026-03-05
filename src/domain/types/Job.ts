@@ -7,7 +7,6 @@ export const JOB_STATUSES = [
   'succeeded',
   'failed',
   'cancelled',
-  'unknown',
 ] as const;
 
 export type JobStatusType = (typeof JOB_STATUSES)[number];
