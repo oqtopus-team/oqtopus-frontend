@@ -165,11 +165,10 @@ export default function JobListPage() {
   };
 
   const handleAllJobsSelectionChange = (selected: boolean) => {
-    //TODO: Add handling "status" to getJobs request and remove code below
-    if (!params.status && selected) {
+    if (!params.query && selected) {
       setSelectedJobs(jobs);
-    } else if (params.status && selected) {
-      setSelectedJobs(jobs.filter((j) => j.status === params.status));
+    } else if (params.query && selected) {
+      setSelectedJobs(jobs.filter(filterJobsByQuery));
     } else {
       setSelectedJobs([]);
     }
@@ -226,10 +225,22 @@ export default function JobListPage() {
     );
   };
 
+  const filterJobsByQuery = (job: Job): boolean => {
+    if (
+      params.query &&
+      !job.id.includes(params.query) &&
+      !job.name.includes(params.query) &&
+      !job.description?.includes(params.query)
+    ) {
+      return false;
+    }
+
+    return true;
+  };
+
   useEffect(() => {
-    //TODO: Add handling "status" to getJobs request and remove code below
     setSelectedJobs([]);
-  }, [params.status]);
+  }, [params.query]);
 
   return (
     <div>
@@ -314,31 +325,15 @@ export default function JobListPage() {
                 </tr>
               </thead>
               <tbody>
-                {jobs
-                  .filter((job) => {
-                    if (params.status && job.status !== params.status) {
-                      return false;
-                    }
-                    if (
-                      params.query &&
-                      !job.id.includes(params.query) &&
-                      !job.name.includes(params.query) &&
-                      !job.description?.includes(params.query)
-                    ) {
-                      return false;
-                    }
-
-                    return true;
-                  })
-                  .map((job) => (
-                    <JobListItem
-                      key={job.id}
-                      job={job}
-                      onJobModified={reloadJobs}
-                      selectedJobs={selectedJobs}
-                      onJobSelectionChange={handleJobSelectionChange}
-                    />
-                  ))}
+                {jobs.filter(filterJobsByQuery).map((job) => (
+                  <JobListItem
+                    key={job.id}
+                    job={job}
+                    onJobModified={reloadJobs}
+                    selectedJobs={selectedJobs}
+                    onJobSelectionChange={handleJobSelectionChange}
+                  />
+                ))}
                 {!loading && jobs.length === 0 && (
                   <tr>
                     <td colSpan={4}>{t('job.list.nodata')}</td>

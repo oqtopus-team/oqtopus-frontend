@@ -36,6 +36,11 @@ export const JobSearchForm = ({
             onChange={(e) =>
               setParams({ ...params, query: e.target.value === '' ? undefined : e.target.value })
             }
+            onKeyDown={(e) => {
+              if (e.key === 'enter') {
+                onSubmit();
+              }
+            }}
             className={clsx('bg-base-card')}
           />
         </div>
