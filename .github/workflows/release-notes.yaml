@@ -29,7 +29,7 @@ jobs:
             const path = require('path');
             const scriptPath = path.join(
               process.env.GITHUB_WORKSPACE,
-              '.github/scripts/release-pr-notes.js'
+              '.github/scripts/release-notes.js'
             );
 
             const script = await import(`file://${scriptPath}`);
