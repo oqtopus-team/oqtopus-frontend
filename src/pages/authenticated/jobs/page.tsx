@@ -50,6 +50,8 @@ export default function JobListPage() {
           params.status = value as JobStatusType;
         } else if (key === 'query') {
           params[key] = value;
+        } else if (key === 'from' || key === 'to') {
+          if (isValidDateString(value)) params[key] = value;
         }
       });
       return params;
@@ -150,10 +152,17 @@ export default function JobListPage() {
         mappedParams.status = value as JobStatusType;
       } else if (key === 'query') {
         mappedParams[key] = value;
+      } else if (key === 'from' || key === 'to') {
+        if (isValidDateString(value)) mappedParams[key] = value;
       }
     });
 
     return mappedParams;
+  };
+
+  const isValidDateString = (dateString: string): boolean => {
+    const date = new Date(dateString);
+    return !Number.isNaN(date.getTime());
   };
 
   const handleJobSelectionChange = (job: Job, selected: boolean) => {
@@ -325,6 +334,12 @@ export default function JobListPage() {
                       !job.name.includes(params.query) &&
                       !job.description?.includes(params.query)
                     ) {
+                      return false;
+                    }
+                    if (params.from && new Date(job.submittedAt) < new Date(params.from)) {
+                      return false;
+                    }
+                    if (params.to && new Date(job.submittedAt) > new Date(params.to)) {
                       return false;
                     }
 

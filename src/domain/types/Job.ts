@@ -102,6 +102,8 @@ export interface JobSearchParams {
   query?: string; // id, name or description query string
   status?: JobStatusType;
   page?: string;
+  from?: string; // date string in ISO format
+  to?: string; // date string in ISO format
 }
 
 export interface ResponseJob {

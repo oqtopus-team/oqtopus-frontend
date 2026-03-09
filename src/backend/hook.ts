@@ -40,8 +40,8 @@ export const useJobAPI = () => {
     return api.job
       .listJobs(
         'job_id,name,description,device_id,status,submitted_at',
-        undefined,
-        undefined,
+        convertToDateIfValid(params.from)?.toISOString(),
+        convertToDateIfValid(params.to)?.toISOString(),
         params.query ?? '',
         page,
         pageSize,
@@ -90,6 +90,15 @@ export const useJobAPI = () => {
   };
 
   return { submitJob, getLatestJobs, getJob, cancelJob, deleteJob, getSselog };
+};
+
+const convertToDateIfValid = (dateString: string | undefined): Date | undefined => {
+  if (!dateString) return undefined;
+
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return undefined;
+
+  return date;
 };
 
 const convertJobResult = (job: JobsGetJobsResponse): Job => ({
