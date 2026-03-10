@@ -218,9 +218,10 @@ export default function JobListPage() {
   };
 
   const areAllJobsSelected = () => {
+    const visibleJobs = params.query ? jobs.filter(filterJobsByQuery) : jobs;
     return (
-      jobs.length > 0 &&
-      jobs.every((j) => selectedJobs.some((selectedJob) => selectedJob.id === j.id))
+      visibleJobs.length > 0 &&
+      visibleJobs.every((j) => selectedJobs.some((selectedJob) => selectedJob.id === j.id))
     );
   };
 

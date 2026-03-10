@@ -1967,7 +1967,7 @@ export const JobApiAxiosParamCreator = function (configuration?: Configuration) 
       };
     },
     /**
-     * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time or search text with \'start_time\', \'end_time\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
+     * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time, status or search text with \'start_time\', \'end_time\', \'status\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
      * @summary List all quantum jobs
      * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
      * @param {string} [startTime] Allows to filter the list of jobs to fetch by submission time. If specified only jobs with submission time (submitted_at property) &gt;&#x3D; start_time are returned.
@@ -2229,7 +2229,7 @@ export const JobApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
-     * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time or search text with \'start_time\', \'end_time\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
+     * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time, status or search text with \'start_time\', \'end_time\', \'status\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
      * @summary List all quantum jobs
      * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
      * @param {string} [startTime] Allows to filter the list of jobs to fetch by submission time. If specified only jobs with submission time (submitted_at property) &gt;&#x3D; start_time are returned.
@@ -2377,7 +2377,7 @@ export const JobApiFactory = function (
       return localVarFp.getSselog(jobId, options).then((request) => request(axios, basePath));
     },
     /**
-     * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time or search text with \'start_time\', \'end_time\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
+     * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time, status or search text with \'start_time\', \'end_time\', \'status\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
      * @summary List all quantum jobs
      * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
      * @param {string} [startTime] Allows to filter the list of jobs to fetch by submission time. If specified only jobs with submission time (submitted_at property) &gt;&#x3D; start_time are returned.
@@ -2501,7 +2501,7 @@ export class JobApi extends BaseAPI {
   }
 
   /**
-   * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time or search text with \'start_time\', \'end_time\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
+   * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time, status or search text with \'start_time\', \'end_time\', \'status\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
    * @summary List all quantum jobs
    * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
    * @param {string} [startTime] Allows to filter the list of jobs to fetch by submission time. If specified only jobs with submission time (submitted_at property) &gt;&#x3D; start_time are returned.

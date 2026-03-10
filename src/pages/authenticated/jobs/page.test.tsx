@@ -6,6 +6,7 @@ import { useJobAPI } from '@/backend/hook';
 import { useTranslation } from 'react-i18next';
 import { useDocumentTitle } from '@/pages/_hooks/title';
 import { Job, JobStatusType } from '@/domain/types/Job';
+import userEvent from '@testing-library/user-event';
 
 vi.mock('@/backend/hook');
 vi.mock('react-i18next');
@@ -44,7 +45,7 @@ vi.mock('./_components/JobListItem', () => ({
 }));
 vi.mock('./_components/JobSearchForm', () => ({
   JobSearchForm: ({ params, setParams, onSubmit }: any) => (
-    <div data-testid="job-search-form">
+    <form data-testid="job-search-form" noValidate onSubmit={onSubmit}>
       <input
         data-testid="search-query"
         value={params.query || ''}
@@ -63,10 +64,10 @@ vi.mock('./_components/JobSearchForm', () => ({
         <option value="failed">Failed</option>
         <option value="cancelled">Cancelled</option>
       </select>
-      <button data-testid="search-submit" onClick={onSubmit}>
+      <button data-testid="search-submit" type="submit">
         Search
       </button>
-    </div>
+    </form>
   ),
 }));
 vi.mock('@/pages/_components/Card', () => ({
@@ -524,6 +525,46 @@ describe('JobListPage', () => {
         expect(screen.queryByTestId('job-item-job-3')).not.toBeInTheDocument();
       });
     });
+
+    it('should call backend API when enter key is pressed', async () => {
+      const jobs = [
+        {
+          ...mockJobs[0],
+          id: 'job-1',
+          name: 'Job One',
+          description: 'This job processes quantum algorithms',
+        },
+        {
+          ...mockJobs[1],
+          id: 'job-2',
+          name: 'Job Two',
+          description: 'This job analyzes classical data',
+        },
+        {
+          ...mockJobs[2],
+          id: 'job-3',
+          name: 'Job Three',
+          description: 'This job runs simulations',
+        },
+      ];
+      mockGetLatestJobs.mockResolvedValue(jobs);
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('job-item-job-1')).toBeInTheDocument();
+        expect(mockGetLatestJobs).toHaveBeenCalledOnce();
+      });
+
+      const searchInput = screen.getByTestId('search-query');
+      await userEvent.type(searchInput, 'quantum algorithms{Enter}');
+
+      await waitFor(() => {
+        expect(mockGetLatestJobs).toHaveBeenCalledTimes(2);
+        expect(mockGetLatestJobs).toHaveBeenCalledWith(1, 10, {
+          query: 'quantum algorithms',
+        });
+      });
+    });
   });
 
   describe('URL Parameters', () => {
@@ -564,6 +605,56 @@ describe('JobListPage', () => {
       const selectAllCheckbox = checkboxes[0];
       fireEvent.click(selectAllCheckbox);
 
+      expect(selectAllCheckbox).toBeChecked();
+    });
+
+    it('select all checkbox should be checked if all filtered jobs are checked', async () => {
+      const jobs = [
+        {
+          ...mockJobs[0],
+          id: 'job-filter-1',
+          name: 'Job One',
+          description: 'This job processes quantum algorithms',
+        },
+        {
+          ...mockJobs[1],
+          id: 'job-filter-2',
+          name: 'Job Two',
+          description: 'This job analyzes classical data',
+        },
+        {
+          ...mockJobs[2],
+          id: 'job-3',
+          name: 'Job Three',
+          description: 'This job runs simulations',
+        },
+      ];
+      mockGetLatestJobs.mockResolvedValueOnce(jobs);
+
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('job-item-job-filter-1')).toBeInTheDocument();
+        expect(screen.getByTestId('job-item-job-filter-2')).toBeInTheDocument();
+        expect(screen.getByTestId('job-item-job-3')).toBeInTheDocument();
+      });
+
+      const queryInput = screen.getByTestId('search-query');
+      fireEvent.change(queryInput, { target: { value: 'job-filter' } });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('job-item-job-filter-1')).toBeInTheDocument();
+        expect(screen.getByTestId('job-item-job-filter-2')).toBeInTheDocument();
+        expect(screen.queryByTestId('job-item-job-3')).not.toBeInTheDocument();
+      });
+
+      const checkboxes = screen.getAllByRole('checkbox');
+      expect(checkboxes.length).toBe(3);
+
+      fireEvent.click(checkboxes[1]);
+      fireEvent.click(checkboxes[2]);
+
+      const selectAllCheckbox = checkboxes[0];
       expect(selectAllCheckbox).toBeChecked();
     });
 

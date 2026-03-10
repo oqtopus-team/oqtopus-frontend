@@ -286,7 +286,7 @@ const { status, data } = await apiInstance.getSselog(
 # **listJobs**
 > Array<JobsGetJobsResponse> listJobs()
 
-By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time or search text with \'start_time\', \'end_time\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
+By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time, status or search text with \'start_time\', \'end_time\', \'status\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
 
 ### Example
 
