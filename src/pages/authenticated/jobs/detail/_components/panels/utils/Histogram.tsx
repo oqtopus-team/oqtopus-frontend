@@ -1,7 +1,8 @@
 import { useRef, useEffect, useState } from 'react';
-import ReactApexChart from 'react-apexcharts';
 import { Spacer } from '@/pages/_components/Spacer';
 import downloadIcon from './icon/download_icon.svg';
+import echarts from './setupEcharts';
+import ReactEchartsCore from 'echarts-for-react/lib/core';
 
 interface HistogramInfoProps {
   categories: string[];
@@ -91,6 +92,52 @@ export const Histogram: React.FC<HistogramInfoProps> = (histogramInfo: Histogram
     },
   };
 
+  const options = {
+    tooltip: {
+      show: true,
+      trigger: 'axis',
+      axisPointer: {
+        type: 'shadow',
+      },
+    },
+
+    xAxis: {
+      type: 'category',
+      data: histogramInfo.categories,
+      axisLine: { show: true },
+      axisTick: { show: false },
+      position: 'bottom',
+    },
+
+    yAxis: {
+      type: 'value',
+      axisLine: { show: false },
+      axisTick: { show: false },
+    },
+
+    series: [
+      {
+        name: 'Frequency',
+        type: 'bar',
+        data: histogramInfo.data,
+        label: { show: false },
+      },
+    ],
+
+    toolbox: {
+      show: true,
+      feature: {
+        saveAsImage: {
+          show: true,
+          name: histogramInfo.filename,
+        },
+      },
+
+      right: 10,
+      top: 10,
+    },
+  };
+
   if (histogramInfo.data.length === 0 || histogramInfo.categories.length === 0) {
     return (
       <div>
@@ -106,12 +153,13 @@ export const Histogram: React.FC<HistogramInfoProps> = (histogramInfo: Histogram
     <>
       <div ref={containerRef}>
         <Spacer className="h-2" />
-        <ReactApexChart
+        <ReactEchartsCore echarts={echarts} option={options} />
+        {/* <ReactApexChart
           series={state.series}
           options={state.options}
           type="bar"
           height={histogramInfo.height}
-        />
+        /> */}
         <div id="html-dist"></div>
       </div>
     </>
