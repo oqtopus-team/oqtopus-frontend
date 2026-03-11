@@ -36,6 +36,9 @@ export default {
     },
     link_txt: 'Information about each word',
     topology_info: {
+      map_view: 'Map View',
+      graph_view: 'Graph View',
+      table_view: 'Table View',
       header: 'Topology information',
       property: 'Property',
       median: 'Median',
@@ -47,6 +50,15 @@ export default {
       qubit_metric: 'Qubit Metric',
       coupling_metric: 'Coupling Metric',
       color_scale: 'Color Scale',
+      graph_output: 'Graph Output',
+      sort: 'Sorting',
+      qubit_number: 'Qubit number',
+      sort_options: {
+        valueDesc: 'Value: high to low',
+        valueAsc: 'Value: low to high',
+        idAsc: 'Qubit: 0 → N',
+        idDesc: 'Qubit: N → 0',
+      },
     },
     qubits_info: {
       header: 'Value per qubit',

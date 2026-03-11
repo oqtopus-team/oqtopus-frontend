@@ -1,14 +1,18 @@
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
-import { TopologyInfo } from './_components/TopologyInfo';
+import { MapView } from './_components/MapView';
 import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
 import { useParams } from 'react-router';
-import { useLayoutEffect, useState } from 'react';
-import { Device } from '@/domain/types/Device';
+import { useEffect, useLayoutEffect, useState } from 'react';
+import { Device, DeviceInfo } from '@/domain/types/Device';
 import { useDeviceAPI } from '@/backend/hook';
 import { Loader } from '@/pages/_components/Loader';
 import { DeviceDetailBasicInfo } from './_components/DeviceDetailBasicInfo';
+import { Tab, Tabs } from '@mui/material';
+import QubitGraphView from '@/pages/authenticated/device/detail/_components/GraphView';
+import { toast } from 'react-toastify';
+import { errorToastConfig } from '@/config/toast';
 
 export default function DeviceDetailPage_() {
   const { id } = useParams();
@@ -18,6 +22,9 @@ export default function DeviceDetailPage_() {
 type Params = { id: string };
 
 function DeviceDetailPage({ params: { id } }: { params: Params }) {
+  const [activeTab, setActiveTab] = useState('map');
+  const [parsedDeviceInfo, setParsedDeviceInfo] = useState<DeviceInfo>();
+
   const { t } = useTranslation();
   useDocumentTitle(t('device.detail.title'));
   const { getDevice } = useDeviceAPI();
@@ -25,6 +32,7 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
   const [device, setDevice] = useState<Device | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSuccess, setIsSuccess] = useState(false);
+
   useLayoutEffect(() => {
     setLoading(true);
     if (id != '') {
@@ -38,6 +46,25 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
     }
   }, [id]);
 
+  useEffect(() => {
+    const parsedDeviceInfo = (() => {
+      try {
+        if (!device?.deviceInfo) {
+          toast('No information about the device', errorToastConfig);
+          return;
+        }
+        return JSON.parse(device.deviceInfo);
+      } catch (err) {
+        toast('Failed to parse device info', errorToastConfig);
+        console.error('Failed to parse device info:', err);
+        return {};
+      }
+    })();
+
+    if (!parsedDeviceInfo?.qubits || !parsedDeviceInfo?.couplings) return;
+    setParsedDeviceInfo(parsedDeviceInfo);
+  }, [device]);
+
   if (loading) {
     return <LoadingView />;
   }
@@ -50,12 +77,30 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
       <Title />
       <Spacer className="h-6" />
       <DeviceDetailBasicInfo {...device} />
-      {device.deviceType === 'QPU' && (
-        <div>
-          <Spacer className="h-6" />
-          <TopologyInfo deviceInfo={device.deviceInfo} />
-        </div>
+      <Spacer className="h-6" />
+      <Tabs
+        value={activeTab}
+        onChange={(_, value) => {
+          setActiveTab(value);
+        }}
+        variant="fullWidth"
+        sx={{
+          backgroundColor: 'var(--color-base-card)',
+          '& .MuiTab-root': {
+            color: 'var(--color-base-content)',
+          },
+        }}
+      >
+        <Tab label={t('device.detail.topology_info.map_view')} value="map" disabled={device.deviceType !== 'QPU'} />
+        <Tab label={t('device.detail.topology_info.graph_view')} value="graph" />
+        <Tab label={t('device.detail.topology_info.table_view')} value="table" />
+      </Tabs>
+      <Spacer className="h-6" />
+      {parsedDeviceInfo && activeTab === 'map' && <MapView deviceInfo={parsedDeviceInfo} />}
+      {parsedDeviceInfo && activeTab === 'graph' && (
+        <QubitGraphView deviceInfo={parsedDeviceInfo} />
       )}
+      {parsedDeviceInfo && activeTab === 'table' && <MapView deviceInfo={parsedDeviceInfo} />}
     </>
   );
 }

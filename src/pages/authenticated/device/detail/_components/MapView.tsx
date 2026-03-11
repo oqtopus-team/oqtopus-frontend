@@ -9,6 +9,7 @@ import useWindowSize from '@/pages/_hooks/UseWindowSize';
 import 'simplebar-react/dist/simplebar.min.css';
 import { Button } from '@/pages/_components/Button';
 import { Select } from '@/pages/_components/Select';
+import { DeviceInfo } from '@/domain/types/Device';
 
 // Types for metric selection
 type QubitMetric = 'readout_error' | 't1' | 't2' | 'single_qubit_gate_error';
@@ -422,7 +423,7 @@ const createEdgeData = (
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 3;
 
-export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ deviceInfo }) => {
+export const MapView = ({ deviceInfo }: { deviceInfo: DeviceInfo }) => {
   const { t } = useTranslation();
   const [isDarkTheme, setIsDarkTheme] = useState<boolean>(() => {
     return typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
@@ -438,7 +439,6 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
   const [nodeMap, setNodeMap] = useState<Map<string, object>>(new Map<string, object>());
   const [couplingMap, setCouplingMap] = useState<Map<string, object>>(new Map<string, object>());
   const [hoveredInfo, setStrHoveredInfo] = useState<object>({});
-  const [isValidDeviceInfo, setIsValidDeviceInfo] = useState<boolean>(true);
   const [hoveredNodeId, setHoveredNodeId] = useState<string | number | null>(null);
   const [hoveredLinkId, setHoveredLinkId] = useState<string | null>(null);
 
@@ -581,59 +581,31 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
   }, [windowSize]);
 
   useEffect(() => {
-    try {
-      const parsedDeviceInfo = (() => {
-        try {
-          if (!deviceInfo) {
-            setIsValidDeviceInfo(false);
-            return {};
-          }
-          return JSON.parse(deviceInfo);
-        } catch (err) {
-          setIsValidDeviceInfo(false);
-          console.error('Failed to parse device info:', err);
-          return {};
-        }
-      })();
+    // Store data for median calculation
+    setQubitsData(deviceInfo.qubits);
+    setCouplingsData(deviceInfo.couplings);
 
-      if (!parsedDeviceInfo.qubits || !parsedDeviceInfo.couplings) return;
+    // Calculate metric ranges
+    const qubitRange = calculateMetricRange(deviceInfo.qubits, selectedQubitMetric);
+    const couplingRange = calculateMetricRange(deviceInfo.couplings, selectedCouplingMetric);
 
-      // Store data for median calculation
-      setQubitsData(parsedDeviceInfo.qubits);
-      setCouplingsData(parsedDeviceInfo.couplings);
+    setQubitMetricRange(qubitRange);
+    setCouplingMetricRange(couplingRange);
 
-      // Calculate metric ranges
-      const qubitRange = calculateMetricRange(parsedDeviceInfo.qubits, selectedQubitMetric);
-      const couplingRange = calculateMetricRange(
-        parsedDeviceInfo.couplings,
-        selectedCouplingMetric
-      );
+    const { nodeData, tempNodeMap } = createNodeData(
+      deviceInfo.qubits,
+      selectedQubitMetric,
+      qubitRange
+    );
+    const { edgeData, tempCouplingMap } = createEdgeData(
+      deviceInfo.couplings,
+      selectedCouplingMetric,
+      couplingRange
+    );
 
-      setQubitMetricRange(qubitRange);
-      setCouplingMetricRange(couplingRange);
-
-      const { nodeData, tempNodeMap } = createNodeData(
-        parsedDeviceInfo.qubits,
-        selectedQubitMetric,
-        qubitRange
-      );
-      const { edgeData, tempCouplingMap } = createEdgeData(
-        parsedDeviceInfo.couplings,
-        selectedCouplingMetric,
-        couplingRange
-      );
-
-      if (nodeData.length === 0) {
-        setIsValidDeviceInfo(false);
-      }
-
-      setTopologyData({ nodes: normalizePositions(nodeData), links: edgeData });
-      setNodeMap(tempNodeMap);
-      setCouplingMap(tempCouplingMap);
-    } catch (err) {
-      setIsValidDeviceInfo(false);
-      console.error('Failed to update topology data:', err);
-    }
+    setTopologyData({ nodes: normalizePositions(nodeData), links: edgeData });
+    setNodeMap(tempNodeMap);
+    setCouplingMap(tempCouplingMap);
   }, [deviceInfo, selectedQubitMetric, selectedCouplingMetric]);
 
   useEffect(() => {
@@ -646,14 +618,6 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
 
     return () => clearTimeout(timeout);
   }, []);
-
-  if (!isValidDeviceInfo) {
-    return (
-      <p className={clsx('text-error', 'text-xl')}>
-        {t('device.detail.topology_info.invalid_device_info')}
-      </p>
-    );
-  }
 
   return (
     <div className={clsx('flex', 'grid', 'grid-cols-[1.3fr_2fr]', 'gap-5')}>

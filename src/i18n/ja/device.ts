@@ -36,6 +36,9 @@ export default {
     },
     link_txt: '各単語の情報について',
     topology_info: {
+      map_view: 'マップビュー',
+      graph_view: 'グラフビュー',
+      table_view: 'テーブルビュー',
       header: 'トポロジー情報',
       property: 'プロパティ',
       median: '中央値',
@@ -47,6 +50,15 @@ export default {
       qubit_metric: '量子ビット',
       coupling_metric: '結合指標',
       color_scale: 'カラースケール',
+      graph_output: 'グラフ出力',
+      sort: 'ソート',
+      qubit_number: '量子ビット数',
+      sort_options: {
+        valueDesc: '値: 高い順',
+        valueAsc: '値: 低い順',
+        idAsc: '量子ビット: 0 → N',
+        idDesc: '量子ビット: N → 0',
+      },
     },
     qubits_info: {
       header: '量子ビットごとの値',
