@@ -42,6 +42,7 @@ export const useJobAPI = () => {
         'job_id,name,description,device_id,status,submitted_at',
         convertToDateIfValid(params.from)?.toISOString(),
         convertToDateIfValid(params.to)?.toISOString(),
+        params.status,
         params.query ?? '',
         page,
         pageSize,
@@ -106,7 +107,7 @@ const convertJobResult = (job: JobsGetJobsResponse): Job => ({
   name: job.name ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   description: job.description,
   jobType: job.job_type!,
-  status: job.status ?? 'unknown',
+  status: job.status!,
   deviceId: job.device_id ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   shots: job.shots ?? 0, // TODO: fix invalid oas schema (nullable: should be false)
   jobInfo: job.job_info!,

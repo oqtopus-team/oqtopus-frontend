@@ -286,7 +286,7 @@ const { status, data } = await apiInstance.getSselog(
 # **listJobs**
 > Array<JobsGetJobsResponse> listJobs()
 
-By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time or search text with \'start_time\', \'end_time\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
+By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time, status or search text with \'start_time\', \'end_time\', \'status\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
 
 ### Example
 
@@ -302,6 +302,7 @@ const apiInstance = new JobApi(configuration);
 let fields: string; //Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response. (optional) (default to undefined)
 let startTime: string; //Allows to filter the list of jobs to fetch by submission time. If specified only jobs with submission time (submitted_at property) >= start_time are returned. (optional) (default to undefined)
 let endTime: string; //Allows to filter the list of jobs to fetch by to submission time. If specified only jobs with submission time (submitted_at property) <= end_time are returned. (optional) (default to undefined)
+let status: JobsJobStatus; //Allows to filter the list of jobs to fetch by job\'s status. If specified only jobs which status is equal to provided status are returned. (optional) (default to undefined)
 let q: string; //Allows to filter the list of jobs to fetch by job\'s id, name and description. If specified only jobs which id, name or description contains specified search string are returned. (optional) (default to undefined)
 let page: number; //Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned. (optional) (default to 1)
 let size: number; //Configure number of jobs per page (optional) (default to 10)
@@ -311,6 +312,7 @@ const { status, data } = await apiInstance.listJobs(
     fields,
     startTime,
     endTime,
+    status,
     q,
     page,
     size,
@@ -325,6 +327,7 @@ const { status, data } = await apiInstance.listJobs(
 | **fields** | [**string**] | Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response. | (optional) defaults to undefined|
 | **startTime** | [**string**] | Allows to filter the list of jobs to fetch by submission time. If specified only jobs with submission time (submitted_at property) &gt;&#x3D; start_time are returned. | (optional) defaults to undefined|
 | **endTime** | [**string**] | Allows to filter the list of jobs to fetch by to submission time. If specified only jobs with submission time (submitted_at property) &lt;&#x3D; end_time are returned. | (optional) defaults to undefined|
+| **status** | **JobsJobStatus** | Allows to filter the list of jobs to fetch by job\&#39;s status. If specified only jobs which status is equal to provided status are returned. | (optional) defaults to undefined|
 | **q** | [**string**] | Allows to filter the list of jobs to fetch by job\&#39;s id, name and description. If specified only jobs which id, name or description contains specified search string are returned. | (optional) defaults to undefined|
 | **page** | [**number**] | Set jobs list page number to fetch. If requested page number exceeds number of all pages last page is returned. | (optional) defaults to 1|
 | **size** | [**number**] | Configure number of jobs per page | (optional) defaults to 10|
