@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import type { DeviceInfo, Qubit } from './types'; // adjust import path
+import { Qubit, DeviceInfo } from '@/domain/types/Device';
 
 interface QubitGraphViewProps {
   deviceInfo: DeviceInfo;
@@ -66,7 +66,6 @@ export default function TableView({ deviceInfo }: QubitGraphViewProps) {
 
   return (
     <div className="w-full space-y-3">
-      {/* Search */}
       <div className="flex items-center gap-2.5 rounded-lg bg-base-card px-4 py-2.5">
         <svg
           width="18"
@@ -90,7 +89,6 @@ export default function TableView({ deviceInfo }: QubitGraphViewProps) {
         />
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto rounded-lg">
         <table className="w-full border-collapse text-sm">
           <thead>
