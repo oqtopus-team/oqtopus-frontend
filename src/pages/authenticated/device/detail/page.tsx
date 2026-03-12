@@ -13,6 +13,7 @@ import { Tab, Tabs } from '@mui/material';
 import QubitGraphView from '@/pages/authenticated/device/detail/_components/GraphView';
 import { toast } from 'react-toastify';
 import { errorToastConfig } from '@/config/toast';
+import TableView from '@/pages/authenticated/device/detail/_components/TableView';
 
 export default function DeviceDetailPage_() {
   const { id } = useParams();
@@ -50,7 +51,6 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
     const parsedDeviceInfo = (() => {
       try {
         if (!device?.deviceInfo) {
-          toast('No information about the device', errorToastConfig);
           return;
         }
         return JSON.parse(device.deviceInfo);
@@ -91,7 +91,11 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
           },
         }}
       >
-        <Tab label={t('device.detail.topology_info.map_view')} value="map" disabled={device.deviceType !== 'QPU'} />
+        <Tab
+          label={t('device.detail.topology_info.map_view')}
+          value="map"
+          disabled={device.deviceType !== 'QPU'}
+        />
         <Tab label={t('device.detail.topology_info.graph_view')} value="graph" />
         <Tab label={t('device.detail.topology_info.table_view')} value="table" />
       </Tabs>
@@ -100,7 +104,7 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
       {parsedDeviceInfo && activeTab === 'graph' && (
         <QubitGraphView deviceInfo={parsedDeviceInfo} />
       )}
-      {parsedDeviceInfo && activeTab === 'table' && <MapView deviceInfo={parsedDeviceInfo} />}
+      {parsedDeviceInfo && activeTab === 'table' && <TableView deviceInfo={parsedDeviceInfo} />}
     </>
   );
 }
