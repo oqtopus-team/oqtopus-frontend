@@ -78,33 +78,39 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
       <Spacer className="h-6" />
       <DeviceDetailBasicInfo {...device} />
       <Spacer className="h-6" />
-      <Tabs
-        value={activeTab}
-        onChange={(_, value) => {
-          setActiveTab(value);
-        }}
-        variant="fullWidth"
-        sx={{
-          backgroundColor: 'var(--color-base-card)',
-          '& .MuiTab-root': {
-            color: 'var(--color-base-content)',
-          },
-        }}
-      >
-        <Tab
-          label={t('device.detail.topology_info.map_view')}
-          value="map"
-          disabled={device.deviceType !== 'QPU'}
-        />
-        <Tab label={t('device.detail.topology_info.graph_view')} value="graph" />
-        <Tab label={t('device.detail.topology_info.table_view')} value="table" />
-      </Tabs>
-      <Spacer className="h-6" />
-      {parsedDeviceInfo && activeTab === 'map' && <MapView deviceInfo={parsedDeviceInfo} />}
-      {parsedDeviceInfo && activeTab === 'graph' && (
-        <QubitGraphView deviceInfo={parsedDeviceInfo} />
+      {parsedDeviceInfo ? (
+        <>
+          <Tabs
+            value={activeTab}
+            onChange={(_, value) => {
+              setActiveTab(value);
+            }}
+            variant="fullWidth"
+            sx={{
+              backgroundColor: 'var(--color-base-card)',
+              '& .MuiTab-root': {
+                color: 'var(--color-base-content)',
+              },
+            }}
+          >
+            <Tab
+              label={t('device.detail.topology_info.map_view')}
+              value="map"
+              disabled={device.deviceType !== 'QPU'}
+            />
+            <Tab label={t('device.detail.topology_info.graph_view')} value="graph" />
+            <Tab label={t('device.detail.topology_info.table_view')} value="table" />
+          </Tabs>
+          <Spacer className="h-6" />
+          {activeTab === 'map' && <MapView deviceInfo={parsedDeviceInfo} />}
+          {activeTab === 'graph' && <QubitGraphView deviceInfo={parsedDeviceInfo} />}
+          {activeTab === 'table' && <TableView deviceInfo={parsedDeviceInfo} />}
+        </>
+      ) : (
+        <p className={clsx('text-error', 'text-xl')}>
+          {t('device.detail.topology_info.invalid_device_info')}
+        </p>
       )}
-      {parsedDeviceInfo && activeTab === 'table' && <TableView deviceInfo={parsedDeviceInfo} />}
     </>
   );
 }

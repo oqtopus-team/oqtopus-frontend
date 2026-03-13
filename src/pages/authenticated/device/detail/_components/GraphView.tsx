@@ -241,7 +241,7 @@ export default function QubitGraphView({ deviceInfo }: QubitGraphViewProps) {
             {t('device.detail.topology_info.sort')}
           </label>
           <Select
-            className="form-select form-select-sm bg-dark text-light border-secondary"
+            className="form-select form-select-sm bg-dark text-light border-secondary bg-base-card"
             value={sortMode}
             onChange={(e) => setSortMode(e.target.value as SortMode)}
             style={{ minWidth: 160 }}
@@ -259,7 +259,7 @@ export default function QubitGraphView({ deviceInfo }: QubitGraphViewProps) {
             {t('device.detail.topology_info.graph_output')}
           </label>
           <Select
-            className="form-select form-select-sm bg-dark text-light border-secondary"
+            className="form-select form-select-sm bg-dark text-light border-secondary bg-base-card"
             value={metricKey}
             onChange={(e) => setMetricKey(e.target.value as MetricKey)}
             style={{ minWidth: 260 }}
