@@ -6,6 +6,7 @@ import ReactEchartsCore from 'echarts-for-react/lib/core';
 import { ThemeOptions, useTheme } from '@/theme/useTheme';
 import clsx from 'clsx';
 import { Button } from '@/pages/_components/Button';
+import { useTranslation } from 'react-i18next';
 
 interface HistogramInfoProps {
   categories: string[];
@@ -34,6 +35,7 @@ export const Histogram: React.FC<HistogramInfoProps> = (histogramInfo: Histogram
   const [exportOptionsOpen, setExportOptionsOpen] = useState(false);
 
   const { theme } = useTheme();
+  const { t } = useTranslation();
 
   useEffect(() => {
     window.addEventListener('mousedown', hideExportOptionsIfClickedOutside);
@@ -187,21 +189,21 @@ export const Histogram: React.FC<HistogramInfoProps> = (histogramInfo: Histogram
                 size="small"
                 onClick={exportPNG}
               >
-                Export PNG
+                {t('job.detail.histogram.download_png')}
               </Button>
               <Button
                 className={clsx('border-none', 'p2', 'hover:bg-neutral-content')}
                 size="small"
                 onClick={exportSVG}
               >
-                Export SVG
+                {t('job.detail.histogram.download_svg')}
               </Button>
               <Button
                 className={clsx('border-none', 'p2', 'hover:bg-neutral-content')}
                 size="small"
                 onClick={exportCSV}
               >
-                Export CSV
+                {t('job.detail.histogram.download_csv')}
               </Button>
             </div>
           )}

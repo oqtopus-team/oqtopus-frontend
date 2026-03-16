@@ -85,6 +85,9 @@ export default {
     },
     histogram: {
       nodata: 'データが存在しません',
+      download_png: 'PNG をダウンロード',
+      download_svg: 'SVG をダウンロード',
+      download_csv: 'CSV をダウンロード',
     },
     transpiler_info: {
       nodata: 'データが存在しません',
