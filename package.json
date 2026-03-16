@@ -39,7 +39,6 @@
     "qrcode.react": "^4.2.0",
     "qulacs-wasm-simulator-client": "^0.0.3",
     "react": "^19.2.3",
-    "react-apexcharts": "^1.9.0",
     "react-datepicker": "^7.6.0",
     "react-dom": "^19.2.3",
     "react-error-boundary": "^6.0.0",
