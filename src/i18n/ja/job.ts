@@ -31,6 +31,7 @@ export default {
     operation: {
       delete: '削除',
       cancel: 'キャンセル',
+      download: 'ダウンロード'
     },
     modal: {
       title: '確認',

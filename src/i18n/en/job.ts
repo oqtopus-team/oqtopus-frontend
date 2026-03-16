@@ -31,6 +31,7 @@ export default {
     operation: {
       delete: 'Delete',
       cancel: 'Cancel',
+      download: 'Download'
     },
     modal: {
       title: 'Confirm',
