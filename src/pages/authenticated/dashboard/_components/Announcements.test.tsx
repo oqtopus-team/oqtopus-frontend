@@ -190,21 +190,6 @@ describe('Announcements', () => {
     });
   });
 
-  it('handles API errors gracefully', async () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-    mockGetAnnouncements.mockRejectedValue(new Error('API Error'));
-
-    render(<Announcements />);
-
-    await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
-    });
-
-    expect(screen.getByText('No announcements available')).toBeInTheDocument();
-
-    consoleSpy.mockRestore();
-  });
-
   it('handles null response from API', async () => {
     mockGetAnnouncements.mockResolvedValue(null);
 

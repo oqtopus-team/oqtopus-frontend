@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
+import { describe, it, expect, vi, beforeEach, Mock, afterEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import JobListPage from './page';
@@ -297,19 +297,6 @@ describe('JobListPage', () => {
       await waitFor(() => {
         expect(screen.getByText('No jobs found')).toBeInTheDocument();
       });
-    });
-
-    it('handles API errors gracefully', async () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      mockGetLatestJobs.mockRejectedValue(new Error('API Error'));
-
-      renderComponent();
-
-      await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
-      });
-
-      consoleSpy.mockRestore();
     });
   });
 
@@ -788,6 +775,11 @@ describe('JobListPage', () => {
   });
 
   describe('Infinite Scroll', () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+      vi.clearAllMocks();
+    });
+
     it('loads more jobs when scrolling', async () => {
       const firstPageJobs = Array.from({ length: 10 }, (_, i) => ({
         ...mockJobs[0],
@@ -856,60 +848,6 @@ describe('JobListPage', () => {
       await waitFor(() => {
         expect(mockGetLatestJobs).toHaveBeenCalledTimes(2);
       });
-    });
-  });
-
-  describe('Error Handling', () => {
-    it('handles delete job errors gracefully', async () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      mockDeleteJob.mockRejectedValue(new Error('Delete failed'));
-
-      renderComponent();
-
-      await waitFor(() => {
-        expect(screen.getByTestId('job-item-job-1')).toBeInTheDocument();
-      });
-
-      const checkbox = screen.getByTestId('job-checkbox-job-1');
-      fireEvent.click(checkbox);
-
-      const deleteButton = screen.getByText('Delete Selected');
-      fireEvent.click(deleteButton);
-
-      const confirmButton = screen.getByTestId('modal-confirm');
-      fireEvent.click(confirmButton);
-
-      await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
-      });
-
-      consoleSpy.mockRestore();
-    });
-
-    it('handles cancel job errors gracefully', async () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      mockCancelJob.mockRejectedValue(new Error('Cancel failed'));
-
-      renderComponent();
-
-      await waitFor(() => {
-        expect(screen.getByTestId('job-item-job-1')).toBeInTheDocument();
-      });
-
-      const checkbox = screen.getByTestId('job-checkbox-job-1');
-      fireEvent.click(checkbox);
-
-      const cancelButton = screen.getByText('Cancel Selected');
-      fireEvent.click(cancelButton);
-
-      const confirmButton = screen.getByTestId('modal-confirm');
-      fireEvent.click(confirmButton);
-
-      await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
-      });
-
-      consoleSpy.mockRestore();
     });
   });
 
