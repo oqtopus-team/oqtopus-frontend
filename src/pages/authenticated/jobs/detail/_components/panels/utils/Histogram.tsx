@@ -18,12 +18,12 @@ interface HistogramInfoProps {
 const colors = {
   [ThemeOptions.LIGHT]: {
     chart: 'rgb(72, 135, 250)',
-    text: 'rbg(45, 45, 45)',
+    text: 'rgb(45, 45, 45)',
     background: 'rgb(255, 255, 255)',
   },
   [ThemeOptions.DARK]: {
     chart: 'rgb(91, 155, 255)',
-    text: 'rgb(230, 230, 230',
+    text: 'rgb(230, 230, 230)',
     background: 'rgb(30, 30, 30)',
   },
 };
