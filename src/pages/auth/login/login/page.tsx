@@ -55,7 +55,7 @@ export default function LoginPage() {
               });
             } else {
               // if something goes wrong, alert the user and redirect to login
-              alert(message);
+              toast(message, errorToastConfig)
               navigate('/login');
             }
             return;

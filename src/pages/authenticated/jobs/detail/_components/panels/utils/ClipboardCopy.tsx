@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import clsx from 'clsx';
 import { BsCopy } from 'react-icons/bs';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'react-toastify';
+import { errorToastConfig } from '@/config/toast';
 
 export interface ClipboardCopyProps {
   text: string;
@@ -13,11 +15,11 @@ const ClipboardCopy: React.FC<ClipboardCopyProps> = ({ text }) => {
 
   const handleCopy = async () => {
     try {
-      navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      console.error('failed to copy:', error);
+      toast(t('common.error.default'), errorToastConfig);
     }
   };
 

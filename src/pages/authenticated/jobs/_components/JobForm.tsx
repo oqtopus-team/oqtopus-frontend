@@ -37,6 +37,7 @@ import { Device } from '@/domain/types/Device';
 import { toast } from 'react-toastify';
 import i18next, { TFunction } from 'i18next';
 import { CodeEditor } from '../../composer/_components/CodeEditor';
+import { errorToastConfig } from '@/config/toast';
 
 interface FormInput {
   name?: string;
@@ -202,7 +203,7 @@ export const JobForm = (componentProps: JobFormProps) => {
         const defaults = await initializeJobFormProgramDefaults();
         setJobDefaults(defaults);
       } catch (error) {
-        console.error('failed to initialize:', error);
+        toast(t('job.form.error_message.initialize_defaults'), errorToastConfig);
       }
     }
 
@@ -272,27 +273,22 @@ export const JobForm = (componentProps: JobFormProps) => {
       return;
     }
 
-    try {
-      const res = await submitJob({
-        name: data.name,
-        description: data.description,
-        device_id: data.deviceId,
-        shots: data.shots,
-        job_type: data.type,
-        job_info: {
-          program: [data.program],
-          operator: data.type === 'estimation' ? data.operator : undefined,
-        },
-        transpiler_info: JSON.parse(data.transpiler ?? ''),
-        simulator_info: JSON.parse(data.simulator ?? ''),
-        mitigation_info: JSON.parse(data.mitigation ?? ''),
-      });
-      toast.success(t('job.form.toast.success'));
-      return res;
-    } catch (e) {
-      console.error(e);
-      toast.error(t('job.form.toast.error'));
-    }
+    const res = await submitJob({
+      name: data.name,
+      description: data.description,
+      device_id: data.deviceId,
+      shots: data.shots,
+      job_type: data.type,
+      job_info: {
+        program: [data.program],
+        operator: data.type === 'estimation' ? data.operator : undefined,
+      },
+      transpiler_info: JSON.parse(data.transpiler ?? ''),
+      simulator_info: JSON.parse(data.simulator ?? ''),
+      mitigation_info: JSON.parse(data.mitigation ?? ''),
+    });
+    toast.success(t('job.form.toast.success'));
+    return res;
   };
 
   const onSubmitWithRedirection = async (data: FormInput) => {

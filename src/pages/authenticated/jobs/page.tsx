@@ -97,7 +97,6 @@ export default function JobListPage() {
         // And we proceed to the next page
         setPage(page + 1);
       })
-      .catch((e) => console.error(e))
       .finally(() => {
         setLoading(false);
       });
@@ -112,17 +111,13 @@ export default function JobListPage() {
     setLoading(true);
 
     for (let i = 0; i < maxPage; i++) {
-      try {
-        const jobsForPage = await getLatestJobs(currentPage, PAGE_SIZE, params);
-        jobs.push(...jobsForPage);
+      const jobsForPage = await getLatestJobs(currentPage, PAGE_SIZE, params);
+      jobs.push(...jobsForPage);
 
-        currentPage++;
+      currentPage++;
 
-        hasMore = jobsForPage.length === PAGE_SIZE;
-        if (!hasMore) break;
-      } catch (e: any) {
-        console.error(e);
-      }
+      hasMore = jobsForPage.length === PAGE_SIZE;
+      if (!hasMore) break;
     }
 
     setPage(currentPage);
@@ -189,11 +184,7 @@ export default function JobListPage() {
     setBulkDeleteInProgress(true);
 
     for (const job of selectedJobs) {
-      try {
-        await deleteJob(job);
-      } catch (error: any) {
-        console.error(error);
-      }
+      await deleteJob(job);
     }
 
     reloadJobs();
@@ -206,11 +197,7 @@ export default function JobListPage() {
     setBulkCancelInProgress(true);
 
     for (const job of selectedJobs) {
-      try {
-        await cancelJob(job);
-      } catch (error: any) {
-        console.error(error);
-      }
+      await cancelJob(job);
     }
 
     reloadJobs();

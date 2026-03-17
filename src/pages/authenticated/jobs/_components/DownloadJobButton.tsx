@@ -2,6 +2,9 @@ import { Job, JobFileData, JobFileDataInfo, JobTypeType } from '@/domain/types/J
 import { Button } from '@/pages/_components/Button';
 import { CSSProperties, useState } from 'react';
 import { BsDownload } from 'react-icons/bs';
+import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
+import { errorToastConfig } from '@/config/toast';
 
 type DownloadJobButtonProps = {
   job?: Job | null;
@@ -9,6 +12,7 @@ type DownloadJobButtonProps = {
 };
 
 export default function DownloadJobButton({ job, style }: DownloadJobButtonProps) {
+  const { t } = useTranslation();
   const [downloadInProgress, setDownloadInProgress] = useState(false);
 
   function downloadJob() {
@@ -40,8 +44,8 @@ export default function DownloadJobButton({ job, style }: DownloadJobButtonProps
 
       document.body.removeChild(a);
       URL.revokeObjectURL(blobURL);
-    } catch (error: any) {
-      console.error('failed to download file due to following error:', error);
+    } catch (e) {
+      toast(t('job.form.error_message.download_job'), errorToastConfig);
     } finally {
       setDownloadInProgress(false);
     }

@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router';
 import { ToastContainer } from 'react-toastify';
 import { Loader } from '@/pages/_components/Loader';
@@ -32,10 +32,15 @@ const DeviceDetail = lazy(async () => await import('@/pages/authenticated/device
 const Announcements = lazy(
   async () => await import('@/pages/authenticated/dashboard/_components/Announcements')
 );
+import { setupInterceptors } from '@/api/api-interceptor-error';
 
 import './style.css';
 
 export const App: React.FunctionComponent = () => {
+  useEffect(() => {
+    setupInterceptors();
+  }, []);
+
   return (
     <>
       <BrowserRouter>

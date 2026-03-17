@@ -2,6 +2,8 @@ import { createEmptyCircuit, insertGatePart, QuantumCircuit } from './circuit';
 import { createComposerGate, getMaxGateRow, isDummyGate, RealComposerGate } from './composer';
 import { GateDefinition } from './custom_gates';
 import { GateTag, isCustomGate, isParametrizedGate } from './gates';
+import { toast } from 'react-toastify';
+import { errorToastConfig } from '@/config/toast';
 
 export function generateQASMCode(
   circuit: QuantumCircuit,
@@ -127,6 +129,6 @@ export function parseCircuitJSON(circuitJSON: string): QuantumCircuit | undefine
 
     return parsedCircuit;
   } catch (e: any) {
-    console.error('failed to parse quantum circuit');
+    toast('Failed to parse quantum circuit', errorToastConfig)
   }
 }

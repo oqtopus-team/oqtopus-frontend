@@ -3,10 +3,11 @@ import { i18nextInitOptions } from '@/i18n/config';
 import { I18nextProvider } from 'react-i18next';
 import { ReactNode } from 'react';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import { toast } from 'react-toastify';
 
 i18n.use(LanguageDetector).init(i18nextInitOptions, (err) => {
   if (err) {
-    console.error('i18next failed to initialize', err);
+    toast('i18next failed to initialize');
   }
 });
 

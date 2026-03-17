@@ -183,8 +183,6 @@ export default function Page() {
       const jobId = await jobApi.submitJob(req);
       toast(t('job.form.toast.success'), successToastConfig);
       setJobId(jobId);
-    } catch (e) {
-      toast(t('job.form.toast.error'), errorToastConfig);
     } finally {
       setBusy(false);
     }

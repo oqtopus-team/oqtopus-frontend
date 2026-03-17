@@ -10,6 +10,8 @@ import { useFormProcessor } from '@/pages/_hooks/form';
 import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
 import { useEffect } from 'react';
+import { toast } from 'react-toastify';
+import { errorToastConfig } from '@/config/toast';
 
 interface FormInput {
   verificationCode: string;
@@ -27,7 +29,7 @@ export default function ConfirmResetMFAPage() {
   const navigate = useNavigate();
   useEffect(() => {
     if (!username || !accessToken) {
-      alert(t('mfa.form.error_message.unexpected'));
+      toast(t('mfa.form.error_message.unexpected'), errorToastConfig);
       navigate('/login', { replace: true });
     }
   }, [username, accessToken, t, navigate]);
@@ -51,7 +53,7 @@ export default function ConfirmResetMFAPage() {
               });
               return;
             }
-            alert(result.message);
+            toast(result.message, errorToastConfig);
             setProcessingFalse();
           })
           .catch((error) => {

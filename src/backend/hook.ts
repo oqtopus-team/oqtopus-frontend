@@ -81,7 +81,6 @@ export const useJobAPI = () => {
         };
       })
       .catch((error) => {
-        console.log(error);
         return {
           file: null,
           file_name: null,

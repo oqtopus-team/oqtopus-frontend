@@ -27,5 +27,8 @@ export default {
     },
     button: 'Send',
   },
+  errors: {
+    no_secret: "No secret provided"
+  },
   button: 'Send',
 };
