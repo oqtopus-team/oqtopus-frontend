@@ -41,7 +41,7 @@ export const Announcements = (props: AnnouncementProps): React.ReactElement => {
       setFilteredAnnouncementsList(filteredList);
     }
 
-    getAnnouncementsList();
+    getAnnouncementsList().catch(() => {});
   }, []);
 
   return (

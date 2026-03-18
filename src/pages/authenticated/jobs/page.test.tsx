@@ -298,6 +298,16 @@ describe('JobListPage', () => {
         expect(screen.getByText('No jobs found')).toBeInTheDocument();
       });
     });
+
+    it('handles API errors gracefully', async () => {
+      mockGetLatestJobs.mockRejectedValue(new Error('API Error'));
+
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByText('Job List')).toBeInTheDocument();
+      });
+    });
   });
 
   describe('Search Functionality', () => {
@@ -847,6 +857,44 @@ describe('JobListPage', () => {
 
       await waitFor(() => {
         expect(mockGetLatestJobs).toHaveBeenCalledTimes(2);
+      });
+    });
+  });
+
+  describe('Error Handling', () => {
+    it('handles delete job errors gracefully', async () => {
+      mockDeleteJob.mockRejectedValue(new Error('Delete failed'));
+
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('job-item-job-1')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('job-checkbox-job-1'));
+      fireEvent.click(screen.getByText('Delete Selected'));
+      fireEvent.click(screen.getByTestId('modal-confirm'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('job-item-job-1')).toBeInTheDocument();
+      });
+    });
+
+    it('handles cancel job errors gracefully', async () => {
+      mockCancelJob.mockRejectedValue(new Error('Cancel failed'));
+
+      renderComponent();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('job-item-job-1')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('job-checkbox-job-1'));
+      fireEvent.click(screen.getByText('Cancel Selected'));
+      fireEvent.click(screen.getByTestId('modal-confirm'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('job-item-job-1')).toBeInTheDocument();
       });
     });
   });

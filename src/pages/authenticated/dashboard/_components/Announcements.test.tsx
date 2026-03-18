@@ -190,6 +190,19 @@ describe('Announcements', () => {
     });
   });
 
+  it('handles API errors gracefully', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    mockGetAnnouncements.mockRejectedValue(new Error('API Error'));
+
+    render(<Announcements />);
+
+    await waitFor(() => {
+      expect(screen.getByText('No announcements available')).toBeInTheDocument();
+    });
+
+    vi.restoreAllMocks();
+  });
+
   it('handles null response from API', async () => {
     mockGetAnnouncements.mockResolvedValue(null);
 
