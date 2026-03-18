@@ -5,5 +5,10 @@ export default {
   },
   expand: 'Expand',
   collapse: 'Collapse',
-  date_format: 'MM/dd/yyyy HH:mm:ss',
+  date_format: 'dd/MM/yyyy HH:mm:ss',
+  type: 'Type',
+  custom: 'Custom',
+  errors: {
+    default: 'Something went wrong',
+  },
 };

@@ -1,57 +1,54 @@
-import { ReactNode, useEffect, useRef } from "react";
-import { QuantumGate } from "../gates";
-import { useDrag } from "react-dnd";
-import { FromPalette, ItemTypeGate } from "../dnd";
-import clsx from "clsx";
+import { useRef, useState } from 'react';
+import { GateTag } from '../gates';
+import clsx from 'clsx';
+import { gateRenderingBlockMap } from '../gates_rendering/Gates';
+import { createComposerGate } from '../composer';
+import { useDraggable } from '@dnd-kit/core';
 
 export interface Props {
-  gateTag: QuantumGate["_tag"];
+  gateTag: GateTag;
   disabled: boolean;
-  children: ReactNode;
-  onDragStart: () => void;
-  onDragEnd: () => void;
 }
 
-export default ({ disabled, gateTag, children, onDragStart, onDragEnd }: Props) => {
+export default function QuantumGatePaletteItem({ disabled, gateTag }: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  const [gateBlock] = useState(gateRenderingBlockMap[gateTag]);
 
-  const [{ isDragging }, drag] = useDrag(() => ({
-    type: ItemTypeGate,
-    item: {
-      type: ItemTypeGate,
-      from: FromPalette,
-      gateTag, // どの種類のゲートか
-    },
-    canDrag: disabled === false,
-    collect: monitor => ({
-      isDragging: monitor.isDragging(),
-    }),
-  }), [gateTag, disabled]);
-
-  useEffect(() => {
-    if (ref.current) {
-      drag(ref.current);
-    }
-  }, [ref, drag]);
-
-  useEffect(() => {
-      if (isDragging) {
-        onDragStart();
-      }
-      else {
-        onDragEnd();
-      }
-  }, [isDragging]);
+  const draggable = useDraggable({
+    id: gateTag,
+    data: { gate: createComposerGate(gateTag, -1, -1) },
+  });
 
   return (
-    <div 
-      ref={ref} 
-      style={{ 
-        opacity: isDragging || disabled ? 0.5 : 1,
-        cursor: isDragging ? "grabbing" : disabled ? "not-allowed" :  "pointer",
-    }}
+    <div
+      ref={(node) => {
+        ref.current = node;
+        draggable.setNodeRef(node);
+      }}
+      {...draggable.attributes}
+      {...(!disabled ? draggable.listeners : {})}
+      className={clsx([
+        ['text-info-content', 'font-bold'],
+        gateBlock.hasBorder ? ['border', 'border-gate-operation-border'] : [],
+      ])}
+      style={{
+        minWidth: '2.5rem',
+        width: '2.5rem',
+        height: '2.5rem',
+        borderRadius: '0.25rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        opacity: draggable.isDragging || disabled ? 0.5 : 1,
+        cursor: draggable.isDragging ? 'grabbing' : disabled ? 'not-allowed' : 'pointer',
+        backgroundColor: gateBlock.backgroundColor,
+        touchAction: 'pan-x', // keep horizontal touch actions to allow scrolling whole pallette
+        transition: 'none',
+        userSelect: 'none',
+        outline: 'none',
+      }}
     >
-      {children}
+      {gateBlock.palletteItem}
     </div>
   );
 }

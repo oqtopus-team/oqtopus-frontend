@@ -13,6 +13,8 @@ import { useNavigate } from 'react-router';
 import { useFormProcessor } from '@/pages/_hooks/form';
 import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
+import { toast } from 'react-toastify';
+import { errorToastConfig } from '@/config/toast';
 
 interface FormInput {
   username: string;
@@ -21,21 +23,8 @@ interface FormInput {
 
 const validationRules = (t: (key: string) => string): yup.ObjectSchema<FormInput> =>
   yup.object({
-    username: yup
-      .string()
-      .required(t('signin.form.error_message.user_name'))
-      .email(t('signin.form.error_message.mail_address')),
-    password: yup
-      .string()
-      .required(t('signin.form.error_message.password'))
-      .min(12, t('signin.form.error_message.password_min_length'))
-      .matches(/[A-Z]/, t('signin.form.error_message.password_uppercase'))
-      .matches(/[a-z]/, t('signin.form.error_message.password_lowercase'))
-      .matches(/[0-9]/, t('signin.form.error_message.password_number'))
-      .matches(
-        /[\^$*.[\]{}()?"!@#%&/\\,><':;|_~`+=-]/,
-        t('signin.form.error_message.password_special')
-      ),
+    username: yup.string().required(t('signin.form.error_message.user_name')),
+    password: yup.string().required(t('signin.form.error_message.password')),
   });
 
 export default function LoginPage() {
@@ -46,33 +35,44 @@ export default function LoginPage() {
   const { processing, register, onSubmit, errors } = useFormProcessor(
     validationRules(t),
     ({ setProcessingFalse }) => {
-      return (data) => {
-        auth
-          .signIn(data.username, data.password)
-          .then(({ success, message }) => {
+      return async (data) => {
+        try {
+          const { success, message } = await auth.signIn(data.username, data.password);
+          if (success) {
+            navigate('/confirm-mfa');
+            return;
+          }
+          toast(t(message), errorToastConfig);
+          if (message === 'signup.confirm.form.mfa_setup_request') {
+            // if MFA is not set, execute MFA reset flow
+            // this will send a confirmation code to the user's email and redirect to the confirm code page
+            const { success, message } = await auth.startMfaReset(data.username, data.password);
             if (success) {
-              navigate('/confirm-mfa');
-              return;
+              // if MFA reset is successful, redirect to confirm code page
+              // transfer username and password to the next page
+              navigate('/mfa-confirmation-code', {
+                state: { username: data.username, accessToken: message },
+              });
+            } else {
+              // if something goes wrong, alert the user and redirect to login
+              alert(message);
+              navigate('/login');
             }
-            alert(message);
-            if (message === 'MFAを設定してください。') {
-              navigate('/mfa');
-              return;
-            }
-            setProcessingFalse();
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+            return;
+          }
+          setProcessingFalse();
+        } catch (error) {
+          const errorMsg = error instanceof Error ? error.message : t('common.errors.default');
+          toast(errorMsg, errorToastConfig);
+        }
       };
     }
   );
 
-  const { termOfService, privacyPolicy }
-    = {
-      termOfService: import.meta.env.VITE_APP_TERM_OF_SERVICE_PATH ?? "",
-      privacyPolicy: import.meta.env.VITE_APP_PRIVACY_POLICY_PATH ?? ""
-    };
+  const { termOfService, privacyPolicy } = {
+    termOfService: import.meta.env.VITE_APP_TERM_OF_SERVICE_PATH ?? '',
+    privacyPolicy: import.meta.env.VITE_APP_PRIVACY_POLICY_PATH ?? '',
+  };
 
   return (
     <div className={clsx('w-[300px]', 'pt-8', 'text-sm')}>
@@ -86,6 +86,7 @@ export default function LoginPage() {
           {...register('username')}
           label={t('signin.form.mail')}
           errorMessage={errors.username && errors.username.message}
+          className={clsx('bg-base-card')}
         />
         <Spacer className="h-5" />
         <Input
@@ -95,16 +96,16 @@ export default function LoginPage() {
           {...register('password')}
           label={t('signin.form.password')}
           errorMessage={errors.password && errors.password.message}
+          className={clsx('bg-base-card')}
         />
         <Spacer className="h-2.5" />
         <NavLink to="/forgot-password" className={clsx('text-link', 'text-xs')}>
           {t('signin.forgot_password')}
         </NavLink>
         <Spacer className="h-2.5" />
-        { termOfService !== "" && privacyPolicy !== ""
-          ? <SignUpAgreement termsOfService={termOfService} privacyPolicy={privacyPolicy} />
-          : null
-        }
+        {termOfService !== '' && privacyPolicy !== '' ? (
+          <SignUpAgreement termsOfService={termOfService} privacyPolicy={privacyPolicy} />
+        ) : null}
         <Spacer className="h-3" />
         <Button type="submit" color="secondary" loading={processing}>
           {t('signin.button')}

@@ -11,6 +11,8 @@ import { FormTitle } from '../../_components/FormTitle';
 import { useFormProcessor } from '@/pages/_hooks/form';
 import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
+import { toast } from 'react-toastify';
+import { errorToastConfig, infoToastConfig, successToastConfig } from '@/config/toast';
 
 interface FormInput {
   totpCode: string;
@@ -33,7 +35,7 @@ export default function SetupMFAPage() {
         if (result.success) {
           setQRLoading(true);
         } else {
-          alert(result.message);
+          toast(result.message, errorToastConfig);
         }
       })
       .catch((error) => {
@@ -42,7 +44,7 @@ export default function SetupMFAPage() {
   }, []);
 
   const { t } = useTranslation();
-  useDocumentTitle(t('mfa.title'));
+  useDocumentTitle(t('mfa.signup.title'));
   const { processing, register, onSubmit, errors } = useFormProcessor(
     validationRules(t),
     ({ setProcessingFalse }) => {
@@ -54,11 +56,12 @@ export default function SetupMFAPage() {
               navigate('/dashboard');
               return;
             }
-            alert(result.message);
+            toast(result.message, errorToastConfig);
             setProcessingFalse();
           })
           .catch((error) => {
-            console.log(error);
+            const errorMsg = error.message ?? t('common.errors.default');
+            toast(errorMsg, errorToastConfig);
           });
       };
     }
@@ -66,7 +69,7 @@ export default function SetupMFAPage() {
 
   return (
     <div className={clsx('w-[300px]', 'pt-8', 'text-sm')}>
-      <FormTitle>{t('mfa.title')}</FormTitle>
+      <FormTitle>{t('mfa.signup.title')}</FormTitle>
       <Spacer className="h-4" />
       <p className={clsx('text-xs', 'leading-[1.8]')}>
         <Trans i18nKey={'mfa.explanation01'} />
@@ -84,6 +87,7 @@ export default function SetupMFAPage() {
           {...register('totpCode')}
           label={t('mfa.form.totp_code')}
           errorMessage={errors.totpCode?.message}
+          className={clsx('bg-base-card')}
         />
         <Spacer className="h-5" />
         <Button type="submit" color="secondary" loading={processing}>

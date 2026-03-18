@@ -20,6 +20,7 @@ export default function Page() {
   const [loadingJobs, setLoadingJobs] = useState(true);
   const [jobs, setJobs] = useState<Job[]>([]);
   const { getLatestJobs } = useJobAPI();
+  const dashboardCardClass = clsx('border', 'border-table-border/70');
 
   useLayoutEffect(() => {
     setLoadingJobs(true);
@@ -42,16 +43,45 @@ export default function Page() {
           'gap-5'
         )}
       >
-        <Card className={clsx(['col-start-1', 'col-end-1'])}>
+        <Card className={clsx(['col-start-1', 'col-end-2', 'h-full', dashboardCardClass])}>
           <Composer />
         </Card>
-        <Card className={clsx(['col-start-2', 'col-end-3', 'overflow-x-auto'])}>
+        <Card
+          className={clsx([
+            'col-start-2',
+            'col-end-3',
+            'overflow-x-auto',
+            'h-full',
+            'max-h-[520px]',
+            'overflow-y-auto',
+            dashboardCardClass,
+          ])}
+        >
           <DeviceList />
         </Card>
-        <Card className={clsx(['col-start-3', 'col-end-4', 'row-start-1', 'row-end-1  '])}>
+        <Card
+          className={clsx([
+            'col-start-3',
+            'col-end-4',
+            'row-start-1',
+            'row-end-2',
+            'h-full',
+            'max-h-[520px]',
+            'overflow-y-auto',
+            dashboardCardClass,
+          ])}
+        >
           <Announcements style={{ post: { '--base-size': 0.55 } }} />
         </Card>
-        <Card className={clsx(['col-start-1', 'col-end-3', 'row-start-2', 'overflow-x-auto'])}>
+        <Card
+          className={clsx([
+            'col-start-1',
+            'col-end-4',
+            'row-start-2',
+            'overflow-x-auto',
+            dashboardCardClass,
+          ])}
+        >
           <JobList jobs={jobs ?? []} />
         </Card>
       </div>

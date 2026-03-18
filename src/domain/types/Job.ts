@@ -5,7 +5,6 @@ import {
   JobsS3SubmitJobInfo,
   JobsS3TranspileResult,
 } from '@/api/generated';
-import { off } from 'process';
 
 export const JOB_STATUSES = [
   'submitted',
@@ -15,7 +14,6 @@ export const JOB_STATUSES = [
   'failed',
   'registered',
   'cancelled',
-  'unknown',
 ] as const;
 
 export type JobStatusType = (typeof JOB_STATUSES)[number];
@@ -32,14 +30,16 @@ export const isJobStatus = (str: string): str is JobStatusType => {
   return JOB_STATUSES.some((v) => v == str);
 };
 
-export const TRANSPILER_TYPES = ['Default', 'None'] as const;
-export const TRANSPILER_TYPE_DEFAULT = TRANSPILER_TYPES[0];
-export type TranspilerTypeType = (typeof TRANSPILER_TYPES)[number];
-
-export const JOB_FORM_TRANSPILER_INFO_DEFAULTS: { [key in TranspilerTypeType]: string } = {
-  Default: JSON.stringify({}, null, 2),
+export const TRANSPILER_TYPES: { [key in 'Default' | 'None']: string } = {
+  Default: JSON.stringify(
+    { transpiler_lib: 'qiskit', transpiler_options: { optimization_level: 2 } },
+    null,
+    2
+  ),
   None: JSON.stringify({ transpiler_lib: null }, null, 2),
 } as const;
+export const TRANSPILER_TYPE_DEFAULT = TRANSPILER_TYPES.Default;
+export type TranspilerTypeType = 'Default' | 'None';
 
 export const PROGRAM_TYPES = ['Default', 'Bell Measurement'] as const;
 export const PROGRAM_TYPE_DEFAULT = PROGRAM_TYPES[0];
@@ -72,10 +72,12 @@ export async function initializeJobFormProgramDefaults(): Promise<{
   return info as { [key in ProgramType]: string };
 }
 
+export type MitigationTypeType = 'PseudoInv' | 'None';
+
 export const JOB_FORM_MITIGATION_INFO_DEFAULTS: { [key in 'PseudoInv' | 'None']: string } = {
   PseudoInv: JSON.stringify(
     {
-      readout: 'pseudo_inverse',
+      ro_error_mitigation: 'pseudo_inverse',
     },
     null,
     2
@@ -119,6 +121,8 @@ export interface JobSearchParams {
   query?: string; // id, name or description query string
   status?: JobStatusType;
   page?: string;
+  from?: string; // date string in ISO format
+  to?: string; // date string in ISO format
 }
 
 export interface ResponseJob {

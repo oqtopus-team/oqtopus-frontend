@@ -8,10 +8,13 @@ import QuantumCircuitCanvas, {
   staticCircuitProps,
 } from '@/pages/authenticated/composer/_components/QuantumCircuitCanvas';
 import { useEffect, useState } from 'react';
-import { QuantumCircuit } from '@/pages/authenticated/composer/circuit';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import { circuitContext, QuantumCircuitService } from '@/pages/authenticated/composer/circuit';
 import { Switch } from '@mui/material';
+import { parseCircuitJSON } from '@/pages/authenticated/composer/qasm';
+import { DndContextProvider } from '@/pages/authenticated/composer/dragging';
+import { CodeEditor } from '@/pages/authenticated/composer/_components/CodeEditor';
+import { BsCodeSlash } from 'react-icons/bs';
+import { ThemeOptions, useTheme } from '@/theme/useTheme';
 
 export interface JobDetailProgramProps {
   program: string[];
@@ -38,8 +41,9 @@ export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
   const { t } = useTranslation();
   const [text, programExceededMaxDisplayLength] = limitProgram(jobInfo.program.join('\n'));
   const sentFromComposer = isSentFromComposer(text);
-  const [circuit, setCircuit] = useState<QuantumCircuit>({ qubitNumber: 0, steps: [] });
+  const [circuitService] = useState<QuantumCircuitService>(new QuantumCircuitService(0, 0, []));
   const [showCode, setShowCode] = useState(false);
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (isSentFromComposer(text)) {
@@ -47,8 +51,8 @@ export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
       if (program.startsWith('//')) {
         const programJson = program.replace(/^\/\/\s*/, '');
         try {
-          const parsed = JSON.parse(programJson);
-          setCircuit(parsed);
+          const parsed = parseCircuitJSON(programJson);
+          if (parsed) circuitService.circuit = parsed;
         } catch (_) {}
       }
     }
@@ -63,7 +67,7 @@ export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
         {sentFromComposer ? (
           <div className="flex items-center">
             <span className={clsx([['text-primary', 'cursor-pointer', 'm-2']])}>
-              <img src="/img/common/icon-code.svg" width={32} height={32} />
+              <BsCodeSlash />
             </span>
             <Switch value={showCode} onChange={() => setShowCode(!showCode)} />
             <span className={clsx([['text-primary', 'cursor-pointer', 'm-2']])}>
@@ -87,14 +91,20 @@ export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
         <>
           {/* FIXME Far from an ideal solution... We REALLY do not need to put DndProvider here! */}
           {showCode ? (
-            <DndProvider backend={HTML5Backend}>
-              <QuantumCircuitCanvas {...staticCircuitProps(circuit)} />
-            </DndProvider>
+            <DndContextProvider>
+              <circuitContext.Provider value={circuitService}>
+                <QuantumCircuitCanvas {...staticCircuitProps()} />
+              </circuitContext.Provider>
+            </DndContextProvider>
           ) : (
             <div className={clsx('relative')}>
               <div className={clsx('p-3', 'rounded', 'bg-cmd-bg', 'text-sm')}>
                 <SimpleBar style={{ maxHeight: jobInfo.maxHeight }}>
-                  <div className={clsx('whitespace-pre-wrap')}>{text}</div>
+                  <CodeEditor
+                    disabled={true}
+                    code={text}
+                    fixedTheme={theme === ThemeOptions.DARK ? 'okaidia' : 'default'}
+                  />
                 </SimpleBar>
               </div>
               <ClipboardCopy text={text} />

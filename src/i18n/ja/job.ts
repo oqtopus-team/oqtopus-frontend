@@ -10,6 +10,14 @@ export default {
       description: '説明',
       description_placeholder: 'Enter description',
       button: '検索',
+      from: '開始日',
+      to: '終了日',
+      today: '今日',
+      last_7_days: '過去7日間',
+      last_30_days: '過去30日間',
+      error_message: {
+        from_is_after_to: '開始日は終了日より前でなければなりません',
+      },
     },
     table: {
       id: 'ジョブID',
@@ -50,6 +58,7 @@ export default {
       description: '説明',
       job_type: 'ジョブタイプ',
       device_id: 'デバイスID',
+      transpiler: 'トランスパイラ',
       shots: 'ショット数',
       status: 'ステータス',
       submitted_at: 'Submit 日時',
@@ -58,6 +67,9 @@ export default {
       ended_at: '終了日時',
       execution_time: '実行時間 (秒)',
       message: 'メッセージ',
+      simulator: 'シミュレーター',
+      mitigation: '緩和',
+      program: 'プログラム',
     },
     program: {
       nodata: 'データが存在しません',
@@ -97,8 +109,8 @@ export default {
   form: {
     title: 'Job入力フォーム',
     description: '量子デバイスで実行するジョブを登録できます',
-    name_placeholder: '例）〇〇〇',
-    description_placeholder: '例）〇〇〇',
+    name_placeholder: 'ジョブ名を入力してください',
+    description_placeholder: 'ジョブの説明を入力してください',
     program_placeholder:
       '例）OPENQASM 3; include "stdgates.inc"; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;',
     operator_pauli_placeholder: '演算子のパウリ文字列 (例: X 0 X 1)',
@@ -106,7 +118,7 @@ export default {
     transpiler_placeholder: '例）{}',
     simulator_placeholder: '例）{}',
     mitigation_placeholder: '例）{}',
-    shots_placeholder: '例）4',
+    shots_placeholder: 'ショット数を入力してください',
     upload_file_button: 'ファイル読み込み',
     button: '送信する',
     submit_and_view_job_button: '送信して詳細を確認',
@@ -125,6 +137,11 @@ export default {
       submit_job: 'Submit job',
       job_upload_completed: 'Job upload completed',
     },
+    operator: {
+      pauli: '演算子（パウリ文字列）',
+      coeff: '係数',
+    },
+    program_sample: 'プログラムサンプル',
     toast: {
       success: '成功: ジョブが正常に送信されました',
       error: '失敗: ジョブの送信に失敗しました',
@@ -143,7 +160,12 @@ export default {
         coeff_required: '係数フィールドは必須です',
       },
       job_info_must_be_zip_file: 'Please upload correct job info zip file',
+      deviceInsufficientQubits:
+        'このデバイスは{{deviceQubits}}量子ビットのみをサポートしていますが、プログラムには{{programQubits}}量子ビットが必要です',
       invalid_json: '正しいJSON形式で入力してください',
+    },
+    modal: {
+      overwrite_program: 'このプログラムを上書きしてもよろしいですか？',
     },
   },
 };

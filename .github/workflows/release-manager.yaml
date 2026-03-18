@@ -1,0 +1,37 @@
+name: Release PR Manager
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - develop
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  release-pr:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run release PR manager
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const path = require('path');
+
+            // Resolve script path from repository root (important!)
+            const scriptPath = path.join(
+              process.env.GITHUB_WORKSPACE,
+              '.github/scripts/release-manager.js'
+            );
+
+            const script = await import(`file://${scriptPath}`);
+            await script.default({ github, context, core });

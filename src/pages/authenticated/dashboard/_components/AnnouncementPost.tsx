@@ -5,11 +5,12 @@ import styles from './announcement.module.css';
 import { AnnouncementsGetAnnouncementResponse } from '@/api/generated';
 import { DateTimeFormatter } from '@/pages/authenticated/_components/DateTimeFormatter';
 import { useTranslation } from 'react-i18next';
+import dompurify from 'dompurify';
 
 interface PostProps {
   announcement: AnnouncementsGetAnnouncementResponse;
   style?: {
-    announcement?: CSSProperties
+    announcement?: CSSProperties;
   };
 }
 
@@ -25,14 +26,13 @@ export const AnnouncementPost = ({ announcement, style: propsStyle }: PostProps)
     if (!contentRef.current) return;
 
     const observer = new ResizeObserver((entries) => {
-      console.log('observer work');
       const entry = entries[0];
       const scrollHeight = entry.target.scrollHeight;
 
       const shouldCollapse = scrollHeight > 400;
       setShouldShowButton(shouldCollapse);
       setIsCollapsed(shouldCollapse);
-      observer.disconnect()
+      observer.disconnect();
     });
 
     observer.observe(contentRef.current);
@@ -61,7 +61,7 @@ export const AnnouncementPost = ({ announcement, style: propsStyle }: PostProps)
   };
 
   return (
-    <div className={styles.announcements_container}>
+    <div className={clsx([styles.announcements_container, 'shadow-lg'])}>
       <div className={styles.post_header}>
         <span className={styles.post_title}>{announcement.title}</span>
         <span className={styles.post_time}>
@@ -70,11 +70,11 @@ export const AnnouncementPost = ({ announcement, style: propsStyle }: PostProps)
       </div>
       <div
         ref={contentRef}
-        className={clsx(styles.post_content, styles.markdown_content , {
+        className={clsx(styles.post_content, styles.markdown_content, {
           [styles.collapsed]: isCollapsed,
         })}
         style={propsStyle?.announcement}
-        dangerouslySetInnerHTML={{ __html: htmlContent }}
+        dangerouslySetInnerHTML={{ __html: dompurify.sanitize(htmlContent) }}
       ></div>
       <button
         type="button"

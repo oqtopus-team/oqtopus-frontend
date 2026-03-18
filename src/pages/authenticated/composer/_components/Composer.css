@@ -1,0 +1,10 @@
+.dagger-gate {
+  position: relative;
+}
+
+.dagger-gate::after {
+    content: "†";
+    position: absolute;
+    top: -20%;
+    font-size: smaller;
+}

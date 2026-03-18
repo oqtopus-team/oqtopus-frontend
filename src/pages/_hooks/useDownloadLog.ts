@@ -1,4 +1,6 @@
 import { useJobAPI } from '@/backend/hook';
+import { toast } from 'react-toastify';
+import { errorToastConfig } from '@/config/toast';
 
 export const useDownloadLog = () => {
   const api = useJobAPI();
@@ -13,10 +15,10 @@ export const useDownloadLog = () => {
       const res = await api.getSselog(sseLogFileURL);
       if (res.status !== 200) {
         if (res.status === 404) {
-          alert('Log file does not exist');
+          toast('Log file does not exist', errorToastConfig);
           return;
         } else {
-          alert('Failed to download log');
+          toast('Failed to download log', errorToastConfig);
           return;
         }
       }
@@ -38,7 +40,7 @@ export const useDownloadLog = () => {
       document.body.removeChild(a);
     } catch (error) {
       console.error(error);
-      alert('Failed to download log');
+      toast('Failed to download log', errorToastConfig);
     }
   };
 

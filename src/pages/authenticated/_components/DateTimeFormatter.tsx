@@ -2,7 +2,7 @@ import { format } from 'date-fns';
 import { enUS, ja } from 'date-fns/locale';
 import { i18n, TFunction } from 'i18next';
 
-const locales = {
+export const locales = {
   en: enUS,
   ja: ja,
 };

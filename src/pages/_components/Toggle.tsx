@@ -5,7 +5,7 @@ export const Toggle = ({
   labelLeft,
   checked,
   onChange,
-  name
+  name,
 }: {
   label?: string;
   labelLeft?: string;

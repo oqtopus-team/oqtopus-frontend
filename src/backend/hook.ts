@@ -8,6 +8,7 @@ import {
   JobsJobInfoUploadPresignedURL,
   JobsRegisterJobResponse,
   JobsSubmitJobRequest,
+  UsersUpdateUserRequest,
 } from '@/api/generated';
 import { Job, JobS3Data, JobSearchParams } from '@/domain/types/Job';
 import { Device } from '@/domain/types/Device';
@@ -113,9 +114,10 @@ export const useJobAPI = () => {
   ): Promise<Job[]> => {
     return api.job
       .listJobs(
-        'job_id,name,description,device_id,job_info,transpiler_info,simulator_info,mitigation_info,job_type,shots,status,submitted_at',
-        undefined,
-        undefined,
+        'job_id,name,description,device_id,status,submitted_at',
+        convertToDateIfValid(params.from)?.toISOString(),
+        convertToDateIfValid(params.to)?.toISOString(),
+        params.status,
         params.query ?? '',
         page,
         pageSize,
@@ -175,12 +177,21 @@ export const useJobAPI = () => {
   };
 };
 
+const convertToDateIfValid = (dateString: string | undefined): Date | undefined => {
+  if (!dateString) return undefined;
+
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return undefined;
+
+  return date;
+};
+
 const convertJobResult = (job: JobsJobBase): Job => ({
   id: job.job_id ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   name: job.name ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   description: job.description,
   jobType: job.job_type!,
-  status: job.status ?? 'unknown',
+  status: job.status!,
   deviceId: job.device_id ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   shots: job.shots ?? 0, // TODO: fix invalid oas schema (nullable: should be false)
   jobInfo: job.job_info!,
@@ -229,6 +240,52 @@ const convertDeviceResult = (device: DevicesDeviceInfo): Device => ({
   description: device.description,
 });
 
+export const useUserAPI = () => {
+  const api = useContext(userApiContext);
+
+  const getCurrentUser = async () => {
+    return api.user.getCurrentUser().then((res) => res.data);
+  };
+
+  const updateCurrentUser = async (userData: UsersUpdateUserRequest) => {
+    return api.user.updateCurrentUser(userData);
+  };
+
+  const deleteCurrentUser = async () => {
+    return api.user.deleteCurrentUser().then((res) => res.data);
+  };
+
+  return { getCurrentUser, updateCurrentUser, deleteCurrentUser };
+};
+
+export const useApiTokenAPI = () => {
+  const api = useContext(userApiContext);
+
+  const getApiTokenStatus = async () => {
+    return api.apiToken.getApiTokenStatus().then((res) => res.data);
+  };
+
+  const createApiToken = async () => {
+    return api.apiToken.createApiToken().then((res) => res.data);
+  };
+
+  const deleteApiToken = async () => {
+    return api.apiToken.deleteApiToken().then((res) => res.data);
+  };
+
+  return { getApiTokenStatus, createApiToken, deleteApiToken };
+};
+
+export const useSettingsAPI = () => {
+  const api = useContext(userApiContext);
+
+  const getCurrentSettings = async () => {
+    return api.settings.getCurrentSettings().then((res) => res.data);
+  };
+
+  return { getCurrentSettings };
+};
+
 export const useAnnouncementsAPI = () => {
   const api = useContext(userApiContext);
 
@@ -241,7 +298,7 @@ export const useAnnouncementsAPI = () => {
   }: AnnouncementsApi) => {
     return api.announcements
       .getAnnouncementsList(offset, limit, order, currentTime, options)
-      .then((res: any) => {
+      .then((res) => {
         if (res.status === 200) {
           return res.data.announcements;
         }
