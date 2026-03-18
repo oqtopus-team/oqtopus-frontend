@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
-import { MapView } from './_components/MapView';
+import { TopologyView } from './_components/TopologyView';
 import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
 import { useParams } from 'react-router';
@@ -10,7 +10,7 @@ import { useDeviceAPI } from '@/backend/hook';
 import { Loader } from '@/pages/_components/Loader';
 import { DeviceDetailBasicInfo } from './_components/DeviceDetailBasicInfo';
 import { Tab, Tabs } from '@mui/material';
-import QubitGraphView from '@/pages/authenticated/device/detail/_components/GraphView';
+import ChartView from '@/pages/authenticated/device/detail/_components/ChartView';
 import { toast } from 'react-toastify';
 import { errorToastConfig } from '@/config/toast';
 import TableView from '@/pages/authenticated/device/detail/_components/TableView';
@@ -102,8 +102,8 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
             <Tab label={t('device.detail.topology_info.table_view')} value="table" />
           </Tabs>
           <Spacer className="h-6" />
-          {activeTab === 'map' && <MapView deviceInfo={parsedDeviceInfo} />}
-          {activeTab === 'graph' && <QubitGraphView deviceInfo={parsedDeviceInfo} />}
+          {activeTab === 'map' && <TopologyView deviceInfo={parsedDeviceInfo} />}
+          {activeTab === 'graph' && <ChartView deviceInfo={parsedDeviceInfo} />}
           {activeTab === 'table' && <TableView deviceInfo={parsedDeviceInfo} />}
         </>
       ) : (

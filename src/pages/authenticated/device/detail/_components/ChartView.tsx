@@ -197,7 +197,7 @@ interface QubitGraphViewProps {
   deviceInfo: DeviceInfo;
 }
 
-export default function QubitGraphView({ deviceInfo }: QubitGraphViewProps) {
+export default function ChartView({ deviceInfo }: QubitGraphViewProps) {
   const [sortMode, setSortMode] = useState<SortMode>('valueDesc');
   const [metricKey, setMetricKey] = useState<MetricKey>('readout_assignment_error');
 

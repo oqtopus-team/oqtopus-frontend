@@ -423,7 +423,7 @@ const createEdgeData = (
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 3;
 
-export const MapView = ({ deviceInfo }: { deviceInfo: DeviceInfo }) => {
+export const TopologyView = ({ deviceInfo }: { deviceInfo: DeviceInfo }) => {
   const { t } = useTranslation();
   const [isDarkTheme, setIsDarkTheme] = useState<boolean>(() => {
     return typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
