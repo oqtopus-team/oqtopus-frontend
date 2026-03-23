@@ -154,7 +154,12 @@ export default (props: ControlPanelProps) => {
                   mkOperator={props.mkOperator}
                   isAdvancedSettingsOpen={false}
                   jobType={props.jobType as JobsJobType}
-                  displayFields={{ program: false, type: false, operator: false }}
+                  displayFields={{
+                    program: false,
+                    type: false,
+                    operator: false,
+                    fileUpload: false,
+                  }}
                 />
               );
             default:

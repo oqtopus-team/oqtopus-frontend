@@ -161,6 +161,7 @@ interface JobFormProps {
     program?: boolean;
     type?: boolean;
     operator?: boolean;
+    fileUpload?: boolean;
   };
 }
 
@@ -169,10 +170,14 @@ export const JobForm = (componentProps: JobFormProps) => {
   const navigate = useNavigate();
   const { getDevices } = useDeviceAPI();
   const { registerJob, uploadJobToS3, submitJob } = useJobAPI();
-  const { displayFields = { program: true, type: true, operator: true }, ...props } =
-    componentProps;
+  const {
+    displayFields = { program: true, type: true, operator: true, fileUpload: true },
+    ...props
+  } = componentProps;
   const [devices, setDevices] = useState<Device[]>([]);
-  const [jobInfoProvider, setJobInfoProvider] = useState(JobInfoProviderMethod.FILE_UPLOAD);
+  const [jobInfoProvider, setJobInfoProvider] = useState(
+    displayFields.fileUpload ? JobInfoProviderMethod.FILE_UPLOAD : JobInfoProviderMethod.FORM_INPUT
+  );
   const [showJobUploadProgressModal, setShowJobUploadProgressModal] = useState(false);
 
   const [registerUploadStageDone, setRegisterUploadStageDone] = useState(false);
@@ -515,43 +520,57 @@ export const JobForm = (componentProps: JobFormProps) => {
               paddingRight: 0,
             }}
           >
-            <p className={clsx('font-bold', 'text-primary')}>
-              {t('job.form.job_info_provider_selector')}
-            </p>
-            <Spacer className="h-4" />
-            <div className={clsx('flex', 'justify-around')}>
-              <div className={clsx('flex', 'gap-[0.5rem]')}>
-                <input
-                  id="job-info-file-upload-option"
-                  className={clsx('cursor-pointer', 'w-[1.25rem]')}
-                  type="radio"
-                  name="job-info-upload-option"
-                  value={JobInfoProviderMethod.FILE_UPLOAD}
-                  onChange={handleJobInfoProviderChange}
-                  checked={jobInfoProvider === JobInfoProviderMethod.FILE_UPLOAD}
-                />
-                <label htmlFor="job-info-file-upload-option">
-                  {t('job.form.job_info_provider_file')}
-                </label>
-              </div>
-              <div className={clsx('flex', 'gap-[0.5rem]')}>
-                <input
-                  id="job-info-form-option"
-                  className={clsx('cursor-pointer', 'w-[1.25rem]')}
-                  type="radio"
-                  name="job-info-upload-option"
-                  value={JobInfoProviderMethod.FORM_INPUT}
-                  onChange={handleJobInfoProviderChange}
-                  checked={jobInfoProvider === JobInfoProviderMethod.FORM_INPUT}
-                />
-                <label htmlFor="job-info-file-upload-option">
-                  {t('job.form.job_info_provider_input')}
-                </label>
-              </div>
-            </div>
-            <Spacer className="h-8" />
-            {jobInfoProvider === JobInfoProviderMethod.FILE_UPLOAD && (
-              <JobProgramUpload setProgram={(f) => setValue('jobInfo', f)} />
+            {displayFields.fileUpload && (
+              <>
+                <p className={clsx('font-bold', 'text-primary')}>
+                  {t('job.form.job_info_provider_selector')}
+                </p>
+                <Spacer className="h-4" />
+                <div
+                  className={clsx(
+                    'flex',
+                    'justify-around',
+                    '[&_*]:bg-base-card',
+                    'text-base-content'
+                  )}
+                >
+                  <div className={clsx('flex', 'gap-[0.5rem]')}>
+                    <input
+                      id="job-info-file-upload-option"
+                      className={clsx('cursor-pointer', 'w-[1.25rem]')}
+                      type="radio"
+                      name="job-info-upload-option"
+                      value={JobInfoProviderMethod.FILE_UPLOAD}
+                      onChange={handleJobInfoProviderChange}
+                      checked={jobInfoProvider === JobInfoProviderMethod.FILE_UPLOAD}
+                    />
+                    <label htmlFor="job-info-file-upload-option">
+                      {t('job.form.job_info_provider_file')}
+                    </label>
+                  </div>
+                  <div className={clsx('flex', 'gap-[0.5rem]')}>
+                    <input
+                      id="job-info-form-option"
+                      className={clsx('cursor-pointer', 'w-[1.25rem]')}
+                      type="radio"
+                      name="job-info-upload-option"
+                      value={JobInfoProviderMethod.FORM_INPUT}
+                      onChange={handleJobInfoProviderChange}
+                      checked={jobInfoProvider === JobInfoProviderMethod.FORM_INPUT}
+                    />
+                    <label htmlFor="job-info-file-upload-option">
+                      {t('job.form.job_info_provider_input')}
+                    </label>
+                  </div>
+                </div>
+                <Spacer className="h-8" />
+              </>
+            )}
+            {displayFields.fileUpload && jobInfoProvider === JobInfoProviderMethod.FILE_UPLOAD && (
+              <>
+                <JobProgramUpload setProgram={(f) => setValue('jobInfo', f)} />
+                <Spacer className="h-7" />
+              </>
             )}
             {jobInfoProvider === JobInfoProviderMethod.FORM_INPUT && (
               <>

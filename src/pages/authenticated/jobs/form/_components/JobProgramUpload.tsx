@@ -9,7 +9,16 @@ export default function JobProgramUpload({ setProgram }: JobProgramUploadProps) 
   const { t } = useTranslation();
 
   return (
-    <div className={clsx('flex', 'flex-row', 'items-center', 'gap-[0.25rem]', 'cursor-pointer')}>
+    <div
+      className={clsx(
+        'flex',
+        'flex-row',
+        'items-center',
+        'gap-[0.25rem]',
+        'cursor-pointer',
+        'text-base-content'
+      )}
+    >
       <input
         ref={ref}
         className={clsx('hidden')}

@@ -1,6 +1,6 @@
 import Prism from 'prismjs';
 import 'prismjs/components/prism-openqasm';
-import { ComponentPropsWithRef, forwardRef, useEffect, useRef, useState } from 'react';
+import React, { ComponentPropsWithRef, forwardRef, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { Select } from '@/pages/_components/Select';
 import './CodeEditor.css';
@@ -68,9 +68,21 @@ export const CodeEditor = forwardRef<
       (localStorage.getItem('prism-code-theme') as ThemeKind) ??
       defaultThemeBasedOnAppTheme()
   );
+  const [containerStyle, setContainerStyle] = useState<React.CSSProperties>();
 
   useEffect(() => {
     loadTheme(selectedTheme, false);
+  }, []);
+
+  useEffect(() => {
+    if (!preRef.current) return;
+
+    const observer = new MutationObserver(updateContainerStyle);
+    observer.observe(preRef.current, { attributes: true, attributeFilter: ['class'] });
+
+    return () => {
+      observer.disconnect();
+    };
   }, []);
 
   useEffect(() => {
@@ -123,6 +135,8 @@ export const CodeEditor = forwardRef<
     themeLink.addEventListener(
       'load',
       () => {
+        updateContainerStyle();
+
         if (updateStateOnLoad) {
           localStorage.setItem('prism-code-theme', newTheme);
           setSelectedTheme(newTheme);
@@ -133,15 +147,14 @@ export const CodeEditor = forwardRef<
     themeLink.href = theme.href;
   }
 
-  function copyBackgroundAndColorFromTheme() {
-    if (!preRef.current) return {};
-
+  function updateContainerStyle() {
+    if (!preRef.current) return;
     const style = getComputedStyle(preRef.current);
 
-    return {
+    setContainerStyle({
       background: style.background,
       color: style.color,
-    };
+    });
   }
 
   const theme = themesMap[selectedTheme] ?? themesMap.default;
@@ -168,10 +181,7 @@ export const CodeEditor = forwardRef<
       )}
       <Spacer className="h-2" />
       <div className={clsx(['grid', 'gap-1'], ['h-64', 'max-h-64', 'overflow-auto'])}>
-        <div
-          className={clsx('flex', 'flex-row', 'rounded')}
-          style={copyBackgroundAndColorFromTheme()}
-        >
+        <div className={clsx('flex', 'flex-row', 'rounded')} style={containerStyle ?? {}}>
           <div className="code-editor-line-numbers">
             {code.split('\n').map((_, i) => (
               <>

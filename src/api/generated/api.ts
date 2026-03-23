@@ -284,6 +284,7 @@ export interface ErrorUnauthorizedError {
 /**
  * *(Only for estimation jobs)* The estimated expectation value and the standard deviation of the operators specified in `job_info.operator` field which is intended to be provided for estimation jobs.
  * @export
+ * @interface JobsEstimationResult
  */
 export interface JobsEstimationResult {
   /**
@@ -299,6 +300,8 @@ export interface JobsEstimationResult {
    */
   stds?: number;
 }
+export type GetJob200Response = JobsRegisteredJob | JobsSubmittedJob;
+
 /**
  * job status
  * @export
@@ -324,299 +327,207 @@ export interface JobsGetJobStatusResponse {
  * @export
  * @interface JobsJobBase
  */
-export interface JobsGetJobsResponse {
+export interface JobsJobBase {
   /**
    *
    * @type {string}
-   * @memberof JobsGetJobsResponse
+   * @memberof JobsJobBase
    */
   job_id?: string;
   /**
    *
    * @type {string}
-   * @memberof JobsGetJobsResponse
+   * @memberof JobsJobBase
    */
   name?: string;
   /**
    *
    * @type {string}
-   * @memberof JobsGetJobsResponse
+   * @memberof JobsJobBase
    */
   description?: string;
   /**
    *
    * @type {JobsJobType}
-   * @memberof JobsGetJobsResponse
+   * @memberof JobsJobBase
    */
   job_type?: JobsJobType;
   /**
    *
    * @type {JobsJobStatus}
-   * @memberof JobsGetJobsResponse
+   * @memberof JobsJobBase
    */
   status?: JobsJobStatus;
   /**
    *
    * @type {string}
-   * @memberof JobsGetJobsResponse
+   * @memberof JobsJobBase
    */
   device_id?: string;
   /**
    *
    * @type {number}
-   * @memberof JobsGetJobsResponse
+   * @memberof JobsJobBase
    */
   shots?: number;
   /**
    *
    * @type {JobsJobInfo}
-   * @memberof JobsGetJobsResponse
+   * @memberof JobsJobBase
    */
   job_info?: JobsJobInfo;
   /**
    *
    * @type {{ [key: string]: any; }}
-   * @memberof JobsGetJobsResponse
+   * @memberof JobsJobBase
    */
   transpiler_info?: { [key: string]: any };
   /**
    *
    * @type {{ [key: string]: any; }}
-   * @memberof JobsGetJobsResponse
+   * @memberof JobsJobBase
    */
   simulator_info?: { [key: string]: any };
   /**
    *
    * @type {{ [key: string]: any; }}
-   * @memberof JobsGetJobsResponse
+   * @memberof JobsJobBase
    */
   mitigation_info?: { [key: string]: any };
   /**
    *
    * @type {number}
-   * @memberof JobsGetJobsResponse
+   * @memberof JobsJobBase
    */
   execution_time?: number;
   /**
    *
    * @type {string}
-   * @memberof JobsGetJobsResponse
+   * @memberof JobsJobBase
    */
   submitted_at?: string;
   /**
    *
    * @type {string}
-   * @memberof JobsGetJobsResponse
+   * @memberof JobsJobBase
    */
   ready_at?: string;
   /**
    *
    * @type {string}
-   * @memberof JobsGetJobsResponse
+   * @memberof JobsJobBase
    */
   running_at?: string;
   /**
    *
    * @type {string}
-   * @memberof JobsGetJobsResponse
+   * @memberof JobsJobBase
    */
   ended_at?: string;
 }
 
 /**
- * sse log file
- * @export
- * @interface JobsGetSselogResponse
- */
-export interface JobsGetSselogResponse {
-  /**
-   *
-   * @type {string}
-   * @memberof JobsGetSselogResponse
-   */
-  file?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsGetSselogResponse
-   */
-  file_name?: string;
-}
-/**
- *
- * @export
- * @interface JobsJobDef
- */
-export interface JobsJobDef {
-  /**
-   *
-   * @type {string}
-   * @memberof JobsJobDef
-   */
-  job_id: string;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsJobDef
-   */
-  name: string;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsJobDef
-   */
-  description?: string;
-  /**
-   *
-   * @type {JobsJobType}
-   * @memberof JobsJobDef
-   */
-  job_type: JobsJobType;
-  /**
-   *
-   * @type {JobsJobStatus}
-   * @memberof JobsJobDef
-   */
-  status: JobsJobStatus;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsJobDef
-   */
-  device_id: string;
-  /**
-   *
-   * @type {number}
-   * @memberof JobsJobDef
-   */
-  shots: number;
-  /**
-   *
-   * @type {JobsJobInfo}
-   * @memberof JobsJobDef
-   */
-  job_info: JobsJobInfo;
-  /**
-   *
-   * @type {{ [key: string]: any; }}
-   * @memberof JobsJobDef
-   */
-  transpiler_info?: { [key: string]: any };
-  /**
-   *
-   * @type {{ [key: string]: any; }}
-   * @memberof JobsJobDef
-   */
-  simulator_info?: { [key: string]: any };
-  /**
-   *
-   * @type {{ [key: string]: any; }}
-   * @memberof JobsJobDef
-   */
-  mitigation_info?: { [key: string]: any };
-  /**
-   *
-   * @type {number}
-   * @memberof JobsJobDef
-   */
-  execution_time?: number;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsJobDef
-   */
-  submitted_at?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsJobDef
-   */
-  ready_at?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsJobDef
-   */
-  running_at?: string;
-  /**
-   *
-   * @type {string}
-   * @memberof JobsJobDef
-   */
-  ended_at?: string;
-}
-
-/**
- *
+ * Presigned URLs for downloading relevant job information .zip files from OQTOPUS cloud.
  * @export
  * @interface JobsJobInfo
  */
 export interface JobsJobInfo {
   /**
-   * A list of OPENQASM3 program. For non-multiprogramming jobs, this field is assumed to contain exactly one program. Otherwise, those programs are combined according to the multiprogramming machinery.
-   * @type {Array<string>}
+   * Content of the file will match `jobs.S3SubmitJobInfo` schema.
+   * @type {string}
    * @memberof JobsJobInfo
    */
-  program: Array<string>;
+  input: string;
   /**
-   * For multiprogramming jobs, this field contains the combined circuit.
+   * For multiprogramming jobs, this file contains the combined circuit.
    * @type {string}
    * @memberof JobsJobInfo
    */
   combined_program?: string;
   /**
-   * *(Only for estimation jobs)* The operator (or observable) for which the expectation value is to be estimated.
-   * @type {Array<JobsOperatorItem>}
+   * Content of the file will match `jobs.S3JobResult` schema.
+   * @type {string}
    * @memberof JobsJobInfo
    */
-  operator?: Array<JobsOperatorItem>;
+  result?: string;
+  /**
+   * Content of the file will match `jobs.S3TranspileResult` schema.
+   * @type {string}
+   * @memberof JobsJobInfo
+   */
+  transpile_result?: string;
+  /**
+   * File available only for sse jobs.
+   * @type {string}
+   * @memberof JobsJobInfo
+   */
+  sse_log?: string;
   /**
    *
-   * @type {JobsJobResult}
-   * @memberof JobsJobInfo
-   */
-  result?: JobsJobResult;
-  /**
-   *
-   * @type {JobsTranspileResult}
-   * @memberof JobsJobInfo
-   */
-  transpile_result?: JobsTranspileResult;
-  /**
-   * Describing the reason why there is no result
    * @type {string}
    * @memberof JobsJobInfo
    */
   message?: string;
 }
 /**
- *
+ * Presigned URL for uploading file to OCTOPUS cloud.
+ * @export
+ * @interface JobsJobInfoUploadPresignedURL
+ */
+export interface JobsJobInfoUploadPresignedURL {
+  /**
+   *
+   * @type {string}
+   * @memberof JobsJobInfoUploadPresignedURL
+   */
+  url?: string;
+  /**
+   *
+   * @type {JobsJobInfoUploadPresignedURLFields}
+   * @memberof JobsJobInfoUploadPresignedURL
+   */
+  fields?: JobsJobInfoUploadPresignedURLFields;
+}
+
+/**
+ * sse log file
  * @export
  * @interface JobsJobInfoUploadPresignedURLFields
  */
-export interface JobsJobResult {
-  [key: string]: any;
-
+export interface JobsJobInfoUploadPresignedURLFields {
   /**
    *
-   * @type {JobsSamplingResult}
-   * @memberof JobsJobResult
+   * @type {string}
+   * @memberof JobsJobInfoUploadPresignedURLFields
    */
-  sampling?: JobsSamplingResult;
+  key?: string;
   /**
    *
-   * @type {JobsEstimationResult}
-   * @memberof JobsJobResult
+   * @type {string}
+   * @memberof JobsJobInfoUploadPresignedURLFields
    */
-  estimation?: JobsEstimationResult;
+  AWSAccessKeyId?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof JobsJobInfoUploadPresignedURLFields
+   */
+  'x-amz-security-token'?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof JobsJobInfoUploadPresignedURLFields
+   */
+  policy?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof JobsJobInfoUploadPresignedURLFields
+   */
+  signature?: string;
 }
-/**
- *
- * @export
- * @enum {string}
- */
-
 export const JobsJobStatus = {
+  Registered: 'registered',
   Submitted: 'submitted',
   Ready: 'ready',
   Running: 'running',
@@ -628,12 +539,13 @@ export const JobsJobStatus = {
 export type JobsJobStatus = (typeof JobsJobStatus)[keyof typeof JobsJobStatus];
 
 /**
- *
+ * none is valid only for newly registered job_ids (job status=registered)
  * @export
  * @enum {string}
  */
 
 export const JobsJobType = {
+  None: 'none',
   Estimation: 'estimation',
   Sampling: 'sampling',
   MultiManual: 'multi_manual',
@@ -641,23 +553,185 @@ export const JobsJobType = {
 } as const;
 
 export type JobsJobType = (typeof JobsJobType)[keyof typeof JobsJobType];
-
+/**
+ *
+ * @export
+ * @interface JobsRegisterJobResponse
+ */
+export interface JobsRegisterJobResponse {
+  /**
+   *
+   * @type {string}
+   * @memberof JobsJobDef
+   */
+  job_id: string;
+  /**
+   *
+   * @type {JobsJobInfoUploadPresignedURL}
+   * @memberof JobsRegisterJobResponse
+   */
+  presigned_url: JobsJobInfoUploadPresignedURL;
+}
 /**
  *
  * @export
  * @interface JobsRegisteredJob
  */
-export interface JobsOperatorItem {
+export interface JobsRegisteredJob {
+  /**
+   *
+   * @type {string}
+   * @memberof JobsRegisteredJob
+   */
+  job_id: string;
+  /**
+   *
+   * @type {string}
+   * @memberof JobsRegisteredJob
+   */
+  name: string;
+  /**
+   *
+   * @type {string}
+   * @memberof JobsRegisteredJob
+   */
+  description?: string;
+  /**
+   *
+   * @type {JobsJobType}
+   * @memberof JobsRegisteredJob
+   */
+  job_type?: JobsJobType;
+  /**
+   *
+   * @type {JobsJobStatus}
+   * @memberof JobsRegisteredJob
+   */
+  status: JobsJobStatus;
+  /**
+   *
+   * @type {string}
+   * @memberof JobsRegisteredJob
+   */
+  device_id?: string;
+  /**
+   *
+   * @type {number}
+   * @memberof JobsRegisteredJob
+   */
+  shots?: number;
+  /**
+   *
+   * @type {JobsJobInfo}
+   * @memberof JobsRegisteredJob
+   */
+  job_info?: JobsJobInfo;
+  /**
+   *
+   * @type {{ [key: string]: any; }}
+   * @memberof JobsRegisteredJob
+   */
+  transpiler_info?: { [key: string]: any };
+  /**
+   *
+   * @type {{ [key: string]: any; }}
+   * @memberof JobsRegisteredJob
+   */
+  simulator_info?: { [key: string]: any };
+  /**
+   *
+   * @type {{ [key: string]: any; }}
+   * @memberof JobsRegisteredJob
+   */
+  mitigation_info?: { [key: string]: any };
+  /**
+   *
+   * @type {number}
+   * @memberof JobsRegisteredJob
+   */
+  execution_time?: number;
+  /**
+   *
+   * @type {string}
+   * @memberof JobsRegisteredJob
+   */
+  submitted_at?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof JobsRegisteredJob
+   */
+  ready_at?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof JobsRegisteredJob
+   */
+  running_at?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof JobsRegisteredJob
+   */
+  ended_at?: string;
+}
+
+/**
+ * *(Only for estimation jobs)* The estimated expectation value and the standard deviation of the operators specified in `job_info.operator` field which is intended to be provided for estimation jobs.
+ * @export
+ * @interface JobsS3EstimationResult
+ */
+export interface JobsS3EstimationResult {
+  /**
+   * The estimated expectation value
+   * @type {number}
+   * @memberof JobsS3EstimationResult
+   */
+  exp_value?: number;
+  /**
+   * The standard deviation value
+   * @type {number}
+   * @memberof JobsS3EstimationResult
+   */
+  stds?: number;
+}
+/**
+ *
+ * @export
+ * @interface JobsS3JobResult
+ */
+export interface JobsS3JobResult {
+  [key: string]: any;
+
+  /**
+   *
+   * @type {JobsS3SamplingResult}
+   * @memberof JobsS3JobResult
+   */
+  sampling?: JobsS3SamplingResult;
+  /**
+   *
+   * @type {JobsS3EstimationResult}
+   * @memberof JobsS3JobResult
+   */
+  estimation?: JobsS3EstimationResult;
+}
+/**
+ *
+ * @export
+ * @interface JobsS3OperatorItem
+ */
+export interface JobsS3OperatorItem {
   /**
    * The Pauli string.
    * @type {string}
-   * @memberof JobsOperatorItem
+   * @memberof JobsS3OperatorItem
    */
   pauli: string;
   /**
    * Coefficient number in the Pauli string representation.
    * @type {number}
-   * @memberof JobsOperatorItem
+   * @memberof JobsS3OperatorItem
    */
   coeff?: number;
 }
@@ -666,17 +740,17 @@ export interface JobsOperatorItem {
  * @export
  * @interface JobsS3SamplingResult
  */
-export interface JobsSamplingResult {
+export interface JobsS3SamplingResult {
   /**
    *
    * @type {{ [key: string]: any; }}
-   * @memberof JobsSamplingResult
+   * @memberof JobsS3SamplingResult
    */
   counts?: { [key: string]: any };
   /**
    *
    * @type {{ [key: string]: any; }}
-   * @memberof JobsSamplingResult
+   * @memberof JobsS3SamplingResult
    */
   divided_counts?: { [key: string]: any } | null;
 }
@@ -685,20 +759,46 @@ export interface JobsSamplingResult {
  * @export
  * @interface JobsS3SubmitJobInfo
  */
-export interface JobsSubmitJobInfo {
+export interface JobsS3SubmitJobInfo {
   /**
    * A list of OPENQASM3 program. For non-multiprogramming jobs, this field is assumed to contain exactly one program. Otherwise, those programs are combined according to the multiprogramming machinery.
    * @type {Array<string>}
-   * @memberof JobsSubmitJobInfo
+   * @memberof JobsS3SubmitJobInfo
    */
   program: Array<string>;
   /**
    *
-   * @type {Array<JobsOperatorItem>}
-   * @memberof JobsSubmitJobInfo
+   * @type {Array<JobsS3OperatorItem>}
+   * @memberof JobsS3SubmitJobInfo
    */
-  operator?: Array<JobsOperatorItem>;
+  operator?: Array<JobsS3OperatorItem>;
 }
+/**
+ *
+ * @export
+ * @interface JobsS3TranspileResult
+ */
+export interface JobsS3TranspileResult {
+  /**
+   *
+   * @type {string}
+   * @memberof JobsS3TranspileResult
+   */
+  transpiled_program: string | null;
+  /**
+   *
+   * @type {{ [key: string]: any; }}
+   * @memberof JobsS3TranspileResult
+   */
+  stats: { [key: string]: any } | null;
+  /**
+   *
+   * @type {{ [key: string]: any; }}
+   * @memberof JobsS3TranspileResult
+   */
+  virtual_physical_mapping: { [key: string]: any } | null;
+}
+
 /**
  *
  * @export
@@ -725,16 +825,10 @@ export interface JobsSubmitJobRequest {
   device_id: string;
   /**
    *
-   * @type {JobsJobType}
+   * @type {JobsSubmitJobType}
    * @memberof JobsSubmitJobRequest
    */
-  job_type: JobsJobType;
-  /**
-   *
-   * @type {JobsSubmitJobInfo}
-   * @memberof JobsSubmitJobRequest
-   */
-  job_info: JobsSubmitJobInfo;
+  job_type: JobsSubmitJobType;
   /**
    *
    * @type {{ [key: string]: any; }}
@@ -766,38 +860,118 @@ export interface JobsSubmitJobRequest {
  * @export
  * @enum {string}
  */
-export interface JobsSubmitJobResponse {
-  /**
-   *
-   * @type {string}
-   * @memberof JobsSubmitJobResponse
-   */
-  job_id: string;
-}
+
+export const JobsSubmitJobType = {
+  Estimation: 'estimation',
+  Sampling: 'sampling',
+  MultiManual: 'multi_manual',
+  Sse: 'sse',
+} as const;
+
+export type JobsSubmitJobType = (typeof JobsSubmitJobType)[keyof typeof JobsSubmitJobType];
+
 /**
  *
  * @export
- * @interface JobsTranspileResult
+ * @interface JobsSubmittedJob
  */
-export interface JobsTranspileResult {
+export interface JobsSubmittedJob {
   /**
    *
    * @type {string}
-   * @memberof JobsTranspileResult
+   * @memberof JobsSubmittedJob
    */
-  transpiled_program: string | null;
+  job_id: string;
+  /**
+   *
+   * @type {string}
+   * @memberof JobsSubmittedJob
+   */
+  name: string;
+  /**
+   *
+   * @type {string}
+   * @memberof JobsSubmittedJob
+   */
+  description?: string;
+  /**
+   *
+   * @type {JobsJobType}
+   * @memberof JobsSubmittedJob
+   */
+  job_type: JobsJobType;
+  /**
+   *
+   * @type {JobsJobStatus}
+   * @memberof JobsSubmittedJob
+   */
+  status: JobsJobStatus;
+  /**
+   *
+   * @type {string}
+   * @memberof JobsSubmittedJob
+   */
+  device_id: string;
+  /**
+   * 0 is valid only for newly registered job_ids (job status=registered)
+   * @type {number}
+   * @memberof JobsSubmittedJob
+   */
+  shots: number;
+  /**
+   *
+   * @type {JobsJobInfo}
+   * @memberof JobsSubmittedJob
+   */
+  job_info: JobsJobInfo;
   /**
    *
    * @type {{ [key: string]: any; }}
-   * @memberof JobsTranspileResult
+   * @memberof JobsSubmittedJob
    */
-  stats: { [key: string]: any } | null;
+  transpiler_info?: { [key: string]: any };
   /**
    *
    * @type {{ [key: string]: any; }}
-   * @memberof JobsTranspileResult
+   * @memberof JobsSubmittedJob
    */
-  virtual_physical_mapping: { [key: string]: any } | null;
+  simulator_info?: { [key: string]: any };
+  /**
+   *
+   * @type {{ [key: string]: any; }}
+   * @memberof JobsSubmittedJob
+   */
+  mitigation_info?: { [key: string]: any };
+  /**
+   *
+   * @type {number}
+   * @memberof JobsSubmittedJob
+   */
+  execution_time?: number;
+  /**
+   *
+   * @type {string}
+   * @memberof JobsSubmittedJob
+   */
+  submitted_at?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof JobsSubmittedJob
+   */
+  ready_at?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof JobsSubmittedJob
+   */
+  running_at?: string;
+  /**
+   *
+   * @type {string}
+   * @memberof JobsSubmittedJob
+   */
+  ended_at?: string;
 }
 /**
  * detail of settings response
@@ -949,6 +1123,7 @@ export interface UsersUpdateUserRequest {
    */
   organization?: string;
 }
+
 /**
  * AnnouncementsApi - axios parameter creator
  * @export
@@ -1252,20 +1427,6 @@ export const GetAnnouncementsListOrderEnum = {
 } as const;
 export type GetAnnouncementsListOrderEnum =
   (typeof GetAnnouncementsListOrderEnum)[keyof typeof GetAnnouncementsListOrderEnum];
-
-/**
- *
- * @export
- * @interface SuccessSuccessResponse
- */
-export interface SuccessSuccessResponse {
-  /**
-   *
-   * @type {string}
-   * @memberof SuccessSuccessResponse
-   */
-  message: string;
-}
 
 /**
  * ApiTokenApi - axios parameter creator
@@ -1979,7 +2140,7 @@ export const JobApiAxiosParamCreator = function (configuration?: Configuration) 
       };
     },
     /**
-     * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time, status or search text with \'start_time\', \'end_time\', \'status\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
+     * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by submission time, status or search text with \'start_time\', \'end_time\', \'status\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
      * @summary List all quantum jobs
      * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
      * @param {string} [startTime] Allows to filter the list of jobs to fetch by submission time. If specified only jobs with submission time (submitted_at property) &gt;&#x3D; start_time are returned.
@@ -2067,17 +2228,60 @@ export const JobApiAxiosParamCreator = function (configuration?: Configuration) 
       };
     },
     /**
-     * Submit a quantum job
-     * @summary Submit a quantum job
+     * Register new job and generate a presigned URL to upload job information (`jobs.S3SubmitJobInfo`) to OQTOPUS cloud.
+     * @summary Register new job
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    registerJobId: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      const localVarPath = `/jobs`;
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      // authentication BearerAuth required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration);
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter);
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     * Complete submission of a previously registered quantum job.  job_id must be created via \'POST /jobs\' request.  Submit job information (`jobs.S3SubmitJobInfo`) must be formerly uploaded to OQTOPUS cloud using presigned URL received in \'POST /jobs\' response.
+     * @summary Complete submission of a quantum job
+     * @param {string} jobId Job identifier
      * @param {JobsSubmitJobRequest} [jobsSubmitJobRequest] Quantum job to be submitted
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     submitJob: async (
+      jobId: string,
       jobsSubmitJobRequest?: JobsSubmitJobRequest,
       options: RawAxiosRequestConfig = {}
     ): Promise<RequestArgs> => {
-      const localVarPath = `/jobs`;
+      // verify required parameter 'jobId' is not null or undefined
+      assertParamExists('submitJob', 'jobId', jobId);
+      const localVarPath = `/jobs/{job_id}/submit`.replace(
+        `{${'job_id'}}`,
+        encodeURIComponent(String(jobId))
+      );
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
       let baseOptions;
@@ -2179,7 +2383,7 @@ export const JobApiFp = function (configuration?: Configuration) {
     async getJob(
       jobId: string,
       options?: RawAxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobsJobDef>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetJob200Response>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getJob(jobId, options);
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
       const localVarOperationServerBasePath =
@@ -2218,30 +2422,7 @@ export const JobApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
-     * Get SSE log file of selected job
-     * @summary Get SSE log file
-     * @param {string} jobId Job identifier
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async getSselog(
-      jobId: string,
-      options?: RawAxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobsGetSselogResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getSselog(jobId, options);
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-      const localVarOperationServerBasePath =
-        operationServerMap['JobApi.getSselog']?.[localVarOperationServerIndex]?.url;
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration
-        )(axios, localVarOperationServerBasePath || basePath);
-    },
-    /**
-     * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time, status or search text with \'start_time\', \'end_time\', \'status\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
+     * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by submission time, status or search text with \'start_time\', \'end_time\', \'status\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
      * @summary List all quantum jobs
      * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
      * @param {string} [startTime] Allows to filter the list of jobs to fetch by submission time. If specified only jobs with submission time (submitted_at property) &gt;&#x3D; start_time are returned.
@@ -2264,9 +2445,7 @@ export const JobApiFp = function (configuration?: Configuration) {
       size?: number,
       order?: ListJobsOrderEnum,
       options?: RawAxiosRequestConfig
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<JobsGetJobsResponse>>
-    > {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<JobsJobBase>>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.listJobs(
         fields,
         startTime,
@@ -2290,17 +2469,43 @@ export const JobApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
-     * Submit a quantum job
-     * @summary Submit a quantum job
+     * Register new job and generate a presigned URL to upload job information (`jobs.S3SubmitJobInfo`) to OQTOPUS cloud.
+     * @summary Register new job
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async registerJobId(
+      options?: RawAxiosRequestConfig
+    ): Promise<
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobsRegisterJobResponse>
+    > {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.registerJobId(options);
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap['JobApi.registerJobId']?.[localVarOperationServerIndex]?.url;
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration
+        )(axios, localVarOperationServerBasePath || basePath);
+    },
+    /**
+     * Complete submission of a previously registered quantum job.  job_id must be created via \'POST /jobs\' request.  Submit job information (`jobs.S3SubmitJobInfo`) must be formerly uploaded to OQTOPUS cloud using presigned URL received in \'POST /jobs\' response.
+     * @summary Complete submission of a quantum job
+     * @param {string} jobId Job identifier
      * @param {JobsSubmitJobRequest} [jobsSubmitJobRequest] Quantum job to be submitted
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async submitJob(
+      jobId: string,
       jobsSubmitJobRequest?: JobsSubmitJobRequest,
       options?: RawAxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobsSubmitJobResponse>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SuccessSuccessResponse>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.submitJob(
+        jobId,
         jobsSubmitJobRequest,
         options
       );
@@ -2362,7 +2567,7 @@ export const JobApiFactory = function (
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    getJob(jobId: string, options?: RawAxiosRequestConfig): AxiosPromise<JobsJobDef> {
+    getJob(jobId: string, options?: RawAxiosRequestConfig): AxiosPromise<GetJob200Response> {
       return localVarFp.getJob(jobId, options).then((request) => request(axios, basePath));
     },
     /**
@@ -2379,17 +2584,7 @@ export const JobApiFactory = function (
       return localVarFp.getJobStatus(jobId, options).then((request) => request(axios, basePath));
     },
     /**
-     * Get SSE log file of selected job
-     * @summary Get SSE log file
-     * @param {string} jobId Job identifier
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getSselog(jobId: string, options?: RawAxiosRequestConfig): AxiosPromise<JobsGetSselogResponse> {
-      return localVarFp.getSselog(jobId, options).then((request) => request(axios, basePath));
-    },
-    /**
-     * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time, status or search text with \'start_time\', \'end_time\', \'status\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
+     * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by submission time, status or search text with \'start_time\', \'end_time\', \'status\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
      * @summary List all quantum jobs
      * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
      * @param {string} [startTime] Allows to filter the list of jobs to fetch by submission time. If specified only jobs with submission time (submitted_at property) &gt;&#x3D; start_time are returned.
@@ -2412,24 +2607,35 @@ export const JobApiFactory = function (
       size?: number,
       order?: ListJobsOrderEnum,
       options?: RawAxiosRequestConfig
-    ): AxiosPromise<Array<JobsGetJobsResponse>> {
+    ): AxiosPromise<Array<JobsJobBase>> {
       return localVarFp
         .listJobs(fields, startTime, endTime, status, q, page, size, order, options)
         .then((request) => request(axios, basePath));
     },
     /**
-     * Submit a quantum job
-     * @summary Submit a quantum job
+     * Register new job and generate a presigned URL to upload job information (`jobs.S3SubmitJobInfo`) to OQTOPUS cloud.
+     * @summary Register new job
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    registerJobId(options?: RawAxiosRequestConfig): AxiosPromise<JobsRegisterJobResponse> {
+      return localVarFp.registerJobId(options).then((request) => request(axios, basePath));
+    },
+    /**
+     * Complete submission of a previously registered quantum job.  job_id must be created via \'POST /jobs\' request.  Submit job information (`jobs.S3SubmitJobInfo`) must be formerly uploaded to OQTOPUS cloud using presigned URL received in \'POST /jobs\' response.
+     * @summary Complete submission of a quantum job
+     * @param {string} jobId Job identifier
      * @param {JobsSubmitJobRequest} [jobsSubmitJobRequest] Quantum job to be submitted
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     submitJob(
+      jobId: string,
       jobsSubmitJobRequest?: JobsSubmitJobRequest,
       options?: RawAxiosRequestConfig
-    ): AxiosPromise<JobsSubmitJobResponse> {
+    ): AxiosPromise<SuccessSuccessResponse> {
       return localVarFp
-        .submitJob(jobsSubmitJobRequest, options)
+        .submitJob(jobId, jobsSubmitJobRequest, options)
         .then((request) => request(axios, basePath));
     },
   };
@@ -2499,21 +2705,7 @@ export class JobApi extends BaseAPI {
   }
 
   /**
-   * Get SSE log file of selected job
-   * @summary Get SSE log file
-   * @param {string} jobId Job identifier
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof JobApi
-   */
-  public getSselog(jobId: string, options?: RawAxiosRequestConfig) {
-    return JobApiFp(this.configuration)
-      .getSselog(jobId, options)
-      .then((request) => request(this.axios, this.basePath));
-  }
-
-  /**
-   * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time, status or search text with \'start_time\', \'end_time\', \'status\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
+   * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by submission time, status or search text with \'start_time\', \'end_time\', \'status\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
    * @summary List all quantum jobs
    * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
    * @param {string} [startTime] Allows to filter the list of jobs to fetch by submission time. If specified only jobs with submission time (submitted_at property) &gt;&#x3D; start_time are returned.
@@ -2544,16 +2736,34 @@ export class JobApi extends BaseAPI {
   }
 
   /**
-   * Submit a quantum job
-   * @summary Submit a quantum job
+   * Register new job and generate a presigned URL to upload job information (`jobs.S3SubmitJobInfo`) to OQTOPUS cloud.
+   * @summary Register new job
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof JobApi
+   */
+  public registerJobId(options?: RawAxiosRequestConfig) {
+    return JobApiFp(this.configuration)
+      .registerJobId(options)
+      .then((request) => request(this.axios, this.basePath));
+  }
+
+  /**
+   * Complete submission of a previously registered quantum job.  job_id must be created via \'POST /jobs\' request.  Submit job information (`jobs.S3SubmitJobInfo`) must be formerly uploaded to OQTOPUS cloud using presigned URL received in \'POST /jobs\' response.
+   * @summary Complete submission of a quantum job
+   * @param {string} jobId Job identifier
    * @param {JobsSubmitJobRequest} [jobsSubmitJobRequest] Quantum job to be submitted
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof JobApi
    */
-  public submitJob(jobsSubmitJobRequest?: JobsSubmitJobRequest, options?: RawAxiosRequestConfig) {
+  public submitJob(
+    jobId: string,
+    jobsSubmitJobRequest?: JobsSubmitJobRequest,
+    options?: RawAxiosRequestConfig
+  ) {
     return JobApiFp(this.configuration)
-      .submitJob(jobsSubmitJobRequest, options)
+      .submitJob(jobId, jobsSubmitJobRequest, options)
       .then((request) => request(this.axios, this.basePath));
   }
 }
