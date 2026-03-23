@@ -249,10 +249,6 @@ export const JobForm = (componentProps: JobFormProps) => {
   }, []);
 
   useEffect(() => {
-    if (isSubmitting) setShowJobUploadProgressModal(true);
-  }, [isSubmitting]);
-
-  useEffect(() => {
     if (props.mkProgram) {
       setValue('program', props.mkProgram?.program);
     }
@@ -316,10 +312,12 @@ export const JobForm = (componentProps: JobFormProps) => {
     }
 
     try {
+      setShowJobUploadProgressModal(true);
+
       const { job_id, presigned_url } = await registerJob();
       const { url } = presigned_url;
       const fileToUpload: File =
-        data.jobInfo ?? (await createZipFile({ program: [data.program], operator: data.operator }));
+        data.jobInfo ?? (await createJobInfoZipFile(data.type, data.program, data.operator));
 
       if (!url) {
         toast.error(t('job.form.toast.register_error'));
@@ -355,7 +353,16 @@ export const JobForm = (componentProps: JobFormProps) => {
     }
   };
 
-  const createZipFile = async (object: Object) => {
+  const createJobInfoZipFile = async (
+    jobType: JobsJobType,
+    program: string | undefined,
+    operator: JobsS3OperatorItem[] | undefined
+  ) => {
+    const object =
+      jobType === 'estimation'
+        ? { program: [program], operator: operator }
+        : { program: [program] };
+
     const zip = new JSZip();
     zip.file('input.json', JSON.stringify(object, null, 2));
     const blob = await zip.generateAsync({ type: 'blob' });
@@ -410,7 +417,17 @@ export const JobForm = (componentProps: JobFormProps) => {
   };
 
   const handleJobInfoProviderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setJobInfoProvider(e.target.value as JobInfoProviderMethod);
+    const method = e.target.value as JobInfoProviderMethod;
+    setJobInfoProvider(method);
+
+    // when changing the job info provider method we clear other method data
+    if (method === JobInfoProviderMethod.FORM_INPUT) {
+      setValue('jobInfo', undefined);
+    } else if (method === JobInfoProviderMethod.FILE_UPLOAD) {
+      setValue('program', '');
+      setValue('operator', []);
+      setValue('programType', 'Default');
+    }
   };
 
   return (
