@@ -46,10 +46,10 @@ const JobDetailPage = ({ params: { id } }: { params: Params }) => {
         ...job,
         ...jobS3Data,
       });
+      setIsSuccess(true);
     } catch {
       setIsSuccess(false);
     } finally {
-      setIsSuccess(true);
       setLoading(false);
     }
   };

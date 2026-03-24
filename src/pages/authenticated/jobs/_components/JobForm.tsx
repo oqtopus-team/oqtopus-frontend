@@ -330,7 +330,7 @@ export const JobForm = (componentProps: JobFormProps) => {
 
       setJobInfoUploadStageDone(true);
 
-      const res = await submitJob(job_id, {
+      await submitJob(job_id, {
         name: data.name,
         description: data.description,
         device_id: data.deviceId,
@@ -342,7 +342,7 @@ export const JobForm = (componentProps: JobFormProps) => {
       });
       setSubmitUploadStageDone(true);
       toast.success(t('job.form.toast.success'));
-      return res;
+      return job_id;
     } catch (e) {
       console.error(e);
       toast.error(t('job.form.toast.error'));

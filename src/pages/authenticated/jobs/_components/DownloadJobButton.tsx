@@ -32,9 +32,11 @@ export default function DownloadJobButton({ kind, job, style }: DownloadJobButto
       switch (kind) {
         case 'jobWithS3Data':
           jobToDownload = job;
+          break;
         case 'jobWithoutS3Data':
           const jobS3Data = await retrieveJobFiles(job.jobInfo);
           jobToDownload = { ...job, ...jobS3Data };
+          break;
       }
 
       const jobData: JobFileData = {
