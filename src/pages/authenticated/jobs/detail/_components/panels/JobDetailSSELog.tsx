@@ -6,11 +6,16 @@ import { useDownloadLog } from '@/pages/_hooks/useDownloadLog';
 import { isFinishedStatus } from './utils/StatusHelpers';
 
 type JobDetailSSELogProps = {
+  job_id: string;
   sseLogFileURL: string | undefined;
   status: string;
 };
 
-export const JobDetailSSELog: React.FC<JobDetailSSELogProps> = ({ status, sseLogFileURL }) => {
+export const JobDetailSSELog: React.FC<JobDetailSSELogProps> = ({
+  job_id,
+  status,
+  sseLogFileURL,
+}) => {
   const { t } = useTranslation();
   const { handleDownloadLog } = useDownloadLog();
 
@@ -29,7 +34,7 @@ export const JobDetailSSELog: React.FC<JobDetailSSELogProps> = ({ status, sseLog
       <div className={clsx('flex', 'items-center', 'justify-center')}>
         <Button
           color={color}
-          onClick={() => handleDownloadLog(sseLogFileURL)}
+          onClick={() => handleDownloadLog(job_id, sseLogFileURL)}
           disabled={isDisabled}
         >
           {t('job.detail.sselog.button')}

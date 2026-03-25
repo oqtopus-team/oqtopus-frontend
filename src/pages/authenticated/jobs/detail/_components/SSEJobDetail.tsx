@@ -32,7 +32,11 @@ export const SuccessViewSSELog: React.FC<JobWithS3Data> = (job: JobWithS3Data) =
         </Card>
         {/* SSE log */}
         <Card className={clsx(['col-start-1', 'col-end-3'])}>
-          <JobDetailSSELog status={job.status} sseLogFileURL={job.jobInfo.sse_log} />
+          <JobDetailSSELog
+            job_id={job.id}
+            status={job.status}
+            sseLogFileURL={job.jobInfo.sse_log}
+          />
         </Card>
         {/* Result */}
         <Card className={clsx(['col-start-1', 'col-end-3'])}>

@@ -77,20 +77,17 @@ export const useJobAPI = () => {
     if (transpile_result) {
       jobS3Data.transpileResult = await axios
         .get(transpile_result, { responseType: 'blob' })
-        .then((r) => convertZipBlobToObject(r.data))
-        .then((o) => o.transpile_result);
+        .then((r) => convertZipBlobToObject(r.data));
     }
     if (result) {
       jobS3Data.result = await axios
         .get(result, { responseType: 'blob' })
-        .then((r) => convertZipBlobToObject(r.data))
-        .then((o) => o.result);
+        .then((r) => convertZipBlobToObject(r.data));
     }
     if (combined_program) {
       jobS3Data.combinedProgram = await axios
         .get(combined_program, { responseType: 'blob' })
-        .then((r) => convertZipBlobToObject(r.data))
-        .then((o) => o.combined_program);
+        .then((r) => convertZipBlobToObject(r.data));
     }
 
     return jobS3Data;
@@ -145,20 +142,17 @@ export const useJobAPI = () => {
 
   const getSselog = async (
     sselogFileURL: string
-  ): Promise<{ file: string | null; file_name: string | null; status: number }> => {
+  ): Promise<{ file: Blob | null; status: number }> => {
     try {
       const res = await axios.get(sselogFileURL, { responseType: 'blob' });
-      const object = await convertZipBlobToObject(res.data);
 
       return {
-        file: object.sselog.file,
-        file_name: object.sselog.file_name,
+        file: res.data,
         status: res.status,
       };
     } catch (error: any) {
       return {
         file: null,
-        file_name: null,
         status: error.response.status,
       };
     }

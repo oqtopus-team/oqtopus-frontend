@@ -5,7 +5,7 @@ import { errorToastConfig } from '@/config/toast';
 export const useDownloadLog = () => {
   const api = useJobAPI();
 
-  const handleDownloadLog = async (sseLogFileURL: string | undefined) => {
+  const handleDownloadLog = async (job_id: string, sseLogFileURL: string | undefined) => {
     if (!sseLogFileURL) {
       alert('Log file does not exist');
       return;
@@ -13,7 +13,7 @@ export const useDownloadLog = () => {
 
     try {
       const res = await api.getSselog(sseLogFileURL);
-      if (res.status !== 200) {
+      if (res.status !== 200 || res.file === null) {
         if (res.status === 404) {
           toast('Log file does not exist', errorToastConfig);
           return;
@@ -23,17 +23,10 @@ export const useDownloadLog = () => {
         }
       }
 
-      const binaryStr = atob(res.file ?? '');
-      const len = binaryStr.length;
-      const bytes = new Uint8Array(len);
-      for (let i = 0; i < len; i++) {
-        bytes[i] = binaryStr.charCodeAt(i);
-      }
-      const blob = new Blob([bytes], { type: 'application/zip' });
-      const url = window.URL.createObjectURL(blob);
+      const url = window.URL.createObjectURL(res.file);
       const a = document.createElement('a');
       a.href = url;
-      a.download = res.file_name ?? 'sselog.zip';
+      a.download = `sselog_${job_id}.zip`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
