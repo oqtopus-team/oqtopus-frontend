@@ -1,16 +1,16 @@
-# JobsRegisteredJob
+# JobsJob
 
-Represents a newly registered quantum job.
+Represents a quantum job.  Newly registered jobs (status=registered) must provide:    - job_id,    - status (registered)  Fully defined jobs must also provide:   - name   - device_id   - job_type,   - shots   - job_info Other properties and optional and depend on job type and status.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**job_id** | **string** |  | [default to undefined]
+**job_id** | **string** |  | [optional] [default to undefined]
 **name** | **string** |  | [optional] [default to undefined]
 **description** | **string** |  | [optional] [default to undefined]
 **job_type** | [**JobsJobType**](JobsJobType.md) |  | [optional] [default to undefined]
-**status** | [**JobsJobStatus**](JobsJobStatus.md) |  | [default to undefined]
+**status** | [**JobsJobStatus**](JobsJobStatus.md) |  | [optional] [default to undefined]
 **device_id** | **string** |  | [optional] [default to undefined]
 **shots** | **number** |  | [optional] [default to undefined]
 **job_info** | [**JobsJobInfo**](JobsJobInfo.md) |  | [optional] [default to undefined]
@@ -26,9 +26,9 @@ Name | Type | Description | Notes
 ## Example
 
 ```typescript
-import { JobsRegisteredJob } from './api';
+import { JobsJob } from './api';
 
-const instance: JobsRegisteredJob = {
+const instance: JobsJob = {
     job_id,
     name,
     description,

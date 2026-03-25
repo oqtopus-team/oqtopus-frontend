@@ -5,7 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**key** | **string** |  | [optional] [default to undefined]
+**key** | **string** |  | [default to undefined]
 **AWSAccessKeyId** | **string** |  | [optional] [default to undefined]
 **x_amz_security_token** | **string** |  | [optional] [default to undefined]
 **policy** | **string** |  | [optional] [default to undefined]

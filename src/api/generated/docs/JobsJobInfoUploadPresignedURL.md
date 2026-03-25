@@ -6,8 +6,8 @@ Presigned URL for uploading file to OCTOPUS cloud.
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**url** | **string** |  | [optional] [default to undefined]
-**fields** | [**JobsJobInfoUploadPresignedURLFields**](JobsJobInfoUploadPresignedURLFields.md) |  | [optional] [default to undefined]
+**url** | **string** |  | [default to undefined]
+**fields** | [**JobsJobInfoUploadPresignedURLFields**](JobsJobInfoUploadPresignedURLFields.md) |  | [default to undefined]
 
 ## Example
 

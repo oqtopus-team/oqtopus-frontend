@@ -282,27 +282,6 @@ export interface ErrorUnauthorizedError {
   message: string;
 }
 /**
- * *(Only for estimation jobs)* The estimated expectation value and the standard deviation of the operators specified in `job_info.operator` field which is intended to be provided for estimation jobs.
- * @export
- * @interface JobsEstimationResult
- */
-export interface JobsEstimationResult {
-  /**
-   * The estimated expectation value
-   * @type {number}
-   * @memberof JobsEstimationResult
-   */
-  exp_value?: number;
-  /**
-   * The standard deviation value
-   * @type {number}
-   * @memberof JobsEstimationResult
-   */
-  stds?: number;
-}
-export type GetJob200Response = JobsRegisteredJob | JobsSubmittedJob;
-
-/**
  * job status
  * @export
  * @interface JobsGetJobStatusResponse
@@ -323,105 +302,105 @@ export interface JobsGetJobStatusResponse {
 }
 
 /**
- *
+ * Represents a quantum job.  Newly registered jobs (status=registered) must provide:    - job_id,    - status (registered)  Fully defined jobs must also provide:   - name   - device_id   - job_type,   - shots   - job_info Other properties and optional and depend on job type and status.
  * @export
- * @interface JobsJobBase
+ * @interface JobsJob
  */
-export interface JobsJobBase {
+export interface JobsJob {
   /**
    *
    * @type {string}
-   * @memberof JobsJobBase
+   * @memberof JobsJob
    */
   job_id?: string;
   /**
    *
    * @type {string}
-   * @memberof JobsJobBase
+   * @memberof JobsJob
    */
   name?: string;
   /**
    *
    * @type {string}
-   * @memberof JobsJobBase
+   * @memberof JobsJob
    */
   description?: string;
   /**
    *
    * @type {JobsJobType}
-   * @memberof JobsJobBase
+   * @memberof JobsJob
    */
   job_type?: JobsJobType;
   /**
    *
    * @type {JobsJobStatus}
-   * @memberof JobsJobBase
+   * @memberof JobsJob
    */
   status?: JobsJobStatus;
   /**
    *
    * @type {string}
-   * @memberof JobsJobBase
+   * @memberof JobsJob
    */
   device_id?: string;
   /**
    *
    * @type {number}
-   * @memberof JobsJobBase
+   * @memberof JobsJob
    */
   shots?: number;
   /**
    *
    * @type {JobsJobInfo}
-   * @memberof JobsJobBase
+   * @memberof JobsJob
    */
   job_info?: JobsJobInfo;
   /**
    *
    * @type {{ [key: string]: any; }}
-   * @memberof JobsJobBase
+   * @memberof JobsJob
    */
   transpiler_info?: { [key: string]: any };
   /**
    *
    * @type {{ [key: string]: any; }}
-   * @memberof JobsJobBase
+   * @memberof JobsJob
    */
   simulator_info?: { [key: string]: any };
   /**
    *
    * @type {{ [key: string]: any; }}
-   * @memberof JobsJobBase
+   * @memberof JobsJob
    */
   mitigation_info?: { [key: string]: any };
   /**
    *
    * @type {number}
-   * @memberof JobsJobBase
+   * @memberof JobsJob
    */
   execution_time?: number;
   /**
    *
    * @type {string}
-   * @memberof JobsJobBase
+   * @memberof JobsJob
    */
   submitted_at?: string;
   /**
    *
    * @type {string}
-   * @memberof JobsJobBase
+   * @memberof JobsJob
    */
   ready_at?: string;
   /**
    *
    * @type {string}
-   * @memberof JobsJobBase
+   * @memberof JobsJob
    */
   running_at?: string;
   /**
    *
    * @type {string}
-   * @memberof JobsJobBase
+   * @memberof JobsJob
    */
   ended_at?: string;
 }
@@ -480,17 +459,16 @@ export interface JobsJobInfoUploadPresignedURL {
    * @type {string}
    * @memberof JobsJobInfoUploadPresignedURL
    */
-  url?: string;
+  url: string;
   /**
    *
    * @type {JobsJobInfoUploadPresignedURLFields}
    * @memberof JobsJobInfoUploadPresignedURL
    */
-  fields?: JobsJobInfoUploadPresignedURLFields;
+  fields: JobsJobInfoUploadPresignedURLFields;
 }
-
 /**
- * sse log file
+ *
  * @export
  * @interface JobsJobInfoUploadPresignedURLFields
  */
@@ -500,7 +478,7 @@ export interface JobsJobInfoUploadPresignedURLFields {
    * @type {string}
    * @memberof JobsJobInfoUploadPresignedURLFields
    */
-  key?: string;
+  key: string;
   /**
    *
    * @type {string}
@@ -526,6 +504,12 @@ export interface JobsJobInfoUploadPresignedURLFields {
    */
   signature?: string;
 }
+/**
+ *
+ * @export
+ * @enum {string}
+ */
+
 export const JobsJobStatus = {
   Registered: 'registered',
   Submitted: 'submitted',
@@ -539,13 +523,12 @@ export const JobsJobStatus = {
 export type JobsJobStatus = (typeof JobsJobStatus)[keyof typeof JobsJobStatus];
 
 /**
- * none is valid only for newly registered job_ids (job status=registered)
+ *
  * @export
  * @enum {string}
  */
 
 export const JobsJobType = {
-  None: 'none',
   Estimation: 'estimation',
   Sampling: 'sampling',
   MultiManual: 'multi_manual',
@@ -553,8 +536,9 @@ export const JobsJobType = {
 } as const;
 
 export type JobsJobType = (typeof JobsJobType)[keyof typeof JobsJobType];
+
 /**
- *
+ * Register new job
  * @export
  * @interface JobsRegisterJobResponse
  */
@@ -562,7 +546,7 @@ export interface JobsRegisterJobResponse {
   /**
    *
    * @type {string}
-   * @memberof JobsJobDef
+   * @memberof JobsRegisterJobResponse
    */
   job_id: string;
   /**
@@ -573,7 +557,7 @@ export interface JobsRegisterJobResponse {
   presigned_url: JobsJobInfoUploadPresignedURL;
 }
 /**
- *
+ * Represents a newly registered quantum job.
  * @export
  * @interface JobsRegisteredJob
  */
@@ -589,7 +573,7 @@ export interface JobsRegisteredJob {
    * @type {string}
    * @memberof JobsRegisteredJob
    */
-  name: string;
+  name?: string;
   /**
    *
    * @type {string}
@@ -798,7 +782,6 @@ export interface JobsS3TranspileResult {
    */
   virtual_physical_mapping: { [key: string]: any } | null;
 }
-
 /**
  *
  * @export
@@ -825,10 +808,10 @@ export interface JobsSubmitJobRequest {
   device_id: string;
   /**
    *
-   * @type {JobsSubmitJobType}
+   * @type {JobsJobType}
    * @memberof JobsSubmitJobRequest
    */
-  job_type: JobsSubmitJobType;
+  job_type: JobsJobType;
   /**
    *
    * @type {{ [key: string]: any; }}
@@ -856,22 +839,7 @@ export interface JobsSubmitJobRequest {
 }
 
 /**
- *
- * @export
- * @enum {string}
- */
-
-export const JobsSubmitJobType = {
-  Estimation: 'estimation',
-  Sampling: 'sampling',
-  MultiManual: 'multi_manual',
-  Sse: 'sse',
-} as const;
-
-export type JobsSubmitJobType = (typeof JobsSubmitJobType)[keyof typeof JobsSubmitJobType];
-
-/**
- *
+ * Represents a fully submitted quantum job.
  * @export
  * @interface JobsSubmittedJob
  */
@@ -913,7 +881,7 @@ export interface JobsSubmittedJob {
    */
   device_id: string;
   /**
-   * 0 is valid only for newly registered job_ids (job status=registered)
+   *
    * @type {number}
    * @memberof JobsSubmittedJob
    */
@@ -953,7 +921,7 @@ export interface JobsSubmittedJob {
    * @type {string}
    * @memberof JobsSubmittedJob
    */
-  submitted_at?: string;
+  submitted_at: string;
   /**
    *
    * @type {string}
@@ -973,6 +941,7 @@ export interface JobsSubmittedJob {
    */
   ended_at?: string;
 }
+
 /**
  * detail of settings response
  * @export
@@ -2098,48 +2067,6 @@ export const JobApiAxiosParamCreator = function (configuration?: Configuration) 
       };
     },
     /**
-     * Get SSE log file of selected job
-     * @summary Get SSE log file
-     * @param {string} jobId Job identifier
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getSselog: async (jobId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      // verify required parameter 'jobId' is not null or undefined
-      assertParamExists('getSselog', 'jobId', jobId);
-      const localVarPath = `/jobs/{job_id}/sselog`.replace(
-        `{${'job_id'}}`,
-        encodeURIComponent(String(jobId))
-      );
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-      let baseOptions;
-      if (configuration) {
-        baseOptions = configuration.baseOptions;
-      }
-
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
-      const localVarHeaderParameter = {} as any;
-      const localVarQueryParameter = {} as any;
-
-      // authentication BearerAuth required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration);
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter);
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-      localVarRequestOptions.headers = {
-        ...localVarHeaderParameter,
-        ...headersFromBaseOptions,
-        ...options.headers,
-      };
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      };
-    },
-    /**
      * By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by submission time, status or search text with \'start_time\', \'end_time\', \'status\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
      * @summary List all quantum jobs
      * @param {string} [fields] Allows to specify an exact list of job properties to fetch for a single job. Each element of the list must be a valid name of job property.  If parameter is specified and requested job field is not defined for a job null is returned.  If parameter is omitted all available job properties are returned. Undefined job properties (null properties) are not included in the response.
@@ -2383,7 +2310,7 @@ export const JobApiFp = function (configuration?: Configuration) {
     async getJob(
       jobId: string,
       options?: RawAxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetJob200Response>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<JobsJob>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getJob(jobId, options);
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
       const localVarOperationServerBasePath =
@@ -2445,7 +2372,7 @@ export const JobApiFp = function (configuration?: Configuration) {
       size?: number,
       order?: ListJobsOrderEnum,
       options?: RawAxiosRequestConfig
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<JobsJobBase>>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<JobsJob>>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.listJobs(
         fields,
         startTime,
@@ -2567,7 +2494,7 @@ export const JobApiFactory = function (
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    getJob(jobId: string, options?: RawAxiosRequestConfig): AxiosPromise<GetJob200Response> {
+    getJob(jobId: string, options?: RawAxiosRequestConfig): AxiosPromise<JobsJob> {
       return localVarFp.getJob(jobId, options).then((request) => request(axios, basePath));
     },
     /**
@@ -2607,7 +2534,7 @@ export const JobApiFactory = function (
       size?: number,
       order?: ListJobsOrderEnum,
       options?: RawAxiosRequestConfig
-    ): AxiosPromise<Array<JobsJobBase>> {
+    ): AxiosPromise<Array<JobsJob>> {
       return localVarFp
         .listJobs(fields, startTime, endTime, status, q, page, size, order, options)
         .then((request) => request(axios, basePath));

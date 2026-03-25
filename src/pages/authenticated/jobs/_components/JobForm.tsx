@@ -31,7 +31,7 @@ import { FieldError, FieldErrorsImpl, Merge, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { NavLink, useNavigate } from 'react-router';
 import { useDeviceAPI, useJobAPI } from '@/backend/hook';
-import { JobsJobType, JobsS3OperatorItem, JobsSubmitJobType } from '@/api/generated';
+import { JobsJobType, JobsS3OperatorItem } from '@/api/generated';
 import * as yup from 'yup';
 import { Device } from '@/domain/types/Device';
 import { toast } from 'react-toastify';
@@ -335,7 +335,7 @@ export const JobForm = (componentProps: JobFormProps) => {
         description: data.description,
         device_id: data.deviceId,
         shots: data.shots,
-        job_type: data.type as JobsSubmitJobType,
+        job_type: data.type,
         transpiler_info: JSON.parse(data.transpiler ?? ''),
         simulator_info: JSON.parse(data.simulator ?? ''),
         mitigation_info: JSON.parse(data.mitigation ?? ''),

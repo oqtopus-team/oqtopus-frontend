@@ -17,10 +17,9 @@ docs/ErrorForbiddenError.md
 docs/ErrorInternalServerError.md
 docs/ErrorNotFoundError.md
 docs/ErrorUnauthorizedError.md
-docs/GetJob200Response.md
 docs/JobApi.md
 docs/JobsGetJobStatusResponse.md
-docs/JobsJobBase.md
+docs/JobsJob.md
 docs/JobsJobInfo.md
 docs/JobsJobInfoUploadPresignedURL.md
 docs/JobsJobInfoUploadPresignedURLFields.md
@@ -35,8 +34,7 @@ docs/JobsS3SamplingResult.md
 docs/JobsS3SubmitJobInfo.md
 docs/JobsS3TranspileResult.md
 docs/JobsSubmitJobRequest.md
-docs/JobsSubmitJobResponse.md
-docs/JobsTranspileResult.md
+docs/JobsSubmittedJob.md
 docs/SettingsApi.md
 docs/SettingsGetSettingsResponse.md
 docs/SuccessSuccessResponse.md

@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 **name** | **string** |  | [optional] [default to undefined]
 **description** | **string** |  | [optional] [default to undefined]
 **device_id** | **string** |  | [default to undefined]
-**job_type** | [**JobsSubmitJobType**](JobsSubmitJobType.md) |  | [default to undefined]
+**job_type** | [**JobsJobType**](JobsJobType.md) |  | [default to undefined]
 **transpiler_info** | **{ [key: string]: any; }** |  | [optional] [default to undefined]
 **simulator_info** | **{ [key: string]: any; }** |  | [optional] [default to undefined]
 **mitigation_info** | **{ [key: string]: any; }** |  | [optional] [default to undefined]

@@ -95,7 +95,7 @@ paths:
       description: |-
         By default, all available job's properties are returned. Use 'fields' parameter to specify exact list of properties to get for each job.
 
-        List of jobs can be filtered by job creation time, status or search text with 'start_time', 'end_time', 'status' and 'q' parameters.
+        List of jobs can be filtered by submission time, status or search text with 'start_time', 'end_time', 'status' and 'q' parameters.
 
         Jobs are fetched with the pagination mechanism. This can be configured with 'page' and 'perPage' parameters. Check response's 'Link' header for pagination details.
       operationId: list_jobs
@@ -136,10 +136,10 @@ paths:
           description: Allows to filter the list of jobs to fetch by job's status. If specified only jobs which status is equal to provided status are returned.
           required: false
           schema:
-            $ref: "#/components/schemas/jobs.JobStatus"
+            $ref: '#/components/schemas/jobs.JobStatus'
         - name: q
           in: query
-          description: Allows to filter the list of jobs to fetch by job's name and description. If specified only jobs which name or description contains specified search string are returned.
+          description: Allows to filter the list of jobs to fetch by job's id, name and description. If specified only jobs which id, name or description contains specified search string are returned.
           required: false
           schema:
             type: string
@@ -183,7 +183,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/jobs.JobBase'
+                  $ref: '#/components/schemas/jobs.Job'
         '401':
           description: Unauthorized
           content:
@@ -320,6 +320,14 @@ paths:
                 $ref: '#/components/schemas/error.ForbiddenError'
               example:
                 message: Forbidden
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error.NotFoundError'
+              example:
+                message: job not found
   /jobs/{job_id}:
     get:
       tags:
@@ -342,9 +350,7 @@ paths:
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/jobs.SubmittedJob'
-                  - $ref: '#/components/schemas/jobs.RegisteredJob'
+                $ref: '#/components/schemas/jobs.Job'
         '400':
           description: Bad Request
           content:
@@ -863,6 +869,26 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    jobs.SubmittedJob:
+      description: Represents a fully submitted quantum job.
+      allOf:
+        - $ref: '#/components/schemas/jobs.Job'
+      required:
+        - job_id
+        - name
+        - job_type
+        - status
+        - device_id
+        - shots
+        - job_info
+        - submitted_at
+    jobs.RegisteredJob:
+      description: Represents a newly registered quantum job.
+      allOf:
+        - $ref: '#/components/schemas/jobs.Job'
+      required:
+        - job_id
+        - status
     jobs.S3SubmitJobInfo:
       type: object
       properties:
@@ -871,7 +897,8 @@ components:
           description: A list of OPENQASM3 program. For non-multiprogramming jobs, this field is assumed to contain exactly one program. Otherwise, those programs are combined according to the multiprogramming machinery.
           items:
             type: string
-          example: '[ "OPENQASM 3; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;" ]'
+          example:
+            - OPENQASM 3; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;
         operator:
           type: array
           items:
@@ -1004,53 +1031,53 @@ components:
         - supported_instructions
         - description
       example:
-        - device_id: SVSim
-          device_type: simulator
-          status: available
-          n_pending_jobs: 8
-          n_qubits: 39
-          n_nodes: 512
-          basis_gates:
-            - x
-            - 'y'
-            - z
-            - h
-            - s
-            - sdg
-            - t
-            - tdg
-            - rx
-            - ry
-            - rz
-            - cx
-            - cz
-            - swap
-            - u1
-            - u2
-            - u3
-            - u
-            - p
-            - id
-            - sx
-            - sxdg
-          supported_instructions:
-            - measure
-            - barrier
-            - reset
-          device_info: |-
-            {
-              "n_nodes": 512,
-              "calibration_data": {
-                "qubit_connectivity": [ "(1,4)", "(4,5)", "(5,8)"],
-                "t1": {
-                  "0": 55.51,
-                  "1": 37.03,
-                  "2": 57.13
-                }
+        device_id: SVSim
+        device_type: simulator
+        status: available
+        n_pending_jobs: 8
+        n_qubits: 39
+        n_nodes: 512
+        basis_gates:
+          - x
+          - 'y'
+          - z
+          - h
+          - s
+          - sdg
+          - t
+          - tdg
+          - rx
+          - ry
+          - rz
+          - cx
+          - cz
+          - swap
+          - u1
+          - u2
+          - u3
+          - u
+          - p
+          - id
+          - sx
+          - sxdg
+        supported_instructions:
+          - measure
+          - barrier
+          - reset
+        device_info: |-
+          {
+            "n_nodes": 512,
+            "calibration_data": {
+              "qubit_connectivity": [ "(1,4)", "(4,5)", "(5,8)"],
+              "t1": {
+                "0": 55.51,
+                "1": 37.03,
+                "2": 57.13
               }
             }
-          calibrated_at: '2022-10-19T11:45:34Z'
-          description: State vector-based quantum circuit simulator
+          }
+        calibrated_at: '2022-10-19T11:45:34Z'
+        description: State vector-based quantum circuit simulator
     error.UnauthorizedError:
       type: object
       properties:
@@ -1079,19 +1106,6 @@ components:
           type: string
       required:
         - message
-    jobs.JobId:
-      type: string
-      example: 7af020f6-2e38-4d70-8cf0-4349650ea08c
-    jobs.JobType:
-      type: string
-      description: none is valid only for newly registered job_ids (job status=registered)
-      enum:
-        - none
-        - estimation
-        - sampling
-        - multi_manual
-        - sse
-      example: sampling
     jobs.JobStatus:
       type: string
       enum:
@@ -1103,6 +1117,17 @@ components:
         - failed
         - cancelled
       example: submitted
+    jobs.JobId:
+      type: string
+      example: 7af020f6-2e38-4d70-8cf0-4349650ea08c
+    jobs.JobType:
+      type: string
+      enum:
+        - estimation
+        - sampling
+        - multi_manual
+        - sse
+      example: sampling
     jobs.JobInfoDownloadPresignedURL:
       description: Presigned URL for downloading a file from OCTOPUS cloud.
       type: string
@@ -1135,7 +1160,21 @@ components:
           type: string
       required:
         - input
-    jobs.JobBase:
+    jobs.Job:
+      description: |-
+        Represents a quantum job.
+
+        Newly registered jobs (status=registered) must provide:
+           - job_id,
+           - status (registered)
+
+        Fully defined jobs must also provide:
+          - name
+          - device_id
+          - job_type,
+          - shots
+          - job_info
+        Other properties and optional and depend on job type and status.
       type: object
       properties:
         job_id:
@@ -1154,11 +1193,10 @@ components:
           type: string
           example: Kawasaki
         shots:
-          description: 0 is valid only for newly registered job_ids (job status=registered)
           type: integer
-          minimum: 0
+          minimum: 1
           maximum: 10000000
-          example: '1000'
+          example: 1000
         job_info:
           $ref: '#/components/schemas/jobs.JobInfo'
         transpiler_info:
@@ -1192,7 +1230,7 @@ components:
             ro_error_mitigation: pseudo_inverse
         execution_time:
           type: number
-          example: '10.123'
+          example: 10.123
         submitted_at:
           type: string
           format: date-time
@@ -1216,10 +1254,25 @@ components:
         description: Bell State Sampling Example
         device_id: Kawasaki
         job_type: estimation
-        job_info: '{"input": https://oqtopus-cloud.s3.amazonaws.com/jobs/7af020f6-2e38-4d70-8cf0-4349650ea08c/input.zip?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1714425600&Signature=abc123def456ghi789jkl%2Fsignature%3D}'
-        transpiler_info: '{ "qubit_allocation": { "0": 12, "1": 16 }, "skip_transpilation": false, "seed_transpilation": 873 },'
-        simulator_info: '{ "n_qubits": 5, "n_nodes": 12, "n_per_node": 2, "seed_simulation": 39058567, "simulation_opt": { "optimization_method": "light", "optimization_block_size": 1, "optimization_swap_level": 1 } }'
-        mitigation_info: '{ "ro_error_mitigation": "pseudo_inverse" }'
+        job_info:
+          input: https://oqtopus-cloud.s3.amazonaws.com/jobs/7af020f6-2e38-4d70-8cf0-4349650ea08c/input.zip?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1714425600&Signature=abc123def456ghi789jkl%2Fsignature%3D
+        transpiler_info:
+          qubit_allocation:
+            '0': 12
+            '1': 16
+          skip_transpilation: false
+          seed_transpilation: 873
+        simulator_info:
+          n_qubits: 5
+          n_nodes: 12
+          n_per_node: 2
+          seed_simulation: 39058567
+          simulation_opt:
+            optimization_method: light
+            optimization_block_size: 1
+            optimization_swap_level: 1
+        mitigation_info:
+          ro_error_mitigation: pseudo_inverse
         shots: 1000
         status: submitted
         execution_time: 10.123
@@ -1227,8 +1280,8 @@ components:
         ready_at: '2022-10-19T11:45:34Z'
         running_at: '2022-10-19T11:45:34Z'
         ended_at: '2022-10-19T11:45:34Z'
-    jobs.SubmitJobInfo:
-      description: All fields in this schema also exist in the `JobInfo` schema and have the same meaning as their counterparts in the `JobInfo` schema.
+    jobs.JobInfoUploadPresignedURL:
+      description: Presigned URL for uploading file to OCTOPUS cloud.
       type: object
       properties:
         url:
@@ -1248,6 +1301,11 @@ components:
               type: string
             signature:
               type: string
+          required:
+            - key
+      required:
+        - url
+        - fields
     jobs.RegisterJobResponse:
       description: Register new job
       type: object
@@ -1266,14 +1324,6 @@ components:
           type: string
       required:
         - message
-    jobs.SubmitJobType:
-      type: string
-      enum:
-        - estimation
-        - sampling
-        - multi_manual
-        - sse
-      example: sampling
     jobs.SubmitJobRequest:
       type: object
       properties:
@@ -1287,7 +1337,7 @@ components:
           type: string
           example: Kawasaki
         job_type:
-          $ref: '#/components/schemas/jobs.SubmitJobType'
+          $ref: '#/components/schemas/jobs.JobType'
         transpiler_info:
           type: object
           properties: {}
@@ -1333,151 +1383,6 @@ components:
           type: string
       required:
         - message
-    jobs.JobDef:
-      type: object
-      properties:
-        job_id:
-          $ref: '#/components/schemas/jobs.JobId'
-        name:
-          type: string
-          example: Bell State Sampling
-        description:
-          type: string
-          example: Bell State Sampling Example
-        job_type:
-          $ref: '#/components/schemas/jobs.JobType'
-        status:
-          $ref: '#/components/schemas/jobs.JobStatus'
-        device_id:
-          type: string
-          example: Kawasaki
-        shots:
-          type: integer
-          minimum: 1
-          maximum: 10000000
-          example: '1000'
-        job_info:
-          $ref: '#/components/schemas/jobs.JobInfo'
-        transpiler_info:
-          type: object
-          properties: {}
-          additionalProperties: true
-          example:
-            qubit_allocation:
-              '0': 12
-              '1': 16
-            skip_transpilation: false
-            seed_transpilation: 873
-        simulator_info:
-          type: object
-          properties: {}
-          additionalProperties: true
-          example:
-            n_qubits: 5
-            n_nodes: 12
-            n_per_node: 2
-            seed_simulation: 39058567
-            simulation_opt:
-              optimization_method: light
-              optimization_block_size: 1
-              optimization_swap_level: 1
-        mitigation_info:
-          type: object
-          properties: {}
-          additionalProperties: true
-          example:
-            ro_error_mitigation: pseudo_inverse
-        execution_time:
-          type: number
-          example: '10.123'
-        submitted_at:
-          type: string
-          format: date-time
-          example: '2022-10-19T11:45:34Z'
-        ready_at:
-          type: string
-          format: date-time
-          example: '2022-10-19T11:45:34Z'
-        running_at:
-          type: string
-          format: date-time
-          example: '2022-10-19T11:45:34Z'
-        ended_at:
-          type: string
-          format: date-time
-          example: '2022-10-19T11:45:34Z'
-      required:
-        - job_id
-        - name
-        - job_type
-        - status
-        - device_id
-        - shots
-        - job_info
-      example:
-        job_id: 7af020f6-2e38-4d70-8cf0-4349650ea08c
-        name: Bell State Sampling
-        description: Bell State Sampling Example
-        device_id: Kawasaki
-        job_type: estimation
-        job_info:
-          program:
-            - OPENQASM 3; qubit[2] q; bit[2] c; h q[0]; cnot q[0], q[1]; c = measure q;
-          operator:
-            - pauli: X 0 Y 1 Z 5 I 2
-              coeff: 1
-          transpiled_code: '{}'
-          result: '{}'
-          reason: ''
-        transpiler_info:
-          qubit_allocation:
-            '0': 12
-            '1': 16
-          skip_transpilation: false
-          seed_transpilation: 873
-        simulator_info:
-          n_qubits: 5
-          n_nodes: 12
-          n_per_node: 2
-          seed_simulation: 39058567
-          simulation_opt:
-            optimization_method: light
-            optimization_block_size: 1
-            optimization_swap_level: 1
-        mitigation_info:
-          ro_error_mitigation: pseudo_inverse
-        shots: 1000
-        status: submitted
-        execution_time: 10.123
-        submitted_at: '2022-10-19T11:45:34Z'
-        ready_at: '2022-10-19T11:45:34Z'
-        running_at: '2022-10-19T11:45:34Z'
-        ended_at: '2022-10-19T11:45:34Z'
-    success.SuccessResponse:
-      type: object
-      properties:
-        message:
-          type: string
-      required:
-        - job_id
-        - status
-      example:
-        job_id: 06823102-73a0-793c-8000-70ac55fe4811
-        name: ''
-        description: null
-        job_type: none
-        status: registered
-        device_id: null
-        shots: null
-        job_info: null
-        transpiler_info: null
-        simulator_info: null
-        mitigation_info: null
-        execution_time: null
-        submitted_at: null
-        ready_at: null
-        running_at: null
-        ended_at: null
     jobs.GetJobStatusResponse:
       description: job status
       type: object
@@ -1489,17 +1394,6 @@ components:
       required:
         - job_id
         - status
-    jobs.GetSselogResponse:
-      description: sse log file
-      type: object
-      properties:
-        file:
-          type: string
-          format: byte
-        file_name:
-          type: string
-          example: sselog_7af020f6-2e38-4d70-8cf0-4349650ea08c.zip
-      required: []
     api-token.Expiration:
       type: string
       format: date-time
@@ -1632,3 +1526,57 @@ components:
         - allow_deletion
         - visible_fields
         - login_history_enabled
+    jobs.S3OperatorItem:
+      type: object
+      properties:
+        pauli:
+          type: string
+          description: The Pauli string.
+          example: X 0 X 1
+        coeff:
+          type: number
+          description: Coefficient number in the Pauli string representation.
+          example: 1
+      required:
+        - pauli
+    jobs.S3SamplingResult:
+      type: object
+      description: '*(Only for sampling jobs)* JSON string representing the sampling result'
+      properties:
+        counts:
+          type: object
+          properties: {}
+          additionalProperties: true
+          example:
+            '10': 454
+            '11': 387
+            '00': 84
+            '01': 75
+        divided_counts:
+          type: object
+          properties: {}
+          additionalProperties: true
+          nullable: true
+          example:
+            '0':
+              '10': 454
+              '11': 387
+              '00': 84
+              '01': 75
+            '1':
+              '10': 454
+              '11': 387
+              '00': 84
+              '01': 75
+    jobs.S3EstimationResult:
+      type: object
+      description: |
+        *(Only for estimation jobs)* The estimated expectation value and the standard deviation
+        of the operators specified in `job_info.operator` field which is intended to be provided for estimation jobs.
+      properties:
+        exp_value:
+          description: The estimated expectation value
+          type: number
+        stds:
+          description: The standard deviation value
+          type: number

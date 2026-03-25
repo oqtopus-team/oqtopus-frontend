@@ -121,7 +121,7 @@ const { status, data } = await apiInstance.deleteJob(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getJob**
-> GetJob200Response getJob()
+> JobsJob getJob()
 
 Get selected job
 
@@ -152,7 +152,7 @@ const { status, data } = await apiInstance.getJob(
 
 ### Return type
 
-**GetJob200Response**
+**JobsJob**
 
 ### Authorization
 
@@ -229,9 +229,9 @@ const { status, data } = await apiInstance.getJobStatus(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **listJobs**
-> Array<JobsJobBase> listJobs()
+> Array<JobsJob> listJobs()
 
-By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time, status or search text with \'start_time\', \'end_time\', \'status\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
+By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by submission time, status or search text with \'start_time\', \'end_time\', \'status\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
 
 ### Example
 
@@ -281,7 +281,7 @@ const { status, data } = await apiInstance.listJobs(
 
 ### Return type
 
-**Array<JobsJobBase>**
+**Array<JobsJob>**
 
 ### Authorization
 
@@ -402,6 +402,7 @@ const { status, data } = await apiInstance.submitJob(
 |**400** | Bad Request |  -  |
 |**401** | Unauthorized |  -  |
 |**403** | Forbidden |  -  |
+|**404** | Not Found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

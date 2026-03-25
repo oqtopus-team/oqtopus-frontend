@@ -1,10 +1,7 @@
 # JobsJobType
 
-none is valid only for newly registered job_ids (job status=registered)
 
 ## Enum
-
-* `None` (value: `'none'`)
 
 * `Estimation` (value: `'estimation'`)
 

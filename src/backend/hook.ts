@@ -3,7 +3,7 @@ import { userApiContext } from './Provider';
 import {
   DevicesDeviceInfo,
   GetAnnouncementsListOrderEnum,
-  JobsJobBase,
+  JobsJob,
   JobsJobInfo,
   JobsJobInfoUploadPresignedURL,
   JobsRegisterJobResponse,
@@ -180,7 +180,7 @@ const convertToDateIfValid = (dateString: string | undefined): Date | undefined 
   return date;
 };
 
-const convertJobResult = (job: JobsJobBase): Job => ({
+const convertJobResult = (job: JobsJob): Job => ({
   id: job.job_id ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   name: job.name ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   description: job.description,
