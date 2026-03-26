@@ -1,4 +1,4 @@
-import { JobsOperatorItem } from "@/api/generated";
+import { JobsS3OperatorItem } from "@/api/generated";
 import { MathJax, MathJax3Config, MathJaxContext } from "better-react-mathjax";
 import clsx from "clsx";
 import { useMemo } from "react";
@@ -9,7 +9,7 @@ import { ParametricExpectationValueChart, ParametricExpectationValuePoint } from
 import { roundNumber } from "../misc";
 
 export interface Props {
-  observable: JobsOperatorItem[];
+  observable: JobsS3OperatorItem[];
   expectationValue?: number;
   qubitNumber: number;
   selectedParametricGatePosition?: GatePosition

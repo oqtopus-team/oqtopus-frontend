@@ -5,7 +5,7 @@ import clsx from "clsx";
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { QuantumCircuitService } from "../circuit";
-import { JobsJobType, JobsOperatorItem } from "@/api/generated";
+import { JobsJobType, JobsS3OperatorItem } from "@/api/generated";
 import { CircuitInfo } from "qulacs-wasm-simulator-client";
 import { parseCircuitJSON } from "../qasm";
 import { convertCircuit, convertObservable } from "../convert";
@@ -20,7 +20,7 @@ export interface Props {
   jobType: JobsJobType;
   qubitNumber: number;
   program: string;
-  observable?: JobsOperatorItem[];
+  observable?: JobsS3OperatorItem[];
   selectedParametricGatePosition?: GatePosition;
 }
 
@@ -59,7 +59,7 @@ export const LocalSimulationTabContent: React.FC<Props> = (props) => {
         const observable = (
           (qubitNumber: number,
             jobType: JobsJobType,
-            operator?: JobsOperatorItem[],
+            operator?: JobsS3OperatorItem[],
           ) => {
             if (jobType == "estimation"
               && operator !== undefined

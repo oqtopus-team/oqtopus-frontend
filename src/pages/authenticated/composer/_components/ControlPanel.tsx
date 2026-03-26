@@ -153,7 +153,7 @@ export default (props: ControlPanelProps) => {
                   mkProgram={props.mkProgram}
                   mkOperator={props.mkOperator}
                   isAdvancedSettingsOpen={false}
-                  jobType={props.jobType as JobsJobType}
+                  jobType={props.jobType}
                   displayFields={{
                     program: false,
                     type: false,
