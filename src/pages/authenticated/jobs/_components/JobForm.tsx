@@ -184,6 +184,7 @@ export const JobForm = (componentProps: JobFormProps) => {
   const [jobInfoUploadStageDone, setJobInfoUploadStageDone] = useState(false);
   const [jobInfoUploadProgressPercent, setJobInfoUploadProgressPercent] = useState(0);
   const [submitUploadStageDone, setSubmitUploadStageDone] = useState(false);
+  const [submitUploadFailed, setSubmitUploadFailed] = useState(false);
 
   const {
     handleSubmit,
@@ -321,6 +322,7 @@ export const JobForm = (componentProps: JobFormProps) => {
 
       if (!url) {
         toast.error(t('job.form.toast.register_error'));
+        setSubmitUploadFailed(true);
         return;
       }
 
@@ -345,6 +347,7 @@ export const JobForm = (componentProps: JobFormProps) => {
       return job_id;
     } catch (e) {
       console.error(e);
+      setSubmitUploadFailed(true);
       toast.error(t('job.form.toast.error'));
     } finally {
       setTimeout(() => {
@@ -375,6 +378,7 @@ export const JobForm = (componentProps: JobFormProps) => {
     setJobInfoUploadStageDone(false);
     setJobInfoUploadProgressPercent(0);
     setSubmitUploadStageDone(false);
+    setSubmitUploadFailed(false);
   };
 
   const onSubmitWithRedirection = async (data: FormInput) => {
@@ -785,6 +789,7 @@ export const JobForm = (componentProps: JobFormProps) => {
         uploadDone={jobInfoUploadStageDone}
         uploadProgressPercent={jobInfoUploadProgressPercent}
         submitDone={submitUploadStageDone}
+        submitFailed={submitUploadFailed}
       />
     </Card>
   );

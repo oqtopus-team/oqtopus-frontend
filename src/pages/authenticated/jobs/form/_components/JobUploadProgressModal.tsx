@@ -1,10 +1,7 @@
-import { Button } from '@/pages/_components/Button';
 import { Card } from '@/pages/_components/Card';
-import { Divider } from '@/pages/_components/Divider';
 import { Loader } from '@/pages/_components/Loader';
 import { Spacer } from '@/pages/_components/Spacer';
 import clsx from 'clsx';
-import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BsCheckCircle, BsExclamationCircleFill } from 'react-icons/bs';
 
@@ -16,6 +13,7 @@ type JobUploadModalProps = {
   uploadDone: boolean;
   uploadProgressPercent: number;
   submitDone: boolean;
+  submitFailed: boolean;
 };
 
 export default function JobUploadProgressModal({
@@ -24,12 +22,13 @@ export default function JobUploadProgressModal({
   uploadDone,
   uploadProgressPercent,
   submitDone,
+  submitFailed,
 }: JobUploadModalProps) {
   const { t } = useTranslation();
 
-  const registerStatus = getStageStatus(registerDone);
-  const uploadStatus = getStageStatus(uploadDone, registerDone);
-  const submitStatus = getStageStatus(submitDone, registerDone, uploadDone);
+  const registerStatus = getStageStatus(registerDone, submitFailed);
+  const uploadStatus = getStageStatus(uploadDone, submitFailed, registerDone);
+  const submitStatus = getStageStatus(submitDone, submitFailed, registerDone, uploadDone);
   const jobUploadCompleted = [registerStatus, uploadStatus, submitStatus].every(
     (s) => s === StageStatus.SUCCEEDED
   );
@@ -89,12 +88,18 @@ enum StageStatus {
   FAILED = 'failed',
 }
 
-function getStageStatus(stageDone: boolean, ...previousStagesDoneList: boolean[]): StageStatus {
+function getStageStatus(
+  stageDone: boolean,
+  submitFailed: boolean,
+  ...previousStagesDoneList: boolean[]
+): StageStatus {
   if (stageDone) return StageStatus.SUCCEEDED;
 
   for (const prevStageDone of previousStagesDoneList) {
     if (!prevStageDone) return StageStatus.PENDING;
   }
+
+  if (submitFailed) return StageStatus.FAILED;
 
   return StageStatus.IN_PROGRESS;
 }
