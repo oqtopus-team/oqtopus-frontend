@@ -380,7 +380,7 @@ export const JobForm = (componentProps: JobFormProps) => {
   const onSubmitWithRedirection = async (data: FormInput) => {
     try {
       const res = await onSubmit(data);
-      navigate('/jobs/' + res);
+      if (res) navigate('/jobs/' + res);
     } catch (e) {
       console.log(e);
     }
