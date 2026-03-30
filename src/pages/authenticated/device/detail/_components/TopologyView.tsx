@@ -354,25 +354,28 @@ const createNodeData = (
 ): { nodeData: any[]; tempNodeMap: Map<string, object> } => {
   try {
     const tempNodeMap = new Map<string, object>();
-    const nodeData = qubits.map((qubit: any) => {
-      tempNodeMap.set(qubit.id.toString(), qubit);
-      const metricValue = getMetricValue(qubit, selectedMetric);
-      const color = getColorForMetric(
-        metricValue,
-        metricRange.min,
-        metricRange.max,
-        selectedMetric
-      );
+    const nodeData = qubits
+      .map((qubit: any) => {
+        if (!qubit || qubit.id === undefined) return null;
+        tempNodeMap.set(qubit.id.toString(), qubit);
+        const metricValue = getMetricValue(qubit, selectedMetric);
+        const color = getColorForMetric(
+          metricValue,
+          metricRange.min,
+          metricRange.max,
+          selectedMetric
+        );
 
-      return {
-        id: qubit.id.toString(),
-        label: `${qubit.id}`,
-        fx: scalePosition(qubit.position.x),
-        fy: scalePosition(qubit.position.y * -1), // multiply by -1 to flip the y-axis
-        color: color,
-        metricValue: metricValue,
-      };
-    });
+        return {
+          id: qubit.id.toString(),
+          label: `${qubit.id}`,
+          fx: qubit.position?.x !== undefined ? scalePosition(qubit.position.x) : 0,
+          fy: qubit.position?.y !== undefined ? scalePosition(qubit.position.y * -1) : 0, // multiply by -1 to flip the y-axis
+          color: color,
+          metricValue: metricValue,
+        };
+      })
+      .filter((n) => n !== null);
     return { nodeData, tempNodeMap };
   } catch (err) {
     console.error('Failed to create node data:', err);
@@ -387,32 +390,37 @@ const createEdgeData = (
 ): { edgeData: LinkObject[]; tempCouplingMap: Map<string, object> } => {
   try {
     const tempCouplingMap = new Map<string, object>();
-    const edgeData: LinkObject[] = couplings.map((coupling: any) => {
-      const key = createCouplingMapKey(coupling.control, coupling.target);
-      const id = `${coupling.control}-${coupling.target}`;
-      const existingValue = tempCouplingMap.get(key);
-      if (existingValue) {
-        tempCouplingMap.set(key, Object.assign({}, existingValue, { [id]: coupling }));
-      } else {
-        tempCouplingMap.set(key, { [id]: coupling });
-      }
+    const edgeData: LinkObject[] = couplings
+      .map((coupling: any) => {
+        if (!coupling || coupling.control === undefined || coupling.target === undefined) {
+          return null;
+        }
+        const key = createCouplingMapKey(coupling.control, coupling.target);
+        const id = `${coupling.control}-${coupling.target}`;
+        const existingValue = tempCouplingMap.get(key);
+        if (existingValue) {
+          tempCouplingMap.set(key, Object.assign({}, existingValue, { [id]: coupling }));
+        } else {
+          tempCouplingMap.set(key, { [id]: coupling });
+        }
 
-      const metricValue = getMetricValue(coupling, selectedMetric);
-      const color = getColorForMetric(
-        metricValue,
-        metricRange.min,
-        metricRange.max,
-        selectedMetric
-      );
+        const metricValue = getMetricValue(coupling, selectedMetric);
+        const color = getColorForMetric(
+          metricValue,
+          metricRange.min,
+          metricRange.max,
+          selectedMetric
+        );
 
-      return {
-        id: id,
-        source: coupling.control.toString(),
-        target: coupling.target.toString(),
-        color: color,
-        metricValue: metricValue,
-      };
-    });
+        return {
+          id: id,
+          source: coupling.control.toString(),
+          target: coupling.target.toString(),
+          color: color,
+          metricValue: metricValue,
+        };
+      })
+      .filter((e) => e !== null);
     return { edgeData, tempCouplingMap };
   } catch (err) {
     console.error('Failed to create edge data:', err);
@@ -581,24 +589,27 @@ export const TopologyView = ({ deviceInfo }: { deviceInfo: DeviceInfo }) => {
   }, [windowSize]);
 
   useEffect(() => {
+    const qubits = deviceInfo.qubits || [];
+    const couplings = deviceInfo.couplings || [];
+
     // Store data for median calculation
-    setQubitsData(deviceInfo.qubits);
-    setCouplingsData(deviceInfo.couplings);
+    setQubitsData(qubits);
+    setCouplingsData(couplings);
 
     // Calculate metric ranges
-    const qubitRange = calculateMetricRange(deviceInfo.qubits, selectedQubitMetric);
-    const couplingRange = calculateMetricRange(deviceInfo.couplings, selectedCouplingMetric);
+    const qubitRange = calculateMetricRange(qubits, selectedQubitMetric);
+    const couplingRange = calculateMetricRange(couplings, selectedCouplingMetric);
 
     setQubitMetricRange(qubitRange);
     setCouplingMetricRange(couplingRange);
 
     const { nodeData, tempNodeMap } = createNodeData(
-      deviceInfo.qubits,
+      qubits,
       selectedQubitMetric,
       qubitRange
     );
     const { edgeData, tempCouplingMap } = createEdgeData(
-      deviceInfo.couplings,
+      couplings,
       selectedCouplingMetric,
       couplingRange
     );

@@ -55,21 +55,21 @@ const METRICS: MetricConfig[] = [
   { key: 'rzx90_duration', label: 'Gate length (rzx90)', unit: 'ns', group: 'coupling' },
 ];
 
-const QUBIT_EXTRACTORS: Record<QubitMetricKey, (q: Qubit) => number> = {
-  readout_assignment_error: (q) => q.meas_error.readout_assignment_error,
-  prob_meas0_prep1: (q) => q.meas_error.prob_meas0_prep1,
-  prob_meas1_prep0: (q) => q.meas_error.prob_meas1_prep0,
-  t1: (q) => q.qubit_lifetime.t1,
-  t2: (q) => q.qubit_lifetime.t2,
+const QUBIT_EXTRACTORS: Record<QubitMetricKey, (q: Qubit) => number | undefined | null> = {
+  readout_assignment_error: (q) => q.meas_error?.readout_assignment_error,
+  prob_meas0_prep1: (q) => q.meas_error?.prob_meas0_prep1,
+  prob_meas1_prep0: (q) => q.meas_error?.prob_meas1_prep0,
+  t1: (q) => q.qubit_lifetime?.t1,
+  t2: (q) => q.qubit_lifetime?.t2,
   fidelity: (q) => q.fidelity,
-  sx_duration: (q) => q.gate_duration.sx,
-  x_duration: (q) => q.gate_duration.x,
-  rz_duration: (q) => q.gate_duration.rz,
+  sx_duration: (q) => q.gate_duration?.sx,
+  x_duration: (q) => q.gate_duration?.x,
+  rz_duration: (q) => q.gate_duration?.rz,
 };
 
-const COUPLING_EXTRACTORS: Record<CouplingMetricKey, (c: Coupling) => number> = {
-  coupling_error: (c) => 1 - c.fidelity,
-  rzx90_duration: (c) => c.gate_duration.rzx90,
+const COUPLING_EXTRACTORS: Record<CouplingMetricKey, (c: Coupling) => number | undefined | null> = {
+  coupling_error: (c) => (c.fidelity !== undefined && c.fidelity !== null ? 1 - c.fidelity : undefined),
+  rzx90_duration: (c) => c.gate_duration?.rzx90,
 };
 
 function getBarColor(value: number, min: number, max: number): string {
@@ -90,6 +90,9 @@ function formatSci(num: number): string {
 }
 
 function computeStats(values: number[]) {
+  if (values.length === 0) {
+    return { min: 0, max: 0, median: null };
+  }
   const min = Math.min(...values);
   const max = Math.max(...values);
   const sorted = [...values].sort((a, b) => a - b);
@@ -208,19 +211,31 @@ export default function ChartView({ deviceInfo }: QubitGraphViewProps) {
   const rawPoints: ChartPoint[] = useMemo(() => {
     if (currentMetric.group === 'coupling') {
       const extract = COUPLING_EXTRACTORS[metricKey as CouplingMetricKey];
-      return deviceInfo.couplings.map((c) => ({
-        id: `${c.control}-${c.target}`,
-        label: `Q${c.control}–Q${c.target}`,
-        value: extract(c),
-      }));
+      return (deviceInfo.couplings || [])
+        .map((c) => {
+          const val = extract(c);
+          if (val === undefined || val === null) return null;
+          return {
+            id: `${c.control}-${c.target}`,
+            label: `${c.control}–Q${c.target}`,
+            value: val,
+          };
+        })
+        .filter((p): p is ChartPoint => p !== null);
     }
 
     const extract = QUBIT_EXTRACTORS[metricKey as QubitMetricKey];
-    return deviceInfo.qubits.map((q) => ({
-      id: String(q.id),
-      label: `Q${q.id}`,
-      value: extract(q),
-    }));
+    return (deviceInfo.qubits || [])
+      .map((q) => {
+        const val = extract(q);
+        if (val === undefined || val === null) return null;
+        return {
+          id: String(q.id),
+          label: `${q.id}`,
+          value: val,
+        };
+      })
+      .filter((p): p is ChartPoint => p !== null);
   }, [deviceInfo, metricKey, currentMetric.group]);
 
   const chartData = useMemo(() => sortData(rawPoints, sortMode), [rawPoints, sortMode]);

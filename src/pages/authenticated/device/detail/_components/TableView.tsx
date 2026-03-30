@@ -9,59 +9,64 @@ interface QubitGraphViewProps {
 const COLUMNS: {
   key: string;
   label: string;
-  getValue: (q: Qubit) => number;
-  format: (v: number) => string;
+  getValue: (q: Qubit) => number | undefined | null;
+  format: (v: number | undefined | null) => string;
 }[] = [
   { key: 'id', label: 'Qubit', getValue: (q) => q.id, format: (v) => String(v) },
   {
     key: 't1',
     label: 'T1 (us)',
-    getValue: (q) => q.qubit_lifetime.t1,
-    format: (v) => String(v?.toFixed(3)),
+    getValue: (q) => q.qubit_lifetime?.t1,
+    format: (v) => (v !== undefined && v !== null ? String(v.toFixed(3)) : '-'),
   },
   {
     key: 't2',
     label: 'T2 (us)',
-    getValue: (q) => q.qubit_lifetime.t2,
-    format: (v) => String(v?.toFixed(3)),
+    getValue: (q) => q.qubit_lifetime?.t2,
+    format: (v) => (v !== undefined && v !== null ? String(v.toFixed(3)) : '-'),
   },
   {
     key: 'readout_assignment_error',
     label: 'Readout assignment error',
-    getValue: (q) => q.meas_error.readout_assignment_error,
-    format: (v) => String(v?.toFixed(3)),
+    getValue: (q) => q.meas_error?.readout_assignment_error,
+    format: (v) => (v !== undefined && v !== null ? String(v.toFixed(3)) : '-'),
   },
   {
     key: 'prob_meas0_prep1',
     label: 'Prob meas0 prep1',
-    getValue: (q) => q.meas_error.prob_meas0_prep1,
-    format: (v) => String(v?.toFixed(3)),
+    getValue: (q) => q.meas_error?.prob_meas0_prep1,
+    format: (v) => (v !== undefined && v !== null ? String(v.toFixed(3)) : '-'),
   },
   {
     key: 'prob_meas1_prep0',
     label: 'Prob meas1 prep0',
-    getValue: (q) => q.meas_error.prob_meas1_prep0,
-    format: (v) => String(v?.toFixed(3)),
+    getValue: (q) => q.meas_error?.prob_meas1_prep0,
+    format: (v) => (v !== undefined && v !== null ? String(v.toFixed(3)) : '-'),
   },
   {
     key: 'fidelity',
     label: 'Fidelity',
     getValue: (q) => q.fidelity,
-    format: (v) => v?.toFixed(3),
+    format: (v) => (v !== undefined && v !== null ? v.toFixed(3) : '-'),
   },
   {
     key: 'rz',
     label: 'RZ duration (ns)',
-    getValue: (q) => q.gate_duration.rz,
-    format: (v) => String(v),
+    getValue: (q) => q.gate_duration?.rz,
+    format: (v) => (v !== undefined && v !== null ? String(v) : '-'),
   },
   {
     key: 'sx',
     label: 'Gate SX (ns)',
-    getValue: (q) => q.gate_duration.sx,
-    format: (v) => String(v),
+    getValue: (q) => q.gate_duration?.sx,
+    format: (v) => (v !== undefined && v !== null ? String(v) : '-'),
   },
-  { key: 'x', label: 'Gate X (ns)', getValue: (q) => q.gate_duration.x, format: (v) => String(v) },
+  {
+    key: 'x',
+    label: 'Gate X (ns)',
+    getValue: (q) => q.gate_duration?.x,
+    format: (v) => (v !== undefined && v !== null ? String(v) : '-'),
+  },
 ];
 
 type SortDir = 'asc' | 'desc';
@@ -74,7 +79,7 @@ export default function TableView({ deviceInfo }: QubitGraphViewProps) {
   const { t } = useTranslation();
 
   const filtered = useMemo(() => {
-    let data = deviceInfo.qubits;
+    let data = deviceInfo.qubits || [];
 
     if (search.trim()) {
       data = data.filter((q) => String(q.id).includes(search.trim()));
@@ -84,7 +89,11 @@ export default function TableView({ deviceInfo }: QubitGraphViewProps) {
       const col = COLUMNS.find((c) => c.key === sortKey);
       if (col) {
         data = [...data].sort((a, b) => {
-          const diff = col.getValue(a) - col.getValue(b);
+          const valA = col.getValue(a);
+          const valB = col.getValue(b);
+          if (valA === undefined || valA === null) return 1;
+          if (valB === undefined || valB === null) return -1;
+          const diff = valA - valB;
           return sortDir === 'asc' ? diff : -diff;
         });
       }
