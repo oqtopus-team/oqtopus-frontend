@@ -108,11 +108,11 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
             }}
           >
             <Tab
-              label={t('device.detail.topology_info.map_view')}
+              label={t('device.detail.topology_info.topology_view')}
               value="map"
               disabled={device.deviceType !== 'QPU'}
             />
-            <Tab label={t('device.detail.topology_info.graph_view')} value="graph" />
+            <Tab label={t('device.detail.topology_info.chart_view')} value="graph" />
             <Tab label={t('device.detail.topology_info.table_view')} value="table" />
           </Tabs>
           <Spacer className="h-6" />

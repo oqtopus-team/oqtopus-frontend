@@ -36,8 +36,8 @@ export default {
     },
     link_txt: 'Information about each word',
     topology_info: {
-      map_view: 'Map View',
-      graph_view: 'Graph View',
+      topology_view: 'Topology View',
+      chart_view: 'Chart View',
       table_view: 'Table View',
       header: 'Topology information',
       property: 'Property',

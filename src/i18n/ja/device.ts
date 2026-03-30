@@ -36,8 +36,8 @@ export default {
     },
     link_txt: '各単語の情報について',
     topology_info: {
-      map_view: 'マップビュー',
-      graph_view: 'グラフビュー',
+      topology_view: 'トポロジービュー',
+      chart_view: 'チャートビュー',
       table_view: 'テーブルビュー',
       header: 'トポロジー情報',
       property: 'プロパティ',
