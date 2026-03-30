@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Qubit, DeviceInfo } from '@/domain/types/Device';
+import { useTranslation } from 'react-i18next';
 
 interface QubitGraphViewProps {
   deviceInfo: DeviceInfo;
@@ -70,6 +71,8 @@ export default function TableView({ deviceInfo }: QubitGraphViewProps) {
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>('asc');
 
+  const { t } = useTranslation();
+
   const filtered = useMemo(() => {
     let data = deviceInfo.qubits;
 
@@ -117,7 +120,7 @@ export default function TableView({ deviceInfo }: QubitGraphViewProps) {
         </svg>
         <input
           type="text"
-          placeholder="Search by qubit number"
+          placeholder={t('device.detail.qubits_info.table.search_bar')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full bg-transparent border-none outline-none text-sm text-base-content placeholder:text-base-content/40"
@@ -167,7 +170,7 @@ export default function TableView({ deviceInfo }: QubitGraphViewProps) {
             {filtered.length === 0 && (
               <tr>
                 <td colSpan={COLUMNS.length} className="px-4 py-8 text-center text-base-content/40">
-                  No qubits found
+                  {t('device.detail.qubits_info.table.no_qubits_found')}
                 </td>
               </tr>
             )}

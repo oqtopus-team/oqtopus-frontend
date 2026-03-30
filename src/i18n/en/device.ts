@@ -67,6 +67,8 @@ export default {
         frequency: 'Frequency',
         anharmonicity: 'Anharmonicity',
         error: 'read allocation error',
+        search_bar: 'Search by qubit number',
+        no_qubits_found: 'No qubits found',
       },
     },
   },

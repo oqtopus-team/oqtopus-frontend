@@ -67,6 +67,8 @@ export default {
         frequency: '頻度',
         anharmonicity: '非調和性',
         error: '読み出し割り当てエラー',
+        search_bar: '量子ビット数で検索',
+        no_qubits_found: '量子ビットは見つかりませんでした',
       },
     },
   },

@@ -183,7 +183,7 @@ function ChartTooltip({ active, payload }: any) {
   return (
     <div
       className="card text-light border-secondary shadow-lg"
-      style={{ minWidth: 140, background: 'rgb(var(--base-card)' }}
+      style={{ minWidth: 140, background: 'rgb(var(--base-card))' }}
     >
       <div className="card-body py-2 px-3">
         <div className="fw-semibold mb-1">{d.label}</div>

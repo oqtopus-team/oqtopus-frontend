@@ -38,7 +38,12 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
     setLoading(true);
     if (id != '') {
       getDevice(id)
-        .then((device) => setDevice(device))
+        .then((device) => {
+          setDevice(device);
+          if (device && device.deviceType !== 'QPU' && activeTab === 'map') {
+            setActiveTab('graph');
+          }
+        })
         .catch(() => setIsSuccess(false))
         .finally(() => {
           setIsSuccess(true);
@@ -46,6 +51,12 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
         });
     }
   }, [id]);
+
+  useEffect(() => {
+    if (device && device.deviceType !== 'QPU' && activeTab === 'map') {
+      setActiveTab('graph');
+    }
+  }, [device]);
 
   useEffect(() => {
     const parsedDeviceInfo = (() => {
@@ -61,7 +72,10 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
       }
     })();
 
-    if (!parsedDeviceInfo?.qubits || !parsedDeviceInfo?.couplings) return;
+    if (!parsedDeviceInfo?.qubits || !parsedDeviceInfo?.couplings) {
+      setParsedDeviceInfo(undefined);
+      return;
+    }
     setParsedDeviceInfo(parsedDeviceInfo);
   }, [device]);
 
@@ -102,7 +116,9 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
             <Tab label={t('device.detail.topology_info.table_view')} value="table" />
           </Tabs>
           <Spacer className="h-6" />
-          {activeTab === 'map' && <TopologyView deviceInfo={parsedDeviceInfo} />}
+          {activeTab === 'map' && device.deviceType === 'QPU' && (
+            <TopologyView deviceInfo={parsedDeviceInfo} />
+          )}
           {activeTab === 'graph' && <ChartView deviceInfo={parsedDeviceInfo} />}
           {activeTab === 'table' && <TableView deviceInfo={parsedDeviceInfo} />}
         </>
