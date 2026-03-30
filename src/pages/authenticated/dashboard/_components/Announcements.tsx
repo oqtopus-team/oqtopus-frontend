@@ -28,24 +28,20 @@ export const Announcements = (props: AnnouncementProps): React.ReactElement => {
 
   useEffect(() => {
     async function getAnnouncementsList() {
-      try {
-        const response = await getAnnouncements({
-          order: GetAnnouncementsListOrderEnum.Desc,
-          currentTime: new Date().toISOString(),
-        });
+      const response = await getAnnouncements({
+        order: GetAnnouncementsListOrderEnum.Desc,
+        currentTime: new Date().toISOString(),
+      });
 
-        if (!response) return;
+      if (!response) return;
 
-        setAllAnnouncementsList(response);
+      setAllAnnouncementsList(response);
 
-        const filteredList = response.filter((announcement) => announcement.publishable);
-        setFilteredAnnouncementsList(filteredList);
-      } catch (e) {
-        console.log(e);
-      }
+      const filteredList = response.filter((announcement) => announcement.publishable);
+      setFilteredAnnouncementsList(filteredList);
     }
 
-    getAnnouncementsList();
+    getAnnouncementsList().catch(() => {});
   }, []);
 
   return (

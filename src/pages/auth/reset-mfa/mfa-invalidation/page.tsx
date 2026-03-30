@@ -43,10 +43,6 @@ export default function ResetMFAPage() {
               toast(t('mfa_reset.alert.failure'), errorToastConfig);
             }
           })
-          .catch((error) => {
-            const errorMsg = error.message ?? t('common.errors.default');
-            toast(errorMsg, errorToastConfig);
-          })
           .finally(() => {
             setProcessingFalse();
           });

@@ -103,10 +103,6 @@ export function AccountTab({ allowDeletion = false }: AccountTabProps) {
 
       toast(t('settings.account.accountDeleted'), successToastConfig);
       await auth.signOut();
-    } catch (e: any) {
-      if (typeof e === 'object' && 'message' in e) {
-        toast(e.message ?? t('common.errors.default'), errorToastConfig);
-      }
     } finally {
       setDeleteDialogOpen(false);
     }

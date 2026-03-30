@@ -18,7 +18,7 @@ import { QuantumGate, supportedGates } from './gates';
 import ObservableComposer from './_components/ObservableComposer';
 import { Observable } from './observable';
 import { errorToastConfig, successToastConfig } from '@/config/toast';
-import "./page.css";
+import './page.css';
 
 const renderOperator = (obs: Observable): JobsOperatorItem[] => {
   return [...new Array(obs.operators.length)].map((_, i) => {
@@ -72,9 +72,12 @@ export default function Page() {
 
   const fetchDevices = async () => {
     setBusy(true);
-    const res = await getDevices();
-    setDevices(res);
-    setBusy(false);
+    try {
+      const res = await getDevices();
+      setDevices(res);
+    } finally {
+      setBusy(false);
+    }
   };
 
   const [qasmFeatures, setQasmFeatures] = useState<QasmFeatures>({});
@@ -183,8 +186,6 @@ export default function Page() {
       const jobId = await jobApi.submitJob(req);
       toast(t('job.form.toast.success'), successToastConfig);
       setJobId(jobId);
-    } catch (e) {
-      toast(t('job.form.toast.error'), errorToastConfig);
     } finally {
       setBusy(false);
     }

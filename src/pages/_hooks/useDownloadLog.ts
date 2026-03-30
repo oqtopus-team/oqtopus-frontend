@@ -1,4 +1,3 @@
-import { useAuth } from '@/auth/hook';
 import { useJobAPI } from '@/backend/hook';
 import { toast } from 'react-toastify';
 import { errorToastConfig } from '@/config/toast';
@@ -35,7 +34,6 @@ export const useDownloadLog = () => {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
-      console.error(error);
       toast('Failed to download log', errorToastConfig);
     }
   };

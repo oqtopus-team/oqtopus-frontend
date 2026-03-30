@@ -97,7 +97,7 @@ export default function JobListPage() {
         // And we proceed to the next page
         setPage(page + 1);
       })
-      .catch((e) => console.error(e))
+      .catch(() => {})
       .finally(() => {
         setLoading(false);
       });
@@ -111,8 +111,8 @@ export default function JobListPage() {
     setHasMore(false);
     setLoading(true);
 
-    for (let i = 0; i < maxPage; i++) {
-      try {
+    try {
+      for (let i = 0; i < maxPage; i++) {
         const jobsForPage = await getLatestJobs(currentPage, PAGE_SIZE, params);
         jobs.push(...jobsForPage);
 
@@ -120,15 +120,14 @@ export default function JobListPage() {
 
         hasMore = jobsForPage.length === PAGE_SIZE;
         if (!hasMore) break;
-      } catch (e: any) {
-        console.error(e);
       }
-    }
 
-    setPage(currentPage);
-    setJobs(jobs);
-    setHasMore(hasMore);
-    setLoading(false);
+      setPage(currentPage);
+      setJobs(jobs);
+      setHasMore(hasMore);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updateFilterParametersIfChanged = (): boolean => {
@@ -191,13 +190,14 @@ export default function JobListPage() {
     for (const job of selectedJobs) {
       try {
         await deleteJob(job);
-      } catch (error: any) {
-        console.error(error);
+      } catch (e) {
+        // ignore error for each job to continue the loop
       }
     }
 
     reloadJobs();
     setBulkDeleteInProgress(false);
+    setSelectedJobs([]);
   };
 
   const cancelSelectedJobs = async () => {
@@ -208,13 +208,14 @@ export default function JobListPage() {
     for (const job of selectedJobs) {
       try {
         await cancelJob(job);
-      } catch (error: any) {
-        console.error(error);
+      } catch (e) {
+        // ignore error for each job to continue the loop
       }
     }
 
     reloadJobs();
     setBulkCancelInProgress(false);
+    setSelectedJobs([]);
   };
 
   const areAllJobsSelected = () => {

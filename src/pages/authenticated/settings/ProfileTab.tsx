@@ -48,20 +48,16 @@ export function ProfileTab({ editableFields = [], visibleFields }: ProfileTabPro
   const [isLoading, setIsLoading] = useState(true);
 
   const onSubmit = async (data: ProfileFormData) => {
-    try {
-      // Only send editable fields
-      const updateData: ProfileFormData = {};
-      if (editableFields.includes('name')) {
-        updateData.name = data.name;
-      }
-      if (editableFields.includes('organization')) {
-        updateData.organization = data.organization;
-      }
-      await updateCurrentUser(updateData);
-      toast(t('settings.profile.saved'), successToastConfig);
-    } catch (e) {
-      toast(t('common.errors.default'), errorToastConfig);
+    // Only send editable fields
+    const updateData: ProfileFormData = {};
+    if (editableFields.includes('name')) {
+      updateData.name = data.name;
     }
+    if (editableFields.includes('organization')) {
+      updateData.organization = data.organization;
+    }
+    await updateCurrentUser(updateData);
+    toast(t('settings.profile.saved'), successToastConfig);
   };
 
   useEffect(() => {

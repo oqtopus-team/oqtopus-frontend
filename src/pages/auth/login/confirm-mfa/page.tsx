@@ -42,10 +42,6 @@ export default function ConfirmMFAPage() {
             toast(result.message, errorToastConfig);
             setProcessingFalse();
           })
-          .catch((error) => {
-            const errorMsg = error.message ?? t('common.errors.default');
-            toast(errorMsg, errorToastConfig);
-          });
       };
     }
   );

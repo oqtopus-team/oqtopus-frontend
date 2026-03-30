@@ -11,6 +11,8 @@ import { FormTitle } from '../../_components/FormTitle';
 import { useFormProcessor } from '@/pages/_hooks/form';
 import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
+import { toast } from 'react-toastify';
+import { errorToastConfig } from '@/config/toast';
 
 interface FormInput {
   totpCode: string;
@@ -33,7 +35,7 @@ export default function SetupMFAPage() {
 
   useEffect(() => {
     if (!username || !accessToken) {
-      alert(t('mfa.form.error_message.unexpected'));
+      toast(t('mfa.form.error_message.unexpected'), errorToastConfig);
       navigate('/login', { replace: true });
     }
   }, [username, accessToken, t, navigate]);
@@ -47,7 +49,7 @@ export default function SetupMFAPage() {
       setQRLoading(true);
     } else {
       setQRLoading(false);
-      console.error('No secret provided in location state');
+      toast(t('mfa.errors.no_secret'), errorToastConfig);
     }
     auth.setQRCodeFromSecret(username, secret);
   }, []);
@@ -63,7 +65,7 @@ export default function SetupMFAPage() {
               navigate('/dashboard');
               return;
             }
-            alert(result.message);
+            toast(t('mfa.form.error_message.unexpected'), errorToastConfig);
             setProcessingFalse();
           })
           .catch((error) => {
