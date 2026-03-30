@@ -36,11 +36,9 @@ import { setupInterceptors } from '@/api/api-interceptor-error';
 
 import './style.css';
 
-export const App: React.FunctionComponent = () => {
-  useEffect(() => {
-    setupInterceptors();
-  }, []);
+setupInterceptors();
 
+export const App: React.FunctionComponent = () => {
   return (
     <>
       <BrowserRouter>

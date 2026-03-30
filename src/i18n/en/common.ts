@@ -10,5 +10,6 @@ export default {
   custom: 'Custom',
   errors: {
     default: 'Something went wrong',
+    unknown_error: 'Something went wrong',
   },
 };

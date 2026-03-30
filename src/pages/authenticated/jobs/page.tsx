@@ -187,15 +187,17 @@ export default function JobListPage() {
 
     setBulkDeleteInProgress(true);
 
-    try {
-      for (const job of selectedJobs) {
+    for (const job of selectedJobs) {
+      try {
         await deleteJob(job);
+      } catch (e) {
+        // ignore error for each job to continue the loop
       }
-    } catch (e) {
-    } finally {
-      reloadJobs();
-      setBulkDeleteInProgress(false);
     }
+
+    reloadJobs();
+    setBulkDeleteInProgress(false);
+    setSelectedJobs([]);
   };
 
   const cancelSelectedJobs = async () => {
@@ -203,15 +205,17 @@ export default function JobListPage() {
 
     setBulkCancelInProgress(true);
 
-    try {
-      for (const job of selectedJobs) {
+    for (const job of selectedJobs) {
+      try {
         await cancelJob(job);
+      } catch (e) {
+        // ignore error for each job to continue the loop
       }
-    } catch (e) {
-    } finally {
-      reloadJobs();
-      setBulkCancelInProgress(false);
     }
+
+    reloadJobs();
+    setBulkCancelInProgress(false);
+    setSelectedJobs([]);
   };
 
   const areAllJobsSelected = () => {

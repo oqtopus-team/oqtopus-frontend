@@ -34,7 +34,7 @@ describe('setupInterceptors', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     setupInterceptors();
-    
+
     // Get the interceptor functions passed to axios.interceptors.response.use
     const mockUse = globalAxios.interceptors.response.use as any;
     [responseInterceptorSuccess, responseInterceptorError] = mockUse.mock.calls[0];
@@ -72,8 +72,8 @@ describe('setupInterceptors', () => {
       // Expected rejection
     }
 
-    expect(i18next.t).toHaveBeenCalledWith('common.unknown_error');
-    expect(toast).toHaveBeenCalledWith('common.unknown_error', errorToastConfig);
+    expect(i18next.t).toHaveBeenCalledWith('common.errors.unknown_error');
+    expect(toast).toHaveBeenCalledWith('common.errors.unknown_error', errorToastConfig);
   });
 
   it('should call toast with generic message if response object does not exist', async () => {
@@ -85,13 +85,13 @@ describe('setupInterceptors', () => {
       // Expected rejection
     }
 
-    expect(i18next.t).toHaveBeenCalledWith('common.unknown_error');
-    expect(toast).toHaveBeenCalledWith('common.unknown_error', errorToastConfig);
+    expect(i18next.t).toHaveBeenCalledWith('common.errors.unknown_error');
+    expect(toast).toHaveBeenCalledWith('common.errors.unknown_error', errorToastConfig);
   });
 
   it('should return Promise.reject with the error', async () => {
     const error = new Error('Some error');
-    
+
     await expect(responseInterceptorError(error)).rejects.toThrow('Some error');
   });
 

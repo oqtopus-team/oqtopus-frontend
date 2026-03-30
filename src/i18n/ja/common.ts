@@ -10,5 +10,6 @@ export default {
   custom: 'カスタム',
   errors: {
     common: '問題が発生しました',
+    unknown_error: '問題が発生しました',
   },
 };
