@@ -9,6 +9,7 @@ import useWindowSize from '@/pages/_hooks/UseWindowSize';
 import 'simplebar-react/dist/simplebar.min.css';
 import { Button } from '@/pages/_components/Button';
 import { Select } from '@/pages/_components/Select';
+import { DeviceInfo } from '@/domain/types/Device';
 
 // Types for metric selection
 type QubitMetric = 'readout_error' | 't1' | 't2' | 'single_qubit_gate_error';
@@ -353,25 +354,28 @@ const createNodeData = (
 ): { nodeData: any[]; tempNodeMap: Map<string, object> } => {
   try {
     const tempNodeMap = new Map<string, object>();
-    const nodeData = qubits.map((qubit: any) => {
-      tempNodeMap.set(qubit.id.toString(), qubit);
-      const metricValue = getMetricValue(qubit, selectedMetric);
-      const color = getColorForMetric(
-        metricValue,
-        metricRange.min,
-        metricRange.max,
-        selectedMetric
-      );
+    const nodeData = qubits
+      .map((qubit: any) => {
+        if (!qubit || qubit.id === undefined) return null;
+        tempNodeMap.set(qubit.id.toString(), qubit);
+        const metricValue = getMetricValue(qubit, selectedMetric);
+        const color = getColorForMetric(
+          metricValue,
+          metricRange.min,
+          metricRange.max,
+          selectedMetric
+        );
 
-      return {
-        id: qubit.id.toString(),
-        label: `${qubit.id}`,
-        fx: scalePosition(qubit.position.x),
-        fy: scalePosition(qubit.position.y * -1), // multiply by -1 to flip the y-axis
-        color: color,
-        metricValue: metricValue,
-      };
-    });
+        return {
+          id: qubit.id.toString(),
+          label: `${qubit.id}`,
+          fx: qubit.position?.x !== undefined ? scalePosition(qubit.position.x) : undefined,
+          fy: qubit.position?.y !== undefined ? scalePosition(qubit.position.y * -1) : undefined, // multiply by -1 to flip the y-axis
+          color: color,
+          metricValue: metricValue,
+        };
+      })
+      .filter((n) => n !== null && n.fx !== undefined && n.fy !== undefined);
     return { nodeData, tempNodeMap };
   } catch (err) {
     console.error('Failed to create node data:', err);
@@ -386,32 +390,37 @@ const createEdgeData = (
 ): { edgeData: LinkObject[]; tempCouplingMap: Map<string, object> } => {
   try {
     const tempCouplingMap = new Map<string, object>();
-    const edgeData: LinkObject[] = couplings.map((coupling: any) => {
-      const key = createCouplingMapKey(coupling.control, coupling.target);
-      const id = `${coupling.control}-${coupling.target}`;
-      const existingValue = tempCouplingMap.get(key);
-      if (existingValue) {
-        tempCouplingMap.set(key, Object.assign({}, existingValue, { [id]: coupling }));
-      } else {
-        tempCouplingMap.set(key, { [id]: coupling });
-      }
+    const edgeData: LinkObject[] = couplings
+      .map((coupling: any) => {
+        if (!coupling || coupling.control === undefined || coupling.target === undefined) {
+          return null;
+        }
+        const key = createCouplingMapKey(coupling.control, coupling.target);
+        const id = `${coupling.control}-${coupling.target}`;
+        const existingValue = tempCouplingMap.get(key);
+        if (existingValue) {
+          tempCouplingMap.set(key, Object.assign({}, existingValue, { [id]: coupling }));
+        } else {
+          tempCouplingMap.set(key, { [id]: coupling });
+        }
 
-      const metricValue = getMetricValue(coupling, selectedMetric);
-      const color = getColorForMetric(
-        metricValue,
-        metricRange.min,
-        metricRange.max,
-        selectedMetric
-      );
+        const metricValue = getMetricValue(coupling, selectedMetric);
+        const color = getColorForMetric(
+          metricValue,
+          metricRange.min,
+          metricRange.max,
+          selectedMetric
+        );
 
-      return {
-        id: id,
-        source: coupling.control.toString(),
-        target: coupling.target.toString(),
-        color: color,
-        metricValue: metricValue,
-      };
-    });
+        return {
+          id: id,
+          source: coupling.control.toString(),
+          target: coupling.target.toString(),
+          color: color,
+          metricValue: metricValue,
+        };
+      })
+      .filter((e) => e !== null);
     return { edgeData, tempCouplingMap };
   } catch (err) {
     console.error('Failed to create edge data:', err);
@@ -422,7 +431,7 @@ const createEdgeData = (
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 3;
 
-export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ deviceInfo }) => {
+export const TopologyView = ({ deviceInfo }: { deviceInfo: DeviceInfo }) => {
   const { t } = useTranslation();
   const [isDarkTheme, setIsDarkTheme] = useState<boolean>(() => {
     return typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
@@ -438,7 +447,6 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
   const [nodeMap, setNodeMap] = useState<Map<string, object>>(new Map<string, object>());
   const [couplingMap, setCouplingMap] = useState<Map<string, object>>(new Map<string, object>());
   const [hoveredInfo, setStrHoveredInfo] = useState<object>({});
-  const [isValidDeviceInfo, setIsValidDeviceInfo] = useState<boolean>(true);
   const [hoveredNodeId, setHoveredNodeId] = useState<string | number | null>(null);
   const [hoveredLinkId, setHoveredLinkId] = useState<string | null>(null);
 
@@ -581,59 +589,41 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
   }, [windowSize]);
 
   useEffect(() => {
-    try {
-      const parsedDeviceInfo = (() => {
-        try {
-          if (!deviceInfo) {
-            setIsValidDeviceInfo(false);
-            return {};
-          }
-          return JSON.parse(deviceInfo);
-        } catch (err) {
-          setIsValidDeviceInfo(false);
-          console.error('Failed to parse device info:', err);
-          return {};
-        }
-      })();
+    const qubits = deviceInfo.qubits || [];
+    const couplings = deviceInfo.couplings || [];
 
-      if (!parsedDeviceInfo.qubits || !parsedDeviceInfo.couplings) return;
+    // Store data for median calculation
+    setQubitsData(qubits);
+    setCouplingsData(couplings);
 
-      // Store data for median calculation
-      setQubitsData(parsedDeviceInfo.qubits);
-      setCouplingsData(parsedDeviceInfo.couplings);
+    // Calculate metric ranges
+    const qubitRange = calculateMetricRange(qubits, selectedQubitMetric);
+    const couplingRange = calculateMetricRange(couplings, selectedCouplingMetric);
 
-      // Calculate metric ranges
-      const qubitRange = calculateMetricRange(parsedDeviceInfo.qubits, selectedQubitMetric);
-      const couplingRange = calculateMetricRange(
-        parsedDeviceInfo.couplings,
-        selectedCouplingMetric
-      );
+    setQubitMetricRange(qubitRange);
+    setCouplingMetricRange(couplingRange);
 
-      setQubitMetricRange(qubitRange);
-      setCouplingMetricRange(couplingRange);
+    const { nodeData, tempNodeMap } = createNodeData(
+      qubits,
+      selectedQubitMetric,
+      qubitRange
+    );
 
-      const { nodeData, tempNodeMap } = createNodeData(
-        parsedDeviceInfo.qubits,
-        selectedQubitMetric,
-        qubitRange
-      );
-      const { edgeData, tempCouplingMap } = createEdgeData(
-        parsedDeviceInfo.couplings,
-        selectedCouplingMetric,
-        couplingRange
-      );
+    const validNodeIds = new Set(nodeData.map((n) => n.id));
 
-      if (nodeData.length === 0) {
-        setIsValidDeviceInfo(false);
-      }
+    const { edgeData, tempCouplingMap } = createEdgeData(
+      couplings,
+      selectedCouplingMetric,
+      couplingRange
+    );
 
-      setTopologyData({ nodes: normalizePositions(nodeData), links: edgeData });
-      setNodeMap(tempNodeMap);
-      setCouplingMap(tempCouplingMap);
-    } catch (err) {
-      setIsValidDeviceInfo(false);
-      console.error('Failed to update topology data:', err);
-    }
+    const validEdgeData = edgeData.filter(
+      (e) => validNodeIds.has(e.source as string) && validNodeIds.has(e.target as string)
+    );
+
+    setTopologyData({ nodes: normalizePositions(nodeData), links: validEdgeData });
+    setNodeMap(tempNodeMap);
+    setCouplingMap(tempCouplingMap);
   }, [deviceInfo, selectedQubitMetric, selectedCouplingMetric]);
 
   useEffect(() => {
@@ -646,14 +636,6 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
 
     return () => clearTimeout(timeout);
   }, []);
-
-  if (!isValidDeviceInfo) {
-    return (
-      <p className={clsx('text-error', 'text-xl')}>
-        {t('device.detail.topology_info.invalid_device_info')}
-      </p>
-    );
-  }
 
   return (
     <div className={clsx('flex', 'grid', 'grid-cols-[1.3fr_2fr]', 'gap-5')}>
