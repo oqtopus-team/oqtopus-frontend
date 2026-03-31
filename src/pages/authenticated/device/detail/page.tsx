@@ -59,7 +59,7 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
   }, [device]);
 
   useEffect(() => {
-    const parsedDeviceInfo = (() => {
+    const parsed = (() => {
       try {
         if (!device?.deviceInfo) {
           return;
@@ -72,11 +72,11 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
       }
     })();
 
-    if (!parsedDeviceInfo?.qubits || !parsedDeviceInfo?.couplings) {
+    if (parsed && (!parsed.qubits || !parsed.couplings)) {
       setParsedDeviceInfo(undefined);
       return;
     }
-    setParsedDeviceInfo(parsedDeviceInfo);
+    setParsedDeviceInfo(parsed);
   }, [device]);
 
   if (loading) {
@@ -86,13 +86,17 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
     return <NotFoundView />;
   }
 
+  const hasDeviceInfo = !!parsedDeviceInfo;
+  const isQpu = device.deviceType === 'QPU';
+  const showDeviceInfoError = isQpu && !hasDeviceInfo && !!device.deviceInfo;
+
   return (
     <>
       <Title />
       <Spacer className="h-6" />
       <DeviceDetailBasicInfo {...device} />
       <Spacer className="h-6" />
-      {parsedDeviceInfo ? (
+      {hasDeviceInfo ? (
         <>
           <Tabs
             value={activeTab}
@@ -110,22 +114,22 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
             <Tab
               label={t('device.detail.topology_info.topology_view')}
               value="map"
-              disabled={device.deviceType !== 'QPU'}
+              disabled={!isQpu}
             />
             <Tab label={t('device.detail.topology_info.chart_view')} value="graph" />
             <Tab label={t('device.detail.topology_info.table_view')} value="table" />
           </Tabs>
           <Spacer className="h-6" />
-          {activeTab === 'map' && device.deviceType === 'QPU' && (
-            <TopologyView deviceInfo={parsedDeviceInfo} />
-          )}
+          {activeTab === 'map' && isQpu && <TopologyView deviceInfo={parsedDeviceInfo} />}
           {activeTab === 'graph' && <ChartView deviceInfo={parsedDeviceInfo} />}
           {activeTab === 'table' && <TableView deviceInfo={parsedDeviceInfo} />}
         </>
       ) : (
-        <p className={clsx('text-error', 'text-xl')}>
-          {t('device.detail.topology_info.invalid_device_info')}
-        </p>
+        showDeviceInfoError && (
+          <p className={clsx('text-error', 'text-xl')}>
+            {t('device.detail.topology_info.invalid_device_info')}
+          </p>
+        )
       )}
     </>
   );

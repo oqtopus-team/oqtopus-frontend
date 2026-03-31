@@ -29,7 +29,7 @@ interface MetricConfig {
 interface ChartPoint {
   id: string;
   label: string;
-  value: number;
+  value: number | null;
 }
 
 type SortMode = 'valueDesc' | 'valueAsc' | 'idAsc' | 'idDesc';
@@ -72,7 +72,8 @@ const COUPLING_EXTRACTORS: Record<CouplingMetricKey, (c: Coupling) => number | u
   rzx90_duration: (c) => c.gate_duration?.rzx90,
 };
 
-function getBarColor(value: number, min: number, max: number): string {
+function getBarColor(value: number | null, min: number, max: number): string {
+  if (value === null) return '#555a72';
   const t = max === min ? 0 : (value - min) / (max - min);
   const r = Math.round(80 + t * 175);
   const g = Math.round(80 + t * 100);
@@ -105,9 +106,17 @@ function sortData(data: ChartPoint[], mode: SortMode): ChartPoint[] {
   const copy = [...data];
   switch (mode) {
     case 'valueDesc':
-      return copy.sort((a, b) => b.value - a.value);
+      return copy.sort((a, b) => {
+        if (a.value === null) return 1;
+        if (b.value === null) return -1;
+        return b.value - a.value;
+      });
     case 'valueAsc':
-      return copy.sort((a, b) => a.value - b.value);
+      return copy.sort((a, b) => {
+        if (a.value === null) return 1;
+        if (b.value === null) return -1;
+        return a.value - b.value;
+      });
     case 'idAsc':
       return copy.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
     case 'idDesc':
@@ -190,7 +199,7 @@ function ChartTooltip({ active, payload }: any) {
     >
       <div className="card-body py-2 px-3">
         <div className="fw-semibold mb-1">{d.label}</div>
-        <small>{formatSci(d.value)}</small>
+        <small>{d.value !== null ? formatSci(d.value) : '-'}</small>
       </div>
     </div>
   );
@@ -211,36 +220,27 @@ export default function ChartView({ deviceInfo }: QubitGraphViewProps) {
   const rawPoints: ChartPoint[] = useMemo(() => {
     if (currentMetric.group === 'coupling') {
       const extract = COUPLING_EXTRACTORS[metricKey as CouplingMetricKey];
-      return (deviceInfo.couplings || [])
-        .map((c) => {
-          const val = extract(c);
-          if (val === undefined || val === null) return null;
-          return {
-            id: `${c.control}-${c.target}`,
-            label: `${c.control}–Q${c.target}`,
-            value: val,
-          };
-        })
-        .filter((p): p is ChartPoint => p !== null);
+      return (deviceInfo.couplings || []).map((c) => ({
+        id: `${c.control}-${c.target}`,
+        label: `${c.control}–Q${c.target}`,
+        value: extract(c) ?? null,
+      }));
     }
 
     const extract = QUBIT_EXTRACTORS[metricKey as QubitMetricKey];
-    return (deviceInfo.qubits || [])
-      .map((q) => {
-        const val = extract(q);
-        if (val === undefined || val === null) return null;
-        return {
-          id: String(q.id),
-          label: `${q.id}`,
-          value: val,
-        };
-      })
-      .filter((p): p is ChartPoint => p !== null);
+    return (deviceInfo.qubits || []).map((q) => ({
+      id: String(q.id),
+      label: `${q.id}`,
+      value: extract(q) ?? null,
+    }));
   }, [deviceInfo, metricKey, currentMetric.group]);
 
   const chartData = useMemo(() => sortData(rawPoints, sortMode), [rawPoints, sortMode]);
 
-  const stats = useMemo(() => computeStats(rawPoints.map((p) => p.value)), [rawPoints]);
+  const stats = useMemo(
+    () => computeStats(rawPoints.map((p) => p.value).filter((v): v is number => v !== null)),
+    [rawPoints]
+  );
 
   const yAxisLabel = currentMetric.unit
     ? `${currentMetric.label} (${currentMetric.unit})`

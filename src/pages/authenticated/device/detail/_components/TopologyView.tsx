@@ -369,13 +369,13 @@ const createNodeData = (
         return {
           id: qubit.id.toString(),
           label: `${qubit.id}`,
-          fx: qubit.position?.x !== undefined ? scalePosition(qubit.position.x) : 0,
-          fy: qubit.position?.y !== undefined ? scalePosition(qubit.position.y * -1) : 0, // multiply by -1 to flip the y-axis
+          fx: qubit.position?.x !== undefined ? scalePosition(qubit.position.x) : undefined,
+          fy: qubit.position?.y !== undefined ? scalePosition(qubit.position.y * -1) : undefined, // multiply by -1 to flip the y-axis
           color: color,
           metricValue: metricValue,
         };
       })
-      .filter((n) => n !== null);
+      .filter((n) => n !== null && n.fx !== undefined && n.fy !== undefined);
     return { nodeData, tempNodeMap };
   } catch (err) {
     console.error('Failed to create node data:', err);
@@ -608,13 +608,20 @@ export const TopologyView = ({ deviceInfo }: { deviceInfo: DeviceInfo }) => {
       selectedQubitMetric,
       qubitRange
     );
+
+    const validNodeIds = new Set(nodeData.map((n) => n.id));
+
     const { edgeData, tempCouplingMap } = createEdgeData(
       couplings,
       selectedCouplingMetric,
       couplingRange
     );
 
-    setTopologyData({ nodes: normalizePositions(nodeData), links: edgeData });
+    const validEdgeData = edgeData.filter(
+      (e) => validNodeIds.has(e.source as string) && validNodeIds.has(e.target as string)
+    );
+
+    setTopologyData({ nodes: normalizePositions(nodeData), links: validEdgeData });
     setNodeMap(tempNodeMap);
     setCouplingMap(tempCouplingMap);
   }, [deviceInfo, selectedQubitMetric, selectedCouplingMetric]);
