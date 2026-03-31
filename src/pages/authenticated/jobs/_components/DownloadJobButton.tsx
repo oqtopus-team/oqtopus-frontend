@@ -18,7 +18,7 @@ type DownloadJobButtonProps =
 
 export default function DownloadJobButton({ kind, job, style }: DownloadJobButtonProps) {
   const [downloadInProgress, setDownloadInProgress] = useState(false);
-  const { retrieveJobFiles } = useJobAPI();
+  const { getJob, retrieveJobFiles } = useJobAPI();
 
   // we provide job either with or without S3 data loaded.
   // In the latter case, we have to retrieve S3 data before downloading the job.
@@ -33,10 +33,16 @@ export default function DownloadJobButton({ kind, job, style }: DownloadJobButto
         case 'jobWithS3Data':
           jobToDownload = job;
           break;
-        case 'jobWithoutS3Data':
-          const jobS3Data = await retrieveJobFiles(job.jobInfo);
-          jobToDownload = { ...job, ...jobS3Data };
+        case 'jobWithoutS3Data': {
+          const completeJob = await getJob(job.id);
+          if (!completeJob) {
+            throw new Error(`failed to retrieve job details for ${job.id}`);
+          }
+
+          const jobS3Data = await retrieveJobFiles(completeJob.jobInfo);
+          jobToDownload = { ...completeJob, ...jobS3Data };
           break;
+        }
       }
 
       const jobData: JobFileData = {
