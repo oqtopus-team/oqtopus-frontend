@@ -190,6 +190,7 @@ function GradientLegend({
 }
 
 function ChartTooltip({ active, payload }: any) {
+  const { t } = useTranslation();
   if (!active || !payload?.length) return null;
   const d = payload[0].payload as ChartPoint;
   return (
@@ -199,7 +200,7 @@ function ChartTooltip({ active, payload }: any) {
     >
       <div className="card-body py-2 px-3">
         <div className="fw-semibold mb-1">{d.label}</div>
-        <small>{d.value !== null ? formatSci(d.value) : '-'}</small>
+        <small>{d.value !== null ? formatSci(d.value) : t('device.detail.topology_info.missing')}</small>
       </div>
     </div>
   );
@@ -235,12 +236,19 @@ export default function ChartView({ deviceInfo }: QubitGraphViewProps) {
     }));
   }, [deviceInfo, metricKey, currentMetric.group]);
 
-  const chartData = useMemo(() => sortData(rawPoints, sortMode), [rawPoints, sortMode]);
-
   const stats = useMemo(
     () => computeStats(rawPoints.map((p) => p.value).filter((v): v is number => v !== null)),
     [rawPoints]
   );
+
+  const chartData = useMemo(() => {
+    const sorted = sortData(rawPoints, sortMode);
+    // Provide a small visual height for null values so they can be hovered to show the tooltip
+    return sorted.map((p) => ({
+      ...p,
+      displayValue: p.value !== null ? p.value : stats.max * 0.01,
+    }));
+  }, [rawPoints, sortMode, stats.max]);
 
   const yAxisLabel = currentMetric.unit
     ? `${currentMetric.label} (${currentMetric.unit})`
@@ -340,11 +348,11 @@ export default function ChartView({ deviceInfo }: QubitGraphViewProps) {
           />
           <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(109, 123, 255, 0.08)' }} />
           <Bar
-            dataKey="value"
+            dataKey="displayValue"
             radius={[2, 2, 0, 0]}
             maxBarSize={12}
             shape={(props: any) => {
-              const { x, y, width, height, value } = props;
+              const { x, y, width, height, payload } = props;
               return (
                 <rect
                   x={x}
@@ -353,7 +361,7 @@ export default function ChartView({ deviceInfo }: QubitGraphViewProps) {
                   height={height}
                   rx={2}
                   ry={2}
-                  fill={getBarColor(value, stats.min, stats.max)}
+                  fill={getBarColor(payload.value, stats.min, stats.max)}
                 />
               );
             }}

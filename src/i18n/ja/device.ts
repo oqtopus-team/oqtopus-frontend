@@ -59,6 +59,7 @@ export default {
         idAsc: '量子ビット: 0 → N',
         idDesc: '量子ビット: N → 0',
       },
+      missing: '欠損',
     },
     qubits_info: {
       header: '量子ビットごとの値',

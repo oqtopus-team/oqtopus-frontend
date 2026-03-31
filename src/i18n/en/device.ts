@@ -59,6 +59,7 @@ export default {
         idAsc: 'Qubit: 0 → N',
         idDesc: 'Qubit: N → 0',
       },
+      missing: 'Missing',
     },
     qubits_info: {
       header: 'Value per qubit',
