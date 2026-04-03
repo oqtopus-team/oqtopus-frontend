@@ -1,4 +1,4 @@
-import { JobsOperatorItem } from '@/api/generated';
+import { JobsS3OperatorItem } from '@/api/generated';
 import { ComposerGate } from './composer';
 import { parsePauliString } from './convert';
 import { roundNumber } from './misc';
@@ -18,7 +18,7 @@ export function filterEmptyRowsAfterLastGate(circuit: ComposerGate[][]): Compose
 }
 
 export const renderObservableExprComponent = (
-  observable: JobsOperatorItem[],
+  observable: JobsS3OperatorItem[],
   qubitNumber: number,
 ): string[] => {
   return observable.flatMap(({ pauli, coeff }) => {
@@ -32,11 +32,11 @@ export const renderObservableExprComponent = (
   });
 }
 
-export const isZeroOperator = (operator: JobsOperatorItem[]): boolean => {
+export const isZeroOperator = (operator: JobsS3OperatorItem[]): boolean => {
   return operator.length <= 0;
 }
 
-export const mkZeroOperator = (qubitNumber: number): JobsOperatorItem[] => {
+export const mkZeroOperator = (qubitNumber: number): JobsS3OperatorItem[] => {
   return [{
     coeff: 0,
     pauli: [...new Array(qubitNumber)].map((_, i) => `I${i}`).join(""),
@@ -44,7 +44,7 @@ export const mkZeroOperator = (qubitNumber: number): JobsOperatorItem[] => {
 }
 
 export const renderObservableExpr = (
-  observable: JobsOperatorItem[],
+  observable: JobsS3OperatorItem[],
   qubitNumber: number,
   combinator: string = '\\ +\\ '
 ): string => {

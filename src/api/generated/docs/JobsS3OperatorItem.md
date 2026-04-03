@@ -1,4 +1,4 @@
-# JobsOperatorItem
+# JobsS3OperatorItem
 
 
 ## Properties
@@ -11,9 +11,9 @@ Name | Type | Description | Notes
 ## Example
 
 ```typescript
-import { JobsOperatorItem } from './api';
+import { JobsS3OperatorItem } from './api';
 
-const instance: JobsOperatorItem = {
+const instance: JobsS3OperatorItem = {
     pauli,
     coeff,
 };

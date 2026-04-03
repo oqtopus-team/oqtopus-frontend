@@ -7,7 +7,7 @@ import * as P from "./parser/observable/parser";
 import { QuantumGate } from "./gates";
 import { QuantumCircuit } from "./circuit";
 import { ComposerGate } from "./composer";
-import { JobsOperatorItem } from "@/api/generated";
+import { JobsS3OperatorItem } from "@/api/generated";
 
 export const convertCircuit = (circuit: QuantumCircuit, qubitNumber: number): QulacsWasmClientType.CircuitInfo => {
   const maxDepth = circuit[0]?.length ?? 0;
@@ -23,7 +23,7 @@ export const convertCircuit = (circuit: QuantumCircuit, qubitNumber: number): Qu
 };
 
 export const convertObservable = (
-  observable: JobsOperatorItem[],
+  observable: JobsS3OperatorItem[],
   qubitNumber: number
 ): QulacsWasmClientType.ObservableInfo => {
   return {

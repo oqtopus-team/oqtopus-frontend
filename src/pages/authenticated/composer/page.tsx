@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import QuantumCircuitComposer, { QasmFeatures } from './_components/QuantumCircuitComposer';
 import ControlPanel from './_components/ControlPanel';
-import { JobsOperatorItem, JobsSubmitJobRequest } from '@/api/generated';
+import { JobsS3OperatorItem, JobsS3SubmitJobInfo, JobsSubmitJobRequest } from '@/api/generated';
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { circuitContext, QuantumCircuitService } from './circuit';
 import { JobTypeType } from '@/domain/types/Job';
@@ -18,9 +18,10 @@ import { QuantumGate, supportedGates } from './gates';
 import ObservableComposer from './_components/ObservableComposer';
 import { Observable } from './observable';
 import { errorToastConfig, successToastConfig } from '@/config/toast';
-import "./page.css";
+import './page.css';
+import JSZip from 'jszip';
 
-const renderOperator = (obs: Observable): JobsOperatorItem[] => {
+const renderOperator = (obs: Observable): JobsS3OperatorItem[] => {
   return [...new Array(obs.operators.length)].map((_, i) => {
     return {
       coeff: obs.coeffs[i],
@@ -177,10 +178,28 @@ export default function Page() {
     fetchDevices();
   }, []);
 
-  const handleSubmitJob = async (req: JobsSubmitJobRequest): Promise<void> => {
+  const createZipFile = async (object: Object) => {
+    const zip = new JSZip();
+    zip.file('input.json', JSON.stringify(object, null, 2));
+    const blob = await zip.generateAsync({ type: 'blob' });
+    return new File([blob], 'input.zip', { type: 'application/zip' });
+  };
+
+  const handleSubmitJob = async (
+    req: JobsSubmitJobRequest,
+    jobS3Info: JobsS3SubmitJobInfo
+  ): Promise<void> => {
     setBusy(true);
     try {
-      const jobId = await jobApi.submitJob(req);
+      const { job_id, presigned_url } = await jobApi.registerJob();
+      const { url } = presigned_url;
+      const fileToUpload: File = await createZipFile(jobS3Info);
+      if (!url) {
+        toast.error(t('job.form.toast.register_error'), errorToastConfig);
+        return;
+      }
+      await jobApi.uploadJobToS3(presigned_url, fileToUpload);
+      await jobApi.submitJob(job_id, req);
       toast(t('job.form.toast.success'), successToastConfig);
       setJobId(jobId);
     } catch (e) {

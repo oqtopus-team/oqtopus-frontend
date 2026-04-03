@@ -40,6 +40,7 @@ const config: Config = {
       'divider-bg': 'rgb(var(--divider-bg) / <alpha-value>)',
       'status-device-red': 'rgb(var(--status-device-red) / <alpha-value>)',
       'status-device-green': 'rgb(var(--status-device-green) / <alpha-value>)',
+      'status-job-registered': 'rgb(var(--status-job-registered) / <alpha-value>)',
       'status-job-submitted': 'rgb(var(--status-job-submitted) / <alpha-value>)',
       'status-job-ready': 'rgb(var(--status-job-ready) / <alpha-value>)',
       'status-job-running': 'rgb(var(--status-job-running) / <alpha-value>)',

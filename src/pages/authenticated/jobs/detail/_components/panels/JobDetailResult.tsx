@@ -4,11 +4,11 @@ import { JSONCodeBlock } from '@/pages/_components/JSONCodeBlock';
 import { Spacer } from '@/pages/_components/Spacer';
 import SimpleBar from 'simplebar-react';
 import 'simplebar-react/dist/simplebar.min.css';
-import { JobsEstimationResult, JobsSamplingResult } from '@/api/generated';
+import { JobsS3EstimationResult, JobsS3SamplingResult } from '@/api/generated';
 import ClipboardCopy from './utils/ClipboardCopy';
 
 export interface JobDetailResultProps {
-  result?: JobsSamplingResult | JobsEstimationResult;
+  result?: JobsS3SamplingResult | JobsS3EstimationResult;
   heading?: string;
   maxHeight: number;
 }

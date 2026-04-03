@@ -3,6 +3,8 @@
 
 ## Enum
 
+* `Registered` (value: `'registered'`)
+
 * `Submitted` (value: `'submitted'`)
 
 * `Ready` (value: `'ready'`)

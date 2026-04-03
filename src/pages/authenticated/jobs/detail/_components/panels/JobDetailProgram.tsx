@@ -26,11 +26,20 @@ const isSentFromComposer = (program: string): boolean => {
   const trimmed = program.trim();
   return trimmed.startsWith('// Sent from OQTOPUS composer');
 };
+
+const programLengthLimit = Math.pow(2, 16);
+
+const limitProgram = (program: string): [string, boolean] => {
+  return program.length > programLengthLimit
+    ? [program.substring(0, programLengthLimit) + '...', true]
+    : [program, false];
+};
+
 export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
   jobInfo: JobDetailProgramProps
 ) => {
   const { t } = useTranslation();
-  const text = jobInfo.program.join('\n');
+  const [text, programExceededMaxDisplayLength] = limitProgram(jobInfo.program.join('\n'));
   const sentFromComposer = isSentFromComposer(text);
   const [circuitService] = useState<QuantumCircuitService>(new QuantumCircuitService(0, 0, []));
   const [showCode, setShowCode] = useState(false);
@@ -68,6 +77,14 @@ export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
         ) : null}
       </div>
       <Spacer className="h-2" />
+      {programExceededMaxDisplayLength && (
+        <>
+          <span className={clsx('text-xs')}>
+            {t('job.detail.program.too_large_to_fully_display')}
+          </span>
+          <Spacer className="h-2" />
+        </>
+      )}
       {jobInfo.program === undefined || jobInfo.program === null || jobInfo.program.length === 0 ? (
         <div className={clsx('text-xs')}>{t('job.detail.program.nodata')}</div>
       ) : (

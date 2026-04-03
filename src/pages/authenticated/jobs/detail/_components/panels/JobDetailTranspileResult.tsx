@@ -1,12 +1,12 @@
 import clsx from 'clsx';
 import { Spacer } from '@/pages/_components/Spacer';
-import { JobsTranspileResult } from '@/api/generated';
+import { JobsS3TranspileResult } from '@/api/generated';
 import { JSONCodeBlock } from '@/pages/_components/JSONCodeBlock';
 import { useTranslation } from 'react-i18next';
 import ClipboardCopy from './utils/ClipboardCopy';
 
 interface Props {
-  transpileResult?: JobsTranspileResult;
+  transpileResult?: JobsS3TranspileResult;
   heading?: string;
 }
 
