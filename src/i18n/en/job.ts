@@ -85,6 +85,9 @@ export default {
     },
     histogram: {
       nodata: 'Data does not exist.',
+      download_png: 'Download PNG',
+      download_svg: 'Download SVG',
+      download_csv: 'Download CSV',
     },
     transpiler_info: {
       nodata: 'Data does not exist.',
