@@ -10,6 +10,14 @@ export default {
       description: 'Description',
       description_placeholder: 'Enter description',
       button: 'Search',
+      from: 'From',
+      to: 'To',
+      today: 'Today',
+      last_7_days: 'Last 7 days',
+      last_30_days: 'Last 30 days',
+      error_message: {
+        from_is_after_to: 'Date from must be before date to',
+      },
     },
     table: {
       id: 'Job ID',
@@ -50,6 +58,7 @@ export default {
       description: 'Description',
       job_type: 'Job type',
       device_id: 'Device ID',
+      transpiler: 'Transpiler',
       shots: 'Number of shots',
       status: 'Status',
       submitted_at: 'Submitted at',
@@ -58,6 +67,9 @@ export default {
       ended_at: 'Ended at',
       execution_time: 'Execution time (sec)',
       message: 'Message',
+      simulator: 'Simulator',
+      mitigation: 'Mitigation',
+      program: 'Program',
     },
     program: {
       nodata: 'Data does not exist.',
@@ -109,6 +121,7 @@ export default {
     button: 'Submit',
     submit_and_view_job_button: 'Submit and view job',
     submitting: 'Processing your request...',
+    program_sample: 'Program sample',
     operator: {
       pauli: 'Operator (Pauli string)',
       coeff: 'Coefficient',

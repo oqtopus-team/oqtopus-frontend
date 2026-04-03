@@ -44,7 +44,7 @@ export default function SetupMFAPage() {
   }, []);
 
   const { t } = useTranslation();
-  useDocumentTitle(t('mfa.title'));
+  useDocumentTitle(t('mfa.signup.title'));
   const { processing, register, onSubmit, errors } = useFormProcessor(
     validationRules(t),
     ({ setProcessingFalse }) => {
@@ -69,7 +69,7 @@ export default function SetupMFAPage() {
 
   return (
     <div className={clsx('w-[300px]', 'pt-8', 'text-sm')}>
-      <FormTitle>{t('mfa.title')}</FormTitle>
+      <FormTitle>{t('mfa.signup.title')}</FormTitle>
       <Spacer className="h-4" />
       <p className={clsx('text-xs', 'leading-[1.8]')}>
         <Trans i18nKey={'mfa.explanation01'} />
@@ -87,6 +87,7 @@ export default function SetupMFAPage() {
           {...register('totpCode')}
           label={t('mfa.form.totp_code')}
           errorMessage={errors.totpCode?.message}
+          className={clsx('bg-base-card')}
         />
         <Spacer className="h-5" />
         <Button type="submit" color="secondary" loading={processing}>

@@ -12,6 +12,9 @@ import { circuitContext, QuantumCircuitService } from '@/pages/authenticated/com
 import { Switch } from '@mui/material';
 import { parseCircuitJSON } from '@/pages/authenticated/composer/qasm';
 import { DndContextProvider } from '@/pages/authenticated/composer/dragging';
+import { CodeEditor } from '@/pages/authenticated/composer/_components/CodeEditor';
+import { BsCodeSlash } from 'react-icons/bs';
+import { ThemeOptions, useTheme } from '@/theme/useTheme';
 
 export interface JobDetailProgramProps {
   program: string[];
@@ -31,6 +34,7 @@ export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
   const sentFromComposer = isSentFromComposer(text);
   const [circuitService] = useState<QuantumCircuitService>(new QuantumCircuitService(0, 0, []));
   const [showCode, setShowCode] = useState(false);
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (isSentFromComposer(text)) {
@@ -54,7 +58,7 @@ export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
         {sentFromComposer ? (
           <div className="flex items-center">
             <span className={clsx([['text-primary', 'cursor-pointer', 'm-2']])}>
-              <img src="/img/common/icon-code.svg" width={32} height={32} />
+              <BsCodeSlash />
             </span>
             <Switch value={showCode} onChange={() => setShowCode(!showCode)} />
             <span className={clsx([['text-primary', 'cursor-pointer', 'm-2']])}>
@@ -79,7 +83,11 @@ export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
             <div className={clsx('relative')}>
               <div className={clsx('p-3', 'rounded', 'bg-cmd-bg', 'text-sm')}>
                 <SimpleBar style={{ maxHeight: jobInfo.maxHeight }}>
-                  <div className={clsx('whitespace-pre-wrap')}>{text}</div>
+                  <CodeEditor
+                    disabled={true}
+                    code={text}
+                    fixedTheme={theme === ThemeOptions.DARK ? 'okaidia' : 'default'}
+                  />
                 </SimpleBar>
               </div>
               <ClipboardCopy text={text} />

@@ -8,24 +8,27 @@ import { UserAPIProvider } from '@/backend/Provider';
 import ENV from '@/env';
 import './layout.css';
 import { ErrorBoundary } from '@/pages/_components/ErrorBoundary';
+import { QulacsSimulatorProvider } from '@/backend/qulacs/Provider';
 
 export default function AuthenticatedLayout() {
   const auth = useAuth();
   return (
     <RequestLogin>
       <UserAPIProvider basePath={ENV.API_ENDPOINT} accessToken={auth.getCurrentIdToken}>
-        <div className={clsx('min-h-screen', 'flex', 'flex-col')}>
-          <ErrorBoundary>
-            <Header />
-            <div className={clsx('application-layout', 'flex', 'flex-auto', 'bg-base-100')}>
-              <Sidebar />
-              <ErrorBoundary>
-                <Outlet />
-              </ErrorBoundary>
-              <NavigationBottomBar />
-            </div>
-          </ErrorBoundary>
-        </div>
+        <QulacsSimulatorProvider>
+          <div className={clsx('min-h-screen', 'flex', 'flex-col')}>
+            <ErrorBoundary>
+              <Header />
+              <div className={clsx('application-layout', 'flex', 'flex-auto', 'bg-base-100')}>
+                <Sidebar />
+                <ErrorBoundary>
+                  <Outlet />
+                </ErrorBoundary>
+                <NavigationBottomBar />
+              </div>
+            </ErrorBoundary>
+          </div>
+        </QulacsSimulatorProvider>
       </UserAPIProvider>
     </RequestLogin>
   );

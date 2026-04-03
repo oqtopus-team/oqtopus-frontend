@@ -13,10 +13,13 @@ import SetupMFAPage from '@/pages/auth/signup/mfa/page';
 import ResetPasswordLayout from '@/pages/auth/reset-password/layout';
 import ForgotPasswordPage from '@/pages/auth/reset-password/forgot-password/page';
 import ForgotPasswordConfirmPage from '@/pages/auth/reset-password/confirm-password/page';
-import ResetMFAPage from '@/pages/auth/reset-mfa/page';
+import InvalidateMFAPage from '@/pages/auth/reset-mfa/mfa-invalidation/page';
+import ConfirmResetMFAPage from '@/pages/auth/reset-mfa/mfa-confirmation-code/page';
+import ResetMFAPage from '@/pages/auth/reset-mfa/mfa-re-registration/page';
 import AuthenticatedLayout from '@/pages/authenticated/layout';
 import AuthenticatedDefaultLayout from '@/pages/authenticated/layout_default';
 import DashboardLayout from '@/pages/authenticated/layout_dashboard';
+import { SettingsPage } from '@/pages/authenticated/settings/page';
 // ログイン後の画面はlazyload
 const JobList = lazy(async () => await import('@/pages/authenticated/jobs/page'));
 const JobDetail = lazy(async () => await import('@/pages/authenticated/jobs/detail/page'));
@@ -29,6 +32,8 @@ const DeviceDetail = lazy(async () => await import('@/pages/authenticated/device
 const Announcements = lazy(
   async () => await import('@/pages/authenticated/dashboard/_components/Announcements')
 );
+
+import './style.css';
 
 export const App: React.FunctionComponent = () => {
   return (
@@ -50,13 +55,15 @@ export const App: React.FunctionComponent = () => {
                 <Route path="mfa" element={<SetupMFAPage />} />
               </Route>
 
+              {/* reset password flow */}
               <Route element={<ResetPasswordLayout />} /* reset password flow */>
                 <Route path="forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="confirm-password" element={<ForgotPasswordConfirmPage />} />
               </Route>
 
-              {/* reset password flow */}
-              <Route path="mfa-reset" element={<ResetMFAPage />} />
+              <Route path="mfa-invalidation" element={<InvalidateMFAPage />} />
+              <Route path="mfa-confirmation-code" element={<ConfirmResetMFAPage />} />
+              <Route path="mfa-re-registration" element={<ResetMFAPage />} />
             </Route>
 
             <Route
@@ -80,6 +87,8 @@ export const App: React.FunctionComponent = () => {
                   <Route path="device" element={<DeviceList />} />
                   <Route path="device/:id" element={<DeviceDetail />} />
                   <Route path="announcements" element={<Announcements />} />
+                  <Route path="settings" element={<SettingsPage />} />
+                  <Route path="settings/:tabId" element={<SettingsPage />} />
                 </Route>
 
                 <Route path="dashboard" element={<DashboardLayout />}>

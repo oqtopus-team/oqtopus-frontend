@@ -18,6 +18,7 @@ import { QuantumGate, supportedGates } from './gates';
 import ObservableComposer from './_components/ObservableComposer';
 import { Observable } from './observable';
 import { errorToastConfig, successToastConfig } from '@/config/toast';
+import "./page.css";
 
 const renderOperator = (obs: Observable): JobsOperatorItem[] => {
   return [...new Array(obs.operators.length)].map((_, i) => {
@@ -76,7 +77,7 @@ export default function Page() {
     setBusy(false);
   };
 
-  const [qasmFeatures, setQasmFeatures] = useState<QasmFeatures> ({});
+  const [qasmFeatures, setQasmFeatures] = useState<QasmFeatures>({});
 
   useEffect(() => {
     setQasmFeatures({
@@ -138,6 +139,15 @@ export default function Page() {
       'keydown',
       (e) => {
         if (currentFocus === '' || currentFocus === 'panel') return;
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          if (currentFocus === 'observable') {
+            observableCircuitService.selectedGates = [];
+          } else {
+            circuitService.selectedGates = [];
+          }
+          return;
+        }
 
         if (currentFocus === 'observable') {
           if (e.key === 'Delete') {
@@ -195,9 +205,7 @@ export default function Page() {
       <hr className={clsx([['w-full', 'my-4'], ['text-neutral-content']])} />
 
       <circuitContext.Provider value={circuitService}>
-        <QuantumCircuitComposer 
-          qasmFeatures={qasmFeatures}
-        />
+        <QuantumCircuitComposer qasmFeatures={qasmFeatures} />
       </circuitContext.Provider>
 
       {jobType === 'estimation' ? (
@@ -213,18 +221,20 @@ export default function Page() {
       ) : null}
 
       <div id="control-panel-container">
-        <ControlPanel
-          onSubmit={handleSubmitJob}
-          devices={devices}
-          jobId={jobId}
-          jobType={jobType}
-          busy={busy}
-          mkProgram={{
-            program: generateQASMCode(circuit, Object.values(circuitService.customGates)),
-            qubitNumber: circuit.length,
-          }}
-          mkOperator={renderOperator(observable)}
-        />
+        <circuitContext.Provider value={circuitService}>
+          <ControlPanel
+            onSubmit={handleSubmitJob}
+            devices={devices}
+            jobId={jobId}
+            jobType={jobType}
+            busy={busy}
+            mkProgram={{
+              program: generateQASMCode(circuit, Object.values(circuitService.customGates)),
+              qubitNumber: circuit.length,
+            }}
+            mkOperator={renderOperator(observable)}
+          />
+        </circuitContext.Provider>
       </div>
     </>
   );

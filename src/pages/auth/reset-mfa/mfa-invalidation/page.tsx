@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import { useNavigate } from 'react-router';
 import { Input } from '@/pages/_components/Input';
 import { Button } from '@/pages/_components/Button';
-import { FormTitle } from '../_components/FormTitle';
+import { FormTitle } from '../../_components/FormTitle';
 import { useFormProcessor } from '@/pages/_hooks/form';
 import { resetMfa } from '@/backend/MfaApi';
 import { Spacer } from '@/pages/_components/Spacer';
@@ -65,6 +65,7 @@ export default function ResetMFAPage() {
           {...register('username')}
           label={t('mfa_reset.form.mail')}
           errorMessage={errors.username?.message}
+          className={clsx('bg-base-card')}
         />
         <Spacer className="h-5" />
         <Input
@@ -74,6 +75,7 @@ export default function ResetMFAPage() {
           {...register('password')}
           label={t('mfa_reset.form.password')}
           errorMessage={errors.password && errors.password.message}
+          className={clsx('bg-base-card')}
         />
         <Spacer className="h-5" />
         <Button type="submit" color="secondary" loading={processing}>

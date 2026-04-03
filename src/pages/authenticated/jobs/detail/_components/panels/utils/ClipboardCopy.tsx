@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import clsx from 'clsx';
+import { BsCopy } from 'react-icons/bs';
 import { useTranslation } from 'react-i18next';
 
 export interface ClipboardCopyProps {
@@ -31,10 +32,7 @@ const ClipboardCopy: React.FC<ClipboardCopyProps> = ({ text }) => {
       title={t('job.detail.text.copy_tooltip')}
     >
       {!copied ? (
-        <img
-          src={'/img/common/copy_button.svg'}
-          className={clsx(['w-4', 'h-4'], ['absolute', 'right-1', 'top-1'])}
-        />
+        <BsCopy className={clsx(['w-4', 'h-4'], ['absolute', 'right-1', 'top-1'])} />
       ) : (
         <div className={clsx(['w-4', 'h-4'], ['absolute', 'right-1', 'top-1'])}>
           <span
@@ -46,8 +44,7 @@ const ClipboardCopy: React.FC<ClipboardCopyProps> = ({ text }) => {
               'transform',
               'px-1',
               'rounded',
-              'bg-modal-bg',
-              'text-primary-content',
+              'text-base-content',
               'whitespace-nowrap',
               'text-xs'
             )}
