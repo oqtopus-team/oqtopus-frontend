@@ -24,7 +24,7 @@ export const Select = ({
           className={clsx(
             'w-full',
             ['border', 'focus:border-primary', 'rounded', size == 'md' ? 'p-2' : 'p-1'],
-            ['focus:text-primary', 'focus:outline-primary', 'text-xs'],
+            ['text-primary', 'focus:outline-primary', 'text-xs'],
             errorMessage && ['!border-error', '!outline-error'],
             className
           )}
