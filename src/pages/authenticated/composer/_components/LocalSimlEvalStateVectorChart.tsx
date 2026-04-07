@@ -15,6 +15,7 @@ import {
 import { Complex } from "../misc";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
+import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
 export interface AmplitudeChartPoint {
   name: string;
@@ -31,7 +32,7 @@ const createHSL = (value: number) => `hsl(${value * 180}, 100%, 70%)`;
 
 const renderImaginaryPart = (value: number) => (value >= 0 ? `+i${value}` : `-i${(-1) * value}`);
 
-const CustomTooltip = (props: TooltipContentProps<number, string>) => {
+const CustomTooltip = (props: TooltipContentProps<ValueType, NameType>) => {
   if (props.active && props.payload && props.payload.length > 0) {
     const data = props.payload[0].payload as AmplitudeChartPoint;
 

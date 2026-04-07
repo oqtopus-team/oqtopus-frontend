@@ -15,6 +15,7 @@ import {
   type TooltipProps,
   type YAxisProps,
 } from 'recharts';
+import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
 
 export interface SamplingChartPoint {
   name: string;
@@ -26,7 +27,7 @@ export interface Props {
   data: SamplingChartPoint[];
 }
 
-const CustomTooltip = (props: TooltipContentProps<number, string>) => {
+const CustomTooltip = (props: TooltipContentProps<ValueType, NameType>) => {
   if (props.active && props.payload && props.payload.length > 0) {
     const data = props.payload[0].payload as SamplingChartPoint;
     return (
