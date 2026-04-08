@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import clsx from 'clsx';
-import { ForceGraph2D } from 'react-force-graph';
+import ForceGraph2D from 'react-force-graph-2d';
 import { useTranslation } from 'react-i18next';
 import SimpleBar from 'simplebar-react';
 import { JSONCodeBlock } from '@/pages/_components/JSONCodeBlock';
