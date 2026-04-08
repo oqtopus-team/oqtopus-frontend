@@ -57,8 +57,6 @@ export function SecurityTab({ login_history_enabled }: SecurityTabProps) {
       const data = await getApiTokenStatus();
 
       setApiTokenData({ ...apiTokenData, api_token_expiration: data.api_token_expiration });
-    } catch (e: any) {
-      toast(e.message ?? t('common.errors.common'), errorToastConfig);
     } finally {
       setLoadingState({ ...loadingState, apiToken: false });
     }
@@ -88,8 +86,6 @@ export function SecurityTab({ login_history_enabled }: SecurityTabProps) {
       await deleteApiToken();
       setApiTokenData(null);
       toast(t('settings.security.deleteSuccess'), successToastConfig);
-    } catch (e: any) {
-      toast(e.message ?? t('common.errors.common'), errorToastConfig);
     } finally {
       setDeleteDialogOpen(false);
     }
@@ -105,8 +101,6 @@ export function SecurityTab({ login_history_enabled }: SecurityTabProps) {
       setApiTokenDialogOpen(true);
 
       toast(t('settings.security.createSuccess'), successToastConfig);
-    } catch (e: any) {
-      toast(e.message ?? t('common.errors.common'), errorToastConfig);
     } finally {
       setLoadingState({ ...loadingState, apiToken: false });
     }

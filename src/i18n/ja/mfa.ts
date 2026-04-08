@@ -25,5 +25,8 @@ export default {
     },
     button: '送信する',
   },
+  errors: {
+    no_secret: '秘密は提供されていません',
+  },
   button: '送信する',
 };

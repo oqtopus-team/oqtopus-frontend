@@ -33,7 +33,6 @@ const JobDetailPage = ({ params: { id } }: { params: Params }) => {
     if (id != '') {
       getJob(id)
         .then((job) => setJob(job))
-        .catch(() => setIsSuccess(false))
         .finally(() => {
           setIsSuccess(true);
           setLoading(false);

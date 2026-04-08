@@ -145,6 +145,9 @@ export default {
       deviceInsufficientQubits:
         'This device supports only {{deviceQubits}} qubits, but the program requires {{programQubits}}',
       invalid_json: 'Please enter correct JSON',
+      initialize_defaults: 'Failed to initialize',
+      load_file: 'Failed to load file',
+      download_job: 'Failed to download file',
     },
     modal: {
       overwrite_program: 'Are you sure you want to overwrite this program?',

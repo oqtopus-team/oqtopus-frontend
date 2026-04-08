@@ -9,6 +9,8 @@ import useWindowSize from '@/pages/_hooks/UseWindowSize';
 import 'simplebar-react/dist/simplebar.min.css';
 import { Button } from '@/pages/_components/Button';
 import { Select } from '@/pages/_components/Select';
+import { toast } from 'react-toastify';
+import { errorToastConfig } from '@/config/toast';
 
 // Types for metric selection
 type QubitMetric = 'readout_error' | 't1' | 't2' | 'single_qubit_gate_error';
@@ -374,7 +376,7 @@ const createNodeData = (
     });
     return { nodeData, tempNodeMap };
   } catch (err) {
-    console.error('Failed to create node data:', err);
+    toast('Failed to create node data:', errorToastConfig)
     return { nodeData: [], tempNodeMap: new Map<string, object>() };
   }
 };
@@ -414,7 +416,7 @@ const createEdgeData = (
     });
     return { edgeData, tempCouplingMap };
   } catch (err) {
-    console.error('Failed to create edge data:', err);
+    toast('Failed to create edge data', errorToastConfig)
     return { edgeData: [], tempCouplingMap: new Map<string, object>() };
   }
 };
@@ -514,7 +516,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
         }
       }
     } catch (err) {
-      console.error('Failed to handle node hover:', err);
+      toast('Failed to handle node hover', errorToastConfig);
     }
   };
 
@@ -533,7 +535,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
         }
       }
     } catch (err) {
-      console.error('Failed to handle link hover:', err);
+      toast('Failed to handle link hover', errorToastConfig);
     }
   };
 
@@ -553,7 +555,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
           });
         }
       } catch (err) {
-        console.error('Failed to update div size:', err);
+        toast('Failed to update div size', errorToastConfig);
       }
     };
 
@@ -566,7 +568,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
           });
         }
       } catch (err) {
-        console.error('Failed to update hedding size:', err);
+        toast('Failed to update hedding size', errorToastConfig);
       }
     };
 
@@ -591,7 +593,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
           return JSON.parse(deviceInfo);
         } catch (err) {
           setIsValidDeviceInfo(false);
-          console.error('Failed to parse device info:', err);
+          toast('Failed to parse device info', errorToastConfig);
           return {};
         }
       })();
@@ -632,7 +634,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
       setCouplingMap(tempCouplingMap);
     } catch (err) {
       setIsValidDeviceInfo(false);
-      console.error('Failed to update topology data:', err);
+      toast('Failed to update topology data', errorToastConfig);
     }
   }, [deviceInfo, selectedQubitMetric, selectedCouplingMetric]);
 

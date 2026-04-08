@@ -12,6 +12,8 @@ import { JobDetailMitigationInfo } from './panels/JobDetailMitigationInfo';
 import { JobDetailMultiManualHistogram } from './panels/JobDetailMultiManualHistogram';
 import { JobDetailMultiManualTabs } from './panels/JobDetailMultiManualTabs';
 import { JobDetailTranspileResult } from './panels/JobDetailTranspileResult';
+import { toast } from 'react-toastify';
+import { errorToastConfig } from '@/config/toast';
 
 const combinedCircuitKey = 'Combined program';
 const combinedCircuitHeading = 'Combined';
@@ -36,10 +38,10 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
       if (!isNaN(index) && programs && programs[index] !== undefined) {
         return [programs[index]];
       } else {
-        console.error(`Program for key '${selectedKeyIndex}' not found.`);
+        toast(`Program for key '${selectedKeyIndex}' not found.`, errorToastConfig);
       }
     } catch (error) {
-      console.error('Failed to get selected QASM:', error);
+      toast('Failed to get selected QASM:', errorToastConfig);
     }
     return [];
   }, [selectedKeyIndex, job.jobInfo?.combined_program, job.jobInfo?.program]);
@@ -52,7 +54,7 @@ export const SuccessViewMultiManual: React.FC<Job> = (job: Job) => {
         heading: `${dividedCountsHeading} ${index}`,
       }));
     } catch (error) {
-      console.error('Failed to generate options:', error);
+      toast('Failed to generate options', errorToastConfig);
       return [];
     }
   }, [combinedCircuitKey, job.jobInfo.program]);

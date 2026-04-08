@@ -26,7 +26,6 @@ export default function Page() {
     setLoadingJobs(true);
     getLatestJobs(1, 10)
       .then((jobs) => setJobs(jobs))
-      .catch((e) => console.error(e))
       .finally(() => setLoadingJobs(false));
   }, []);
 

@@ -145,6 +145,9 @@ export default {
       deviceInsufficientQubits:
         'このデバイスは{{deviceQubits}}量子ビットのみをサポートしていますが、プログラムには{{programQubits}}量子ビットが必要です',
       invalid_json: '正しいJSON形式で入力してください',
+      initialize_defaults: '初期化に失敗しました',
+      load_file: 'ファイルの読み込みに失敗しました',
+      download_job: 'ファイルのダウンロードに失敗しました',
     },
     modal: {
       overwrite_program: 'このプログラムを上書きしてもよろしいですか？',

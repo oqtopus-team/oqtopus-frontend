@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { Spacer } from '@/pages/_components/Spacer';
 import { Histogram } from './utils/Histogram';
 import { reshapeToHistogramInfo } from './utils/ReshapeToHistogramInfo';
+import { toast } from 'react-toastify';
+import { errorToastConfig } from '@/config/toast';
 
 interface countsProps {
   combinedCircuitKey: string;
@@ -65,7 +67,7 @@ export const JobDetailMultiManualHistogram: React.FC<countsProps> = ({
         circuitTitle: pullDownKey === combinedCircuitKey ? 'combined' : `index_${pullDownKey}`,
       };
     } catch (error) {
-      console.error('Failed to get histogram data:', error);
+      toast('Failed to get histogram data', errorToastConfig)
       return {
         categories: [],
         data: [],

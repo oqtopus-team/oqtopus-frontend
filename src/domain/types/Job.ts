@@ -1,4 +1,6 @@
 import { JobsJobInfo } from '@/api/generated';
+import { toast } from 'react-toastify';
+import { errorToastConfig } from '@/config/toast';
 
 export const JOB_STATUSES = [
   'submitted',
@@ -49,7 +51,7 @@ export async function initializeJobFormProgramDefaults(): Promise<{
       }
       return fetch(`/sample_program/${fileName}.txt`).then((res) => {
         if (!res.ok) {
-          console.error('failed to load file:', fileName);
+          toast(`Failed to load file`, errorToastConfig);
           return { fileName, content: '' };
         }
         return res.text().then((content) => ({ fileName, content }));
