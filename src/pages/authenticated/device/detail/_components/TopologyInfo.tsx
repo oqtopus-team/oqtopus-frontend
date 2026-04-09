@@ -3,12 +3,15 @@ import clsx from 'clsx';
 import ForceGraph2D from 'react-force-graph-2d';
 import { useTranslation } from 'react-i18next';
 import SimpleBar from 'simplebar-react';
+import { interpolateViridis } from 'd3-scale-chromatic';
 import { JSONCodeBlock } from '@/pages/_components/JSONCodeBlock';
 import { Card } from '@/pages/_components/Card';
 import useWindowSize from '@/pages/_hooks/UseWindowSize';
-import 'simplebar-react/dist/simplebar.min.css';
 import { Button } from '@/pages/_components/Button';
 import { Select } from '@/pages/_components/Select';
+import { useTheme } from '@/theme/useTheme';
+
+import 'simplebar-react/dist/simplebar.min.css';
 
 // Types for metric selection
 type QubitMetric = 'readout_error' | 't1' | 't2' | 'single_qubit_gate_error';
@@ -53,136 +56,53 @@ const getMetricValue = (data: any, metric: string): number | null => {
   }
 };
 
-const isHigherBetter = (metric: string): boolean => {
-  return ['t1', 't2'].includes(metric);
-};
-
-type RgbColor = { r: number; g: number; b: number };
-
 const MISSING_METRIC_COLOR = '#94a3b8';
-const VIRIDIS_COLOR_SCALE: string[] = [
-  '#440154',
-  '#46085c',
-  '#481467',
-  '#482173',
-  '#472d7b',
-  '#453882',
-  '#424086',
-  '#3f4889',
-  '#3d4e8a',
-  '#3a538b',
-  '#37588c',
-  '#345d8d',
-  '#31688e',
-  '#2e6e8e',
-  '#2c728e',
-  '#2a788e',
-  '#287d8e',
-  '#25828e',
-  '#23878e',
-  '#218c8d',
-  '#21918c',
-  '#22968b',
-  '#239b89',
-  '#25a186',
-  '#29a783',
-  '#2fac80',
-  '#35b179',
-  '#3db771',
-  '#46bd6a',
-  '#51c362',
-  '#5ec962',
-  '#6ed05b',
-  '#7ed655',
-  '#8fdc4f',
-  '#a0e249',
-  '#b1e745',
-  '#c2eb42',
-  '#d4ef40',
-  '#e5f03f',
-  '#f5ee3f',
-  '#fde724',
-];
 
-const interpolateRgbColor = (from: RgbColor, to: RgbColor, ratio: number): RgbColor => {
-  const clampedRatio = Math.max(0, Math.min(1, ratio));
-  return {
-    r: Math.round(from.r + (to.r - from.r) * clampedRatio),
-    g: Math.round(from.g + (to.g - from.g) * clampedRatio),
-    b: Math.round(from.b + (to.b - from.b) * clampedRatio),
-  };
-};
-
-const hexToRgb = (hex: string): RgbColor | null => {
-  const match = /^#([0-9a-f]{6})$/i.exec(hex);
-  if (!match) {
-    return null;
-  }
-  const [r, g, b] = [0, 2, 4].map((i) => parseInt(match[1].slice(i, i + 2), 16));
-  return { r, g, b };
-};
-
-const getColorFromScale = (ratio: number): string => {
-  const clampedRatio = Math.max(0, Math.min(1, ratio));
-  const maxIndex = VIRIDIS_COLOR_SCALE.length - 1;
-  const position = clampedRatio * maxIndex;
-  const lowerIndex = Math.floor(position);
-  const upperIndex = Math.min(maxIndex, Math.ceil(position));
-
-  const lowerColor = hexToRgb(VIRIDIS_COLOR_SCALE[lowerIndex]);
-  const upperColor = hexToRgb(VIRIDIS_COLOR_SCALE[upperIndex]);
-  if (!lowerColor || !upperColor) {
-    return VIRIDIS_COLOR_SCALE[lowerIndex] ?? MISSING_METRIC_COLOR;
-  }
-
-  if (lowerIndex === upperIndex) {
-    return VIRIDIS_COLOR_SCALE[lowerIndex];
-  }
-
-  const mixed = interpolateRgbColor(lowerColor, upperColor, position - lowerIndex);
-  return `rgb(${mixed.r}, ${mixed.g}, ${mixed.b})`;
-};
-
-const getLabelTextColor = (backgroundColor: string): string => {
-  const color = backgroundColor.trim().toLowerCase();
-
-  const hexMatch = /^#([0-9a-f]{6})$/i.exec(color);
-  if (hexMatch) {
-    const rgb = hexToRgb(`#${hexMatch[1]}`);
-    if (rgb) {
-      const luminance = 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
-      return luminance > 145 ? '#0f172a' : '#f8fafc';
-    }
-  }
-
-  const rgbMatch = /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i.exec(color);
-  if (rgbMatch) {
-    const r = Number(rgbMatch[1]);
-    const g = Number(rgbMatch[2]);
-    const b = Number(rgbMatch[3]);
-    const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    return luminance > 145 ? '#0f172a' : '#f8fafc';
-  }
-
-  return '#f8fafc';
-};
-
-const getColorForMetric = (
-  value: number | null,
-  min: number,
-  max: number,
-  metric: string
-): string => {
+const getColorForMetric = (value: number | null, min: number, max: number): string => {
   if (value === null || isNaN(value)) {
     return MISSING_METRIC_COLOR;
   }
 
   if (min === max) {
-    return VIRIDIS_COLOR_SCALE[Math.floor(VIRIDIS_COLOR_SCALE.length / 2)];
+    return interpolateViridis(0.5);
   }
 
   const normalized = Math.max(0, Math.min(1, (value - min) / (max - min)));
-  return getColorFromScale(normalized);
+  return interpolateViridis(normalized);
+};
+
+// Function for defining color of node text label
+const parseColor = (color: string): { r: number; g: number; b: number } | null => {
+  const trimmed = color.trim().toLowerCase();
+
+  const hexMatch = /^#([0-9a-f]{6})$/i.exec(trimmed);
+  if (hexMatch) {
+    const [r, g, b] = [0, 2, 4].map((i) => parseInt(hexMatch[1].slice(i, i + 2), 16));
+    return { r, g, b };
+  }
+
+  const rgbMatch = /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/i.exec(trimmed);
+  if (rgbMatch) {
+    return { r: Number(rgbMatch[1]), g: Number(rgbMatch[2]), b: Number(rgbMatch[3]) };
+  }
+
+  return null;
+};
+
+const LUMINANCE_R = 0.2126;
+const LUMINANCE_G = 0.7152;
+const LUMINANCE_B = 0.0722;
+const LUMINANCE_THRESHOLD = 145;
+const LABEL_COLOR_DARK = '#0f172a';
+const LABEL_COLOR_LIGHT = '#f8fafc';
+
+const getLabelTextColor = (backgroundColor: string): string => {
+  const rgb = parseColor(backgroundColor);
+  if (rgb) {
+    const luminance = LUMINANCE_R * rgb.r + LUMINANCE_G * rgb.g + LUMINANCE_B * rgb.b;
+    return luminance > LUMINANCE_THRESHOLD ? LABEL_COLOR_DARK : LABEL_COLOR_LIGHT;
+  }
+  return 'LABEL_COLOR_LIGHT';
 };
 
 // Function to calculate median
@@ -229,8 +149,8 @@ const ColorLegend: React.FC<{
 
   const gradientStops = [];
   for (let i = 0; i <= 10; i++) {
-    const value = range.min + (range.max - range.min) * (i / 10);
-    const color = getColorForMetric(value, range.min, range.max, metric);
+    const ratio = i / 10;
+    const color = interpolateViridis(ratio);
     gradientStops.push(`${color} ${i * 10}%`);
   }
 
@@ -356,12 +276,7 @@ const createNodeData = (
     const nodeData = qubits.map((qubit: any) => {
       tempNodeMap.set(qubit.id.toString(), qubit);
       const metricValue = getMetricValue(qubit, selectedMetric);
-      const color = getColorForMetric(
-        metricValue,
-        metricRange.min,
-        metricRange.max,
-        selectedMetric
-      );
+      const color = getColorForMetric(metricValue, metricRange.min, metricRange.max);
 
       return {
         id: qubit.id.toString(),
@@ -397,12 +312,7 @@ const createEdgeData = (
       }
 
       const metricValue = getMetricValue(coupling, selectedMetric);
-      const color = getColorForMetric(
-        metricValue,
-        metricRange.min,
-        metricRange.max,
-        selectedMetric
-      );
+      const color = getColorForMetric(metricValue, metricRange.min, metricRange.max);
 
       return {
         id: id,
@@ -424,12 +334,10 @@ const MAX_ZOOM = 3;
 
 export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ deviceInfo }) => {
   const { t } = useTranslation();
-  const [isDarkTheme, setIsDarkTheme] = useState<boolean>(() => {
-    return typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
-  });
-  const nodeStrokeColor = isDarkTheme ? '#f8fafc' : '#0f172a';
-  const nodeHoverStrokeColor = isDarkTheme ? '#fcd34d' : '#1d4ed8';
-  const linkHoverStrokeColor = isDarkTheme ? '#fcd34d' : '#1d4ed8';
+  const { theme } = useTheme();
+  const nodeStrokeColor = theme === 'dark' ? '#f8fafc' : '#0f172a';
+  const nodeHoverStrokeColor = theme === 'dark' ? '#fcd34d' : '#1d4ed8';
+  const linkHoverStrokeColor = theme === 'dark' ? '#fcd34d' : '#1d4ed8';
 
   const [topologyData, setTopologyData] = useState<{ nodes: NodeObject[]; links: LinkObject[] }>({
     nodes: [],
@@ -477,21 +385,6 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
   const heddingRef = useRef<HTMLDivElement>(null);
 
   const strHoveredInfo = JSON.stringify(hoveredInfo);
-
-  useEffect(() => {
-    if (typeof document === 'undefined') {
-      return;
-    }
-
-    const root = document.documentElement;
-    const updateTheme = () => setIsDarkTheme(root.classList.contains('dark'));
-
-    updateTheme();
-    const observer = new MutationObserver(updateTheme);
-    observer.observe(root, { attributes: true, attributeFilter: ['class'] });
-
-    return () => observer.disconnect();
-  }, []);
 
   const handleZoom = useCallback(() => {
     if (fgRef.current && typeof fgRef.current.zoom === 'function') {
@@ -791,13 +684,21 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
               ctx.textAlign = 'center';
               ctx.textBaseline = 'middle';
               if (node.x !== undefined && node.y !== undefined) {
-                ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
-                ctx.shadowBlur = 2 / globalScale;
+                ctx.strokeStyle = nodeColor;
+                ctx.lineWidth = 3 / globalScale;
+                ctx.strokeText(label, node.x, node.y);
                 ctx.fillStyle = labelTextColor;
                 ctx.fillText(label, node.x, node.y);
-                ctx.shadowColor = 'transparent';
-                ctx.shadowBlur = 0;
               }
+            }}
+            nodePointerAreaPaint={(node, color, ctx, globalScale) => {
+              const radius = 18 / globalScale;
+              ctx.beginPath();
+              if (node.x !== undefined && node.y !== undefined) {
+                ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
+              }
+              ctx.fillStyle = color;
+              ctx.fill();
             }}
             linkCanvasObject={(
               link: LinkObject,
