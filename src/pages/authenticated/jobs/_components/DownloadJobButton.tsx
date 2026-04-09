@@ -2,6 +2,7 @@ import { Job, JobFileData, JobFileDataInfo, JobTypeType } from '@/domain/types/J
 import { Button } from '@/pages/_components/Button';
 import { CSSProperties, useState } from 'react';
 import { BsDownload } from 'react-icons/bs';
+import { useTranslation } from 'react-i18next';
 
 type DownloadJobButtonProps = {
   job?: Job | null;
@@ -9,6 +10,7 @@ type DownloadJobButtonProps = {
 };
 
 export default function DownloadJobButton({ job, style }: DownloadJobButtonProps) {
+  const { t } = useTranslation();
   const [downloadInProgress, setDownloadInProgress] = useState(false);
 
   function downloadJob() {
@@ -54,7 +56,12 @@ export default function DownloadJobButton({ job, style }: DownloadJobButtonProps
       onClick={downloadJob}
       disabled={!job || downloadInProgress}
     >
-      <BsDownload />
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <BsDownload />
+        <span>{t('job.list.operation.download')}</span>
+
+      </div>
+      
     </Button>
   );
 }
