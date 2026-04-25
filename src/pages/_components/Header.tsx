@@ -32,7 +32,7 @@ const Logo = (): React.ReactElement => {
   const { theme } = useTheme();
 
   const logoSrc = useMemo(() => {
-    return `/public/static_assets/img/common/header-image--${theme === ThemeOptions.DARK ? 'dark' : 'light'}.png`;
+    return `/static_assets/img/common/header-image--${theme === ThemeOptions.DARK ? 'dark' : 'light'}.png`;
   }, [theme]);
 
   const handleLogoClick = () => {
