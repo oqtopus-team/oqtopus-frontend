@@ -62,7 +62,7 @@ export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
             </span>
             <Switch value={showCode} onChange={() => setShowCode(!showCode)} />
             <span className={clsx([['text-primary', 'cursor-pointer', 'm-2']])}>
-              <img src="/img/common/icon-quantum-circuit.svg" width={24} height={24} />
+              <img src="/static_assets/img/common/icon-quantum-circuit.svg" width={24} height={24} />
             </span>
           </div>
         ) : null}
