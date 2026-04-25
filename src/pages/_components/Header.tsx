@@ -32,14 +32,7 @@ const Logo = (): React.ReactElement => {
   const { theme } = useTheme();
 
   const logoSrc = useMemo(() => {
-    const baseUrl = import.meta.env.VITE_APP_LOGO_IMAGE_URL;
-    const ext = theme === ThemeOptions.DARK ? '.webp' : '.png';
-
-    if (/\.(png|webp|jpg|jpeg|svg)$/i.test(baseUrl)) {
-      return baseUrl.replace(/\.[^.]+$/, ext);
-    }
-
-    return `${baseUrl}${ext}`;
+    return `/public/static_assets/img/common/header-image--${theme === ThemeOptions.DARK ? 'dark' : 'light'}.png`;
   }, [theme]);
 
   const handleLogoClick = () => {
