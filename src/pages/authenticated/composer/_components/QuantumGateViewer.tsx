@@ -199,7 +199,7 @@ export default function QuantumGateViewer({ gateViewer, setGateViewer }: Quantum
               className="ml-auto cursor-pointer rounded-full "
               onClick={() => setGateViewer(undefined)}
             >
-              <img src="/img/common/sidebar_arrow.svg" alt="" width="25" height="25" />
+              <img src="/static_assets/img/common/sidebar_arrow.svg" alt="" width="25" height="25" />
             </div>
           </div>
           <div className="w-full">

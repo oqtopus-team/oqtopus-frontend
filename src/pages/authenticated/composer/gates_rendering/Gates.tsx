@@ -148,7 +148,7 @@ export const gateRenderingBlockMap: Record<GateTag, GateRenderingBlock> = {
     palletteItem: (
       <img
         style={{ padding: 4 }}
-        src={`/img/composer/gate-cnot.svg`}
+        src={`/static_assets/img/composer/gate-cnot.svg`}
         className="h-full w-auto object-contain"
       />
     ),
@@ -163,7 +163,7 @@ export const gateRenderingBlockMap: Record<GateTag, GateRenderingBlock> = {
     palletteItem: (
       <img
         style={{ padding: 4 }}
-        src={`/img/composer/gate-cz.svg`}
+        src={`/static_assets/img/composer/gate-cz.svg`}
         className="h-full w-auto object-contain"
       />
     ),
@@ -177,7 +177,7 @@ export const gateRenderingBlockMap: Record<GateTag, GateRenderingBlock> = {
     palletteItem: (
       <img
         style={{ padding: 4 }}
-        src={`/img/composer/gate-swap.svg`}
+        src={`/static_assets/img/composer/gate-swap.svg`}
         className="h-full w-auto object-contain"
       />
     ),
@@ -188,7 +188,7 @@ export const gateRenderingBlockMap: Record<GateTag, GateRenderingBlock> = {
     name: 'Barrier',
     backgroundColor: GateColor.NONE,
     hasBorder: true,
-    palletteItem: <img style={{ padding: 4 }} className="p-2" src={`/img/composer/barrier.svg`} />,
+    palletteItem: <img style={{ padding: 4 }} className="p-2" src={`/static_assets/img/composer/barrier.svg`} />,
     renderComposerItem: Barrier,
   },
   $custom_gate: {

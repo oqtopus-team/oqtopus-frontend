@@ -7,7 +7,7 @@ export const Hero = (): React.ReactElement => {
   return (
     <div
       className={clsx(
-        ["bg-[url('/img/common/mv_bg.png')]", 'bg-center', 'bg-cover'],
+        ["bg-[url('/static_assets/img/common/mv_bg.png')]", 'bg-center', 'bg-cover'],
         ['py-9', 'px-10'],
         ['text-primary-content', 'text-center']
       )}
