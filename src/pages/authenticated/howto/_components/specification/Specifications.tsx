@@ -68,7 +68,7 @@ export const Specifications = () => {
         }
       `}</style>
       <SwaggerUI
-        url={`${import.meta.env.VITE_APP_PUBLIC_PATH ?? ''}/openapi.yaml`}
+        url={`${import.meta.env.VITE_APP_PUBLIC_PATH ?? ''}/static_assets/openapi.yaml`}
         deepLinking={true}
       />
     </div>
