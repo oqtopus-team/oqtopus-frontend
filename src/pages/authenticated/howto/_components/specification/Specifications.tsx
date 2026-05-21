@@ -1,8 +1,11 @@
 import SwaggerUI from 'swagger-ui-react';
 import clsx from 'clsx';
 import 'swagger-ui-react/swagger-ui.css';
+import { useAuth } from "@/auth/hook";
 
 export const Specifications = () => {
+  const { getCurrentIdToken } = useAuth();
+
   return (
     <div className={clsx('prose', 'min-w-full', 'swagger-doc')}>
       <style>{`
@@ -70,6 +73,11 @@ export const Specifications = () => {
       <SwaggerUI
         url={`${import.meta.env.VITE_APP_PUBLIC_PATH ?? ''}/static_assets/openapi.yaml`}
         deepLinking={true}
+        requestInterceptor={async (req) => {
+          const jwt = await getCurrentIdToken();
+          req.headers["Authorization"] = `Bearer ${jwt}`;
+          return req
+        }}
       />
     </div>
   );
