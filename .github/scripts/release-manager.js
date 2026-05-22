@@ -18,8 +18,8 @@
 export default async function ({ github, context, core }) {
   const owner = context.repo.owner;
   const repo = context.repo.repo;
-  const head = "develop";
-  const base = "main";
+  const head = 'develop';
+  const base = 'main';
 
   // ==================================================
   // 1. Find existing open release PR
@@ -27,7 +27,7 @@ export default async function ({ github, context, core }) {
   const { data: openPRs } = await github.rest.pulls.list({
     owner,
     repo,
-    state: "open",
+    state: 'open',
     base,
     head: `${owner}:${head}`,
     per_page: 10,
@@ -39,8 +39,8 @@ export default async function ({ github, context, core }) {
   // 2. Create PR if not exists (JST date)
   // ==================================================
   if (!releasePR) {
-    const today = new Date().toLocaleDateString("en-CA", {
-      timeZone: "Asia/Tokyo",
+    const today = new Date().toLocaleDateString('en-CA', {
+      timeZone: 'Asia/Tokyo',
     }); // YYYY-MM-DD
 
     const { data: created } = await github.rest.pulls.create({
@@ -49,7 +49,7 @@ export default async function ({ github, context, core }) {
       title: `Release ${today}`,
       head,
       base,
-      body: "Auto-generated release PR. Release notes will be updated automatically.",
+      body: 'Auto-generated release PR. Release notes will be updated automatically.',
       maintainer_can_modify: true,
     });
 
@@ -63,21 +63,15 @@ export default async function ({ github, context, core }) {
   // ==================================================
   // 3. Collect merged PRs into develop (since last main merge)
   // ==================================================
-  const mergedPRs = await github.paginate(
-    github.rest.pulls.list,
-    {
-      owner,
-      repo,
-      state: "closed",
-      base: "develop",
-      per_page: 100,
-    }
-  );
+  const mergedPRs = await github.paginate(github.rest.pulls.list, {
+    owner,
+    repo,
+    state: 'closed',
+    base: 'develop',
+    per_page: 100,
+  });
 
-  const filtered = mergedPRs.filter(pr =>
-    pr.merged_at &&
-    pr.number !== releasePR.number
-  );
+  const filtered = mergedPRs.filter((pr) => pr.merged_at && pr.number !== releasePR.number);
 
   // ==================================================
   // 4. Classify PRs
@@ -88,21 +82,20 @@ export default async function ({ github, context, core }) {
   const chores = [];
 
   for (const pr of filtered) {
-    const labels = pr.labels.map(l => l.name);
+    const labels = pr.labels.map((l) => l.name);
 
-    const line =
-      `- ${pr.title} (#${pr.number}) @${pr.user.login}`;
+    const line = `- ${pr.title} (#${pr.number}) @${pr.user.login}`;
 
-    if (labels.includes("breaking changes")) {
+    if (labels.includes('breaking changes')) {
       breaking.push(line);
     }
-    if (labels.includes("feature")) {
+    if (labels.includes('feature')) {
       features.push(line);
     }
-    if (labels.includes("bugfix")) {
+    if (labels.includes('bugfix')) {
       fixes.push(line);
     }
-    if (labels.includes("chore")) {
+    if (labels.includes('chore')) {
       chores.push(line);
     }
   }
@@ -111,26 +104,20 @@ export default async function ({ github, context, core }) {
   // 5. Build release note body
   // ==================================================
   function section(title, items) {
-    if (!items.length) return "";
-    return `\n## ${title}\n${items.join("\n")}\n`;
+    if (!items.length) return '';
+    return `\n## ${title}\n${items.join('\n')}\n`;
   }
 
   let body =
-    `Auto-generated release PR.\n` +
-    `Release notes are generated from merged PRs into develop.\n`;
+    `Auto-generated release PR.\n` + `Release notes are generated from merged PRs into develop.\n`;
 
-  body += section("⚠️ Breaking Changes", breaking);
-  body += section("✨ Features", features);
-  body += section("🐛 Fixes", fixes);
-  body += section("🧹 Chores", chores);
+  body += section('⚠️ Breaking Changes', breaking);
+  body += section('✨ Features', features);
+  body += section('🐛 Fixes', fixes);
+  body += section('🧹 Chores', chores);
 
-  if (
-    !breaking.length &&
-    !features.length &&
-    !fixes.length &&
-    !chores.length
-  ) {
-    body += "\n_No user-facing changes in this release._\n";
+  if (!breaking.length && !features.length && !fixes.length && !chores.length) {
+    body += '\n_No user-facing changes in this release._\n';
   }
 
   // ==================================================
@@ -143,5 +130,5 @@ export default async function ({ github, context, core }) {
     body,
   });
 
-  core.info("Release PR body updated.");
+  core.info('Release PR body updated.');
 }

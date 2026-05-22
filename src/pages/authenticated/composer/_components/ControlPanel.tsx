@@ -1,6 +1,7 @@
 import {
+  JobsS3OperatorItem,
+  JobsS3SubmitJobInfo,
   JobsJobType,
-  JobsOperatorItem,
   JobsSubmitJobRequest,
 } from '@/api/generated';
 import { Device } from '@/domain/types/Device';
@@ -51,7 +52,7 @@ export const TabPanels = (props: TabPanelsProps) => {
                     ? ['bg-base-card', 'text-primary']
                     : ['bg-gray-bg'],
               ])}
-              onClick={tabItem.disabled ? () => { } : handleTabItemClick(tabItem.id)}
+              onClick={tabItem.disabled ? () => {} : handleTabItemClick(tabItem.id)}
               key={`tab-${i}`}
             >
               <div
@@ -96,8 +97,8 @@ export interface ControlPanelProps {
   busy: boolean;
   jobId: null | string;
   mkProgram: { program: string; qubitNumber: number };
-  mkOperator: JobsOperatorItem[];
-  onSubmit: (req: JobsSubmitJobRequest) => Promise<void>;
+  mkOperator: JobsS3OperatorItem[];
+  onSubmit: (req: JobsSubmitJobRequest, jobS3Info: JobsS3SubmitJobInfo) => Promise<void>;
 }
 
 export default (props: ControlPanelProps) => {
@@ -111,9 +112,9 @@ export default (props: ControlPanelProps) => {
   const [selectedGates, setSelectedGates] = useState<RealComposerGate[]>([]);
 
   useEffect(() => {
-    return composerCircuitService.onSelectedGatesChange(gs => {
+    return composerCircuitService.onSelectedGatesChange((gs) => {
       setSelectedGates(gs);
-    })
+    });
   }, [composerCircuitService]);
 
   const selectedParametricGatePosition = useMemo(() => {
@@ -122,7 +123,7 @@ export default (props: ControlPanelProps) => {
       if (isParametrizedGate(selectedGate)) {
         return {
           step: selectedGate.column,
-          index: selectedGate.row
+          index: selectedGate.row,
         };
       }
     }
@@ -141,7 +142,7 @@ export default (props: ControlPanelProps) => {
                   jobType={props.jobType}
                   qubitNumber={props.mkProgram.qubitNumber}
                   program={props.mkProgram.program}
-                  observable={props.jobType == "estimation" ? props.mkOperator : undefined}
+                  observable={props.jobType == 'estimation' ? props.mkOperator : undefined}
                   selectedParametricGatePosition={selectedParametricGatePosition}
                 />
               );
@@ -152,11 +153,15 @@ export default (props: ControlPanelProps) => {
                   mkProgram={props.mkProgram}
                   mkOperator={props.mkOperator}
                   isAdvancedSettingsOpen={false}
-                  jobType={props.jobType as JobsJobType}
-                  displayFields={{ program: false, type: false, operator: false }}
+                  jobType={props.jobType}
+                  displayFields={{
+                    program: false,
+                    type: false,
+                    operator: false,
+                    fileUpload: false,
+                  }}
                 />
               );
-
             default:
               return null;
           }

@@ -8,9 +8,9 @@ All URIs are relative to *http://localhost:8080*
 |[**deleteJob**](#deletejob) | **DELETE** /jobs/{job_id} | Delete job|
 |[**getJob**](#getjob) | **GET** /jobs/{job_id} | Get selected job|
 |[**getJobStatus**](#getjobstatus) | **GET** /jobs/{job_id}/status | Get selected job\&#39;s status|
-|[**getSselog**](#getsselog) | **GET** /jobs/{job_id}/sselog | Get SSE log file|
 |[**listJobs**](#listjobs) | **GET** /jobs | List all quantum jobs|
-|[**submitJob**](#submitjob) | **POST** /jobs | Submit a quantum job|
+|[**registerJobId**](#registerjobid) | **POST** /jobs | Register new job|
+|[**submitJob**](#submitjob) | **POST** /jobs/{job_id}/submit | Complete submission of a quantum job|
 
 # **cancelJob**
 > SuccessSuccessResponse cancelJob()
@@ -121,7 +121,7 @@ const { status, data } = await apiInstance.deleteJob(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getJob**
-> JobsJobDef getJob()
+> JobsJob getJob()
 
 Get selected job
 
@@ -152,7 +152,7 @@ const { status, data } = await apiInstance.getJob(
 
 ### Return type
 
-**JobsJobDef**
+**JobsJob**
 
 ### Authorization
 
@@ -228,65 +228,10 @@ const { status, data } = await apiInstance.getJobStatus(
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **getSselog**
-> JobsGetSselogResponse getSselog()
-
-Get SSE log file of selected job
-
-### Example
-
-```typescript
-import {
-    JobApi,
-    Configuration
-} from './api';
-
-const configuration = new Configuration();
-const apiInstance = new JobApi(configuration);
-
-let jobId: string; //Job identifier (default to undefined)
-
-const { status, data } = await apiInstance.getSselog(
-    jobId
-);
-```
-
-### Parameters
-
-|Name | Type | Description  | Notes|
-|------------- | ------------- | ------------- | -------------|
-| **jobId** | [**string**] | Job identifier | defaults to undefined|
-
-
-### Return type
-
-**JobsGetSselogResponse**
-
-### Authorization
-
-[BearerAuth](../README.md#BearerAuth)
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
-
-### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-|**200** | Return SSE log file |  -  |
-|**400** | Bad Request |  -  |
-|**401** | Unauthorized |  -  |
-|**404** | Not Found |  -  |
-|**500** | Internal Server Error |  -  |
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
 # **listJobs**
-> Array<JobsGetJobsResponse> listJobs()
+> Array<JobsJob> listJobs()
 
-By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by job creation time, status or search text with \'start_time\', \'end_time\', \'status\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
+By default, all available job\'s properties are returned. Use \'fields\' parameter to specify exact list of properties to get for each job.  List of jobs can be filtered by submission time, status or search text with \'start_time\', \'end_time\', \'status\' and \'q\' parameters.  Jobs are fetched with the pagination mechanism. This can be configured with \'page\' and \'perPage\' parameters. Check response\'s \'Link\' header for pagination details.
 
 ### Example
 
@@ -336,7 +281,7 @@ const { status, data } = await apiInstance.listJobs(
 
 ### Return type
 
-**Array<JobsGetJobsResponse>**
+**Array<JobsJob>**
 
 ### Authorization
 
@@ -351,15 +296,61 @@ const { status, data } = await apiInstance.listJobs(
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Return a list of submitted quantum jobs |  -  |
+|**200** | Return a list of quantum jobs |  -  |
+|**401** | Unauthorized |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **registerJobId**
+> JobsRegisterJobResponse registerJobId()
+
+Register new job and generate a presigned URL to upload job information (`jobs.S3SubmitJobInfo`) to OQTOPUS cloud.
+
+### Example
+
+```typescript
+import {
+    JobApi,
+    Configuration
+} from './api';
+
+const configuration = new Configuration();
+const apiInstance = new JobApi(configuration);
+
+const { status, data } = await apiInstance.registerJobId();
+```
+
+### Parameters
+This endpoint does not have any parameters.
+
+
+### Return type
+
+**JobsRegisterJobResponse**
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | Return new job_id and presigned URL for job information upload |  -  |
+|**400** | Bad Request |  -  |
 |**401** | Unauthorized |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **submitJob**
-> JobsSubmitJobResponse submitJob()
+> SuccessSuccessResponse submitJob()
 
-Submit a quantum job
+Complete submission of a previously registered quantum job.  job_id must be created via \'POST /jobs\' request.  Submit job information (`jobs.S3SubmitJobInfo`) must be formerly uploaded to OQTOPUS cloud using presigned URL received in \'POST /jobs\' response.
 
 ### Example
 
@@ -373,9 +364,11 @@ import {
 const configuration = new Configuration();
 const apiInstance = new JobApi(configuration);
 
+let jobId: string; //Job identifier (default to undefined)
 let jobsSubmitJobRequest: JobsSubmitJobRequest; //Quantum job to be submitted (optional)
 
 const { status, data } = await apiInstance.submitJob(
+    jobId,
     jobsSubmitJobRequest
 );
 ```
@@ -385,11 +378,12 @@ const { status, data } = await apiInstance.submitJob(
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
 | **jobsSubmitJobRequest** | **JobsSubmitJobRequest**| Quantum job to be submitted | |
+| **jobId** | [**string**] | Job identifier | defaults to undefined|
 
 
 ### Return type
 
-**JobsSubmitJobResponse**
+**SuccessSuccessResponse**
 
 ### Authorization
 
@@ -408,6 +402,7 @@ const { status, data } = await apiInstance.submitJob(
 |**400** | Bad Request |  -  |
 |**401** | Unauthorized |  -  |
 |**403** | Forbidden |  -  |
+|**404** | Not Found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 

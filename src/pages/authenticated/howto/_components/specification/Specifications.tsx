@@ -1,7 +1,7 @@
 import SwaggerUI from 'swagger-ui-react';
 import clsx from 'clsx';
 import 'swagger-ui-react/swagger-ui.css';
-import { useAuth } from "@/auth/hook";
+import { useAuth } from '@/auth/hook';
 
 export const Specifications = () => {
   const { getCurrentIdToken } = useAuth();
@@ -75,8 +75,8 @@ export const Specifications = () => {
         deepLinking={true}
         requestInterceptor={async (req) => {
           const jwt = await getCurrentIdToken();
-          req.headers["Authorization"] = `Bearer ${jwt}`;
-          return req
+          req.headers['Authorization'] = `Bearer ${jwt}`;
+          return req;
         }}
       />
     </div>

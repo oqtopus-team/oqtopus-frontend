@@ -2,6 +2,7 @@ import { JobStatusType } from '@/domain/types/Job';
 import clsx from 'clsx';
 
 const JobStatusColor = {
+  registered: 'text-status-job-registered',
   submitted: 'text-status-job-submitted',
   ready: 'text-status-job-ready',
   running: 'text-status-job-running',

@@ -1,0 +1,25 @@
+.upload-job-info-progress-bar {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    width: 100%;
+    border-radius: 0.25rem;
+    background-color: #E5E7EB;
+}
+
+.upload-job-info-progress-bar::-webkit-progress-bar {
+    background-color: #E5E7EB;
+    border-radius: 0.25rem;
+}
+
+.upload-job-info-progress-bar::-webkit-progress-value {
+    border-radius: 0.25rem;
+    background-image: linear-gradient(to right, #4887fa, #38bdf7);
+}
+
+.upload-job-info-progress-bar::-moz-progress-bar {
+    background-color: #E5E7EB;
+    border-radius: 0.25rem;
+    background-image: linear-gradient(to right, #4887fa, #38bdf7);
+}

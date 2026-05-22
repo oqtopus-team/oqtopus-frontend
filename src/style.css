@@ -24,6 +24,7 @@
     --divider-bg: 229 231 235;
     --status-device-red: 252 100 100;
     --status-device-green: 67 215 135;
+    --status-job-registered: 76 175 140;
     --status-job-submitted: 76 175 80;
     --status-job-ready: 255 193 7;
     --status-job-running: 33 150 243;
@@ -74,6 +75,7 @@
     --divider-bg: 60 60 60;
     --status-device-red: 252 100 100;
     --status-device-green: 67 215 135;
+    --status-job-registered: 76 175 140;
     --status-job-submitted: 76 175 80;
     --status-job-ready: 255 193 7;
     --status-job-running: 33 150 243;
