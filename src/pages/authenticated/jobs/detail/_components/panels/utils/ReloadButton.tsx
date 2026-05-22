@@ -23,7 +23,7 @@ const ReloadButton: React.FC = () => {
             'cursor-pointer'
           )}
         >
-          <img src="/img/common/reload.svg" alt="Reload Icon" width={16} />
+          <img src="/static_assets/img/common/reload.svg" alt="Reload Icon" width={16} />
         </div>
       </div>
     </h2>

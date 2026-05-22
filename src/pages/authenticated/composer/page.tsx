@@ -30,15 +30,15 @@ const renderOperator = (obs: Observable): JobsS3OperatorItem[] => {
           case 'x':
           case 'y':
           case 'z':
-            return `${prev}${gate._tag.toUpperCase()}${j}`;
+            return `${prev} ${gate._tag.toUpperCase()}${j}`;
 
           case 'emptyCell':
           case 'i':
-            return `${prev}I${j}`;
+            return `${prev} I${j}`;
           default:
             throw new Error('Unexpected gate in the operator!');
         }
-      }, ''),
+      }, '').trim(),
     };
   });
 };

@@ -8,7 +8,7 @@ export const Hero = (): React.ReactElement => {
     <div className={clsx('w-full')}>
       <div
         className={clsx(
-          ["bg-[url('/img/dashboard/mv_bg.png')]", 'bg-center', 'bg-cover'],
+          ["bg-[url('/static_assets/img/dashboard/mv_bg.png')]", 'bg-center', 'bg-cover'],
           ['py-9', 'px-10'],
           'text-primary-content'
         )}

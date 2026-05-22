@@ -51,7 +51,7 @@ const ClipboardCopy: React.FC<ClipboardCopyProps> = ({ text }) => {
           >
             {t('job.detail.text.copied')}
           </span>
-          <img src={'/img/common/check_mark.svg'} />
+          <img src={'/static_assets/img/common/check_mark.svg'} />
         </div>
       )}
     </button>

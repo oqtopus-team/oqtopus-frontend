@@ -110,7 +110,7 @@ export const Sidebar = () => {
             )}
             onClick={classToggle}
           >
-            <img src="/img/common/sidebar_arrow.svg" alt="" width="25" height="25" />
+            <img src="/static_assets/img/common/sidebar_arrow.svg" alt="" width="25" height="25" />
           </div>
           <Spacer className="h-4" />
           <ul className={clsx('flex', 'flex-col', 'gap-[1px]', 'text-sm')}>

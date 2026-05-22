@@ -80,7 +80,7 @@ export function SecurityTab({ login_history_enabled }: SecurityTabProps) {
   }
 
   const handleResetMFA = async () => {
-    navigate('/mfa-reset');
+    navigate('/mfa-invalidation');
   };
 
   const handleDeleteApiToken = async () => {

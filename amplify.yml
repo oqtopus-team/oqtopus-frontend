@@ -14,10 +14,12 @@ frontend:
         - rm -rf node_modules
         - bun install
         # - bun generate -- --src "github:oqtopus-team/oqtopus-cloud" --ref develop --path "/backend/oas/user/openapi.yaml"
-        # download favicon
-        - if [ -n "$FAVICON_SRC_S3" ]; then
-            aws s3 cp "s3://$OQTOPUS_FRONTEND_BUILD_BUCKET/$FAVICON_SRC_S3" ./public/favicon.svg;
-          fi 
+        # sync static_assets dir from S3 bucket
+        - |
+          if [ "$SYNC_STATIC_ASSETS_S3" = "true" ]; then
+            mkdir -p ./public/static_assets
+            aws s3 sync "s3://$OQTOPUS_FRONTEND_BUILD_BUCKET" ./public/static_assets
+          fi
     build:
       commands:
         - bun run build
