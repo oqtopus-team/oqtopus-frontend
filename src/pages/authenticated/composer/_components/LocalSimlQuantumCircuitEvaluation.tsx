@@ -1,22 +1,22 @@
-import { JobsJobType } from "@/api/generated";
-import React, { useMemo } from "react";
-import { QuantumCircuitEvaluationResult } from "@/backend/qulacs/types";
-import clsx from "clsx";
-import { EvaluationStateVectorChart } from "./LocalSimlEvalStateVectorChart";
-import { roundNumber } from "../misc";
+import { JobsJobType } from '@/api/generated';
+import React, { useMemo } from 'react';
+import { QuantumCircuitEvaluationResult } from '@/backend/qulacs/types';
+import clsx from 'clsx';
+import { EvaluationStateVectorChart } from './LocalSimlEvalStateVectorChart';
+import { roundNumber } from '../misc';
 
 export interface Props {
   jobType: JobsJobType;
   qubitNumber: number;
   evaluationResult: QuantumCircuitEvaluationResult;
-};
+}
 
 export const QuantumCircuitEvaluation: React.FC<Props> = (props) => {
   const amplitudeData = useMemo(() => {
     const {
       stateVector: points,
       stateVectorAbsoluted: absPoints,
-      stateVectorArgument: argPoints
+      stateVectorArgument: argPoints,
     } = props.evaluationResult;
 
     return points.map((point, i) => {
@@ -30,18 +30,16 @@ export const QuantumCircuitEvaluation: React.FC<Props> = (props) => {
         stateVectorArgument: roundNumber(argPoints[i], 5),
       };
     });
-  }, [props.evaluationResult, props.qubitNumber])
+  }, [props.evaluationResult, props.qubitNumber]);
 
   return (
     <div
       className={clsx([
-        ['flex', 'items-center',],
+        ['flex', 'items-center'],
         ['select-none', 'cursor-default'],
       ])}
     >
-      <EvaluationStateVectorChart
-        data={amplitudeData}
-      />
+      <EvaluationStateVectorChart data={amplitudeData} />
     </div>
   );
-}
+};

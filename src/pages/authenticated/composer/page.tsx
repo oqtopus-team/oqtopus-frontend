@@ -25,20 +25,22 @@ const renderOperator = (obs: Observable): JobsS3OperatorItem[] => {
   return [...new Array(obs.operators.length)].map((_, i) => {
     return {
       coeff: obs.coeffs[i],
-      pauli: obs.operators[i].reduce((prev, gate, j) => {
-        switch (gate._tag) {
-          case 'x':
-          case 'y':
-          case 'z':
-            return `${prev} ${gate._tag.toUpperCase()}${j}`;
+      pauli: obs.operators[i]
+        .reduce((prev, gate, j) => {
+          switch (gate._tag) {
+            case 'x':
+            case 'y':
+            case 'z':
+              return `${prev} ${gate._tag.toUpperCase()}${j}`;
 
-          case 'emptyCell':
-          case 'i':
-            return `${prev} I${j}`;
-          default:
-            throw new Error('Unexpected gate in the operator!');
-        }
-      }, '').trim(),
+            case 'emptyCell':
+            case 'i':
+              return `${prev} I${j}`;
+            default:
+              throw new Error('Unexpected gate in the operator!');
+          }
+        }, '')
+        .trim(),
     };
   });
 };
