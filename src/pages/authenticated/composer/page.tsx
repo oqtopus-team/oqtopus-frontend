@@ -3,9 +3,9 @@ import { useDocumentTitle } from '@/pages/_hooks/title';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
-import QuantumCircuitComposer from './_components/QuantumCircuitComposer';
+import QuantumCircuitComposer, { QasmFeatures } from './_components/QuantumCircuitComposer';
 import ControlPanel from './_components/ControlPanel';
-import { JobsOperatorItem, JobsSubmitJobRequest } from '@/api/generated';
+import { JobsS3OperatorItem, JobsS3SubmitJobInfo, JobsSubmitJobRequest } from '@/api/generated';
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { circuitContext, QuantumCircuitService } from './circuit';
 import { JobTypeType } from '@/domain/types/Job';
@@ -18,25 +18,29 @@ import { QuantumGate, supportedGates } from './gates';
 import ObservableComposer from './_components/ObservableComposer';
 import { Observable } from './observable';
 import { errorToastConfig, successToastConfig } from '@/config/toast';
+import './page.css';
+import JSZip from 'jszip';
 
-const renderOperator = (obs: Observable): JobsOperatorItem[] => {
+const renderOperator = (obs: Observable): JobsS3OperatorItem[] => {
   return [...new Array(obs.operators.length)].map((_, i) => {
     return {
       coeff: obs.coeffs[i],
-      pauli: obs.operators[i].reduce((prev, gate, j) => {
-        switch (gate._tag) {
-          case 'x':
-          case 'y':
-          case 'z':
-            return `${prev}${gate._tag.toUpperCase()}${j}`;
+      pauli: obs.operators[i]
+        .reduce((prev, gate, j) => {
+          switch (gate._tag) {
+            case 'x':
+            case 'y':
+            case 'z':
+              return `${prev} ${gate._tag.toUpperCase()}${j}`;
 
-          case 'emptyCell':
-          case 'i':
-            return `${prev}I${j}`;
-          default:
-            throw new Error('Unexpected gate in the operator!');
-        }
-      }, ''),
+            case 'emptyCell':
+            case 'i':
+              return `${prev} I${j}`;
+            default:
+              throw new Error('Unexpected gate in the operator!');
+          }
+        }, '')
+        .trim(),
     };
   });
 };
@@ -75,6 +79,14 @@ export default function Page() {
     setDevices(res);
     setBusy(false);
   };
+
+  const [qasmFeatures, setQasmFeatures] = useState<QasmFeatures>({});
+
+  useEffect(() => {
+    setQasmFeatures({
+      customGates: import.meta.env.VITE_APP_COMPOSER_FEAT_CUSTOM_GATE === 'enabled',
+    });
+  }, []);
 
   useEffect(() => {
     return circuitService.onCircuitChange((c) => {
@@ -130,6 +142,15 @@ export default function Page() {
       'keydown',
       (e) => {
         if (currentFocus === '' || currentFocus === 'panel') return;
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          if (currentFocus === 'observable') {
+            observableCircuitService.selectedGates = [];
+          } else {
+            circuitService.selectedGates = [];
+          }
+          return;
+        }
 
         if (currentFocus === 'observable') {
           if (e.key === 'Delete') {
@@ -140,7 +161,7 @@ export default function Page() {
         } else {
           if (e.key === 'Delete') {
             circuitService.selectedGates.toReversed().forEach((g) => circuitService.removeGate(g));
-          } else if (e.key.toUpperCase() === 'G' && e.ctrlKey) {
+          } else if (qasmFeatures.customGates && e.key.toUpperCase() === 'G' && e.ctrlKey) {
             e.preventDefault();
             if (circuitService.selectedGates.length >= 2)
               circuitService.isCustomGateModalOpen = true;
@@ -159,10 +180,28 @@ export default function Page() {
     fetchDevices();
   }, []);
 
-  const handleSubmitJob = async (req: JobsSubmitJobRequest): Promise<void> => {
+  const createZipFile = async (object: Object) => {
+    const zip = new JSZip();
+    zip.file('input.json', JSON.stringify(object, null, 2));
+    const blob = await zip.generateAsync({ type: 'blob' });
+    return new File([blob], 'input.zip', { type: 'application/zip' });
+  };
+
+  const handleSubmitJob = async (
+    req: JobsSubmitJobRequest,
+    jobS3Info: JobsS3SubmitJobInfo
+  ): Promise<void> => {
     setBusy(true);
     try {
-      const jobId = await jobApi.submitJob(req);
+      const { job_id, presigned_url } = await jobApi.registerJob();
+      const { url } = presigned_url;
+      const fileToUpload: File = await createZipFile(jobS3Info);
+      if (!url) {
+        toast.error(t('job.form.toast.register_error'), errorToastConfig);
+        return;
+      }
+      await jobApi.uploadJobToS3(presigned_url, fileToUpload);
+      await jobApi.submitJob(job_id, req);
       toast(t('job.form.toast.success'), successToastConfig);
       setJobId(jobId);
     } catch (e) {
@@ -187,7 +226,7 @@ export default function Page() {
       <hr className={clsx([['w-full', 'my-4'], ['text-neutral-content']])} />
 
       <circuitContext.Provider value={circuitService}>
-        <QuantumCircuitComposer />
+        <QuantumCircuitComposer qasmFeatures={qasmFeatures} />
       </circuitContext.Provider>
 
       {jobType === 'estimation' ? (
@@ -203,18 +242,20 @@ export default function Page() {
       ) : null}
 
       <div id="control-panel-container">
-        <ControlPanel
-          onSubmit={handleSubmitJob}
-          devices={devices}
-          jobId={jobId}
-          jobType={jobType}
-          busy={busy}
-          mkProgram={{
-            program: generateQASMCode(circuit, Object.values(circuitService.customGates)),
-            qubitNumber: circuit.length,
-          }}
-          mkOperator={renderOperator(observable)}
-        />
+        <circuitContext.Provider value={circuitService}>
+          <ControlPanel
+            onSubmit={handleSubmitJob}
+            devices={devices}
+            jobId={jobId}
+            jobType={jobType}
+            busy={busy}
+            mkProgram={{
+              program: generateQASMCode(circuit, Object.values(circuitService.customGates)),
+              qubitNumber: circuit.length,
+            }}
+            mkOperator={renderOperator(observable)}
+          />
+        </circuitContext.Provider>
       </div>
     </>
   );

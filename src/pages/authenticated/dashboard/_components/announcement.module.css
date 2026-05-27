@@ -1,18 +1,17 @@
 .announcements_container {
-    box-shadow: 1px 2px 4px 3px #dadada;
     border-radius: 1px;
     position: relative;
     font-family: sans-serif;
 
     * {
-        color: #39383a
+        color: rgb(var(--base-content))
     }
 }
 
 .post_header {
-    background: #fafafa;
+    background: rgb(var(--base-card));
     padding: 10px;
-    border-bottom: 1px solid #bcbcbc;
+    border-bottom: 1px solid rgb(var(--neutral-content));
     display: flex;
     flex-direction: column;
     align-items: flex-start;

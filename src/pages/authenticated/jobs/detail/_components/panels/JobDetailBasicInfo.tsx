@@ -21,13 +21,14 @@ export interface JobDetailBasicInfoProps {
   executionTime: number;
   message?: string;
 }
+
 interface BoldThProps extends React.ThHTMLAttributes<HTMLTableCellElement> {
   children: React.ReactNode;
 }
 
 const BoldTh: React.FC<BoldThProps> = ({ children, className, ...props }) => {
   return (
-    <th className={clsx('font-bold', 'text-lg')} style={{ color: 'black' }} {...props}>
+    <th className={clsx('font-bold', 'text-lg', 'text-base-content')} {...props}>
       {children}
     </th>
   );

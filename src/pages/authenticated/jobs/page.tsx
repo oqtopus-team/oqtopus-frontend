@@ -19,6 +19,8 @@ import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
 import { useJobAPI } from '@/backend/hook';
 import { ConfirmModal } from '@/pages/_components/ConfirmModal';
+import { BsTrashFill, BsXCircleFill } from 'react-icons/bs';
+import { list } from 'postcss';
 
 const PAGE_SIZE = 10; // The limit of items to fetch in one request
 
@@ -48,6 +50,8 @@ export default function JobListPage() {
           params.status = value as JobStatusType;
         } else if (key === 'query') {
           params[key] = value;
+        } else if (key === 'from' || key === 'to') {
+          if (isValidDateString(value)) params[key] = value;
         }
       });
       return params;
@@ -148,10 +152,17 @@ export default function JobListPage() {
         mappedParams.status = value as JobStatusType;
       } else if (key === 'query') {
         mappedParams[key] = value;
+      } else if (key === 'from' || key === 'to') {
+        if (isValidDateString(value)) mappedParams[key] = value;
       }
     });
 
     return mappedParams;
+  };
+
+  const isValidDateString = (dateString: string): boolean => {
+    const date = new Date(dateString);
+    return !Number.isNaN(date.getTime());
   };
 
   const handleJobSelectionChange = (job: Job, selected: boolean) => {
@@ -163,11 +174,10 @@ export default function JobListPage() {
   };
 
   const handleAllJobsSelectionChange = (selected: boolean) => {
-    //TODO: Add handling "status" to getJobs request and remove code below
-    if (!params.status && selected) {
+    if (!params.query && selected) {
       setSelectedJobs(jobs);
-    } else if (params.status && selected) {
-      setSelectedJobs(jobs.filter((j) => j.status === params.status));
+    } else if (params.query && selected) {
+      setSelectedJobs(jobs.filter(filterJobsByQuery));
     } else {
       setSelectedJobs([]);
     }
@@ -208,9 +218,10 @@ export default function JobListPage() {
   };
 
   const areAllJobsSelected = () => {
+    const visibleJobs = params.query ? jobs.filter(filterJobsByQuery) : jobs;
     return (
-      jobs.length > 0 &&
-      jobs.every((j) => selectedJobs.some((selectedJob) => selectedJob.id === j.id))
+      visibleJobs.length > 0 &&
+      visibleJobs.every((j) => selectedJobs.some((selectedJob) => selectedJob.id === j.id))
     );
   };
 
@@ -224,10 +235,22 @@ export default function JobListPage() {
     );
   };
 
+  const filterJobsByQuery = (job: Job): boolean => {
+    if (
+      params.query &&
+      !job.id.includes(params.query) &&
+      !job.name.includes(params.query) &&
+      !job.description?.includes(params.query)
+    ) {
+      return false;
+    }
+
+    return true;
+  };
+
   useEffect(() => {
-    //TODO: Add handling "status" to getJobs request and remove code below
     setSelectedJobs([]);
-  }, [params.status]);
+  }, [params.query]);
 
   return (
     <div>
@@ -250,7 +273,7 @@ export default function JobListPage() {
               'cursor-pointer'
             )}
           >
-            <img src="/img/common/reload.svg" alt="Reload Icon" width={16} />
+            <img src="/static_assets/img/common/reload.svg" alt="Reload Icon" width={16} />
           </div>
         </div>
       </h2>
@@ -271,14 +294,20 @@ export default function JobListPage() {
               disabled={isDeleteSelectedDisabled()}
               onClick={() => setShowBulkDeleteModal(true)}
             >
-              {t('job.list.delete_selected')}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <BsTrashFill />
+                <span>{t('job.list.operation.delete')}</span>
+              </div>
             </Button>
             <Button
               color={isCancelSelectedDisabled() ? 'disabled' : 'secondary'}
               disabled={isCancelSelectedDisabled()}
               onClick={() => setShowBulkCancelModal(true)}
             >
-              {t('job.list.cancel_selected')}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <BsXCircleFill />
+                <span>{t('job.list.operation.cancel')}</span>
+              </div>
             </Button>
           </section>
           <InfiniteScroll
@@ -289,40 +318,24 @@ export default function JobListPage() {
           >
             <table className={clsx('w-full')}>
               <thead>
-              <tr>
-                <th>
-                  <input
-                    type="checkbox"
-                    checked={areAllJobsSelected()}
-                    onChange={(e) => handleAllJobsSelectionChange(e.target.checked)}
-                  />
-                </th>
-                <th>{t('job.list.table.id')}</th>
-                <th>{t('job.list.table.name')}</th>
-                <th>{t('job.list.table.device')}</th>
-                <th>{t('job.list.table.status')}</th>
-                <th>{t('job.list.table.date')}</th>
-                <th>{t('job.list.table.operation')}</th>
-              </tr>
+                <tr>
+                  <th>
+                    <input
+                      type="checkbox"
+                      checked={areAllJobsSelected()}
+                      onChange={(e) => handleAllJobsSelectionChange(e.target.checked)}
+                    />
+                  </th>
+                  <th>{t('job.list.table.id')}</th>
+                  <th>{t('job.list.table.name')}</th>
+                  <th>{t('job.list.table.device')}</th>
+                  <th>{t('job.list.table.status')}</th>
+                  <th>{t('job.list.table.date')}</th>
+                  <th>{t('job.list.table.operation')}</th>
+                </tr>
               </thead>
               <tbody>
-              {jobs
-                .filter((job) => {
-                  if (params.status && job.status !== params.status) {
-                    return false;
-                  }
-                  if (
-                    params.query &&
-                    !job.id.includes(params.query) &&
-                    !job.name.includes(params.query) &&
-                    !job.description?.includes(params.query)
-                  ) {
-                    return false;
-                  }
-
-                  return true;
-                })
-                .map((job) => (
+                {jobs.filter(filterJobsByQuery).map((job) => (
                   <JobListItem
                     key={job.id}
                     job={job}
@@ -331,20 +344,20 @@ export default function JobListPage() {
                     onJobSelectionChange={handleJobSelectionChange}
                   />
                 ))}
-              {!loading && jobs.length === 0 && (
-                <tr>
-                  <td colSpan={4}>{t('job.list.nodata')}</td>
-                </tr>
-              )}
-              {loading && (
-                <tr>
-                  <td colSpan={5} className={clsx('text-center')}>
-                    <div className={clsx('justify-center')}>
-                      <Loader />
-                    </div>
-                  </td>
-                </tr>
-              )}
+                {!loading && jobs.length === 0 && (
+                  <tr>
+                    <td colSpan={4}>{t('job.list.nodata')}</td>
+                  </tr>
+                )}
+                {loading && (
+                  <tr>
+                    <td colSpan={5} className={clsx('text-center')}>
+                      <div className={clsx('justify-center')}>
+                        <Loader />
+                      </div>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </InfiniteScroll>
@@ -404,7 +417,6 @@ const Loadmore = (props: { handleClick: () => void }) => {
 };
 
 const generateSearchParams = (params: JobSearchParams): string => {
-  console.log('params', params);
   const searchParams = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
     if (value === undefined || value === '') {

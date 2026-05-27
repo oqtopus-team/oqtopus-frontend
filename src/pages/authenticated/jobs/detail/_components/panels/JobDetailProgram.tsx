@@ -12,6 +12,9 @@ import { circuitContext, QuantumCircuitService } from '@/pages/authenticated/com
 import { Switch } from '@mui/material';
 import { parseCircuitJSON } from '@/pages/authenticated/composer/qasm';
 import { DndContextProvider } from '@/pages/authenticated/composer/dragging';
+import { CodeEditor } from '@/pages/authenticated/composer/_components/CodeEditor';
+import { BsCodeSlash } from 'react-icons/bs';
+import { ThemeOptions, useTheme } from '@/theme/useTheme';
 
 export interface JobDetailProgramProps {
   program: string[];
@@ -23,14 +26,24 @@ const isSentFromComposer = (program: string): boolean => {
   const trimmed = program.trim();
   return trimmed.startsWith('// Sent from OQTOPUS composer');
 };
+
+const programLengthLimit = Math.pow(2, 16);
+
+const limitProgram = (program: string): [string, boolean] => {
+  return program.length > programLengthLimit
+    ? [program.substring(0, programLengthLimit) + '...', true]
+    : [program, false];
+};
+
 export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
   jobInfo: JobDetailProgramProps
 ) => {
   const { t } = useTranslation();
-  const text = jobInfo.program.join('\n');
+  const [text, programExceededMaxDisplayLength] = limitProgram(jobInfo.program.join('\n'));
   const sentFromComposer = isSentFromComposer(text);
   const [circuitService] = useState<QuantumCircuitService>(new QuantumCircuitService(0, 0, []));
   const [showCode, setShowCode] = useState(false);
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (isSentFromComposer(text)) {
@@ -54,16 +67,28 @@ export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
         {sentFromComposer ? (
           <div className="flex items-center">
             <span className={clsx([['text-primary', 'cursor-pointer', 'm-2']])}>
-              <img src="/img/common/icon-code.svg" width={32} height={32} />
+              <BsCodeSlash />
             </span>
             <Switch value={showCode} onChange={() => setShowCode(!showCode)} />
             <span className={clsx([['text-primary', 'cursor-pointer', 'm-2']])}>
-              <img src="/img/common/icon-quantum-circuit.svg" width={24} height={24} />
+              <img
+                src="/static_assets/img/common/icon-quantum-circuit.svg"
+                width={24}
+                height={24}
+              />
             </span>
           </div>
         ) : null}
       </div>
       <Spacer className="h-2" />
+      {programExceededMaxDisplayLength && (
+        <>
+          <span className={clsx('text-xs')}>
+            {t('job.detail.program.too_large_to_fully_display')}
+          </span>
+          <Spacer className="h-2" />
+        </>
+      )}
       {jobInfo.program === undefined || jobInfo.program === null || jobInfo.program.length === 0 ? (
         <div className={clsx('text-xs')}>{t('job.detail.program.nodata')}</div>
       ) : (
@@ -79,7 +104,11 @@ export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
             <div className={clsx('relative')}>
               <div className={clsx('p-3', 'rounded', 'bg-cmd-bg', 'text-sm')}>
                 <SimpleBar style={{ maxHeight: jobInfo.maxHeight }}>
-                  <div className={clsx('whitespace-pre-wrap')}>{text}</div>
+                  <CodeEditor
+                    disabled={true}
+                    code={text}
+                    fixedTheme={theme === ThemeOptions.DARK ? 'okaidia' : 'default'}
+                  />
                 </SimpleBar>
               </div>
               <ClipboardCopy text={text} />

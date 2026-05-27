@@ -26,7 +26,6 @@ export const AnnouncementPost = ({ announcement, style: propsStyle }: PostProps)
     if (!contentRef.current) return;
 
     const observer = new ResizeObserver((entries) => {
-      console.log('observer work');
       const entry = entries[0];
       const scrollHeight = entry.target.scrollHeight;
 
@@ -62,7 +61,7 @@ export const AnnouncementPost = ({ announcement, style: propsStyle }: PostProps)
   };
 
   return (
-    <div className={styles.announcements_container}>
+    <div className={clsx([styles.announcements_container, 'shadow-lg'])}>
       <div className={styles.post_header}>
         <span className={styles.post_title}>{announcement.title}</span>
         <span className={styles.post_time}>

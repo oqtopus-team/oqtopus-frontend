@@ -13,7 +13,7 @@ export default {
   confirm: {
     title: 'Enter one-time password',
     form: {
-      totp_code: 'one-time password(TOTP Code)',
+      totp_code: 'one-time password (TOTP Code)',
       totp_code_explanation: 'Enter the one-time password from the MFA application.',
       error_message: {
         code: 'Please enter one-time password',
@@ -31,5 +31,14 @@ export default {
     totp_setup_failed: 'Failed to set up TOTP.',
     totp_verification_failed: 'TOTP verification failed.',
     api_token_reissue_failed: 'Failed to reissue API token.',
+  },
+  auth: {
+    message: {
+      error: {
+        authorize: 'Authorization failed.',
+        logout: 'Logout failed.',
+        noMFA: 'Please set up MFA.',
+      },
+    },
   },
 };

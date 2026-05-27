@@ -1,15 +1,12 @@
-import { ErrorBoundary as ErrorBoundaryNative } from 'react-error-boundary';
+import { ErrorBoundary as ErrorBoundaryNative, FallbackProps } from 'react-error-boundary';
 import { ErrorBoundaryProps } from 'react-error-boundary';
 
-interface FallbackProps {
-  error?: Error;
-}
-
 function fallbackRender({ error }: FallbackProps) {
+  const errorMessage = error instanceof Error ? error.message : String(error);
   return (
     <div role="alert">
       <p>Something went wrong:</p>
-      <pre style={{ color: 'red' }}>{error?.message}</pre>
+      <pre style={{ color: 'red' }}>{errorMessage}</pre>
     </div>
   );
 }

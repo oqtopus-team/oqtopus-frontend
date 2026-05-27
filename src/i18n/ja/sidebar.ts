@@ -6,6 +6,7 @@ export default {
     job: 'ジョブ',
     document: 'APIドキュメント',
     announcements: 'お知らせ',
+    settings: '設定',
     logout: 'ログアウト',
   },
 };

@@ -44,6 +44,9 @@ export default {
       nodata: 'Data does not exist.',
       invalid_device_info: 'Topology information is invalid',
       fit_to_view: 'Fit to View',
+      qubit_metric: 'Qubit Metric',
+      coupling_metric: 'Coupling Metric',
+      color_scale: 'Color Scale',
     },
     qubits_info: {
       header: 'Value per qubit',

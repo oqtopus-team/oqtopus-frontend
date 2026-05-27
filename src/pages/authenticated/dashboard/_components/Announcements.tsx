@@ -51,9 +51,9 @@ export const Announcements = (props: AnnouncementProps): React.ReactElement => {
   return (
     <>
       <div className={clsx('flex', 'justify-between', 'items-center')}>
-        <div className={clsx('text-base', 'font-bold', 'text-primary')}>
+        <h2 className={clsx('text-primary', 'text-2xl', 'font-bold')}>
           {t('dashboard.announcements.title')}
-        </div>
+        </h2>
       </div>
       <Spacer className="h-4" />
       <div className={clsx('grid', 'gap-[23px]')}>

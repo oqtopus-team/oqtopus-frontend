@@ -3,12 +3,18 @@ import { userApiContext } from './Provider';
 import {
   DevicesDeviceInfo,
   GetAnnouncementsListOrderEnum,
-  JobsGetJobsResponse,
+  JobsJob,
+  JobsJobInfo,
+  JobsJobInfoUploadPresignedURL,
+  JobsRegisterJobResponse,
   JobsSubmitJobRequest,
+  UsersUpdateUserRequest,
 } from '@/api/generated';
-import { Job, JobSearchParams } from '@/domain/types/Job';
+import { Job, JobS3Data, JobSearchParams } from '@/domain/types/Job';
 import { Device } from '@/domain/types/Device';
 import type { RawAxiosRequestConfig } from 'axios';
+import axios from 'axios';
+import JSZip from 'jszip';
 
 interface AnnouncementsApi {
   offset?: string;
@@ -18,17 +24,84 @@ interface AnnouncementsApi {
   order?: GetAnnouncementsListOrderEnum;
 }
 
+async function convertZipBlobToObject(zipBlob: Blob) {
+  const zip = await JSZip.loadAsync(zipBlob);
+  const [_, file] = Object.entries(zip.files)[0] ?? []; // we assume we have exactly 1 file inside ZIP
+
+  if (!file) return;
+
+  const fileContent = await file.async('string');
+  return JSON.parse(fileContent);
+}
+
 export const useJobAPI = () => {
   const api = useContext(userApiContext);
+
+  const registerJob = (): Promise<JobsRegisterJobResponse> => {
+    return api.job.registerJobId().then((res) => res.data);
+  };
+
+  const uploadJobToS3 = async (
+    presigned_url: JobsJobInfoUploadPresignedURL,
+    jobFile: File,
+    setUploadProgressPercent?: (progress: number) => void
+  ): Promise<void> => {
+    const { url, fields } = presigned_url;
+    if (!url || !fields) throw new Error('missing presigned URL data');
+
+    const formData = new FormData();
+    for (const [k, v] of Object.entries(fields)) {
+      if (!v) continue;
+      formData.append(k, v);
+    }
+
+    formData.append('file', jobFile);
+    const response = await axios.post(url, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress(progressEvent) {
+        if (!progressEvent.total) return;
+        const progressPercent = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+        setUploadProgressPercent?.(progressPercent);
+      },
+    });
+  };
+
+  const retrieveJobFiles = async (jobInfo: JobsJobInfo): Promise<JobS3Data> => {
+    const { input, transpile_result, result, combined_program } = jobInfo;
+    const jobS3Data: JobS3Data = {
+      input: await axios
+        .get(input, { responseType: 'blob' })
+        .then((r) => convertZipBlobToObject(r.data)),
+    };
+
+    if (transpile_result) {
+      jobS3Data.transpileResult = await axios
+        .get(transpile_result, { responseType: 'blob' })
+        .then((r) => convertZipBlobToObject(r.data));
+    }
+    if (result) {
+      jobS3Data.result = await axios
+        .get(result, { responseType: 'blob' })
+        .then((r) => convertZipBlobToObject(r.data));
+    }
+    if (combined_program) {
+      jobS3Data.combinedProgram = await axios
+        .get(combined_program, { responseType: 'blob' })
+        .then((r) => convertZipBlobToObject(r.data));
+    }
+
+    return jobS3Data;
+  };
 
   /**
    * @returns Promise job id
    */
   const submitJob = async (
     // TODO: fix invalid oas schema (invalid fields: status, created_at, updated_at)
+    job_id: string,
     job: JobsSubmitJobRequest
   ): Promise<string /* job id */> => {
-    return api.job.submitJob(job).then((res) => res.data.job_id);
+    return api.job.submitJob(job_id, job).then((res) => res.data.message);
   };
 
   const getLatestJobs = async (
@@ -39,8 +112,9 @@ export const useJobAPI = () => {
     return api.job
       .listJobs(
         'job_id,name,description,device_id,status,submitted_at',
-        undefined,
-        undefined,
+        convertToDateIfValid(params.from)?.toISOString(),
+        convertToDateIfValid(params.to)?.toISOString(),
+        params.status,
         params.query ?? '',
         page,
         pageSize,
@@ -67,36 +141,51 @@ export const useJobAPI = () => {
   };
 
   const getSselog = async (
-    job_id: string
-  ): Promise<{ file: string | null; file_name: string | null; status: number }> => {
-    return api.job
-      .getSselog(job_id)
-      .then((res) => {
-        return {
-          file: res.data.file ?? null,
-          file_name: res.data.file_name ?? null,
-          status: res.status,
-        };
-      })
-      .catch((error) => {
-        console.log(error);
-        return {
-          file: null,
-          file_name: null,
-          status: error.response.status,
-        };
-      });
+    sselogFileURL: string
+  ): Promise<{ file: Blob | null; status: number }> => {
+    try {
+      const res = await axios.get(sselogFileURL, { responseType: 'blob' });
+
+      return {
+        file: res.data,
+        status: res.status,
+      };
+    } catch (error: any) {
+      return {
+        file: null,
+        status: error.response.status,
+      };
+    }
   };
 
-  return { submitJob, getLatestJobs, getJob, cancelJob, deleteJob, getSselog };
+  return {
+    registerJob,
+    uploadJobToS3,
+    retrieveJobFiles,
+    submitJob,
+    getLatestJobs,
+    getJob,
+    cancelJob,
+    deleteJob,
+    getSselog,
+  };
 };
 
-const convertJobResult = (job: JobsGetJobsResponse): Job => ({
+const convertToDateIfValid = (dateString: string | undefined): Date | undefined => {
+  if (!dateString) return undefined;
+
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return undefined;
+
+  return date;
+};
+
+const convertJobResult = (job: JobsJob): Job => ({
   id: job.job_id ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   name: job.name ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   description: job.description,
   jobType: job.job_type!,
-  status: job.status ?? 'unknown',
+  status: job.status!,
   deviceId: job.device_id ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   shots: job.shots ?? 0, // TODO: fix invalid oas schema (nullable: should be false)
   jobInfo: job.job_info!,
@@ -144,6 +233,52 @@ const convertDeviceResult = (device: DevicesDeviceInfo): Device => ({
   calibratedAt: device.calibrated_at ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   description: device.description,
 });
+
+export const useUserAPI = () => {
+  const api = useContext(userApiContext);
+
+  const getCurrentUser = async () => {
+    return api.user.getCurrentUser().then((res) => res.data);
+  };
+
+  const updateCurrentUser = async (userData: UsersUpdateUserRequest) => {
+    return api.user.updateCurrentUser(userData);
+  };
+
+  const deleteCurrentUser = async () => {
+    return api.user.deleteCurrentUser().then((res) => res.data);
+  };
+
+  return { getCurrentUser, updateCurrentUser, deleteCurrentUser };
+};
+
+export const useApiTokenAPI = () => {
+  const api = useContext(userApiContext);
+
+  const getApiTokenStatus = async () => {
+    return api.apiToken.getApiTokenStatus().then((res) => res.data);
+  };
+
+  const createApiToken = async () => {
+    return api.apiToken.createApiToken().then((res) => res.data);
+  };
+
+  const deleteApiToken = async () => {
+    return api.apiToken.deleteApiToken().then((res) => res.data);
+  };
+
+  return { getApiTokenStatus, createApiToken, deleteApiToken };
+};
+
+export const useSettingsAPI = () => {
+  const api = useContext(userApiContext);
+
+  const getCurrentSettings = async () => {
+    return api.settings.getCurrentSettings().then((res) => res.data);
+  };
+
+  return { getCurrentSettings };
+};
 
 export const useAnnouncementsAPI = () => {
   const api = useContext(userApiContext);

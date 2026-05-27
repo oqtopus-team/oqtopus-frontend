@@ -32,7 +32,7 @@ export default () => {
         ])}
         onClick={() => circuitService.toggleMode('eraser')}
       >
-        <img className="p-2" src={`/img/composer/eraser.svg`} />
+        <img className="p-2" src={`/static_assets/img/composer/eraser.svg`} />
       </div>
     </div>
   );

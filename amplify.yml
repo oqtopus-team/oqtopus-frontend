@@ -4,11 +4,22 @@ frontend:
   phases:
     preBuild:
       commands:
+        # Set Node.js version (AWS Amplify uses nvm)
+        - nvm install 20
+        - nvm use 20
         # install bun
         - curl -fsSL https://bun.sh/install | bash
         - source /root/.bash_profile
+        - bun --version
+        - rm -rf node_modules
         - bun install
         # - bun generate -- --src "github:oqtopus-team/oqtopus-cloud" --ref develop --path "/backend/oas/user/openapi.yaml"
+        # sync static_assets dir from S3 bucket
+        - |
+          if [ "$SYNC_STATIC_ASSETS_S3" = "true" ]; then
+            mkdir -p ./public/static_assets
+            aws s3 sync "s3://$OQTOPUS_FRONTEND_BUILD_BUCKET" ./public/static_assets
+          fi
     build:
       commands:
         - bun run build
@@ -18,4 +29,4 @@ frontend:
       - '**/*'
   cache:
     paths:
-      - node_modules/**/*
+      - ~/.bun/install/cache/**/*

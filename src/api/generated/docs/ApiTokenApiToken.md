@@ -5,6 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**api_token_id** | **string** | The api token id | [optional] [default to undefined]
 **api_token_secret** | **string** | The api token secret | [optional] [default to undefined]
 **api_token_expiration** | **string** | The expiration date of the api token | [optional] [default to undefined]
 
@@ -14,6 +15,7 @@ Name | Type | Description | Notes
 import { ApiTokenApiToken } from './api';
 
 const instance: ApiTokenApiToken = {
+    api_token_id,
     api_token_secret,
     api_token_expiration,
 };

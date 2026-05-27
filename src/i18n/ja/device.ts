@@ -44,6 +44,9 @@ export default {
       nodata: 'データが存在しません',
       invalid_device_info: 'トポロジー情報が無効です',
       fit_to_view: '画面に合わせる',
+      qubit_metric: '量子ビット',
+      coupling_metric: '結合指標',
+      color_scale: 'カラースケール',
     },
     qubits_info: {
       header: '量子ビットごとの値',

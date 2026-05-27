@@ -1,10 +1,19 @@
-import { JobsOperatorItem, JobsSubmitJobInfo, JobsSubmitJobRequest } from '@/api/generated';
+import {
+  JobsS3OperatorItem,
+  JobsS3SubmitJobInfo,
+  JobsJobType,
+  JobsSubmitJobRequest,
+} from '@/api/generated';
 import { Device } from '@/domain/types/Device';
 import { JobTypeType } from '@/domain/types/Job';
 import clsx from 'clsx';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { JobForm } from '@/pages/authenticated/jobs/_components/JobForm';
+import { LocalSimulationTabContent } from './LocalSimulationTabContent';
+import { RealComposerGate } from '../composer';
+import { isParametrizedGate } from '../gates';
+import { circuitContext } from '../circuit';
 
 export type TabPanelItem = { id: string; label: string; disabled: boolean };
 
@@ -88,35 +97,71 @@ export interface ControlPanelProps {
   busy: boolean;
   jobId: null | string;
   mkProgram: { program: string; qubitNumber: number };
-  mkOperator: JobsOperatorItem[];
-  onSubmit: (req: JobsSubmitJobRequest) => Promise<void>;
+  mkOperator: JobsS3OperatorItem[];
+  onSubmit: (req: JobsSubmitJobRequest, jobS3Info: JobsS3SubmitJobInfo) => Promise<void>;
 }
 
 export default (props: ControlPanelProps) => {
   const { t } = useTranslation();
-
-  const tabItems = ['exec', 'siml'].map((id) => ({
+  const tabItems = ['siml', 'exec'].map((id) => ({
     id,
     label: t(`composer.control_panel.${id}.tab_label`),
-    disabled: id == 'siml',
+    disabled: false,
   }));
+  const composerCircuitService = useContext(circuitContext);
+  const [selectedGates, setSelectedGates] = useState<RealComposerGate[]>([]);
+
+  useEffect(() => {
+    return composerCircuitService.onSelectedGatesChange((gs) => {
+      setSelectedGates(gs);
+    });
+  }, [composerCircuitService]);
+
+  const selectedParametricGatePosition = useMemo(() => {
+    if (selectedGates.length == 1) {
+      const selectedGate = selectedGates[0];
+      if (isParametrizedGate(selectedGate)) {
+        return {
+          step: selectedGate.column,
+          index: selectedGate.row,
+        };
+      }
+    }
+    return undefined;
+  }, [selectedGates]);
+
   return (
     <>
       <TabPanels
         tabItems={tabItems}
         tabContent={(item) => {
           switch (item.id) {
+            case 'siml':
+              return (
+                <LocalSimulationTabContent
+                  jobType={props.jobType}
+                  qubitNumber={props.mkProgram.qubitNumber}
+                  program={props.mkProgram.program}
+                  observable={props.jobType == 'estimation' ? props.mkOperator : undefined}
+                  selectedParametricGatePosition={selectedParametricGatePosition}
+                />
+              );
+
             case 'exec':
               return (
                 <JobForm
                   mkProgram={props.mkProgram}
                   mkOperator={props.mkOperator}
                   isAdvancedSettingsOpen={false}
-                  displayFields={{ program: false }}
+                  jobType={props.jobType}
+                  displayFields={{
+                    program: false,
+                    type: false,
+                    operator: false,
+                    fileUpload: false,
+                  }}
                 />
               );
-            case 'siml':
-              return <></>;
             default:
               return null;
           }

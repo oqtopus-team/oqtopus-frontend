@@ -23,7 +23,6 @@ import { Spacer } from '@/pages/_components/Spacer';
 import { TextArea } from '@/pages/_components/TextArea';
 import { ConfirmModal } from '@/pages/_components/ConfirmModal';
 import { Divider } from '@/pages/_components/Divider';
-import { Toggle } from '@/pages/_components/Toggle';
 import JobFileUpload from '@/pages/authenticated/jobs/form/_components/JobFileUpload';
 import { Button } from '@/pages/_components/Button';
 import { Card } from '@/pages/_components/Card';
@@ -32,26 +31,36 @@ import { FieldError, FieldErrorsImpl, Merge, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { NavLink, useNavigate } from 'react-router';
 import { useDeviceAPI, useJobAPI } from '@/backend/hook';
-import { JobsJobType, JobsOperatorItem } from '@/api/generated';
+import { JobsJobType, JobsS3OperatorItem } from '@/api/generated';
 import * as yup from 'yup';
 import { Device } from '@/domain/types/Device';
 import { toast } from 'react-toastify';
 import i18next, { TFunction } from 'i18next';
+import { CodeEditor } from '../../composer/_components/CodeEditor';
+import JobProgramUpload from '../form/_components/JobProgramUpload';
+import JobUploadProgressModal from '../form/_components/JobUploadProgressModal';
+import JSZip from 'jszip';
 
 interface FormInput {
-  name: string;
+  name?: string;
   description?: string;
   shots: number;
   deviceId: string;
   type: JobsJobType;
-  program: string;
+  program?: string;
   programType: ProgramType;
   transpilerType: TranspilerTypeType | 'Custom';
   mitigationType: MitigationTypeType | 'Custom';
   transpiler?: string;
   simulator?: string;
   mitigation?: string;
-  operator: JobsOperatorItem[];
+  operator?: JobsS3OperatorItem[];
+  jobInfo?: File;
+}
+
+enum JobInfoProviderMethod {
+  FILE_UPLOAD = 'file_upload',
+  FORM_INPUT = 'form_input',
 }
 
 type Program = { program: string; qubitNumber: number };
@@ -77,14 +86,14 @@ const operatorItemSchema = (t: (key: string) => string) =>
     pauli: yup
       .string()
       .required(t('job.form.error_message.operator.pauli_required'))
-      .matches(/^([IXYZ][0-9]+)*$/, t('job.form.error_message.operator.pauli_match'))
+      .matches(/^([IXYZ]\s*[0-9]+\s*)*$/, t('job.form.error_message.operator.pauli_match'))
       .min(1, t('job.form.error_message.operator.pauli_empty')),
     coeff: yup.number().required(t('job.form.error_message.operator.coeff_required')),
   });
 
 const validationRules = (t: TFunction<'translation', undefined>): yup.ObjectSchema<FormInput> =>
   yup.object({
-    name: yup.string().required(t('job.form.error_message.name')),
+    name: yup.string(),
     description: yup.string(),
     shots: yup
       .number()
@@ -117,21 +126,42 @@ const validationRules = (t: TFunction<'translation', undefined>): yup.ObjectSche
       }),
     type: yup.mixed<JobsJobType>().required(t('job.form.error_message.type')),
     programType: yup.mixed<ProgramType>().required(),
-    program: yup.string().required(t('job.form.error_message.program')),
+    program: yup.string().when('jobInfo', {
+      is: (jobInfo: any) => !jobInfo,
+      then: (schema) => schema.required(t('job.form.error_message.program')),
+      otherwise: (schema) => schema.notRequired(),
+    }),
     transpilerType: yup.mixed<TranspilerTypeType>().required(),
     transpiler: yup.string().test('', t('job.form.error_message.invalid_json'), isJsonParsable),
     simulator: yup.string().test('', t('job.form.error_message.invalid_json'), isJsonParsable),
     mitigationType: yup.mixed<MitigationTypeType>().required(),
     mitigation: yup.string().test('', t('job.form.error_message.invalid_json'), isJsonParsable),
-    operator: yup.array().of(operatorItemSchema(t)).required(),
+    operator: yup
+      .array()
+      .of(operatorItemSchema(t))
+      .when('jobInfo', {
+        is: (jobInfo: any) => !jobInfo,
+        then: (schema) => schema.required(),
+        otherwise: (schema) => schema.notRequired(),
+      }),
+    jobInfo: yup
+      .mixed<File>()
+      .test('', t('job.form.error_message.job_info_must_be_zip_file'), (v) => {
+        if (v === undefined) return true;
+        return v instanceof File && v.name.toLowerCase().endsWith('.zip');
+      }),
   });
 
 interface JobFormProps {
   mkProgram?: Program;
-  mkOperator?: JobsOperatorItem[];
+  mkOperator?: JobsS3OperatorItem[];
   isAdvancedSettingsOpen?: boolean;
+  jobType?: JobsJobType;
   displayFields?: {
     program?: boolean;
+    type?: boolean;
+    operator?: boolean;
+    fileUpload?: boolean;
   };
 }
 
@@ -139,9 +169,22 @@ export const JobForm = (componentProps: JobFormProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { getDevices } = useDeviceAPI();
-  const { submitJob } = useJobAPI();
-  const { displayFields = { program: true }, ...props } = componentProps;
+  const { registerJob, uploadJobToS3, submitJob } = useJobAPI();
+  const {
+    displayFields = { program: true, type: true, operator: true, fileUpload: true },
+    ...props
+  } = componentProps;
   const [devices, setDevices] = useState<Device[]>([]);
+  const [jobInfoProvider, setJobInfoProvider] = useState(
+    displayFields.fileUpload ? JobInfoProviderMethod.FILE_UPLOAD : JobInfoProviderMethod.FORM_INPUT
+  );
+  const [showJobUploadProgressModal, setShowJobUploadProgressModal] = useState(false);
+
+  const [registerUploadStageDone, setRegisterUploadStageDone] = useState(false);
+  const [jobInfoUploadStageDone, setJobInfoUploadStageDone] = useState(false);
+  const [jobInfoUploadProgressPercent, setJobInfoUploadProgressPercent] = useState(0);
+  const [submitUploadStageDone, setSubmitUploadStageDone] = useState(false);
+  const [submitUploadFailed, setSubmitUploadFailed] = useState(false);
 
   const {
     handleSubmit,
@@ -160,7 +203,7 @@ export const JobForm = (componentProps: JobFormProps) => {
     defaultValues: {
       name: '',
       description: '',
-      type: JOB_TYPE_DEFAULT,
+      type: props.jobType ?? JOB_TYPE_DEFAULT,
       mitigation: '{}',
       programType: PROGRAM_TYPE_DEFAULT,
       program: '',
@@ -169,18 +212,18 @@ export const JobForm = (componentProps: JobFormProps) => {
       shots: SHOTS_DEFAULT,
       operator: [],
       simulator: '{}',
+      jobInfo: undefined,
     },
   });
 
-  const [mitigationType, mitigation, transpilerType, program, jobType, operator] =
-    watch([
-      'mitigationType',
-      'mitigation',
-      'transpilerType',
-      'program',
-      'type',
-      'operator',
-    ]);
+  const [mitigationType, mitigation, transpilerType, program, jobType, operator] = watch([
+    'mitigationType',
+    'mitigation',
+    'transpilerType',
+    'program',
+    'type',
+    'operator',
+  ]);
 
   useLayoutEffect(() => {
     getDevices().then((devices) => setDevices(devices));
@@ -209,9 +252,20 @@ export const JobForm = (componentProps: JobFormProps) => {
   useEffect(() => {
     if (props.mkProgram) {
       setValue('program', props.mkProgram?.program);
-      setValue('operator', props.mkOperator ?? [{ pauli: '', coeff: 1.0 }]);
     }
   }, [props.mkProgram?.program]);
+
+  useEffect(() => {
+    if (props.mkOperator) {
+      setValue('operator', props.mkOperator);
+    }
+  }, [props.mkOperator]);
+
+  useEffect(() => {
+    if (props.jobType) {
+      setValue('type', props.jobType);
+    }
+  }, [props.jobType]);
 
   // Change templates after changing types
   useEffect(() => {
@@ -221,7 +275,9 @@ export const JobForm = (componentProps: JobFormProps) => {
   }, [transpilerType]);
   useEffect(() => {
     if (mitigationType !== 'Custom') {
-      setValue('mitigation', JOB_FORM_MITIGATION_INFO_DEFAULTS[mitigationType], { shouldValidate: true });
+      setValue('mitigation', JOB_FORM_MITIGATION_INFO_DEFAULTS[mitigationType], {
+        shouldValidate: true,
+      });
     }
   }, [mitigationType]);
 
@@ -257,32 +313,78 @@ export const JobForm = (componentProps: JobFormProps) => {
     }
 
     try {
-      const res = await submitJob({
+      setShowJobUploadProgressModal(true);
+
+      const { job_id, presigned_url } = await registerJob();
+      const { url } = presigned_url;
+      const fileToUpload: File =
+        data.jobInfo ?? (await createJobInfoZipFile(data.type, data.program, data.operator));
+
+      if (!url) {
+        toast.error(t('job.form.toast.register_error'));
+        setSubmitUploadFailed(true);
+        return;
+      }
+
+      setRegisterUploadStageDone(true);
+
+      await uploadJobToS3(presigned_url, fileToUpload, setJobInfoUploadProgressPercent);
+
+      setJobInfoUploadStageDone(true);
+
+      await submitJob(job_id, {
         name: data.name,
         description: data.description,
         device_id: data.deviceId,
         shots: data.shots,
         job_type: data.type,
-        job_info: {
-          program: [data.program],
-          operator: data.type === 'estimation' ? data.operator : undefined,
-        },
         transpiler_info: JSON.parse(data.transpiler ?? ''),
         simulator_info: JSON.parse(data.simulator ?? ''),
         mitigation_info: JSON.parse(data.mitigation ?? ''),
       });
+      setSubmitUploadStageDone(true);
       toast.success(t('job.form.toast.success'));
-      return res;
+      return job_id;
     } catch (e) {
       console.error(e);
+      setSubmitUploadFailed(true);
       toast.error(t('job.form.toast.error'));
+    } finally {
+      setTimeout(() => {
+        clearJobUploadProgressData();
+      }, 3000);
     }
+  };
+
+  const createJobInfoZipFile = async (
+    jobType: JobsJobType,
+    program: string | undefined,
+    operator: JobsS3OperatorItem[] | undefined
+  ) => {
+    const object =
+      jobType === 'estimation'
+        ? { program: [program], operator: operator }
+        : { program: [program] };
+
+    const zip = new JSZip();
+    zip.file('input.json', JSON.stringify(object, null, 2));
+    const blob = await zip.generateAsync({ type: 'blob' });
+    return new File([blob], 'input.zip', { type: 'application/zip' });
+  };
+
+  const clearJobUploadProgressData = () => {
+    setShowJobUploadProgressModal(false);
+    setRegisterUploadStageDone(false);
+    setJobInfoUploadStageDone(false);
+    setJobInfoUploadProgressPercent(0);
+    setSubmitUploadStageDone(false);
+    setSubmitUploadFailed(false);
   };
 
   const onSubmitWithRedirection = async (data: FormInput) => {
     try {
       const res = await onSubmit(data);
-      navigate('/jobs/' + res);
+      if (res) navigate('/jobs/' + res);
     } catch (e) {
       console.log(e);
     }
@@ -318,27 +420,43 @@ export const JobForm = (componentProps: JobFormProps) => {
     setDeleteModalShow(false);
   };
 
+  const handleJobInfoProviderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const method = e.target.value as JobInfoProviderMethod;
+    setJobInfoProvider(method);
+
+    // when changing the job info provider method we clear other method data
+    if (method === JobInfoProviderMethod.FORM_INPUT) {
+      setValue('jobInfo', undefined);
+    } else if (method === JobInfoProviderMethod.FILE_UPLOAD) {
+      setValue('program', '');
+      setValue('operator', []);
+      setValue('programType', 'Default');
+    }
+  };
+
   return (
     <Card className={clsx('max-w-[2160px]')}>
       <div className={clsx('flex-1', 'min-w-[240px]', 'max-w-[1080px]')}>
         {/* Common */}
-        <div className={clsx('grid', 'grid-cols-2', 'gap-5')}>
+        <div className={clsx('grid', 'grid-cols-2', 'gap-5', '[&_*]:bg-base-card')}>
           <Input
             autoFocus
             placeholder={t('job.form.name_placeholder')}
-            label="name"
+            label={t('job.detail.info.name')}
+            optional
             {...register('name')}
             errorMessage={errors.name && errors.name.message}
           />
           <Input
             placeholder={t('job.form.description_placeholder')}
-            label="description"
+            label={t('job.detail.info.description')}
+            optional
             {...register('description')}
             errorMessage={errors.description && errors.description.message}
           />
           <Input
             placeholder={t('job.form.shots_placeholder')}
-            label="shots"
+            label={t('job.detail.info.shots')}
             type="number"
             min={1}
             defaultValue={SHOTS_DEFAULT}
@@ -359,7 +477,7 @@ export const JobForm = (componentProps: JobFormProps) => {
             )}
           >
             <Select
-              label="device"
+              label={t('job.detail.info.device_id')}
               {...register('deviceId')}
               errorMessage={errors.deviceId && errors.deviceId.message}
             >
@@ -371,38 +489,41 @@ export const JobForm = (componentProps: JobFormProps) => {
               ))}
             </Select>
           </div>
-          <div
-            className={clsx(
-              '[&>*:first-child]:grid',
-              '[&>*:first-child]:gap-1',
-              '[&>*:first-child]:w-full'
-            )}
-          >
-            <Select
-              label="type"
-              {...register('type')}
-              errorMessage={errors.type && errors.type.message}
+          {displayFields?.type && (
+            <div
+              className={clsx(
+                '[&>*:first-child]:grid',
+                '[&>*:first-child]:gap-1',
+                '[&>*:first-child]:w-full'
+              )}
             >
-              {JOB_TYPES.map((jobType) => (
-                <option key={jobType}>{jobType}</option>
-              ))}
-            </Select>
-          </div>
+              <Select
+                label="type"
+                {...register('type')}
+                errorMessage={errors.type && errors.type.message}
+              >
+                {JOB_TYPES.map((jobType) => (
+                  <option key={jobType}>{jobType}</option>
+                ))}
+              </Select>
+            </div>
+          )}
         </div>
         <Accordion
           defaultExpanded={props.isAdvancedSettingsOpen ?? true}
           disableGutters
           elevation={0}
           square
-          className={clsx('mt-5')}
+          className={clsx('mt-5', 'bg-base-card')}
           sx={{
             '&::before': {
               content: 'unset',
             },
+            backgroundColor: 'rgb(var(--base-card))',
           }}
         >
           <AccordionSummary
-            expandIcon={<BsCaretDown />}
+            expandIcon={<BsCaretDown color="rgb(var(--base-content))" />}
             sx={{
               flexDirection: 'row-reverse',
               justifyContent: 'flex-end',
@@ -412,7 +533,7 @@ export const JobForm = (componentProps: JobFormProps) => {
               },
             }}
           >
-            <span className="text-link">Advanced Options</span>
+            <span className="text-link">{t('composer.advanced_options')}</span>
           </AccordionSummary>
           <AccordionDetails
             sx={{
@@ -420,68 +541,143 @@ export const JobForm = (componentProps: JobFormProps) => {
               paddingRight: 0,
             }}
           >
-            {displayFields?.program && (
+            {displayFields.fileUpload && (
               <>
-                <div className={clsx('flex', 'justify-between')}>
-                  <p className={clsx('font-bold', 'text-primary')}>program</p>
-                  <Select
-                    disabled={Boolean(props.mkProgram?.program)}
-                    labelLeft="sample program"
-                    {...register('programType')}
-                    onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                      handleProgramTypeChange(e.target.value as ProgramType);
-                    }}
-                    errorMessage={errors.programType && errors.programType.message}
-                    size="xs"
-                  >
-                    {PROGRAM_TYPES.map((oneProgramType) => (
-                      <option key={oneProgramType} value={oneProgramType}>
-                        {oneProgramType}
-                      </option>
-                    ))}
-                  </Select>
+                <p className={clsx('font-bold', 'text-primary')}>
+                  {t('job.form.job_info_provider_selector')}
+                </p>
+                <Spacer className="h-4" />
+                <div
+                  className={clsx(
+                    'flex',
+                    'justify-around',
+                    '[&_*]:bg-base-card',
+                    'text-base-content'
+                  )}
+                >
+                  <div className={clsx('flex', 'gap-[0.5rem]')}>
+                    <input
+                      id="job-info-file-upload-option"
+                      className={clsx('cursor-pointer', 'w-[1.25rem]')}
+                      type="radio"
+                      name="job-info-upload-option"
+                      value={JobInfoProviderMethod.FILE_UPLOAD}
+                      onChange={handleJobInfoProviderChange}
+                      checked={jobInfoProvider === JobInfoProviderMethod.FILE_UPLOAD}
+                    />
+                    <label htmlFor="job-info-file-upload-option">
+                      {t('job.form.job_info_provider_file')}
+                    </label>
+                  </div>
+                  <div className={clsx('flex', 'gap-[0.5rem]')}>
+                    <input
+                      id="job-info-form-option"
+                      className={clsx('cursor-pointer', 'w-[1.25rem]')}
+                      type="radio"
+                      name="job-info-upload-option"
+                      value={JobInfoProviderMethod.FORM_INPUT}
+                      onChange={handleJobInfoProviderChange}
+                      checked={jobInfoProvider === JobInfoProviderMethod.FORM_INPUT}
+                    />
+                    <label htmlFor="job-info-file-upload-option">
+                      {t('job.form.job_info_provider_input')}
+                    </label>
+                  </div>
                 </div>
-                <Spacer className="h-2" />
-
-                {/* programs */}
-                <TextArea
-                  disabled={Boolean(props.mkProgram?.program)}
-                  className={clsx('h-[16rem]')}
-                  placeholder={t('job.form.program_placeholder')}
-                  {...register('program')}
-                  errorMessage={errors.program && errors.program.message}
-                />
-                <ConfirmModal
-                  show={deleteModalShow}
-                  onHide={cancelProgramTypeChange}
-                  title={t('job.list.modal.title')}
-                  message={t('job.form.modal.overwrite_program')}
-                  onConfirm={confirmProgramTypeChange}
-                />
+                <Spacer className="h-8" />
               </>
             )}
-            <Spacer className="h-5" />
-            {/* operator */}
-            {jobType === 'estimation' && (
-              <OperatorForm
-                current={operator}
-                set={async (v) => {
-                  setValue('operator', v);
-                  await trigger('operator');
-                }}
-                errors={errors.operator}
-              />
+            {displayFields.fileUpload && jobInfoProvider === JobInfoProviderMethod.FILE_UPLOAD && (
+              <>
+                <JobProgramUpload setProgram={(f) => setValue('jobInfo', f)} />
+                <Spacer className="h-7" />
+              </>
             )}
-            <Spacer className="h-7" />
+            {jobInfoProvider === JobInfoProviderMethod.FORM_INPUT && (
+              <>
+                {displayFields?.program && (
+                  <>
+                    <div
+                      className={clsx(
+                        'flex',
+                        'justify-between',
+                        '[&_*]:bg-base-card',
+                        'text-base-content'
+                      )}
+                    >
+                      <p className={clsx('font-bold', 'text-primary')}>
+                        {t('job.detail.info.program')}
+                      </p>
+                      <Select
+                        disabled={Boolean(props.mkProgram?.program)}
+                        labelLeft={t('job.form.program_sample')}
+                        {...register('programType')}
+                        onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                          handleProgramTypeChange(e.target.value as ProgramType);
+                        }}
+                        errorMessage={errors.programType && errors.programType.message}
+                        size="xs"
+                      >
+                        {PROGRAM_TYPES.map((oneProgramType) => (
+                          <option key={oneProgramType} value={oneProgramType}>
+                            {oneProgramType}
+                          </option>
+                        ))}
+                      </Select>
+                    </div>
+                    <Spacer className="h-2" />
+
+                    {/* programs */}
+                    <CodeEditor
+                      code={program ?? ''}
+                      disabled={Boolean(props.mkProgram?.program)}
+                      placeholder={t('job.form.program_placeholder')}
+                      {...register('program')}
+                      errorMessage={errors.program && errors.program.message}
+                    />
+                    <ConfirmModal
+                      show={deleteModalShow}
+                      onHide={cancelProgramTypeChange}
+                      title={t('job.list.modal.title')}
+                      message={t('job.form.modal.overwrite_program')}
+                      onConfirm={confirmProgramTypeChange}
+                    />
+                  </>
+                )}
+                <Spacer className="h-5" />
+                {/* operator */}
+                {jobType === 'estimation' && (
+                  <OperatorForm
+                    current={operator}
+                    set={async (v) => {
+                      setValue('operator', v);
+                      await trigger('operator');
+                    }}
+                    errors={errors.operator}
+                    disabled={displayFields?.operator === false}
+                  />
+                )}
+                <Spacer className="h-7" />
+              </>
+            )}
             <div
               className={clsx(['flex-1', 'min-w-[240px]', 'max-w-[1080px]'], ['flex', 'flex-col'])}
             >
               {/* transpiler */}
               <>
-                <div className={clsx('flex', 'justify-between')}>
-                  <p className={clsx('font-bold', 'text-primary')}>transpiler</p>
+                <div
+                  className={clsx(
+                    'flex',
+                    'justify-between',
+                    '[&_*]:bg-base-card',
+                    'text-base-content'
+                  )}
+                >
+                  <p className={clsx('font-bold', 'text-primary')}>
+                    {t('job.detail.info.transpiler')}
+                  </p>
                   <Select
-                    labelLeft="type"
+                    labelLeft={t('common.type')}
                     {...register('transpilerType')}
                     size="xs"
                     defaultValue={TRANSPILER_TYPE_DEFAULT}
@@ -494,7 +690,7 @@ export const JobForm = (componentProps: JobFormProps) => {
                         </option>
                       );
                     })}
-                    <option value="Custom">Custom</option>
+                    <option value="Custom">{t('common.custom')}</option>
                   </Select>
                 </div>
                 <Spacer className="h-2" />
@@ -502,7 +698,12 @@ export const JobForm = (componentProps: JobFormProps) => {
               <Spacer className="h-2" />
               <TextArea
                 {...register('transpiler')}
-                className={clsx('h-[16rem]', transpilerType !== 'Custom' && 'hidden')}
+                className={clsx(
+                  'h-[16rem]',
+                  'bg-base-card',
+                  'text-base-content',
+                  transpilerType !== 'Custom' && 'hidden'
+                )}
                 placeholder={t('job.form.transpiler_placeholder')}
                 errorMessage={errors.transpiler && errors.transpiler.message}
               />
@@ -511,11 +712,13 @@ export const JobForm = (componentProps: JobFormProps) => {
                 <Spacer className="h-4" />
                 <Divider />
                 <Spacer className="h-4" />
-                <p className={clsx('font-bold', 'text-primary')}>simulator</p>
+                <p className={clsx('font-bold', 'text-primary')}>
+                  {t('job.detail.info.simulator')}
+                </p>
                 <Spacer className="h-2" />
               </>
               <TextArea
-                className={clsx('h-[16rem]')}
+                className={clsx('h-[16rem]', 'bg-base-card', 'text-base-content')}
                 placeholder={t('job.form.simulator_placeholder')}
                 {...register('simulator')}
                 errorMessage={errors.simulator && errors.simulator.message}
@@ -526,8 +729,11 @@ export const JobForm = (componentProps: JobFormProps) => {
                 <Divider />
                 <Spacer className="h-4" />
                 <div className={clsx('flex', 'justify-between')}>
-                  <p className={clsx('font-bold', 'text-primary')}>mitigation</p>
+                  <p className={clsx('font-bold', 'text-primary')}>
+                    {t('job.detail.info.mitigation')}
+                  </p>
                   <Select
+                    className={clsx('bg-base-card', 'text-base-content')}
                     {...register('mitigationType')}
                     defaultValue={JOB_FORM_MITIGATION_INFO_DEFAULTS.None}
                   >
@@ -545,7 +751,12 @@ export const JobForm = (componentProps: JobFormProps) => {
                 <Spacer className="h-2" />
               </>
               <TextArea
-                className={clsx('h-[16rem]', mitigationType !== 'Custom' && 'hidden')}
+                className={clsx(
+                  'h-[16rem]',
+                  'bg-base-card',
+                  'text-base-content',
+                  mitigationType !== 'Custom' && 'hidden'
+                )}
                 {...register('mitigation')}
                 placeholder={t('job.form.mitigation_placeholder')}
                 value={mitigation}
@@ -572,6 +783,14 @@ export const JobForm = (componentProps: JobFormProps) => {
         </div>
         <CheckReferenceCTA />
       </div>
+      <JobUploadProgressModal
+        isSubmitting={showJobUploadProgressModal}
+        registerDone={registerUploadStageDone}
+        uploadDone={jobInfoUploadStageDone}
+        uploadProgressPercent={jobInfoUploadProgressPercent}
+        submitDone={submitUploadStageDone}
+        submitFailed={submitUploadFailed}
+      />
     </Card>
   );
 };
@@ -600,21 +819,25 @@ const CheckReferenceCTA = () => {
 };
 
 const OperatorForm = ({
-  current,
+  current = [],
   set,
   errors = [],
+  disabled = false,
 }: {
-  current: JobsOperatorItem[];
-  set: (_: JobsOperatorItem[]) => Promise<void>;
+  current: JobsS3OperatorItem[] | undefined;
+  set: (_: JobsS3OperatorItem[]) => Promise<void>;
   errors?:
-    | Merge<FieldError, (Merge<FieldError, FieldErrorsImpl<JobsOperatorItem>> | undefined)[]>
+    | Merge<FieldError, (Merge<FieldError, FieldErrorsImpl<JobsS3OperatorItem>> | undefined)[]>
     | undefined;
+  disabled?: boolean;
 }) => {
   const { t } = useTranslation();
 
   useEffect(() => {
-    set([{ pauli: '', coeff: 1.0 }]); // Initial setting form value
-  }, []);
+    if (!disabled && current.length === 0) {
+      set([{ pauli: '', coeff: 1.0 }]); // Initial setting form value
+    }
+  }, [disabled]);
 
   const handleCoeffInput = (index: number) => async (e: FormEvent<HTMLInputElement>) => {
     const coeff = (e.target as HTMLInputElement).value;
@@ -651,6 +874,7 @@ const OperatorForm = ({
                   value={current[index].coeff}
                   onInput={handleCoeffInput(index)}
                   errorMessage={errors[index]?.coeff?.message}
+                  disabled={disabled}
                 />
                 <Input
                   label={t('job.form.operator.pauli')}
@@ -658,27 +882,32 @@ const OperatorForm = ({
                   value={item.pauli}
                   onChange={handlePauliInput(index)}
                   errorMessage={errors[index]?.pauli?.message}
+                  disabled={disabled}
                 />
               </div>
             </div>
-            <Button
-              color="error"
-              size="small"
-              className={clsx('w-8', 'h-8', 'flex', 'justify-center', 'items-center')}
-              onClick={() => {
-                set(current.filter((_, i) => i !== index));
-              }}
-            >
-              x
-            </Button>
+            {!disabled && (
+              <Button
+                color="error"
+                size="small"
+                className={clsx('w-8', 'h-8', 'flex', 'justify-center', 'items-center')}
+                onClick={() => {
+                  set(current.filter((_, i) => i !== index));
+                }}
+              >
+                x
+              </Button>
+            )}
           </div>
         ))}
       </div>
-      <div className={clsx('w-min')}>
-        <Button color="secondary" size="small" onClick={handlePlusButtonClick}>
-          +
-        </Button>
-      </div>
+      {!disabled && (
+        <div className={clsx('w-min')}>
+          <Button color="secondary" size="small" onClick={handlePlusButtonClick}>
+            +
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

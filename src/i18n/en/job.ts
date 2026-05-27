@@ -10,6 +10,14 @@ export default {
       description: 'Description',
       description_placeholder: 'Enter description',
       button: 'Search',
+      from: 'From',
+      to: 'To',
+      today: 'Today',
+      last_7_days: 'Last 7 days',
+      last_30_days: 'Last 30 days',
+      error_message: {
+        from_is_after_to: 'Date from must be before date to',
+      },
     },
     table: {
       id: 'Job ID',
@@ -50,6 +58,7 @@ export default {
       description: 'Description',
       job_type: 'Job type',
       device_id: 'Device ID',
+      transpiler: 'Transpiler',
       shots: 'Number of shots',
       status: 'Status',
       submitted_at: 'Submitted at',
@@ -58,9 +67,14 @@ export default {
       ended_at: 'Ended at',
       execution_time: 'Execution time (sec)',
       message: 'Message',
+      simulator: 'Simulator',
+      mitigation: 'Mitigation',
+      program: 'Program',
     },
     program: {
       nodata: 'Data does not exist.',
+      too_large_to_fully_display:
+        'Program is too large to be fully displayed. Please download the job to view it.',
     },
     transpiled_program: {
       nodata: 'Data does not exist.',
@@ -109,13 +123,29 @@ export default {
     button: 'Submit',
     submit_and_view_job_button: 'Submit and view job',
     submitting: 'Processing your request...',
+    program_sample: 'Program sample',
     operator: {
       pauli: 'Operator (Pauli string)',
       coeff: 'Coefficient',
     },
+    job_info_provider_selector: 'Select method for providing job info',
+    job_info_provider_file: 'Upload file',
+    job_info_provider_input: 'Enter manually',
+    upload_job_info: {
+      choose_file: 'Choose File',
+      no_file_chosen: 'No file chosen',
+    },
+    job_upload_progress_modal: {
+      title: 'Job Upload',
+      register_job: 'Register job',
+      upload_job_info: 'Upload job info',
+      submit_job: 'Submit job',
+      job_upload_completed: 'Job upload completed',
+    },
     toast: {
       success: 'Success: Job submitted successfully',
       error: 'Error: Failed to submit job',
+      register_error: 'Failed to submit job, no job URL received',
     },
     error_message: {
       name: 'Please enter job name',
@@ -129,7 +159,9 @@ export default {
         pauli_empty: 'Pauli field cannot be empty',
         coeff_required: 'Coefficient field is required',
       },
-      deviceInsufficientQubits: "This device supports only {{deviceQubits}} qubits, but the program requires {{programQubits}}",
+      job_info_must_be_zip_file: 'Please upload correct job info zip file',
+      deviceInsufficientQubits:
+        'This device supports only {{deviceQubits}} qubits, but the program requires {{programQubits}}',
       invalid_json: 'Please enter correct JSON',
     },
     modal: {
