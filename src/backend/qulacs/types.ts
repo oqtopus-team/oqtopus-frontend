@@ -1,4 +1,4 @@
-import { Complex } from "qulacs-wasm-simulator-client/lib/main/type/common";
+import { Complex } from 'qulacs-wasm-simulator-client/lib/main/type/common';
 
 /**
  * Type representing the result of a quantum circuit evaluation, including the state vector and expectation value.
@@ -137,4 +137,3 @@ export interface ParametricExpectedValueResult {
    */
   expectationValueMap: ExpectationValueElement[];
 }
-

@@ -188,7 +188,9 @@ export const gateRenderingBlockMap: Record<GateTag, GateRenderingBlock> = {
     name: 'Barrier',
     backgroundColor: GateColor.NONE,
     hasBorder: true,
-    palletteItem: <img style={{ padding: 4 }} className="p-2" src={`/static_assets/img/composer/barrier.svg`} />,
+    palletteItem: (
+      <img style={{ padding: 4 }} className="p-2" src={`/static_assets/img/composer/barrier.svg`} />
+    ),
     renderComposerItem: Barrier,
   },
   $custom_gate: {

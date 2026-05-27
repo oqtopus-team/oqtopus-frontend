@@ -1,6 +1,5 @@
-export type ParseErrorType =
-  | ["Unexpected", string]
+export type ParseErrorType = ['Unexpected', string];
 
 export const ParseError = {
-  Unexpected: (inp: string): ParseErrorType => ["Unexpected", inp],
-}
+  Unexpected: (inp: string): ParseErrorType => ['Unexpected', inp],
+};

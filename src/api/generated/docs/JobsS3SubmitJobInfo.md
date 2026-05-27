@@ -1,20 +1,19 @@
-# JobsSubmitJobInfo
+# JobsS3SubmitJobInfo
 
-All fields in this schema also exist in the `JobInfo` schema and have the same meaning as their counterparts in the `JobInfo` schema.
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **program** | **Array&lt;string&gt;** | A list of OPENQASM3 program. For non-multiprogramming jobs, this field is assumed to contain exactly one program. Otherwise, those programs are combined according to the multiprogramming machinery. | [default to undefined]
-**operator** | [**Array&lt;JobsOperatorItem&gt;**](JobsOperatorItem.md) |  | [optional] [default to undefined]
+**operator** | [**Array&lt;JobsS3OperatorItem&gt;**](JobsS3OperatorItem.md) |  | [optional] [default to undefined]
 
 ## Example
 
 ```typescript
-import { JobsSubmitJobInfo } from './api';
+import { JobsS3SubmitJobInfo } from './api';
 
-const instance: JobsSubmitJobInfo = {
+const instance: JobsS3SubmitJobInfo = {
     program,
     operator,
 };

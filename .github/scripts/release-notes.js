@@ -28,8 +28,8 @@ export default async function ({ github, context, core }) {
   const compare = await github.rest.repos.compareCommits({
     owner,
     repo,
-    base: "main",
-    head: "develop",
+    base: 'main',
+    head: 'develop',
   });
 
   const commits = compare.data.commits || [];
@@ -63,18 +63,18 @@ export default async function ({ github, context, core }) {
 
     seen.add(pr.number);
 
-    const labels = pr.labels.map(l => l.name.toLowerCase());
+    const labels = pr.labels.map((l) => l.name.toLowerCase());
 
     const line = `- [#${pr.number}](${pr.html_url}) ${pr.title} (@${pr.user.login})`;
 
     // Classification priority
-    if (labels.includes("breaking changes")) {
+    if (labels.includes('breaking changes')) {
       buckets.breaking.push(line);
-    } else if (labels.includes("feat") || labels.includes("feature")) {
+    } else if (labels.includes('feat') || labels.includes('feature')) {
       buckets.feat.push(line);
-    } else if (labels.includes("fix")) {
+    } else if (labels.includes('fix')) {
       buckets.fix.push(line);
-    } else if (labels.includes("chore")) {
+    } else if (labels.includes('chore')) {
       buckets.chore.push(line);
     } else {
       buckets.other.push(line);
@@ -85,17 +85,17 @@ export default async function ({ github, context, core }) {
   // 3. Build body
   // ==================================================
   function section(title, items) {
-    if (!items.length) return "";
-    return `\n## ${title}\n\n${[...new Set(items)].sort().join("\n")}\n`;
+    if (!items.length) return '';
+    return `\n## ${title}\n\n${[...new Set(items)].sort().join('\n')}\n`;
   }
 
-  let body = "# Release Notes\n";
+  let body = '# Release Notes\n';
 
-  body += section("⚠️ Breaking Changes", buckets.breaking);
-  body += section("✨ Features", buckets.feat);
-  body += section("🐛 Bug Fixes", buckets.fix);
-  body += section("🧹 Chores", buckets.chore);
-  body += section("Other Changes", buckets.other);
+  body += section('⚠️ Breaking Changes', buckets.breaking);
+  body += section('✨ Features', buckets.feat);
+  body += section('🐛 Bug Fixes', buckets.fix);
+  body += section('🧹 Chores', buckets.chore);
+  body += section('Other Changes', buckets.other);
 
   if (
     !buckets.breaking.length &&
@@ -104,7 +104,7 @@ export default async function ({ github, context, core }) {
     !buckets.chore.length &&
     !buckets.other.length
   ) {
-    body += "\n_No user-facing changes in this release._\n";
+    body += '\n_No user-facing changes in this release._\n';
   }
 
   // ==================================================
@@ -117,5 +117,5 @@ export default async function ({ github, context, core }) {
     body,
   });
 
-  core.info("Release notes updated.");
-};
+  core.info('Release notes updated.');
+}
