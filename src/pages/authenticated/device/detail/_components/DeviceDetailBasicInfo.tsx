@@ -3,9 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { Device } from '@/domain/types/Device';
 import { Card } from '@/pages/_components/Card';
 import { DeviceStatus } from '../../_components/DeviceStatus';
+import { DateTimeFormatter } from '@/pages/authenticated/_components/DateTimeFormatter';
 
 export const DeviceDetailBasicInfo: React.FC<Device> = (device) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const labelClass = clsx('text-xs', 'break-words');
   const valueClass = clsx('text-xl', 'break-words');
 
@@ -41,13 +42,13 @@ export const DeviceDetailBasicInfo: React.FC<Device> = (device) => {
         {device.availableAt && (
           <div>
             <p className={labelClass}>{t('device.detail.available_at')} :</p>
-            <p className={valueClass}>{device.availableAt}</p>
+            <p className={valueClass}>{DateTimeFormatter(t, i18n, device.availableAt)}</p>
           </div>
         )}
         {device.calibratedAt && (
           <div>
             <p className={labelClass}>{t('device.detail.calibrated_at')} :</p>
-            <p className={valueClass}>{device.calibratedAt}</p>
+            <p className={valueClass}>{DateTimeFormatter(t, i18n, device.calibratedAt)}</p>
           </div>
         )}
         {device.basisGates.length !== 0 && (

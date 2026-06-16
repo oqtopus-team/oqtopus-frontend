@@ -1,0 +1,11 @@
+.auth-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+@media (max-width: 768px) {
+    .auth-layout .auth-layout-content-wrapper {
+        width: 100%;
+    }
+}

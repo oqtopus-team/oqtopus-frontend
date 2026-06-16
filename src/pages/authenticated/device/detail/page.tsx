@@ -45,12 +45,14 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
     return <NotFoundView />;
   }
 
+  const hasDeviceInfo = (device.deviceInfo ?? '').trim() !== '';
+
   return (
     <>
       <Title />
       <Spacer className="h-6" />
       <DeviceDetailBasicInfo {...device} />
-      {device.deviceType === 'QPU' && (
+      {hasDeviceInfo && (
         <div>
           <Spacer className="h-6" />
           <TopologyInfo deviceInfo={device.deviceInfo} />
@@ -83,7 +85,7 @@ const NotFoundView = () => {
     <>
       <Title />
       <Spacer className="h-3" />
-      <p className={clsx('text-error', 'text-xs')}>{t('job.detail.not_found')}</p>
+      <p className={clsx('text-error', 'text-xs')}>{t('device.detail.not_found')}</p>
     </>
   );
 };

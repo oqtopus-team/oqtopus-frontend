@@ -1,0 +1,6 @@
+@media (max-width: 768px) {
+    .application-layout {
+        flex-direction: column;
+        padding-bottom: 60px;
+    }
+}

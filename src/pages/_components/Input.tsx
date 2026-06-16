@@ -7,21 +7,31 @@ export const Input = forwardRef<
   {
     label?: string;
     errorMessage?: string;
+    optional?: boolean;
   } & ComponentPropsWithRef<'input'>
 >(({ label, type, errorMessage, className, ...props }, ref) => {
   const [hidden, setHidden] = useState(true);
 
-  // Input elements must be either controlled or uncontrolled 
+  // Input elements must be either controlled or uncontrolled
   // (specify either the value prop, or the defaultValue prop, but not both)
   if (props.value) {
-    delete props.defaultValue
+    delete props.defaultValue;
   } else if (props.defaultValue) {
-    delete props.value
+    delete props.value;
   }
 
   return (
     <div className={clsx('grid', 'gap-1', 'w-full')}>
-      {label && <p className="text-xs">{label}</p>}
+      {label && (
+        <div className={clsx('flex', 'gap-1', 'items-center')}>
+          <p className="text-xs">{label}</p>
+          {props.optional && (
+            <span className={clsx('text-sm', 'font-sans', 'italic', 'text-neutral-content')}>
+              optional
+            </span>
+          )}
+        </div>
+      )}
       {type === 'password' ? (
         <div className={clsx('flex', 'items-center')}>
           <input
@@ -64,6 +74,7 @@ export const Input = forwardRef<
         <input
           ref={ref}
           {...props}
+          type={type}
           className={clsx(
             'w-full',
             ['rounded', 'border', 'outline-primary'],

@@ -12,5 +12,5 @@ export const RequestLogin = ({ children }: React.PropsWithChildren) => {
     }
   }, [isAuthenticated, initialized]);
 
-  return (initialized && isAuthenticated) ? children : <Loader />;
+  return initialized && isAuthenticated ? children : <Loader />;
 };

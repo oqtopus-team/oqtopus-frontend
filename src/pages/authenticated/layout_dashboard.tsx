@@ -4,7 +4,7 @@ import { Outlet } from 'react-router';
 
 export default function DashboardLayout() {
   return (
-    <div className={clsx('relative', 'flex-1')}>
+    <div className={clsx('relative', 'flex-1', 'min-w-0')}>
       <div className={clsx('p-8', 'rounded-tl-2xl', 'rounded-bl-2xl', 'bg-base-card')}>
         <Outlet />
       </div>

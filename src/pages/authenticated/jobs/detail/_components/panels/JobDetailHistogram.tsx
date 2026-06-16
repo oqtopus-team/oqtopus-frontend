@@ -8,6 +8,7 @@ interface countsProps {
   countsJson?: string;
   mitigationInfo?: { [key: string]: any };
   height: number;
+  jobId: string;
 }
 
 export const JobDetailHistogram: React.FC<countsProps> = (counts: countsProps) => {
@@ -58,6 +59,7 @@ export const JobDetailHistogram: React.FC<countsProps> = (counts: countsProps) =
           categories={histogramInfo.categories}
           data={histogramInfo.data}
           height={histogramInfo.height}
+          filename={counts.jobId}
         ></Histogram>
       )}
     </>

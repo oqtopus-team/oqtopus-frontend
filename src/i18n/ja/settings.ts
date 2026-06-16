@@ -1,0 +1,82 @@
+export default {
+  title: '設定',
+  save: '変更を保存',
+  saving: '保存中...',
+  updating: '更新中...',
+  cancel: 'キャンセル',
+
+  tabs: {
+    profile: 'プロフィール',
+    account: 'アカウント',
+    security: 'セキュリティ',
+  },
+
+  profile: {
+    title: 'プロフィール情報',
+    email: 'メールアドレス',
+    name: '表示名',
+    organization: '組織',
+    memberSince: '登録日',
+    emailReadonly: 'メールアドレスは変更できません',
+    created_at: 'アカウント作成日',
+    saved: 'プロフィールが正常に更新されました！',
+  },
+
+  account: {
+    changePassword: 'パスワード変更',
+    currentPassword: '現在のパスワード',
+    newPassword: '新しいパスワード',
+    confirmPassword: '新しいパスワード（確認）',
+    passwordChanged: 'パスワードが正常に変更されました！',
+    updatePassword: 'パスワードを更新',
+
+    deleteAccount: 'アカウント削除',
+    deleteAccountWarning: 'この操作は元に戻せません。すべてのデータが削除されます。',
+    confirmDelete: 'アカウント削除の確認',
+    deleteConfirmMessage: '本当にアカウントを削除しますか？この操作は元に戻せません。',
+    confirmDeleteButton: 'はい、アカウントを削除します',
+    accountDeleted: 'アカウント削除リクエストが送信されました',
+  },
+
+  security: {
+    mfaStatus: '多要素認証ステータス',
+    multiFactorAuth: '多要素認証',
+    enabled: '有効',
+    disabled: '無効',
+
+    resetMfa: 'MFAリセット',
+    resetMfaDescription: '認証アプリへのアクセスを失った場合、ここでMFAをリセットできます。',
+    resetMfaButton: 'MFAをリセット',
+    mfaResetSuccess: 'MFAが正常にリセットされました',
+
+    login: 'ログイン',
+    recentLoginActivity: '最近のログインアクティビティ',
+    device: 'デバイス',
+    ipAddress: 'IPアドレス',
+    location: '場所',
+
+    apiToken: {
+      apiTokenStatus: 'APIトークンのステータス',
+      notCreated: '作成されていません',
+      status: 'ステータス',
+      active: '有効',
+      expired: '期限切れ',
+      expiresOn: '有効期限',
+      generateToken: 'APIトークンを生成する',
+      deleteToken: 'APIトークンの削除',
+      createdTitle: 'APIトークンが作成されました',
+      createdWarning:
+        'ご注意ください。APIトークンは作成時に一度のみ表示されます。必ずコピーして安全な場所に保管してください。',
+      afterCloseInfo:
+        'このウィンドウを閉じた後は、トークンを再度確認することはできません。新しいトークンの発行のみ可能となります。',
+      okButton: '確認しました',
+      copied: 'APIトークンが正常にコピーされました',
+    },
+
+    confirmDelete: 'APIトークンの削除確認',
+    deleteConfirmMessage: 'APIトークンを削除してもよろしいですか？この操作は元に戻せません。',
+    confirmDeleteButton: 'API トークンを削除してもよろしいですか?',
+    createSuccess: 'APIトークンが正常に作成されました',
+    deleteSuccess: 'APIトークンが正常に削除されました',
+  },
+};

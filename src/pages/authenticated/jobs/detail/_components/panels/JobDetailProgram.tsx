@@ -3,28 +3,118 @@ import { useTranslation } from 'react-i18next';
 import { Spacer } from '@/pages/_components/Spacer';
 import SimpleBar from 'simplebar-react';
 import 'simplebar-react/dist/simplebar.min.css';
+import ClipboardCopy from './utils/ClipboardCopy';
+import QuantumCircuitCanvas, {
+  staticCircuitProps,
+} from '@/pages/authenticated/composer/_components/QuantumCircuitCanvas';
+import { useEffect, useState } from 'react';
+import { circuitContext, QuantumCircuitService } from '@/pages/authenticated/composer/circuit';
+import { Switch } from '@mui/material';
+import { parseCircuitJSON } from '@/pages/authenticated/composer/qasm';
+import { DndContextProvider } from '@/pages/authenticated/composer/dragging';
+import { CodeEditor } from '@/pages/authenticated/composer/_components/CodeEditor';
+import { BsCodeSlash } from 'react-icons/bs';
+import { ThemeOptions, useTheme } from '@/theme/useTheme';
 
 export interface JobDetailProgramProps {
   program: string[];
+  heading?: string;
   maxHeight: number;
 }
+
+const isSentFromComposer = (program: string): boolean => {
+  const trimmed = program.trim();
+  return trimmed.startsWith('// Sent from OQTOPUS composer');
+};
+
+const programLengthLimit = Math.pow(2, 16);
+
+const limitProgram = (program: string): [string, boolean] => {
+  return program.length > programLengthLimit
+    ? [program.substring(0, programLengthLimit) + '...', true]
+    : [program, false];
+};
 
 export const JobDetailProgram: React.FC<JobDetailProgramProps> = (
   jobInfo: JobDetailProgramProps
 ) => {
   const { t } = useTranslation();
+  const [text, programExceededMaxDisplayLength] = limitProgram(jobInfo.program.join('\n'));
+  const sentFromComposer = isSentFromComposer(text);
+  const [circuitService] = useState<QuantumCircuitService>(new QuantumCircuitService(0, 0, []));
+  const [showCode, setShowCode] = useState(false);
+  const { theme } = useTheme();
+
+  useEffect(() => {
+    if (isSentFromComposer(text)) {
+      const program = text.split('\n')[1];
+      if (program.startsWith('//')) {
+        const programJson = program.replace(/^\/\/\s*/, '');
+        try {
+          const parsed = parseCircuitJSON(programJson);
+          if (parsed) circuitService.circuit = parsed;
+        } catch (_) {}
+      }
+    }
+  }, [text]);
+
   return (
     <>
-      <h3 className={clsx('text-primary', 'font-bold')}>Program</h3>
+      <div className="flex items-center justify-between">
+        <h3 className={clsx('text-primary', 'font-bold')}>
+          {jobInfo.heading != null ? jobInfo.heading : 'Program'}
+        </h3>
+        {sentFromComposer ? (
+          <div className="flex items-center">
+            <span className={clsx([['text-primary', 'cursor-pointer', 'm-2']])}>
+              <BsCodeSlash />
+            </span>
+            <Switch value={showCode} onChange={() => setShowCode(!showCode)} />
+            <span className={clsx([['text-primary', 'cursor-pointer', 'm-2']])}>
+              <img
+                src="/static_assets/img/common/icon-quantum-circuit.svg"
+                width={24}
+                height={24}
+              />
+            </span>
+          </div>
+        ) : null}
+      </div>
       <Spacer className="h-2" />
+      {programExceededMaxDisplayLength && (
+        <>
+          <span className={clsx('text-xs')}>
+            {t('job.detail.program.too_large_to_fully_display')}
+          </span>
+          <Spacer className="h-2" />
+        </>
+      )}
       {jobInfo.program === undefined || jobInfo.program === null || jobInfo.program.length === 0 ? (
         <div className={clsx('text-xs')}>{t('job.detail.program.nodata')}</div>
       ) : (
-        <div className={clsx(['p-3', 'rounded', 'bg-cmd-bg'], ['text-xs', 'whitespace-pre-wrap'])}>
-          <SimpleBar style={{ maxHeight: jobInfo.maxHeight }}>
-            {jobInfo.program.join('\n')}
-          </SimpleBar>
-        </div>
+        <>
+          {/* FIXME Far from an ideal solution... We REALLY do not need to put DndProvider here! */}
+          {showCode ? (
+            <DndContextProvider>
+              <circuitContext.Provider value={circuitService}>
+                <QuantumCircuitCanvas {...staticCircuitProps()} />
+              </circuitContext.Provider>
+            </DndContextProvider>
+          ) : (
+            <div className={clsx('relative')}>
+              <div className={clsx('p-3', 'rounded', 'bg-cmd-bg', 'text-sm')}>
+                <SimpleBar style={{ maxHeight: jobInfo.maxHeight }}>
+                  <CodeEditor
+                    disabled={true}
+                    code={text}
+                    fixedTheme={theme === ThemeOptions.DARK ? 'okaidia' : 'default'}
+                  />
+                </SimpleBar>
+              </div>
+              <ClipboardCopy text={text} />
+            </div>
+          )}
+        </>
       )}
     </>
   );

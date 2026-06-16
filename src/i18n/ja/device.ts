@@ -1,8 +1,6 @@
 export default {
   list: {
     title: 'デバイス一覧',
-    description:
-      '分子や原子を扱う量子力学の知見を活かした電子部品です。トポロジー情報や量子ビットごとの値などを確認できます。',
     table: {
       id: 'デバイス ID',
       name: 'デバイス名',
@@ -19,6 +17,7 @@ export default {
   },
   detail: {
     title: 'デバイス',
+    not_found: '対象のデバイスが存在しません',
     id: 'ID',
     status: 'ステータス',
     qubits: '量子ビット数',
@@ -44,6 +43,10 @@ export default {
       min: '最小',
       nodata: 'データが存在しません',
       invalid_device_info: 'トポロジー情報が無効です',
+      fit_to_view: '画面に合わせる',
+      qubit_metric: '量子ビット',
+      coupling_metric: '結合指標',
+      color_scale: 'カラースケール',
     },
     qubits_info: {
       header: '量子ビットごとの値',

@@ -28,7 +28,7 @@ export const DeviceList = (): React.ReactElement => {
         </Button>
       </div>
       <Spacer className="h-3" />
-      <table className={clsx('w-full')}>
+      <table className={clsx('w-full', '[&_td]:whitespace-normal')}>
         <thead>
           <tr>
             <th>{t('dashboard.device.table.name')}</th>

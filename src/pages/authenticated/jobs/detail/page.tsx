@@ -1,8 +1,8 @@
 import { Loader } from '@/pages/_components/Loader';
 import { useAuth } from '@/auth/hook';
-import { Job } from '@/domain/types/Job';
+import { JobWithS3Data } from '@/domain/types/Job';
 import clsx from 'clsx';
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Spacer } from '@/pages/_components/Spacer';
 import { useParams } from 'react-router';
@@ -11,6 +11,8 @@ import { SuccessViewEstimation } from './_components/EstimationJobDetail';
 import { SuccessViewMultiManual } from './_components/MultiManualJobDetail';
 import { SuccessViewSSELog } from './_components/SSEJobDetail';
 import { useJobAPI } from '@/backend/hook';
+import ReloadButton from './_components/panels/utils/ReloadButton';
+import DownloadJobButton from '../_components/DownloadJobButton';
 
 export default function JobDetailPage_() {
   const { id } = useParams();
@@ -21,23 +23,36 @@ type Params = { id: string };
 
 const JobDetailPage = ({ params: { id } }: { params: Params }) => {
   const auth = useAuth();
-  const [job, setJob] = useState<Job | null>(null);
+  const [job, setJob] = useState<JobWithS3Data | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSuccess, setIsSuccess] = useState(false);
-  const { getJob } = useJobAPI();
+  const { getJob, retrieveJobFiles } = useJobAPI();
 
   useLayoutEffect(() => {
     setLoading(true);
     if (id != '') {
-      getJob(id)
-        .then((job) => setJob(job))
-        .catch(() => setIsSuccess(false))
-        .finally(() => {
-          setIsSuccess(true);
-          setLoading(false);
-        });
+      loadJob(id);
     }
   }, [id]);
+
+  const loadJob = async (id: string) => {
+    try {
+      const job = await getJob(id);
+      if (!job) return;
+
+      const jobS3Data = await retrieveJobFiles(job.jobInfo);
+
+      setJob({
+        ...job,
+        ...jobS3Data,
+      });
+      setIsSuccess(true);
+    } catch {
+      setIsSuccess(false);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return <LoadingView />;
@@ -47,7 +62,7 @@ const JobDetailPage = ({ params: { id } }: { params: Params }) => {
   }
   return (
     <>
-      <Title />
+      <Title job={job} />
       <Spacer className="h-3" />
       <SuccessViewWrapper {...job} />
     </>
@@ -64,12 +79,22 @@ const LoadingView = () => {
   );
 };
 
-const Title = () => {
+const Title = ({ job }: { job?: JobWithS3Data }) => {
   const { t } = useTranslation();
-  return <h2 className={clsx('text-primary', 'text-2xl', 'font-bold')}>{t('job.detail.title')}</h2>;
+  return (
+    <div className={clsx('flex', 'items-center', 'text-primary', 'text-2xl', 'font-bold')}>
+      {t('job.detail.title')}
+      <ReloadButton />
+      <DownloadJobButton
+        kind="jobWithS3Data"
+        job={job}
+        style={{ marginLeft: '0.5rem', marginRight: '0.5rem' }}
+      />
+    </div>
+  );
 };
 
-const SuccessViewWrapper: React.FC<Job> = (job: Job) => {
+const SuccessViewWrapper: React.FC<JobWithS3Data> = (job: JobWithS3Data) => {
   const jobType: string = job.jobType;
   if (jobType === 'sampling') {
     return <SuccessViewSampling {...job} />;

@@ -1,8 +1,6 @@
 export default {
   list: {
     title: 'Device list',
-    description:
-      'These are electronic components that utilize the knowledge of quantum mechanics, which deals with molecules and atoms. You can check topology information and values ​​for each qubit.',
     table: {
       id: 'Device ID',
       name: 'Device name',
@@ -19,6 +17,7 @@ export default {
   },
   detail: {
     title: 'Device',
+    not_found: 'Device not found',
     id: 'ID',
     status: 'Status',
     qubits: 'Number of qubits',
@@ -44,6 +43,10 @@ export default {
       min: 'Minimum',
       nodata: 'Data does not exist.',
       invalid_device_info: 'Topology information is invalid',
+      fit_to_view: 'Fit to View',
+      qubit_metric: 'Qubit Metric',
+      coupling_metric: 'Coupling Metric',
+      color_scale: 'Color Scale',
     },
     qubits_info: {
       header: 'Value per qubit',

@@ -1,4 +1,4 @@
-type News @model @auth(rules: [{ allow: public }]) {
+type Announcements @model @auth(rules: [{ allow: public }]) {
   id: ID!
   category: String
   date: AWSDate

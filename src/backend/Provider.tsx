@@ -4,12 +4,20 @@ import { createContext } from 'react';
 interface UserAPI {
   device: OAS.DeviceApi;
   job: OAS.JobApi;
+  apiToken: OAS.ApiTokenApi;
+  announcements: OAS.AnnouncementsApi;
+  user: OAS.UsersApi;
+  settings: OAS.SettingsApi;
 }
 
 export const newUserAPI = (config?: OAS.ConfigurationParameters): UserAPI => {
   return {
     device: new OAS.DeviceApi(new OAS.Configuration(config)),
     job: new OAS.JobApi(new OAS.Configuration(config)),
+    apiToken: new OAS.ApiTokenApi(new OAS.Configuration(config)),
+    announcements: new OAS.AnnouncementsApi(new OAS.Configuration(config)),
+    user: new OAS.UsersApi(new OAS.Configuration(config)),
+    settings: new OAS.SettingsApi(new OAS.Configuration(config)),
   };
 };
 

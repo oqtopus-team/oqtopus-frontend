@@ -1,4 +1,10 @@
-import { JobsJobInfo } from '@/api/generated';
+import {
+  JobsJobInfo,
+  JobsS3JobResult,
+  JobsS3OperatorItem,
+  JobsS3SubmitJobInfo,
+  JobsS3TranspileResult,
+} from '@/api/generated';
 
 export const JOB_STATUSES = [
   'submitted',
@@ -6,11 +12,13 @@ export const JOB_STATUSES = [
   'running',
   'succeeded',
   'failed',
+  'registered',
   'cancelled',
-  'unknown',
 ] as const;
 
 export type JobStatusType = (typeof JOB_STATUSES)[number];
+
+export const NOT_CANCELABLE_JOBS: JobStatusType[] = ['succeeded', 'failed', 'cancelled'] as const;
 
 export const JOB_TYPES = ['estimation', 'sampling'] as const;
 export const JOB_TYPE_DEFAULT = JOB_TYPES[1];
@@ -22,21 +30,57 @@ export const isJobStatus = (str: string): str is JobStatusType => {
   return JOB_STATUSES.some((v) => v == str);
 };
 
-export const TRANSPILER_TYPES = ['Default', 'None'] as const;
-export const TRANSPILER_TYPE_DEFAULT = TRANSPILER_TYPES[0];
-export type TranspilerTypeType = (typeof TRANSPILER_TYPES)[number];
-
-export const JOB_FORM_TRANSPILER_INFO_DEFAULTS: { [key in TranspilerTypeType]: string } = {
-  Default: JSON.stringify({}, null, 2),
+export const TRANSPILER_TYPES: { [key in 'Default' | 'None']: string } = {
+  Default: JSON.stringify(
+    { transpiler_lib: 'qiskit', transpiler_options: { optimization_level: 2 } },
+    null,
+    2
+  ),
   None: JSON.stringify({ transpiler_lib: null }, null, 2),
 } as const;
+export const TRANSPILER_TYPE_DEFAULT = TRANSPILER_TYPES.Default;
+export type TranspilerTypeType = 'Default' | 'None';
+
+export const PROGRAM_TYPES = ['Default', 'Bell Measurement'] as const;
+export const PROGRAM_TYPE_DEFAULT = PROGRAM_TYPES[0];
+export type ProgramType = (typeof PROGRAM_TYPES)[number];
+
+export async function initializeJobFormProgramDefaults(): Promise<{
+  [key in ProgramType]: string;
+}> {
+  const results = await Promise.all(
+    PROGRAM_TYPES.map((fileName: string) => {
+      if (fileName === PROGRAM_TYPE_DEFAULT) {
+        // set the 'Default' program empty
+        return Promise.resolve({ fileName, content: '' });
+      }
+      return fetch(`/sample_program/${fileName}.txt`).then((res) => {
+        if (!res.ok) {
+          console.error('failed to load file:', fileName);
+          return { fileName, content: '' };
+        }
+        return res.text().then((content) => ({ fileName, content }));
+      });
+    })
+  );
+  const info: { [key in ProgramType]?: string } = {};
+  results.forEach((result) => {
+    if (result != null) {
+      info[result.fileName as ProgramType] = result.content;
+    }
+  });
+  return info as { [key in ProgramType]: string };
+}
+
+export type MitigationTypeType = 'PseudoInv' | 'None';
 
 export const JOB_FORM_MITIGATION_INFO_DEFAULTS: { [key in 'PseudoInv' | 'None']: string } = {
   PseudoInv: JSON.stringify(
     {
-      readout: 'pseudo_inverse',
+      ro_error_mitigation: 'pseudo_inverse',
     },
-    null
+    null,
+    2
   ),
   None: JSON.stringify({}, null, 2),
 } as const;
@@ -60,11 +104,25 @@ export interface Job {
   executionTime: number;
 }
 
+export type JobS3Data = {
+  input: JobsS3SubmitJobInfo;
+  transpileResult?: JobsS3TranspileResult;
+  result?: JobsS3JobResult;
+  combinedProgram?: string;
+};
+
+export type JobS3Files = {
+  [K in keyof JobS3Data]: File;
+};
+
+export type JobWithS3Data = Job & JobS3Data;
+
 export interface JobSearchParams {
-  jobid?: string;
-  description?: string;
+  query?: string; // id, name or description query string
   status?: JobStatusType;
   page?: string;
+  from?: string; // date string in ISO format
+  to?: string; // date string in ISO format
 }
 
 export interface ResponseJob {
@@ -92,7 +150,7 @@ export interface JobFileData {
 
 export interface JobFileDataInfo {
   program: string[];
-  operator?: OperatorItem[];
+  operator?: JobsS3OperatorItem[];
 }
 
-export type OperatorItem = { pauli: string; coeff: [string, string] };
+export type OperatorItem = { pauli: string; coeff: number };
