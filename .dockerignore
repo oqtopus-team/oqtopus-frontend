@@ -10,6 +10,7 @@ LICENSE
 Makefile
 helm-charts
 .env
+.env*.local
 .editorconfig
 .idea
 coverage*

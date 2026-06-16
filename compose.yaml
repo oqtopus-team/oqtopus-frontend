@@ -5,22 +5,14 @@ services:
       dockerfile: Dockerfile
       target: development
     ports:
-      - 3000:5173
-    environment:
-      VITE_APP_AUTH_REGION: ap-northeast-1
-      VITE_APP_AUTH_USER_POOL_ID: ap-northeast-1_example
-      VITE_APP_AUTH_USER_POOL_WEB_CLIENT_ID: clientid_example
-      VITE_APP_AUTH_COOKIE_STORAGE_DOMAIN: localhost
-      VITE_APP_API_ENDPOINT: https://438i5dp1z9.execute-api.ap-northeast-1.amazonaws.com/v1
-      VITE_APP_API_SIGNUP_ENDPOINT: https://4hq0k3alvj.execute-api.ap-northeast-1.amazonaws.com/v1
-      VITE_APP_APP_ENV: local
-      VITE_APP_APP_ORG: oqtopus
-      VITE_APP_PUBLIC_BASE: /public
+      - 5173:5173
+    # Auth/API and other values are read from .env / .env.local, just like the
+    # host `bun run dev`. Vite gives inline `environment` values priority over
+    # .env files, so we deliberately do not override env vars here (and do not
+    # mask .env.local with an empty docker/.env).
     volumes:
       - .:/workspace:cached
       - node_modules:/workspace/node_modules
-      - ./docker/.env:/workspace/.env
-      - ./docker/.env:/workspace/.env.local
 
   magnito:
     image: frourio/magnito:latest
@@ -50,11 +42,6 @@ services:
 
 volumes:
   node_modules:
-    driver: local
-    driver_opts:
-      type: none
-      device: ${PWD}/node_modules
-      o: bind
   magnito:
     driver: local
   inbucket:
