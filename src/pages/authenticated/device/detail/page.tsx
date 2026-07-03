@@ -45,12 +45,14 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
     return <NotFoundView />;
   }
 
+  const hasDeviceInfo = (device.deviceInfo ?? '').trim() !== '';
+
   return (
     <>
       <Title />
       <Spacer className="h-6" />
       <DeviceDetailBasicInfo {...device} />
-      {device.deviceType === 'QPU' && (
+      {hasDeviceInfo && (
         <div>
           <Spacer className="h-6" />
           <TopologyInfo deviceInfo={device.deviceInfo} />
