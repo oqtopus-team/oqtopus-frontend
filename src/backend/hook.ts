@@ -227,11 +227,18 @@ const retrieveDeviceInfo = async (deviceInfo: string | undefined): Promise<strin
   if (!isDeviceInfoUrl(deviceInfo)) return deviceInfo;
 
   return axios
-    .get<string>(deviceInfo, {
-      responseType: 'text',
-      transformResponse: [(data) => data],
+    .get<Blob>(deviceInfo, {
+      responseType: 'blob',
     })
-    .then((res) => res.data);
+    .then(async (res) => {
+      try {
+        const object = await convertZipBlobToObject(res.data);
+        if (object !== undefined) return JSON.stringify(object);
+      } catch {
+        // Fall back to legacy raw JSON responses.
+      }
+      return await res.data.text();
+    });
 };
 
 const convertDeviceResult = async (device: DevicesDeviceInfo): Promise<Device> => ({
