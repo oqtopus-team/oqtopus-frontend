@@ -205,13 +205,13 @@ export const useDeviceAPI = () => {
   const api = useContext(userApiContext);
 
   const getDevices = async (): Promise<Device[]> => {
-    return api.device.listDevices().then((res) => res.data.map(convertDeviceResult));
+    return api.device.listDevices().then((res) => Promise.all(res.data.map(convertDeviceResult)));
   };
 
   const getDevice = async (id: string): Promise<Device | null> => {
-    return api.device.getDevice(id).then((res) => {
+    return api.device.getDevice(id).then(async (res) => {
       if (res.status === 200) {
-        return convertDeviceResult(res.data);
+        return await convertDeviceResult(res.data);
       }
       return null;
     });
@@ -220,7 +220,21 @@ export const useDeviceAPI = () => {
   return { getDevices, getDevice };
 };
 
-const convertDeviceResult = (device: DevicesDeviceInfo): Device => ({
+const isDeviceInfoUrl = (deviceInfo: string): boolean => /^https?:\/\//.test(deviceInfo);
+
+const retrieveDeviceInfo = async (deviceInfo: string | undefined): Promise<string> => {
+  if (!deviceInfo) return '';
+  if (!isDeviceInfoUrl(deviceInfo)) return deviceInfo;
+
+  return axios
+    .get<string>(deviceInfo, {
+      responseType: 'text',
+      transformResponse: [(data) => data],
+    })
+    .then((res) => res.data);
+};
+
+const convertDeviceResult = async (device: DevicesDeviceInfo): Promise<Device> => ({
   id: device.device_id,
   deviceType: device.device_type,
   status: device.status,
@@ -229,7 +243,7 @@ const convertDeviceResult = (device: DevicesDeviceInfo): Device => ({
   nQubits: device.n_qubits ?? 0, // TODO: fix invalid oas schema (nullable: should be false)
   basisGates: device.basis_gates,
   supportedInstructions: device.supported_instructions,
-  deviceInfo: device.device_info ?? '', // TODO: fix invalid oas schema (nullable: should be false)
+  deviceInfo: await retrieveDeviceInfo(device.device_info), // TODO: fix invalid oas schema (nullable: should be false)
   calibratedAt: device.calibrated_at ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   description: device.description,
 });
