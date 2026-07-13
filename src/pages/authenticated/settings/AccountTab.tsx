@@ -18,10 +18,18 @@ import { toast } from 'react-toastify';
 import { errorToastConfig, successToastConfig } from '@/config/toast';
 import { useUserAPI } from '@/backend/hook';
 import { useAuth } from '@/auth/hook';
+import ENV from '@/env';
 import {
   createPasswordConfirmSchema,
   createPasswordSchema,
 } from '@/config/validation/passwordSchemas';
+
+// In proxy (BFF/OIDC) mode, password management is delegated to the identity
+// provider's account console rather than handled in-app via Cognito.
+const isProxyAuth = ENV.AUTH_MODE === 'proxy';
+const accountConsoleSigningIn = ENV.ACCOUNT_CONSOLE_URL
+  ? `${ENV.ACCOUNT_CONSOLE_URL.replace(/\/$/, '')}/#/security/signing-in`
+  : '';
 
 interface AccountTabFormData {
   currentPassword: string;
@@ -134,7 +142,20 @@ export function AccountTab({ allowDeletion = false }: AccountTabProps) {
           {t('settings.account.changePassword')}
         </h3>
 
-        <form onSubmit={handleSubmit(handlePasswordSubmit)} className={clsx('space-y-4')}>
+        {isProxyAuth ? (
+          <div className={clsx('space-y-4')}>
+            <p className={clsx('text-gray-600')}>{t('settings.account.externalIdpNote')}</p>
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              onClick={() => window.open(accountConsoleSigningIn, '_blank', 'noopener')}
+            >
+              {t('settings.account.openPasswordSettings')}
+            </Button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit(handlePasswordSubmit)} className={clsx('space-y-4')}>
           {passwordFields.map((field) => (
             <TextField
               key={field.name}
@@ -172,6 +193,7 @@ export function AccountTab({ allowDeletion = false }: AccountTabProps) {
             {isPasswordLoading ? t('settings.updating') : t('settings.account.updatePassword')}
           </Button>
         </form>
+        )}
       </div>
       {allowDeletion && (
         <>

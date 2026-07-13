@@ -29,6 +29,14 @@ import { isBefore } from 'date-fns';
 import { ApiTokenApiToken, UsersLoginEvent } from '@/api/generated';
 import { toast } from 'react-toastify';
 import { errorToastConfig, successToastConfig } from '@/config/toast';
+import ENV from '@/env';
+
+// In proxy (BFF/OIDC) mode, MFA is managed by the identity provider (Keycloak)
+// account console, not via Cognito in-app.
+const isProxyAuth = ENV.AUTH_MODE === 'proxy';
+const accountConsoleSigningIn = ENV.ACCOUNT_CONSOLE_URL
+  ? `${ENV.ACCOUNT_CONSOLE_URL.replace(/\/$/, '')}/#/security/signing-in`
+  : '';
 
 interface SecurityTabProps {
   login_history_enabled: boolean;
@@ -75,6 +83,8 @@ export function SecurityTab({ login_history_enabled }: SecurityTabProps) {
   }, []);
 
   async function verifyMFAStatus() {
+    // Cognito is not configured in proxy mode; MFA state lives in Keycloak.
+    if (isProxyAuth) return;
     const user = await Auth.currentAuthenticatedUser();
     setMfaData(await Auth.getPreferredMFA(user));
   }
@@ -134,44 +144,67 @@ export function SecurityTab({ login_history_enabled }: SecurityTabProps) {
 
   return (
     <div className={clsx('max-w-3xl', 'space-y-8')}>
-      <div>
-        <h3 className={clsx('text-xl', 'font-semibold', 'mb-4')}>
-          {t('settings.security.mfaStatus')}
-        </h3>
-
-        <div className={clsx('flex', 'items-center', 'gap-4')}>
-          <span className={clsx('text-gray-700')}>{t('settings.security.multiFactorAuth')}:</span>
-          <Chip
-            label={
-              mfaData !== 'NOMFA'
-                ? `${t('settings.security.enabled')} (${mfaData})`
-                : t('settings.security.disabled')
-            }
-            color={mfaData ? 'success' : 'default'}
-            size="medium"
-          />
+      {isProxyAuth ? (
+        <div>
+          <h3 className={clsx('text-xl', 'font-semibold', 'mb-4')}>
+            {t('settings.security.mfaStatus')}
+          </h3>
+          <p className={clsx('text-gray-600', 'mb-4')}>
+            {t('settings.security.externalIdpNote')}
+          </p>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={() => window.open(accountConsoleSigningIn, '_blank', 'noopener')}
+          >
+            {t('settings.security.openMfaSettings')}
+          </Button>
         </div>
-      </div>
-      <hr className={clsx('border-gray-200')} />
-      <div>
-        <h3 className={clsx('text-xl', 'font-semibold', 'mb-4')}>
-          {t('settings.security.resetMfa')}
-        </h3>
+      ) : (
+        <>
+          <div>
+            <h3 className={clsx('text-xl', 'font-semibold', 'mb-4')}>
+              {t('settings.security.mfaStatus')}
+            </h3>
 
-        <p className={clsx('text-gray-600', 'mb-4')}>
-          {t('settings.security.resetMfaDescription')}
-        </p>
+            <div className={clsx('flex', 'items-center', 'gap-4')}>
+              <span className={clsx('text-gray-700')}>
+                {t('settings.security.multiFactorAuth')}:
+              </span>
+              <Chip
+                label={
+                  mfaData !== 'NOMFA'
+                    ? `${t('settings.security.enabled')} (${mfaData})`
+                    : t('settings.security.disabled')
+                }
+                color={mfaData ? 'success' : 'default'}
+                size="medium"
+              />
+            </div>
+          </div>
+          <hr className={clsx('border-gray-200')} />
+          <div>
+            <h3 className={clsx('text-xl', 'font-semibold', 'mb-4')}>
+              {t('settings.security.resetMfa')}
+            </h3>
 
-        <Button
-          variant="outlined"
-          color="warning"
-          size="large"
-          onClick={handleResetMFA}
-          disabled={!mfaData}
-        >
-          {t('settings.security.resetMfaButton')}
-        </Button>
-      </div>
+            <p className={clsx('text-gray-600', 'mb-4')}>
+              {t('settings.security.resetMfaDescription')}
+            </p>
+
+            <Button
+              variant="outlined"
+              color="warning"
+              size="large"
+              onClick={handleResetMFA}
+              disabled={!mfaData}
+            >
+              {t('settings.security.resetMfaButton')}
+            </Button>
+          </div>
+        </>
+      )}
       <hr className={clsx('border-gray-200')} />
       {login_history_enabled && (
         <>

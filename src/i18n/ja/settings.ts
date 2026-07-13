@@ -23,6 +23,9 @@ export default {
   },
 
   account: {
+    externalIdpNote:
+      'パスワードは認証プロバイダ（Keycloak）で管理されています。下のボタンから変更してください。',
+    openPasswordSettings: 'Keycloak でパスワードを変更',
     changePassword: 'パスワード変更',
     currentPassword: '現在のパスワード',
     newPassword: '新しいパスワード',
@@ -39,6 +42,9 @@ export default {
   },
 
   security: {
+    externalIdpNote:
+      '多要素認証（MFA）は認証プロバイダ（Keycloak）で管理されています。下のボタンから認証アプリの登録・再設定ができます。',
+    openMfaSettings: 'Keycloak で MFA を管理',
     mfaStatus: '多要素認証ステータス',
     multiFactorAuth: '多要素認証',
     enabled: '有効',
