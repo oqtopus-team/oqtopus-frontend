@@ -14,7 +14,10 @@ export default function AuthenticatedLayout() {
   const auth = useAuth();
   return (
     <RequestLogin>
-      <UserAPIProvider basePath={ENV.API_ENDPOINT} accessToken={auth.getCurrentIdToken}>
+      <UserAPIProvider
+        basePath={ENV.API_ENDPOINT}
+        accessToken={ENV.AUTH_MODE === 'proxy' ? undefined : auth.getCurrentIdToken}
+      >
         <QulacsSimulatorProvider>
           <div className={clsx('min-h-screen', 'flex', 'flex-col')}>
             <ErrorBoundary>
