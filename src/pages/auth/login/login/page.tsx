@@ -42,6 +42,14 @@ export default function LoginPage() {
             navigate('/confirm-mfa');
             return;
           }
+          if (message === 'signin.new_password_required') {
+            // Temporary-password user (e.g. after a pool restore): send them to
+            // set a new password before the MFA step. Not an error -> no toast.
+            // The screen guards on the provider's pending challenge, not on any
+            // navigation state, so nothing needs to be passed here.
+            navigate('/new-password');
+            return;
+          }
           toast(t(message), errorToastConfig);
           if (message === 'signup.confirm.form.mfa_setup_request') {
             // if MFA is not set, execute MFA reset flow
