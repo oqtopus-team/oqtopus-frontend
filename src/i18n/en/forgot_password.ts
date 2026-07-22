@@ -25,7 +25,7 @@ export default {
         password_uppercase: 'Please include capital letters',
         password_number: 'Please include numbers',
         password_special: 'Please include special characters (^$*.11（?-"！@#％＆人>く.L~\'+=)',
-        password_min: 'Please enter at least 8 characters',
+        password_min: 'Please enter at least 12 characters',
         confirm_password_enter: 'Please enter your confirmation password',
         confirm_password_mismatch: 'Password does not match',
         code_enter: 'Please enter verification code',
