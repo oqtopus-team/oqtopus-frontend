@@ -2,6 +2,9 @@ import { useContext } from 'react';
 import { userApiContext } from './Provider';
 import {
   DevicesDeviceInfo,
+  DevicesDeviceInfoHistoryDetail,
+  DevicesDeviceInfoHistoryEntry,
+  DevicesDeviceInfoHistoryListResponse,
   GetAnnouncementsListOrderEnum,
   JobsJob,
   JobsJobInfo,
@@ -11,7 +14,12 @@ import {
   UsersUpdateUserRequest,
 } from '@/api/generated';
 import { Job, JobS3Data, JobSearchParams } from '@/domain/types/Job';
-import { Device } from '@/domain/types/Device';
+import {
+  Device,
+  DeviceInfoHistoryDetail,
+  DeviceInfoHistoryEntry,
+  DeviceInfoHistoryList,
+} from '@/domain/types/Device';
 import type { RawAxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import JSZip from 'jszip';
@@ -217,7 +225,28 @@ export const useDeviceAPI = () => {
     });
   };
 
-  return { getDevices, getDevice };
+  const getDeviceInfoHistory = async (
+    deviceId: string,
+    params: { from?: string; to?: string; limit?: number; offset?: number } = {}
+  ): Promise<DeviceInfoHistoryList> => {
+    return api.device
+      .listDeviceInfoHistory(deviceId, params.from, params.to, params.limit, params.offset)
+      .then((res) => convertDeviceInfoHistoryList(res.data));
+  };
+
+  const getDeviceInfoHistoryAt = async (
+    deviceId: string,
+    timestamp: string
+  ): Promise<DeviceInfoHistoryDetail | null> => {
+    return api.device.getDeviceInfoHistoryAt(deviceId, timestamp).then(async (res) => {
+      if (res.status === 200) {
+        return await convertDeviceInfoHistoryDetail(res.data);
+      }
+      return null;
+    });
+  };
+
+  return { getDevices, getDevice, getDeviceInfoHistory, getDeviceInfoHistoryAt };
 };
 
 const isDeviceInfoUrl = (deviceInfo: string): boolean => /^https?:\/\//.test(deviceInfo);
@@ -253,6 +282,31 @@ const convertDeviceResult = async (device: DevicesDeviceInfo): Promise<Device> =
   deviceInfo: await retrieveDeviceInfo(device.device_info), // TODO: fix invalid oas schema (nullable: should be false)
   calibratedAt: device.calibrated_at ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   description: device.description,
+});
+
+const convertDeviceInfoHistoryEntry = (
+  entry: DevicesDeviceInfoHistoryEntry
+): DeviceInfoHistoryEntry => ({
+  deviceId: entry.device_id,
+  calibratedAt: entry.calibrated_at,
+  nQubits: entry.n_qubits,
+  nCouplings: entry.n_couplings,
+});
+
+const convertDeviceInfoHistoryList = (
+  history: DevicesDeviceInfoHistoryListResponse
+): DeviceInfoHistoryList => ({
+  items: history.items.map(convertDeviceInfoHistoryEntry),
+  total: history.total,
+  limit: history.limit,
+  offset: history.offset,
+});
+
+const convertDeviceInfoHistoryDetail = async (
+  history: DevicesDeviceInfoHistoryDetail
+): Promise<DeviceInfoHistoryDetail> => ({
+  ...convertDeviceInfoHistoryEntry(history),
+  deviceInfo: await retrieveDeviceInfo(history.device_info),
 });
 
 export const useUserAPI = () => {

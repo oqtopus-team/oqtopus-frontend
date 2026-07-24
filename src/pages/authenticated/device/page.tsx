@@ -2,6 +2,7 @@ import { Card } from '@/pages/_components/Card';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { DeviceListTable } from './_components/DeviceListTable';
+import { DeviceInfoHistorySearch } from './_components/DeviceInfoHistorySearch';
 import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
 import { useDeviceAPI } from '@/backend/hook';
@@ -34,6 +35,14 @@ export default function Page() {
       <Spacer className="h-8" />
       <Card className={clsx('overflow-x-auto')}>
         <DeviceListTable devices={devices} />
+      </Card>
+      <Spacer className="h-8" />
+      <h2 className={clsx('text-primary', 'text-2xl', 'font-bold')}>
+        {t('device.detail.history.list_header')}
+      </h2>
+      <Spacer className="h-8" />
+      <Card>
+        <DeviceInfoHistorySearch devices={devices} />
       </Card>
     </>
   );

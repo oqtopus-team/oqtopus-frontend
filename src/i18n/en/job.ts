@@ -67,6 +67,7 @@ export default {
       ended_at: 'Ended at',
       execution_time: 'Execution time (sec)',
       message: 'Message',
+      runtime_device_info: 'Open device information at job runtime',
       simulator: 'Simulator',
       mitigation: 'Mitigation',
       program: 'Program',

@@ -67,6 +67,7 @@ export default {
       ended_at: '終了日時',
       execution_time: '実行時間 (秒)',
       message: 'メッセージ',
+      runtime_device_info: 'ジョブ実行時点のデバイス情報を開く',
       simulator: 'シミュレーター',
       mitigation: '緩和',
       program: 'プログラム',
