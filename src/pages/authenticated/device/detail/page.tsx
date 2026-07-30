@@ -66,7 +66,7 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
       <Spacer className="h-6" />
       <DeviceDetailBasicInfo
         {...device}
-        historyDetail={isHistoryDetail ? historyDetail ?? undefined : undefined}
+        historyDetail={isHistoryDetail ? (historyDetail ?? undefined) : undefined}
       />
       {hasDeviceInfo && (
         <div>

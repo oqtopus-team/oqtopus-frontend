@@ -273,12 +273,14 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
             <tr>
               <th className={clsx('text-center')}>{t('device.list.table.id')}</th>
               <th className={clsx('text-center')}>{t('device.detail.history.captured_at')}</th>
+              <th className={clsx('text-center')}>{t('device.detail.qubits')}</th>
+              <th className={clsx('text-center')}>{t('device.detail.couplings')}</th>
             </tr>
           </thead>
           <tbody>
             {historyEntries.length === 0 ? (
               <tr>
-                <td colSpan={2} className={clsx('text-center', 'text-secondary-content')}>
+                <td colSpan={4} className={clsx('text-center', 'text-secondary-content')}>
                   {isLoading
                     ? t('device.detail.history.loading')
                     : t('device.detail.history.empty')}
@@ -299,6 +301,12 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
                     >
                       {DateTimeFormatter(t, i18n, entry.calibratedAt)}
                     </NavLink>
+                  </td>
+                  <td className={clsx('break-words', 'whitespace-normal', 'text-center')}>
+                    {entry.nQubits}
+                  </td>
+                  <td className={clsx('break-words', 'whitespace-normal', 'text-center')}>
+                    {entry.nCouplings}
                   </td>
                 </tr>
               ))

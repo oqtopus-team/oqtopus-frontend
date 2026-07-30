@@ -56,10 +56,9 @@ describe('JobDetailBasicInfo', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByRole('link', { name: 'Open device information at job runtime' })).toHaveAttribute(
-      'href',
-      '/device/qulacs?deviceInfoAt=2024-03-01T12%3A00%3A00Z'
-    );
+    expect(
+      screen.getByRole('link', { name: 'Open device information at job runtime' })
+    ).toHaveAttribute('href', '/device/qulacs?deviceInfoAt=2024-03-01T12%3A00%3A00Z');
   });
 
   it('does not show a runtime device information link before the job starts running', () => {
@@ -69,6 +68,8 @@ describe('JobDetailBasicInfo', () => {
       </MemoryRouter>
     );
 
-    expect(screen.queryByRole('link', { name: 'Open device information at job runtime' })).toBeNull();
+    expect(
+      screen.queryByRole('link', { name: 'Open device information at job runtime' })
+    ).toBeNull();
   });
 });
