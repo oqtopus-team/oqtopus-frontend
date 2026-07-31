@@ -326,6 +326,8 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
                       color="secondary"
                       type="button"
                       disabled={downloadingHistoryUid === entry.historyUid}
+                      aria-label={t('device.detail.history.download_json')}
+                      title={t('device.detail.history.download_json')}
                       onClick={() => void handleDownloadHistory(entry)}
                     >
                       <BsDownload />

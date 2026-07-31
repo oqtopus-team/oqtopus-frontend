@@ -775,9 +775,14 @@ export const TopologyInfo: React.FC<{
                 )}
               </div>
               {historyCapturedAt && activeDeviceInfo && (
-                <Button color="secondary" size="small" onClick={handleDownloadDeviceInfo}>
+                <Button
+                  color="secondary"
+                  size="small"
+                  aria-label={t('device.detail.history.download_json')}
+                  title={t('device.detail.history.download_json')}
+                  onClick={handleDownloadDeviceInfo}
+                >
                   <BsDownload />
-                  {t('device.detail.history.download_json')}
                 </Button>
               )}
             </div>
