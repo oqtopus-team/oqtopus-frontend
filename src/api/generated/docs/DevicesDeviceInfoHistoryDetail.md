@@ -5,6 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**history_uid** | **string** | UUID assigned when the device information history is issued. | [default to undefined]
 **device_id** | **string** |  | [default to undefined]
 **calibrated_at** | **string** |  | [default to undefined]
 **n_qubits** | **number** |  | [default to undefined]
@@ -17,6 +18,7 @@ Name | Type | Description | Notes
 import { DevicesDeviceInfoHistoryDetail } from './api';
 
 const instance: DevicesDeviceInfoHistoryDetail = {
+    history_uid,
     device_id,
     calibrated_at,
     n_qubits,

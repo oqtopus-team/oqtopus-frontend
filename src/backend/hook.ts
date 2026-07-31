@@ -225,20 +225,20 @@ export const useDeviceAPI = () => {
     });
   };
 
-  const getDeviceInfoHistory = async (
-    deviceId: string,
-    params: { from?: string; to?: string; limit?: number; offset?: number } = {}
-  ): Promise<DeviceInfoHistoryList> => {
+  const getDeviceInfoHistory = async (params: {
+    deviceId?: string;
+    from?: string;
+    to?: string;
+    limit?: number;
+    offset?: number;
+  } = {}): Promise<DeviceInfoHistoryList> => {
     return api.device
-      .listDeviceInfoHistory(deviceId, params.from, params.to, params.limit, params.offset)
+      .listDeviceHistories(params.deviceId, params.from, params.to, params.limit, params.offset)
       .then((res) => convertDeviceInfoHistoryList(res.data));
   };
 
-  const getDeviceInfoHistoryAt = async (
-    deviceId: string,
-    timestamp: string
-  ): Promise<DeviceInfoHistoryDetail | null> => {
-    return api.device.getDeviceInfoHistoryAt(deviceId, timestamp).then(async (res) => {
+  const getDeviceHistory = async (historyUid: string): Promise<DeviceInfoHistoryDetail | null> => {
+    return api.device.getDeviceHistory(historyUid).then(async (res) => {
       if (res.status === 200) {
         return await convertDeviceInfoHistoryDetail(res.data);
       }
@@ -246,7 +246,19 @@ export const useDeviceAPI = () => {
     });
   };
 
-  return { getDevices, getDevice, getDeviceInfoHistory, getDeviceInfoHistoryAt };
+  const getDeviceHistoryAtRuntime = async (
+    deviceId: string,
+    timestamp: string
+  ): Promise<DeviceInfoHistoryDetail | null> => {
+    const history = await getDeviceInfoHistory({ deviceId, to: timestamp, limit: 1, offset: 0 });
+    const historyUid = history.items[0]?.historyUid;
+    if (!historyUid) {
+      return null;
+    }
+    return getDeviceHistory(historyUid);
+  };
+
+  return { getDevices, getDevice, getDeviceInfoHistory, getDeviceHistory, getDeviceHistoryAtRuntime };
 };
 
 const isDeviceInfoUrl = (deviceInfo: string): boolean => /^https?:\/\//.test(deviceInfo);
@@ -287,6 +299,7 @@ const convertDeviceResult = async (device: DevicesDeviceInfo): Promise<Device> =
 const convertDeviceInfoHistoryEntry = (
   entry: DevicesDeviceInfoHistoryEntry
 ): DeviceInfoHistoryEntry => ({
+  historyUid: entry.history_uid,
   deviceId: entry.device_id,
   calibratedAt: entry.calibrated_at,
   nQubits: entry.n_qubits,

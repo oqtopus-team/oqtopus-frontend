@@ -5,8 +5,8 @@ All URIs are relative to *http://localhost:8080*
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
 |[**getDevice**](#getdevice) | **GET** /devices/{device_id} | Get specified device details|
-|[**getDeviceInfoHistoryAt**](#getdeviceinfohistoryat) | **GET** /devices/{device_id}/device_info_history/at | Get device information history at timestamp|
-|[**listDeviceInfoHistory**](#listdeviceinfohistory) | **GET** /devices/{device_id}/device_info_history | List device information history|
+|[**getDeviceHistory**](#getdevicehistory) | **GET** /device_histories/{history_uid} | Get device information history|
+|[**listDeviceHistories**](#listdevicehistories) | **GET** /device_histories | List device information histories|
 |[**listDevices**](#listdevices) | **GET** /devices | List available devices|
 
 # **getDevice**
@@ -63,10 +63,10 @@ const { status, data } = await apiInstance.getDevice(
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **getDeviceInfoHistoryAt**
-> DevicesDeviceInfoHistoryDetail getDeviceInfoHistoryAt()
+# **getDeviceHistory**
+> DevicesDeviceInfoHistoryDetail getDeviceHistory()
 
-Returns the latest device information history whose calibrated_at is earlier than or equal to the specified timestamp.
+Returns the device information history identified by history_uid.
 
 ### Example
 
@@ -79,12 +79,10 @@ import {
 const configuration = new Configuration();
 const apiInstance = new DeviceApi(configuration);
 
-let deviceId: string; //Device identifier (default to undefined)
-let timestamp: string; //Runtime timestamp used to resolve the effective device information. (default to undefined)
+let historyUid: string; //Device information history UUID. (default to undefined)
 
-const { status, data } = await apiInstance.getDeviceInfoHistoryAt(
-    deviceId,
-    timestamp
+const { status, data } = await apiInstance.getDeviceHistory(
+    historyUid
 );
 ```
 
@@ -92,8 +90,7 @@ const { status, data } = await apiInstance.getDeviceInfoHistoryAt(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **deviceId** | [**string**] | Device identifier | defaults to undefined|
-| **timestamp** | [**string**] | Runtime timestamp used to resolve the effective device information. | defaults to undefined|
+| **historyUid** | [**string**] | Device information history UUID. | defaults to undefined|
 
 
 ### Return type
@@ -113,17 +110,17 @@ const { status, data } = await apiInstance.getDeviceInfoHistoryAt(
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Returns resolved device information history. |  -  |
+|**200** | Returns device information history. |  -  |
 |**403** | Cannot access device with device_id |  -  |
 |**404** | Device or history not found |  -  |
 |**500** | Internal Server Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **listDeviceInfoHistory**
-> DevicesDeviceInfoHistoryListResponse listDeviceInfoHistory()
+# **listDeviceHistories**
+> DevicesDeviceInfoHistoryListResponse listDeviceHistories()
 
-List device information history metadata for the specified device.
+List device information history metadata. Optionally filter by device_id.
 
 ### Example
 
@@ -136,13 +133,13 @@ import {
 const configuration = new Configuration();
 const apiInstance = new DeviceApi(configuration);
 
-let deviceId: string; //Device identifier (default to undefined)
+let deviceId: string; //Device identifier to filter histories. (optional) (default to undefined)
 let from: string; //Inclusive lower bound of calibrated_at. (optional) (default to undefined)
 let to: string; //Inclusive upper bound of calibrated_at. (optional) (default to undefined)
 let limit: number; // (optional) (default to 100)
 let offset: number; // (optional) (default to 0)
 
-const { status, data } = await apiInstance.listDeviceInfoHistory(
+const { status, data } = await apiInstance.listDeviceHistories(
     deviceId,
     from,
     to,
@@ -155,7 +152,7 @@ const { status, data } = await apiInstance.listDeviceInfoHistory(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **deviceId** | [**string**] | Device identifier | defaults to undefined|
+| **deviceId** | [**string**] | Device identifier to filter histories. | (optional) defaults to undefined|
 | **from** | [**string**] | Inclusive lower bound of calibrated_at. | (optional) defaults to undefined|
 | **to** | [**string**] | Inclusive upper bound of calibrated_at. | (optional) defaults to undefined|
 | **limit** | [**number**] |  | (optional) defaults to 100|

@@ -64,7 +64,8 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
     }
 
     setIsLoading(true);
-    getDeviceInfoHistory(deviceId, {
+    getDeviceInfoHistory({
+      deviceId,
       from: appliedParams.from,
       to: appliedParams.to,
       limit: 100,
@@ -288,7 +289,7 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
               </tr>
             ) : (
               historyEntries.map((entry) => (
-                <tr key={`${entry.deviceId}-${entry.calibratedAt}`}>
+                <tr key={entry.historyUid}>
                   <td className={clsx('break-words', 'whitespace-normal', 'text-center')}>
                     <NavLink to={`/device/${entry.deviceId}`} className="text-link">
                       {entry.deviceId}
@@ -296,7 +297,7 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
                   </td>
                   <td className={clsx('break-words', 'whitespace-normal', 'text-center')}>
                     <NavLink
-                      to={`/device/${entry.deviceId}?deviceInfoAt=${encodeURIComponent(entry.calibratedAt)}`}
+                      to={`/device/${entry.deviceId}?deviceHistoryUid=${encodeURIComponent(entry.historyUid)}`}
                       className="text-link"
                     >
                       {DateTimeFormatter(t, i18n, entry.calibratedAt)}

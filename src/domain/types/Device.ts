@@ -18,6 +18,7 @@ export interface Device {
 }
 
 export interface DeviceInfoHistoryEntry {
+  historyUid: string;
   deviceId: string;
   calibratedAt: string;
   nQubits: number;

@@ -20,13 +20,14 @@ type Params = { id: string };
 function DeviceDetailPage({ params: { id } }: { params: Params }) {
   const { t } = useTranslation();
   useDocumentTitle(t('device.detail.title'));
-  const { getDevice, getDeviceInfoHistoryAt } = useDeviceAPI();
+  const { getDevice, getDeviceHistory, getDeviceHistoryAtRuntime } = useDeviceAPI();
   const [searchParams] = useSearchParams();
 
   const [device, setDevice] = useState<Device | null>(null);
   const [historyDetail, setHistoryDetail] = useState<DeviceInfoHistoryDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSuccess, setIsSuccess] = useState(false);
+  const requestedDeviceHistoryUid = searchParams.get('deviceHistoryUid') ?? '';
   const requestedDeviceInfoAt = searchParams.get('deviceInfoAt') ?? '';
 
   useLayoutEffect(() => {
@@ -36,8 +37,11 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
       getDevice(id)
         .then(async (device) => {
           setDevice(device);
-          if (device && requestedDeviceInfoAt) {
-            const history = await getDeviceInfoHistoryAt(id, requestedDeviceInfoAt);
+          if (device && requestedDeviceHistoryUid) {
+            const history = await getDeviceHistory(requestedDeviceHistoryUid);
+            setHistoryDetail(history);
+          } else if (device && requestedDeviceInfoAt) {
+            const history = await getDeviceHistoryAtRuntime(id, requestedDeviceInfoAt);
             setHistoryDetail(history);
           }
         })
@@ -47,7 +51,7 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
           setLoading(false);
         });
     }
-  }, [id, requestedDeviceInfoAt]);
+  }, [id, requestedDeviceHistoryUid, requestedDeviceInfoAt]);
 
   if (loading) {
     return <LoadingView />;
@@ -58,7 +62,7 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
 
   const activeDeviceInfo = historyDetail?.deviceInfo ?? device.deviceInfo;
   const hasDeviceInfo = (activeDeviceInfo ?? '').trim() !== '';
-  const isHistoryDetail = Boolean(requestedDeviceInfoAt && historyDetail);
+  const isHistoryDetail = Boolean((requestedDeviceHistoryUid || requestedDeviceInfoAt) && historyDetail);
 
   return (
     <>

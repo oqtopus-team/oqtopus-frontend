@@ -223,6 +223,12 @@ export type DevicesDeviceInfoStatusEnum =
  */
 export interface DevicesDeviceInfoHistoryDetail {
   /**
+   * UUID assigned when the device information history is issued.
+   * @type {string}
+   * @memberof DevicesDeviceInfoHistoryDetail
+   */
+  history_uid: string;
+  /**
    *
    * @type {string}
    * @memberof DevicesDeviceInfoHistoryDetail
@@ -259,6 +265,12 @@ export interface DevicesDeviceInfoHistoryDetail {
  * @interface DevicesDeviceInfoHistoryEntry
  */
 export interface DevicesDeviceInfoHistoryEntry {
+  /**
+   * UUID assigned when the device information history is issued.
+   * @type {string}
+   * @memberof DevicesDeviceInfoHistoryEntry
+   */
+  history_uid: string;
   /**
    *
    * @type {string}
@@ -1826,25 +1838,21 @@ export const DeviceApiAxiosParamCreator = function (configuration?: Configuratio
       };
     },
     /**
-     * Returns the latest device information history whose calibrated_at is earlier than or equal to the specified timestamp.
-     * @summary Get device information history at timestamp
-     * @param {string} deviceId Device identifier
-     * @param {string} timestamp Runtime timestamp used to resolve the effective device information.
+     * Returns the device information history identified by history_uid.
+     * @summary Get device information history
+     * @param {string} historyUid Device information history UUID.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    getDeviceInfoHistoryAt: async (
-      deviceId: string,
-      timestamp: string,
+    getDeviceHistory: async (
+      historyUid: string,
       options: RawAxiosRequestConfig = {}
     ): Promise<RequestArgs> => {
-      // verify required parameter 'deviceId' is not null or undefined
-      assertParamExists('getDeviceInfoHistoryAt', 'deviceId', deviceId);
-      // verify required parameter 'timestamp' is not null or undefined
-      assertParamExists('getDeviceInfoHistoryAt', 'timestamp', timestamp);
-      const localVarPath = `/devices/{device_id}/device_info_history/at`.replace(
-        `{${'device_id'}}`,
-        encodeURIComponent(String(deviceId))
+      // verify required parameter 'historyUid' is not null or undefined
+      assertParamExists('getDeviceHistory', 'historyUid', historyUid);
+      const localVarPath = `/device_histories/{history_uid}`.replace(
+        `{${'history_uid'}}`,
+        encodeURIComponent(String(historyUid))
       );
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -1860,11 +1868,6 @@ export const DeviceApiAxiosParamCreator = function (configuration?: Configuratio
       // authentication BearerAuth required
       // http bearer authentication required
       await setBearerAuthToObject(localVarHeaderParameter, configuration);
-
-      if (timestamp !== undefined) {
-        localVarQueryParameter['timestamp'] =
-          (timestamp as any) instanceof Date ? (timestamp as any).toISOString() : timestamp;
-      }
 
       setSearchParams(localVarUrlObj, localVarQueryParameter);
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
@@ -1880,9 +1883,9 @@ export const DeviceApiAxiosParamCreator = function (configuration?: Configuratio
       };
     },
     /**
-     * List device information history metadata for the specified device.
-     * @summary List device information history
-     * @param {string} deviceId Device identifier
+     * List device information history metadata. Optionally filter by device_id.
+     * @summary List device information histories
+     * @param {string} [deviceId] Device identifier to filter histories.
      * @param {string} [from] Inclusive lower bound of calibrated_at.
      * @param {string} [to] Inclusive upper bound of calibrated_at.
      * @param {number} [limit]
@@ -1890,20 +1893,15 @@ export const DeviceApiAxiosParamCreator = function (configuration?: Configuratio
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    listDeviceInfoHistory: async (
-      deviceId: string,
+    listDeviceHistories: async (
+      deviceId?: string,
       from?: string,
       to?: string,
       limit?: number,
       offset?: number,
       options: RawAxiosRequestConfig = {}
     ): Promise<RequestArgs> => {
-      // verify required parameter 'deviceId' is not null or undefined
-      assertParamExists('listDeviceInfoHistory', 'deviceId', deviceId);
-      const localVarPath = `/devices/{device_id}/device_info_history`.replace(
-        `{${'device_id'}}`,
-        encodeURIComponent(String(deviceId))
-      );
+      const localVarPath = `/device_histories`;
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
       let baseOptions;
@@ -1918,6 +1916,10 @@ export const DeviceApiAxiosParamCreator = function (configuration?: Configuratio
       // authentication BearerAuth required
       // http bearer authentication required
       await setBearerAuthToObject(localVarHeaderParameter, configuration);
+
+      if (deviceId !== undefined) {
+        localVarQueryParameter['device_id'] = deviceId;
+      }
 
       if (from !== undefined) {
         localVarQueryParameter['from'] =
@@ -2019,28 +2021,25 @@ export const DeviceApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
-     * Returns the latest device information history whose calibrated_at is earlier than or equal to the specified timestamp.
-     * @summary Get device information history at timestamp
-     * @param {string} deviceId Device identifier
-     * @param {string} timestamp Runtime timestamp used to resolve the effective device information.
+     * Returns the device information history identified by history_uid.
+     * @summary Get device information history
+     * @param {string} historyUid Device information history UUID.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    async getDeviceInfoHistoryAt(
-      deviceId: string,
-      timestamp: string,
+    async getDeviceHistory(
+      historyUid: string,
       options?: RawAxiosRequestConfig
     ): Promise<
       (axios?: AxiosInstance, basePath?: string) => AxiosPromise<DevicesDeviceInfoHistoryDetail>
     > {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getDeviceInfoHistoryAt(
-        deviceId,
-        timestamp,
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getDeviceHistory(
+        historyUid,
         options
       );
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
       const localVarOperationServerBasePath =
-        operationServerMap['DeviceApi.getDeviceInfoHistoryAt']?.[localVarOperationServerIndex]?.url;
+        operationServerMap['DeviceApi.getDeviceHistory']?.[localVarOperationServerIndex]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -2050,9 +2049,9 @@ export const DeviceApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
-     * List device information history metadata for the specified device.
-     * @summary List device information history
-     * @param {string} deviceId Device identifier
+     * List device information history metadata. Optionally filter by device_id.
+     * @summary List device information histories
+     * @param {string} [deviceId] Device identifier to filter histories.
      * @param {string} [from] Inclusive lower bound of calibrated_at.
      * @param {string} [to] Inclusive upper bound of calibrated_at.
      * @param {number} [limit]
@@ -2060,8 +2059,8 @@ export const DeviceApiFp = function (configuration?: Configuration) {
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    async listDeviceInfoHistory(
-      deviceId: string,
+    async listDeviceHistories(
+      deviceId?: string,
       from?: string,
       to?: string,
       limit?: number,
@@ -2073,7 +2072,7 @@ export const DeviceApiFp = function (configuration?: Configuration) {
         basePath?: string
       ) => AxiosPromise<DevicesDeviceInfoHistoryListResponse>
     > {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.listDeviceInfoHistory(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.listDeviceHistories(
         deviceId,
         from,
         to,
@@ -2083,7 +2082,7 @@ export const DeviceApiFp = function (configuration?: Configuration) {
       );
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
       const localVarOperationServerBasePath =
-        operationServerMap['DeviceApi.listDeviceInfoHistory']?.[localVarOperationServerIndex]?.url;
+        operationServerMap['DeviceApi.listDeviceHistories']?.[localVarOperationServerIndex]?.url;
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -2140,26 +2139,24 @@ export const DeviceApiFactory = function (
       return localVarFp.getDevice(deviceId, options).then((request) => request(axios, basePath));
     },
     /**
-     * Returns the latest device information history whose calibrated_at is earlier than or equal to the specified timestamp.
-     * @summary Get device information history at timestamp
-     * @param {string} deviceId Device identifier
-     * @param {string} timestamp Runtime timestamp used to resolve the effective device information.
+     * Returns the device information history identified by history_uid.
+     * @summary Get device information history
+     * @param {string} historyUid Device information history UUID.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    getDeviceInfoHistoryAt(
-      deviceId: string,
-      timestamp: string,
+    getDeviceHistory(
+      historyUid: string,
       options?: RawAxiosRequestConfig
     ): AxiosPromise<DevicesDeviceInfoHistoryDetail> {
       return localVarFp
-        .getDeviceInfoHistoryAt(deviceId, timestamp, options)
+        .getDeviceHistory(historyUid, options)
         .then((request) => request(axios, basePath));
     },
     /**
-     * List device information history metadata for the specified device.
-     * @summary List device information history
-     * @param {string} deviceId Device identifier
+     * List device information history metadata. Optionally filter by device_id.
+     * @summary List device information histories
+     * @param {string} [deviceId] Device identifier to filter histories.
      * @param {string} [from] Inclusive lower bound of calibrated_at.
      * @param {string} [to] Inclusive upper bound of calibrated_at.
      * @param {number} [limit]
@@ -2167,8 +2164,8 @@ export const DeviceApiFactory = function (
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    listDeviceInfoHistory(
-      deviceId: string,
+    listDeviceHistories(
+      deviceId?: string,
       from?: string,
       to?: string,
       limit?: number,
@@ -2176,7 +2173,7 @@ export const DeviceApiFactory = function (
       options?: RawAxiosRequestConfig
     ): AxiosPromise<DevicesDeviceInfoHistoryListResponse> {
       return localVarFp
-        .listDeviceInfoHistory(deviceId, from, to, limit, offset, options)
+        .listDeviceHistories(deviceId, from, to, limit, offset, options)
         .then((request) => request(axios, basePath));
     },
     /**
@@ -2213,28 +2210,23 @@ export class DeviceApi extends BaseAPI {
   }
 
   /**
-   * Returns the latest device information history whose calibrated_at is earlier than or equal to the specified timestamp.
-   * @summary Get device information history at timestamp
-   * @param {string} deviceId Device identifier
-   * @param {string} timestamp Runtime timestamp used to resolve the effective device information.
+   * Returns the device information history identified by history_uid.
+   * @summary Get device information history
+   * @param {string} historyUid Device information history UUID.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof DeviceApi
    */
-  public getDeviceInfoHistoryAt(
-    deviceId: string,
-    timestamp: string,
-    options?: RawAxiosRequestConfig
-  ) {
+  public getDeviceHistory(historyUid: string, options?: RawAxiosRequestConfig) {
     return DeviceApiFp(this.configuration)
-      .getDeviceInfoHistoryAt(deviceId, timestamp, options)
+      .getDeviceHistory(historyUid, options)
       .then((request) => request(this.axios, this.basePath));
   }
 
   /**
-   * List device information history metadata for the specified device.
-   * @summary List device information history
-   * @param {string} deviceId Device identifier
+   * List device information history metadata. Optionally filter by device_id.
+   * @summary List device information histories
+   * @param {string} [deviceId] Device identifier to filter histories.
    * @param {string} [from] Inclusive lower bound of calibrated_at.
    * @param {string} [to] Inclusive upper bound of calibrated_at.
    * @param {number} [limit]
@@ -2243,8 +2235,8 @@ export class DeviceApi extends BaseAPI {
    * @throws {RequiredError}
    * @memberof DeviceApi
    */
-  public listDeviceInfoHistory(
-    deviceId: string,
+  public listDeviceHistories(
+    deviceId?: string,
     from?: string,
     to?: string,
     limit?: number,
@@ -2252,7 +2244,7 @@ export class DeviceApi extends BaseAPI {
     options?: RawAxiosRequestConfig
   ) {
     return DeviceApiFp(this.configuration)
-      .listDeviceInfoHistory(deviceId, from, to, limit, offset, options)
+      .listDeviceHistories(deviceId, from, to, limit, offset, options)
       .then((request) => request(this.axios, this.basePath));
   }
 
