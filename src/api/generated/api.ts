@@ -223,7 +223,7 @@ export type DevicesDeviceInfoStatusEnum =
  */
 export interface DevicesDeviceInfoHistoryDetail {
   /**
-   * UUID assigned when the device information history is issued.
+   * UUID assigned when the device history is issued.
    * @type {string}
    * @memberof DevicesDeviceInfoHistoryDetail
    */
@@ -266,7 +266,7 @@ export interface DevicesDeviceInfoHistoryDetail {
  */
 export interface DevicesDeviceInfoHistoryEntry {
   /**
-   * UUID assigned when the device information history is issued.
+   * UUID assigned when the device history is issued.
    * @type {string}
    * @memberof DevicesDeviceInfoHistoryEntry
    */
@@ -1838,9 +1838,9 @@ export const DeviceApiAxiosParamCreator = function (configuration?: Configuratio
       };
     },
     /**
-     * Returns the device information history identified by history_uid.
-     * @summary Get device information history
-     * @param {string} historyUid Device information history UUID.
+     * Returns the device history identified by history_uid.
+     * @summary Get device history
+     * @param {string} historyUid Device history UUID.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -1883,8 +1883,8 @@ export const DeviceApiAxiosParamCreator = function (configuration?: Configuratio
       };
     },
     /**
-     * List device information history metadata. Optionally filter by device_id.
-     * @summary List device information histories
+     * List device history metadata. Optionally filter by device_id.
+     * @summary List device histories
      * @param {string} [deviceId] Device identifier to filter histories.
      * @param {string} [from] Inclusive lower bound of calibrated_at.
      * @param {string} [to] Inclusive upper bound of calibrated_at.
@@ -2021,9 +2021,9 @@ export const DeviceApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
-     * Returns the device information history identified by history_uid.
-     * @summary Get device information history
-     * @param {string} historyUid Device information history UUID.
+     * Returns the device history identified by history_uid.
+     * @summary Get device history
+     * @param {string} historyUid Device history UUID.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -2049,8 +2049,8 @@ export const DeviceApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
-     * List device information history metadata. Optionally filter by device_id.
-     * @summary List device information histories
+     * List device history metadata. Optionally filter by device_id.
+     * @summary List device histories
      * @param {string} [deviceId] Device identifier to filter histories.
      * @param {string} [from] Inclusive lower bound of calibrated_at.
      * @param {string} [to] Inclusive upper bound of calibrated_at.
@@ -2139,9 +2139,9 @@ export const DeviceApiFactory = function (
       return localVarFp.getDevice(deviceId, options).then((request) => request(axios, basePath));
     },
     /**
-     * Returns the device information history identified by history_uid.
-     * @summary Get device information history
-     * @param {string} historyUid Device information history UUID.
+     * Returns the device history identified by history_uid.
+     * @summary Get device history
+     * @param {string} historyUid Device history UUID.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -2154,8 +2154,8 @@ export const DeviceApiFactory = function (
         .then((request) => request(axios, basePath));
     },
     /**
-     * List device information history metadata. Optionally filter by device_id.
-     * @summary List device information histories
+     * List device history metadata. Optionally filter by device_id.
+     * @summary List device histories
      * @param {string} [deviceId] Device identifier to filter histories.
      * @param {string} [from] Inclusive lower bound of calibrated_at.
      * @param {string} [to] Inclusive upper bound of calibrated_at.
@@ -2210,9 +2210,9 @@ export class DeviceApi extends BaseAPI {
   }
 
   /**
-   * Returns the device information history identified by history_uid.
-   * @summary Get device information history
-   * @param {string} historyUid Device information history UUID.
+   * Returns the device history identified by history_uid.
+   * @summary Get device history
+   * @param {string} historyUid Device history UUID.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof DeviceApi
@@ -2224,8 +2224,8 @@ export class DeviceApi extends BaseAPI {
   }
 
   /**
-   * List device information history metadata. Optionally filter by device_id.
-   * @summary List device information histories
+   * List device history metadata. Optionally filter by device_id.
+   * @summary List device histories
    * @param {string} [deviceId] Device identifier to filter histories.
    * @param {string} [from] Inclusive lower bound of calibrated_at.
    * @param {string} [to] Inclusive upper bound of calibrated_at.

@@ -1,15 +1,16 @@
 # DeviceApi
 
-All URIs are relative to *http://localhost:8080*
+All URIs are relative to _http://localhost:8080_
 
-|Method | HTTP request | Description|
-|------------- | ------------- | -------------|
-|[**getDevice**](#getdevice) | **GET** /devices/{device_id} | Get specified device details|
-|[**getDeviceHistory**](#getdevicehistory) | **GET** /device_histories/{history_uid} | Get device information history|
-|[**listDeviceHistories**](#listdevicehistories) | **GET** /device_histories | List device information histories|
-|[**listDevices**](#listdevices) | **GET** /devices | List available devices|
+| Method                                          | HTTP request                            | Description                  |
+| ----------------------------------------------- | --------------------------------------- | ---------------------------- |
+| [**getDevice**](#getdevice)                     | **GET** /devices/{device_id}            | Get specified device details |
+| [**getDeviceHistory**](#getdevicehistory)       | **GET** /device_histories/{history_uid} | Get device history           |
+| [**listDeviceHistories**](#listdevicehistories) | **GET** /device_histories               | List device histories        |
+| [**listDevices**](#listdevices)                 | **GET** /devices                        | List available devices       |
 
 # **getDevice**
+
 > DevicesDeviceInfo getDevice()
 
 get device
@@ -17,27 +18,21 @@ get device
 ### Example
 
 ```typescript
-import {
-    DeviceApi,
-    Configuration
-} from './api';
+import { DeviceApi, Configuration } from './api';
 
 const configuration = new Configuration();
 const apiInstance = new DeviceApi(configuration);
 
 let deviceId: string; //Device identifier (default to undefined)
 
-const { status, data } = await apiInstance.getDevice(
-    deviceId
-);
+const { status, data } = await apiInstance.getDevice(deviceId);
 ```
 
 ### Parameters
 
-|Name | Type | Description  | Notes|
-|------------- | ------------- | ------------- | -------------|
-| **deviceId** | [**string**] | Device identifier | defaults to undefined|
-
+| Name         | Type         | Description       | Notes                 |
+| ------------ | ------------ | ----------------- | --------------------- |
+| **deviceId** | [**string**] | Device identifier | defaults to undefined |
 
 ### Return type
 
@@ -49,49 +44,44 @@ const { status, data } = await apiInstance.getDevice(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-|**200** | job response |  -  |
-|**403** | Cannot access device with device_id |  -  |
-|**404** | Device with device_id not found |  -  |
-|**500** | Internal Server Error |  -  |
+
+| Status code | Description                         | Response headers |
+| ----------- | ----------------------------------- | ---------------- |
+| **200**     | job response                        | -                |
+| **403**     | Cannot access device with device_id | -                |
+| **404**     | Device with device_id not found     | -                |
+| **500**     | Internal Server Error               | -                |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getDeviceHistory**
+
 > DevicesDeviceInfoHistoryDetail getDeviceHistory()
 
-Returns the device information history identified by history_uid.
+Returns the device history identified by history_uid.
 
 ### Example
 
 ```typescript
-import {
-    DeviceApi,
-    Configuration
-} from './api';
+import { DeviceApi, Configuration } from './api';
 
 const configuration = new Configuration();
 const apiInstance = new DeviceApi(configuration);
 
-let historyUid: string; //Device information history UUID. (default to undefined)
+let historyUid: string; //Device history UUID. (default to undefined)
 
-const { status, data } = await apiInstance.getDeviceHistory(
-    historyUid
-);
+const { status, data } = await apiInstance.getDeviceHistory(historyUid);
 ```
 
 ### Parameters
 
-|Name | Type | Description  | Notes|
-|------------- | ------------- | ------------- | -------------|
-| **historyUid** | [**string**] | Device information history UUID. | defaults to undefined|
-
+| Name           | Type         | Description          | Notes                 |
+| -------------- | ------------ | -------------------- | --------------------- |
+| **historyUid** | [**string**] | Device history UUID. | defaults to undefined |
 
 ### Return type
 
@@ -103,32 +93,30 @@ const { status, data } = await apiInstance.getDeviceHistory(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-|**200** | Returns device information history. |  -  |
-|**403** | Cannot access device with device_id |  -  |
-|**404** | Device or history not found |  -  |
-|**500** | Internal Server Error |  -  |
+
+| Status code | Description                         | Response headers |
+| ----------- | ----------------------------------- | ---------------- |
+| **200**     | Returns device history.             | -                |
+| **403**     | Cannot access device with device_id | -                |
+| **404**     | Device or history not found         | -                |
+| **500**     | Internal Server Error               | -                |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **listDeviceHistories**
+
 > DevicesDeviceInfoHistoryListResponse listDeviceHistories()
 
-List device information history metadata. Optionally filter by device_id.
+List device history metadata. Optionally filter by device_id.
 
 ### Example
 
 ```typescript
-import {
-    DeviceApi,
-    Configuration
-} from './api';
+import { DeviceApi, Configuration } from './api';
 
 const configuration = new Configuration();
 const apiInstance = new DeviceApi(configuration);
@@ -139,25 +127,18 @@ let to: string; //Inclusive upper bound of calibrated_at. (optional) (default to
 let limit: number; // (optional) (default to 100)
 let offset: number; // (optional) (default to 0)
 
-const { status, data } = await apiInstance.listDeviceHistories(
-    deviceId,
-    from,
-    to,
-    limit,
-    offset
-);
+const { status, data } = await apiInstance.listDeviceHistories(deviceId, from, to, limit, offset);
 ```
 
 ### Parameters
 
-|Name | Type | Description  | Notes|
-|------------- | ------------- | ------------- | -------------|
-| **deviceId** | [**string**] | Device identifier to filter histories. | (optional) defaults to undefined|
-| **from** | [**string**] | Inclusive lower bound of calibrated_at. | (optional) defaults to undefined|
-| **to** | [**string**] | Inclusive upper bound of calibrated_at. | (optional) defaults to undefined|
-| **limit** | [**number**] |  | (optional) defaults to 100|
-| **offset** | [**number**] |  | (optional) defaults to 0|
-
+| Name         | Type         | Description                             | Notes                            |
+| ------------ | ------------ | --------------------------------------- | -------------------------------- |
+| **deviceId** | [**string**] | Device identifier to filter histories.  | (optional) defaults to undefined |
+| **from**     | [**string**] | Inclusive lower bound of calibrated_at. | (optional) defaults to undefined |
+| **to**       | [**string**] | Inclusive upper bound of calibrated_at. | (optional) defaults to undefined |
+| **limit**    | [**number**] |                                         | (optional) defaults to 100       |
+| **offset**   | [**number**] |                                         | (optional) defaults to 0         |
 
 ### Return type
 
@@ -169,21 +150,22 @@ const { status, data } = await apiInstance.listDeviceHistories(
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-|**200** | Returns device information history metadata. |  -  |
-|**403** | Cannot access device with device_id |  -  |
-|**404** | Device with device_id not found |  -  |
-|**500** | Internal Server Error |  -  |
+
+| Status code | Description                         | Response headers |
+| ----------- | ----------------------------------- | ---------------- |
+| **200**     | Returns device history metadata.    | -                |
+| **403**     | Cannot access device with device_id | -                |
+| **404**     | Device with device_id not found     | -                |
+| **500**     | Internal Server Error               | -                |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **listDevices**
+
 > Array<DevicesDeviceInfo> listDevices()
 
 List available devices
@@ -191,10 +173,7 @@ List available devices
 ### Example
 
 ```typescript
-import {
-    DeviceApi,
-    Configuration
-} from './api';
+import { DeviceApi, Configuration } from './api';
 
 const configuration = new Configuration();
 const apiInstance = new DeviceApi(configuration);
@@ -203,8 +182,8 @@ const { status, data } = await apiInstance.listDevices();
 ```
 
 ### Parameters
-This endpoint does not have any parameters.
 
+This endpoint does not have any parameters.
 
 ### Return type
 
@@ -216,16 +195,15 @@ This endpoint does not have any parameters.
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 ### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-|**200** | Returns a list of available devices |  -  |
-|**401** | Unauthorized |  -  |
-|**500** | Internal Server Error |  -  |
+
+| Status code | Description                         | Response headers |
+| ----------- | ----------------------------------- | ---------------- |
+| **200**     | Returns a list of available devices | -                |
+| **401**     | Unauthorized                        | -                |
+| **500**     | Internal Server Error               | -                |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-

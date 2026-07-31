@@ -51,13 +51,13 @@ export default {
       color_scale: 'Color Scale',
     },
     history: {
-      header: 'Device information history',
+      header: 'Device history',
       selected_snapshot: 'Selected snapshot',
       captured_at: 'Calibrated at',
       storage_key: 'Storage key',
       change_summary: 'Change summary',
       payload_preview: 'Payload preview',
-      list_header: 'Device information history',
+      list_header: 'Device history',
       list_description:
         'Filter by time range and select the device information snapshot to inspect by calibration time.',
       clear_filter: 'Clear filters',
@@ -66,6 +66,7 @@ export default {
       invalid_range: 'The start time must be earlier than or equal to the end time.',
       empty: 'No device information snapshots match the selected time range.',
       loading: 'Loading...',
+      all_devices: 'All devices',
       filtered_count_one: '{{count}} snapshot',
       filtered_count_other: '{{count}} snapshots',
       selected_badge: 'Selected',

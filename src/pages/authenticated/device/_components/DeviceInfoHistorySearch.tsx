@@ -34,44 +34,32 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
   const [hasDateRangeError, setHasDateRangeError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [downloadingHistoryUid, setDownloadingHistoryUid] = useState<string>();
-  const defaultDeviceId = devices[0]?.id;
 
   useEffect(() => {
-    if (!defaultDeviceId) {
-      return;
-    }
-
     setParams((currentParams) => {
       if (
-        currentParams.deviceId &&
+        currentParams.deviceId === undefined ||
         devices.some((device) => device.id === currentParams.deviceId)
       ) {
         return currentParams;
       }
-      return { ...currentParams, deviceId: defaultDeviceId };
+      return { ...currentParams, deviceId: undefined };
     });
     setAppliedParams((currentParams) => {
       if (
-        currentParams.deviceId &&
+        currentParams.deviceId === undefined ||
         devices.some((device) => device.id === currentParams.deviceId)
       ) {
         return currentParams;
       }
-      return { ...currentParams, deviceId: defaultDeviceId };
+      return { ...currentParams, deviceId: undefined };
     });
-  }, [defaultDeviceId, devices]);
+  }, [devices]);
 
   useEffect(() => {
-    const deviceId = appliedParams.deviceId ?? defaultDeviceId;
-    if (!deviceId) {
-      setHistoryEntries([]);
-      setTotalCount(0);
-      return;
-    }
-
     setIsLoading(true);
     getDeviceInfoHistory({
-      deviceId,
+      deviceId: appliedParams.deviceId,
       from: appliedParams.from,
       to: appliedParams.to,
       limit: 100,
@@ -86,7 +74,7 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
         setTotalCount(0);
       })
       .finally(() => setIsLoading(false));
-  }, [appliedParams, defaultDeviceId]);
+  }, [appliedParams]);
 
   const dateFormat = i18n.language === 'ja' ? 'yyyy/MM/dd HH:mm' : 'dd/MM/yyyy HH:mm';
 
@@ -171,7 +159,7 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
                 <div className={clsx('grid', 'gap-1')}>
                   <p className="text-xs">{t('device.list.table.id')}</p>
                   <Select
-                    value={params.deviceId ?? defaultDeviceId ?? ''}
+                    value={params.deviceId ?? ''}
                     onChange={(event) =>
                       setParams({
                         ...params,
@@ -180,6 +168,7 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
                     }
                     className={clsx('bg-base-card')}
                   >
+                    <option value="">{t('device.detail.history.all_devices')}</option>
                     {devices.map((device) => (
                       <option key={device.id} value={device.id}>
                         {device.id}
@@ -265,8 +254,8 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
                       type="button"
                       onClick={() => {
                         setHasDateRangeError(false);
-                        setParams({ deviceId: defaultDeviceId });
-                        setAppliedParams({ deviceId: defaultDeviceId });
+                        setParams({});
+                        setAppliedParams({});
                       }}
                     >
                       {t('device.detail.history.clear_filter')}
