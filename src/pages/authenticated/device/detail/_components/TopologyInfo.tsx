@@ -10,6 +10,8 @@ import 'simplebar-react/dist/simplebar.min.css';
 import { Button } from '@/pages/_components/Button';
 import { Select } from '@/pages/_components/Select';
 import { DateTimeFormatter } from '@/pages/authenticated/_components/DateTimeFormatter';
+import { BsDownload } from 'react-icons/bs';
+import { downloadDeviceInfoJson } from '../../_utils/downloadDeviceInfoJson';
 
 // Types for metric selection
 type QubitMetric = 'readout_error' | 't1' | 't2' | 'single_qubit_gate_error';
@@ -478,7 +480,8 @@ const MAX_ZOOM = 3;
 export const TopologyInfo: React.FC<{
   deviceInfo: string | undefined;
   historyCapturedAt?: string;
-}> = ({ deviceInfo, historyCapturedAt }) => {
+  downloadFileName?: string;
+}> = ({ deviceInfo, historyCapturedAt, downloadFileName = 'device_info.json' }) => {
   const { t, i18n } = useTranslation();
   const [isDarkTheme, setIsDarkTheme] = useState<boolean>(() => {
     return typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
@@ -534,6 +537,11 @@ export const TopologyInfo: React.FC<{
 
   const strHoveredInfo = JSON.stringify(hoveredInfo);
   const activeDeviceInfo = deviceInfo;
+
+  const handleDownloadDeviceInfo = () => {
+    if (!activeDeviceInfo) return;
+    downloadDeviceInfoJson(activeDeviceInfo, downloadFileName);
+  };
 
   useEffect(() => {
     if (typeof document === 'undefined') {
@@ -751,18 +759,28 @@ export const TopologyInfo: React.FC<{
       <Card className={clsx('min-w-0')}>
         <div className={clsx('flex', 'flex-col', 'gap-5')}>
           <div>
-            <h3 className={clsx('text-primary', 'font-bold')}>
-              {t('device.detail.topology_info.header')}
-            </h3>
-            {historyCapturedAt && (
-              <p className={clsx('mt-2', 'text-sm', 'text-secondary-content')}>
-                {`${t('device.detail.topology_info.device_info_at')}: ${DateTimeFormatter(
-                  t,
-                  i18n,
-                  historyCapturedAt
-                )}`}
-              </p>
-            )}
+            <div className={clsx('flex', 'flex-wrap', 'items-start', 'justify-between', 'gap-3')}>
+              <div>
+                <h3 className={clsx('text-primary', 'font-bold')}>
+                  {t('device.detail.topology_info.header')}
+                </h3>
+                {historyCapturedAt && (
+                  <p className={clsx('mt-2', 'text-sm', 'text-secondary-content')}>
+                    {`${t('device.detail.topology_info.device_info_at')}: ${DateTimeFormatter(
+                      t,
+                      i18n,
+                      historyCapturedAt
+                    )}`}
+                  </p>
+                )}
+              </div>
+              {historyCapturedAt && activeDeviceInfo && (
+                <Button color="secondary" size="small" onClick={handleDownloadDeviceInfo}>
+                  <BsDownload />
+                  {t('device.detail.history.download_json')}
+                </Button>
+              )}
+            </div>
           </div>
 
           <div className={clsx('min-w-0')}>

@@ -9,6 +9,11 @@ import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
+import { BsDownload } from 'react-icons/bs';
+import {
+  createDeviceInfoJsonFileName,
+  downloadDeviceInfoJson,
+} from '../_utils/downloadDeviceInfoJson';
 
 type SearchParams = {
   deviceId?: string;
@@ -21,13 +26,14 @@ type PresetOption = (typeof presetOptions)[number];
 
 export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): React.ReactElement => {
   const { t, i18n } = useTranslation();
-  const { getDeviceInfoHistory } = useDeviceAPI();
+  const { getDeviceInfoHistory, getDeviceHistory } = useDeviceAPI();
   const [params, setParams] = useState<SearchParams>({});
   const [appliedParams, setAppliedParams] = useState<SearchParams>({});
   const [historyEntries, setHistoryEntries] = useState<DeviceInfoHistoryEntry[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [hasDateRangeError, setHasDateRangeError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [downloadingHistoryUid, setDownloadingHistoryUid] = useState<string>();
   const defaultDeviceId = devices[0]?.id;
 
   useEffect(() => {
@@ -121,6 +127,21 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
       return;
     }
     setAppliedParams(params);
+  };
+
+  const handleDownloadHistory = async (entry: DeviceInfoHistoryEntry) => {
+    if (downloadingHistoryUid) return;
+    setDownloadingHistoryUid(entry.historyUid);
+    try {
+      const detail = await getDeviceHistory(entry.historyUid);
+      if (!detail) return;
+      downloadDeviceInfoJson(
+        detail.deviceInfo,
+        createDeviceInfoJsonFileName(entry.deviceId, entry.calibratedAt)
+      );
+    } finally {
+      setDownloadingHistoryUid(undefined);
+    }
   };
 
   return (
@@ -276,12 +297,13 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
               <th className={clsx('text-center')}>{t('device.detail.history.captured_at')}</th>
               <th className={clsx('text-center')}>{t('device.detail.qubits')}</th>
               <th className={clsx('text-center')}>{t('device.detail.couplings')}</th>
+              <th className={clsx('text-center')}>{t('device.detail.history.download_json')}</th>
             </tr>
           </thead>
           <tbody>
             {historyEntries.length === 0 ? (
               <tr>
-                <td colSpan={4} className={clsx('text-center', 'text-secondary-content')}>
+                <td colSpan={5} className={clsx('text-center', 'text-secondary-content')}>
                   {isLoading
                     ? t('device.detail.history.loading')
                     : t('device.detail.history.empty')}
@@ -308,6 +330,17 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
                   </td>
                   <td className={clsx('break-words', 'whitespace-normal', 'text-center')}>
                     {entry.nCouplings}
+                  </td>
+                  <td className={clsx('text-center')}>
+                    <Button
+                      size="small"
+                      color="secondary"
+                      type="button"
+                      disabled={downloadingHistoryUid === entry.historyUid}
+                      onClick={() => void handleDownloadHistory(entry)}
+                    >
+                      <BsDownload />
+                    </Button>
                   </td>
                 </tr>
               ))

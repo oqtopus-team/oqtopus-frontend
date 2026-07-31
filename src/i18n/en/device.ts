@@ -70,6 +70,7 @@ export default {
       filtered_count_other: '{{count}} snapshots',
       selected_badge: 'Selected',
       select_badge: 'Show',
+      download_json: 'Download JSON',
       today: 'Today',
       last_7_days: 'Last 7 days',
       last_30_days: 'Last 30 days',

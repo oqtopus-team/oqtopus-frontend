@@ -9,6 +9,7 @@ import { Device, DeviceInfoHistoryDetail } from '@/domain/types/Device';
 import { useDeviceAPI } from '@/backend/hook';
 import { Loader } from '@/pages/_components/Loader';
 import { DeviceDetailBasicInfo } from './_components/DeviceDetailBasicInfo';
+import { createDeviceInfoJsonFileName } from '../_utils/downloadDeviceInfoJson';
 
 export default function DeviceDetailPage_() {
   const { id } = useParams();
@@ -62,7 +63,12 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
 
   const activeDeviceInfo = historyDetail?.deviceInfo ?? device.deviceInfo;
   const hasDeviceInfo = (activeDeviceInfo ?? '').trim() !== '';
-  const isHistoryDetail = Boolean((requestedDeviceHistoryUid || requestedDeviceInfoAt) && historyDetail);
+  const isHistoryDetail = Boolean(
+    (requestedDeviceHistoryUid || requestedDeviceInfoAt) && historyDetail
+  );
+  const historyDownloadFileName = historyDetail
+    ? createDeviceInfoJsonFileName(device.id, historyDetail.calibratedAt)
+    : undefined;
 
   return (
     <>
@@ -78,6 +84,7 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
           <TopologyInfo
             deviceInfo={activeDeviceInfo}
             historyCapturedAt={isHistoryDetail ? historyDetail?.calibratedAt : undefined}
+            downloadFileName={historyDownloadFileName}
           />
         </div>
       )}

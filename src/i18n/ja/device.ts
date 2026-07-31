@@ -69,6 +69,7 @@ export default {
       filtered_count_other: '{{count}} 件',
       selected_badge: '選択中',
       select_badge: '表示',
+      download_json: 'JSONをダウンロード',
       today: '今日',
       last_7_days: '過去7日間',
       last_30_days: '過去30日間',
