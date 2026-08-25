@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
 import { BsDownload } from 'react-icons/bs';
 import { toast } from 'react-toastify';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import { errorToastConfig } from '@/config/toast';
 import {
   createDeviceInfoJsonFileName,
@@ -27,6 +28,8 @@ type SearchParams = {
 const presetOptions = ['today', 'last7Days', 'last30Days'] as const;
 type PresetOption = (typeof presetOptions)[number];
 
+const PAGE_SIZE = 10;
+
 export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): React.ReactElement => {
   const { t, i18n } = useTranslation();
   const { getDeviceInfoHistory, getDeviceHistory } = useDeviceAPI();
@@ -36,6 +39,7 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
   const [totalCount, setTotalCount] = useState(0);
   const [hasDateRangeError, setHasDateRangeError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
   const [downloadingHistoryId, setDownloadingHistoryId] = useState<string>();
   const [selectedHistoryIds, setSelectedHistoryIds] = useState<string[]>([]);
   const [isBulkDownloading, setIsBulkDownloading] = useState(false);
@@ -62,26 +66,61 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
   }, [devices]);
 
   useEffect(() => {
+    let isActive = true;
     setIsLoading(true);
+    setHasMore(false);
     getDeviceInfoHistory({
       deviceId: appliedParams.deviceId,
       from: appliedParams.from,
       to: appliedParams.to,
-      limit: 100,
+      limit: PAGE_SIZE,
       offset: 0,
     })
       .then((history) => {
+        if (!isActive) return;
         setHistoryEntries(history.items);
         setTotalCount(history.total);
+        setHasMore(history.items.length < history.total);
         setSelectedHistoryIds([]);
       })
       .catch(() => {
+        if (!isActive) return;
         setHistoryEntries([]);
         setTotalCount(0);
+        setHasMore(false);
         setSelectedHistoryIds([]);
       })
-      .finally(() => setIsLoading(false));
+      .finally(() => {
+        if (isActive) setIsLoading(false);
+      });
+
+    return () => {
+      isActive = false;
+    };
   }, [appliedParams]);
+
+  const loadMoreHistories = async (): Promise<void> => {
+    if (isLoading || !hasMore) return;
+
+    const offset = historyEntries.length;
+    setIsLoading(true);
+    try {
+      const history = await getDeviceInfoHistory({
+        deviceId: appliedParams.deviceId,
+        from: appliedParams.from,
+        to: appliedParams.to,
+        limit: PAGE_SIZE,
+        offset,
+      });
+      setHistoryEntries((current) => [...current, ...history.items]);
+      setTotalCount(history.total);
+      setHasMore(offset + history.items.length < history.total);
+    } catch {
+      setHasMore(offset < totalCount);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const dateFormat = i18n.language === 'ja' ? 'yyyy/MM/dd HH:mm' : 'dd/MM/yyyy HH:mm';
 
@@ -185,24 +224,7 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
   return (
     <div className={clsx('grid', 'gap-5')}>
       <form noValidate onSubmit={onSubmit}>
-        <div className={clsx('flex', 'items-center', 'justify-end', 'gap-3', 'flex-wrap')}>
-          <span
-            className={clsx(
-              'rounded-full',
-              'border',
-              'px-2.5',
-              'py-1',
-              'text-[11px]',
-              'font-semibold',
-              'text-base-content'
-            )}
-          >
-            {t('device.detail.history.filtered_count', { count: totalCount })}
-          </span>
-        </div>
-        <div
-          className={clsx('mt-5', 'flex', 'justify-between', 'items-end', 'flex-nowrap', 'gap-6')}
-        >
+        <div className={clsx('flex', 'justify-between', 'items-end', 'flex-nowrap', 'gap-6')}>
           <div className={clsx('flex', 'flex-1', 'flex-col', 'gap-6')}>
             <div className={clsx('flex', 'flex-1', 'justify-start', 'items-end')}>
               <div className={clsx('grid', 'gap-4', 'min-w-[16rem]', 'max-w-[24rem]', 'flex-1')}>
@@ -343,96 +365,122 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
       </section>
 
       <div className={clsx('overflow-x-auto')}>
-        <table className={clsx('table-auto', 'w-full')}>
-          <thead>
-            <tr>
-              <th>
-                <input
-                  type="checkbox"
-                  checked={areAllHistoriesSelected}
-                  aria-label={t('device.detail.history.select_all')}
-                  onChange={(event) =>
-                    handleAllHistoriesSelectionChange(event.currentTarget.checked)
-                  }
-                />
-              </th>
-              <th>{t('device.detail.history.history_id')}</th>
-              <th className={clsx('text-center')}>{t('device.list.table.id')}</th>
-              <th className={clsx('text-center')}>{t('device.detail.history.captured_at')}</th>
-              <th className={clsx('text-center')}>{t('device.detail.qubits')}</th>
-              <th className={clsx('text-center')}>{t('device.detail.couplings')}</th>
-              <th className={clsx('text-center')}>{t('device.detail.history.download_json')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {historyEntries.length === 0 ? (
+        <InfiniteScroll
+          next={() => void loadMoreHistories()}
+          hasMore={hasMore}
+          loader={null}
+          dataLength={historyEntries.length}
+        >
+          <table className={clsx('table-auto', 'w-full')}>
+            <thead>
               <tr>
-                <td colSpan={7} className={clsx('text-center', 'text-secondary-content')}>
-                  {isLoading
-                    ? t('device.detail.history.loading')
-                    : t('device.detail.history.empty')}
-                </td>
+                <th>
+                  <input
+                    type="checkbox"
+                    checked={areAllHistoriesSelected}
+                    aria-label={t('device.detail.history.select_all')}
+                    onChange={(event) =>
+                      handleAllHistoriesSelectionChange(event.currentTarget.checked)
+                    }
+                  />
+                </th>
+                <th>{t('device.detail.history.history_id')}</th>
+                <th className={clsx('text-center')}>{t('device.list.table.id')}</th>
+                <th className={clsx('text-center')}>{t('device.detail.history.captured_at')}</th>
+                <th className={clsx('text-center')}>{t('device.detail.qubits')}</th>
+                <th className={clsx('text-center')}>{t('device.detail.couplings')}</th>
+                <th className={clsx('text-center')}>{t('device.detail.history.download_json')}</th>
               </tr>
-            ) : (
-              historyEntries.map((entry) => (
-                <tr key={entry.historyId}>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={selectedHistoryIds.includes(entry.historyId)}
-                      aria-label={t('device.detail.history.select_history', {
-                        historyId: entry.historyId,
-                      })}
-                      onChange={(event) =>
-                        handleHistorySelectionChange(entry.historyId, event.currentTarget.checked)
-                      }
-                    />
-                  </td>
-                  <td>
-                    <NavLink
-                      to={`/device/${entry.deviceId}?deviceHistoryId=${encodeURIComponent(entry.historyId)}`}
-                      className="text-link"
-                    >
-                      {entry.historyId}
-                    </NavLink>
-                  </td>
-                  <td className={clsx('break-words', 'whitespace-normal', 'text-center')}>
-                    <NavLink to={`/device/${entry.deviceId}`} className="text-link">
-                      {entry.deviceId}
-                    </NavLink>
-                  </td>
-                  <td className={clsx('break-words', 'whitespace-normal', 'text-center')}>
-                    <NavLink
-                      to={`/device/${entry.deviceId}?deviceHistoryId=${encodeURIComponent(entry.historyId)}`}
-                      className="text-link"
-                    >
-                      {DateTimeFormatter(t, i18n, entry.calibratedAt)}
-                    </NavLink>
-                  </td>
-                  <td className={clsx('break-words', 'whitespace-normal', 'text-center')}>
-                    {entry.nQubits}
-                  </td>
-                  <td className={clsx('break-words', 'whitespace-normal', 'text-center')}>
-                    {entry.nCouplings}
-                  </td>
-                  <td className={clsx('text-center')}>
-                    <Button
-                      size="small"
-                      color="secondary"
-                      type="button"
-                      disabled={isBulkDownloading || downloadingHistoryId === entry.historyId}
-                      aria-label={t('device.detail.history.download_json')}
-                      title={t('device.detail.history.download_json')}
-                      onClick={() => void handleDownloadHistory(entry)}
-                    >
-                      <BsDownload />
-                    </Button>
+            </thead>
+            <tbody>
+              {historyEntries.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className={clsx('text-center', 'text-secondary-content')}>
+                    {isLoading
+                      ? t('device.detail.history.loading')
+                      : t('device.detail.history.empty')}
                   </td>
                 </tr>
-              ))
+              ) : (
+                historyEntries.map((entry) => (
+                  <tr key={entry.historyId}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={selectedHistoryIds.includes(entry.historyId)}
+                        aria-label={t('device.detail.history.select_history', {
+                          historyId: entry.historyId,
+                        })}
+                        onChange={(event) =>
+                          handleHistorySelectionChange(entry.historyId, event.currentTarget.checked)
+                        }
+                      />
+                    </td>
+                    <td>
+                      <NavLink
+                        to={`/device/${entry.deviceId}?deviceHistoryId=${encodeURIComponent(entry.historyId)}`}
+                        className="text-link"
+                      >
+                        {entry.historyId}
+                      </NavLink>
+                    </td>
+                    <td className={clsx('break-words', 'whitespace-normal', 'text-center')}>
+                      <NavLink to={`/device/${entry.deviceId}`} className="text-link">
+                        {entry.deviceId}
+                      </NavLink>
+                    </td>
+                    <td className={clsx('break-words', 'whitespace-normal', 'text-center')}>
+                      <NavLink
+                        to={`/device/${entry.deviceId}?deviceHistoryId=${encodeURIComponent(entry.historyId)}`}
+                        className="text-link"
+                      >
+                        {DateTimeFormatter(t, i18n, entry.calibratedAt)}
+                      </NavLink>
+                    </td>
+                    <td className={clsx('break-words', 'whitespace-normal', 'text-center')}>
+                      {entry.nQubits}
+                    </td>
+                    <td className={clsx('break-words', 'whitespace-normal', 'text-center')}>
+                      {entry.nCouplings}
+                    </td>
+                    <td className={clsx('text-center')}>
+                      <Button
+                        size="small"
+                        color="secondary"
+                        type="button"
+                        disabled={isBulkDownloading || downloadingHistoryId === entry.historyId}
+                        aria-label={t('device.detail.history.download_json')}
+                        title={t('device.detail.history.download_json')}
+                        onClick={() => void handleDownloadHistory(entry)}
+                      >
+                        <BsDownload />
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </InfiniteScroll>
+        {hasMore && (
+          <button
+            type="button"
+            disabled={isLoading}
+            className={clsx(
+              'flex',
+              'h-12',
+              'w-full',
+              'items-center',
+              'justify-center',
+              'text-sm',
+              'text-info',
+              !isLoading && 'cursor-pointer'
             )}
-          </tbody>
-        </table>
+            onClick={() => void loadMoreHistories()}
+          >
+            {isLoading ? t('device.detail.history.loading') : t('device.detail.history.load_more')}
+          </button>
+        )}
       </div>
     </div>
   );
