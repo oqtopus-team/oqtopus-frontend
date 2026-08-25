@@ -1,6 +1,7 @@
 import JSZip from 'jszip';
 import { describe, expect, it } from 'vitest';
 import {
+  createDeviceInfoHistoryJsonFileName,
   createDeviceInfoHistoryZip,
   createDeviceInfoHistoryZipFileName,
   formatDeviceInfoJson,
@@ -20,10 +21,19 @@ describe('device info downloads', () => {
     );
   });
 
+  it('creates a safe JSON file name from the history ID', () => {
+    expect(createDeviceInfoHistoryJsonFileName('018f4c8a-7c2b-7f4d-9a2f-4f2f0b8f6f12')).toBe(
+      '018f4c8a-7c2b-7f4d-9a2f-4f2f0b8f6f12.json'
+    );
+    expect(createDeviceInfoHistoryJsonFileName('history/with spaces')).toBe(
+      'history%2Fwith%20spaces.json'
+    );
+  });
+
   it('creates a ZIP containing each formatted history JSON file', async () => {
     const blob = await createDeviceInfoHistoryZip([
-      { deviceInfo: '{"device":"qpu-1"}', fileName: 'first.json' },
-      { deviceInfo: 'legacy-content', fileName: 'second.json' },
+      { deviceInfo: '{"device":"qpu-1"}', historyId: 'first' },
+      { deviceInfo: 'legacy-content', historyId: 'second' },
     ]);
     const zip = await JSZip.loadAsync(blob);
 

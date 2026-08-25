@@ -2,13 +2,16 @@ import JSZip from 'jszip';
 
 export type DeviceInfoJsonArchiveEntry = {
   deviceInfo: string;
-  fileName: string;
+  historyId: string;
 };
 
 export const createDeviceInfoJsonFileName = (deviceId: string, calibratedAt: string): string => {
   const timestamp = calibratedAt.replace(/[:.]/g, '').replace(/\s+/g, '_');
   return `device_info_${deviceId}_${timestamp}.json`;
 };
+
+export const createDeviceInfoHistoryJsonFileName = (historyId: string): string =>
+  `${encodeURIComponent(historyId)}.json`;
 
 export const createDeviceInfoHistoryZipFileName = (createdAt = new Date()): string => {
   const timestamp = createdAt
@@ -32,8 +35,8 @@ export const createDeviceInfoHistoryZip = async (
   entries: DeviceInfoJsonArchiveEntry[]
 ): Promise<Blob> => {
   const zip = new JSZip();
-  entries.forEach(({ deviceInfo, fileName }) => {
-    zip.file(fileName, formatDeviceInfoJson(deviceInfo));
+  entries.forEach(({ deviceInfo, historyId }) => {
+    zip.file(createDeviceInfoHistoryJsonFileName(historyId), formatDeviceInfoJson(deviceInfo));
   });
   return zip.generateAsync({ type: 'blob' });
 };

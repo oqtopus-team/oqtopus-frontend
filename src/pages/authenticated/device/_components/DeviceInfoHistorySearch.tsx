@@ -169,7 +169,7 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
           }
           return {
             deviceInfo: detail.deviceInfo,
-            fileName: createDeviceInfoJsonFileName(entry.deviceId, entry.calibratedAt),
+            historyId: entry.historyId,
           };
         })
       );
