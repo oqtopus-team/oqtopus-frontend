@@ -28,7 +28,7 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
   const [historyDetail, setHistoryDetail] = useState<DeviceInfoHistoryDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSuccess, setIsSuccess] = useState(false);
-  const requestedDeviceHistoryUid = searchParams.get('deviceHistoryUid') ?? '';
+  const requestedDeviceHistoryId = searchParams.get('deviceHistoryId') ?? '';
   const requestedDeviceInfoAt = searchParams.get('deviceInfoAt') ?? '';
 
   useLayoutEffect(() => {
@@ -38,8 +38,8 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
       getDevice(id)
         .then(async (device) => {
           setDevice(device);
-          if (device && requestedDeviceHistoryUid) {
-            const history = await getDeviceHistory(requestedDeviceHistoryUid);
+          if (device && requestedDeviceHistoryId) {
+            const history = await getDeviceHistory(requestedDeviceHistoryId);
             setHistoryDetail(history);
           } else if (device && requestedDeviceInfoAt) {
             const history = await getDeviceHistoryAtRuntime(id, requestedDeviceInfoAt);
@@ -52,7 +52,7 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
           setLoading(false);
         });
     }
-  }, [id, requestedDeviceHistoryUid, requestedDeviceInfoAt]);
+  }, [id, requestedDeviceHistoryId, requestedDeviceInfoAt]);
 
   if (loading) {
     return <LoadingView />;
@@ -64,7 +64,7 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
   const activeDeviceInfo = historyDetail?.deviceInfo ?? device.deviceInfo;
   const hasDeviceInfo = (activeDeviceInfo ?? '').trim() !== '';
   const isHistoryDetail = Boolean(
-    (requestedDeviceHistoryUid || requestedDeviceInfoAt) && historyDetail
+    (requestedDeviceHistoryId || requestedDeviceInfoAt) && historyDetail
   );
   const historyDownloadFileName = historyDetail
     ? createDeviceInfoJsonFileName(device.id, historyDetail.calibratedAt)

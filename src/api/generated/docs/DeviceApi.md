@@ -2,12 +2,12 @@
 
 All URIs are relative to _http://localhost:8080_
 
-| Method                                          | HTTP request                            | Description                  |
-| ----------------------------------------------- | --------------------------------------- | ---------------------------- |
-| [**getDevice**](#getdevice)                     | **GET** /devices/{device_id}            | Get specified device details |
-| [**getDeviceHistory**](#getdevicehistory)       | **GET** /device_histories/{history_uid} | Get device history           |
-| [**listDeviceHistories**](#listdevicehistories) | **GET** /device_histories               | List device histories        |
-| [**listDevices**](#listdevices)                 | **GET** /devices                        | List available devices       |
+| Method                                          | HTTP request                           | Description                  |
+| ----------------------------------------------- | -------------------------------------- | ---------------------------- |
+| [**getDevice**](#getdevice)                     | **GET** /devices/{device_id}           | Get specified device details |
+| [**getDeviceHistory**](#getdevicehistory)       | **GET** /device_histories/{history_id} | Get device history           |
+| [**listDeviceHistories**](#listdevicehistories) | **GET** /device_histories              | List device histories        |
+| [**listDevices**](#listdevices)                 | **GET** /devices                       | List available devices       |
 
 # **getDevice**
 
@@ -62,7 +62,7 @@ const { status, data } = await apiInstance.getDevice(deviceId);
 
 > DevicesDeviceInfoHistoryDetail getDeviceHistory()
 
-Returns the device history identified by history_uid.
+Returns the device history identified by history_id.
 
 ### Example
 
@@ -72,16 +72,16 @@ import { DeviceApi, Configuration } from './api';
 const configuration = new Configuration();
 const apiInstance = new DeviceApi(configuration);
 
-let historyUid: string; //Device history UUID. (default to undefined)
+let historyId: string; //Unique string identifying the device history. (default to undefined)
 
-const { status, data } = await apiInstance.getDeviceHistory(historyUid);
+const { status, data } = await apiInstance.getDeviceHistory(historyId);
 ```
 
 ### Parameters
 
-| Name           | Type         | Description          | Notes                 |
-| -------------- | ------------ | -------------------- | --------------------- |
-| **historyUid** | [**string**] | Device history UUID. | defaults to undefined |
+| Name          | Type         | Description                                   | Notes                 |
+| ------------- | ------------ | --------------------------------------------- | --------------------- |
+| **historyId** | [**string**] | Unique string identifying the device history. | defaults to undefined |
 
 ### Return type
 

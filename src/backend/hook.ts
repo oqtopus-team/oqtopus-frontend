@@ -237,8 +237,8 @@ export const useDeviceAPI = () => {
       .then((res) => convertDeviceInfoHistoryList(res.data));
   };
 
-  const getDeviceHistory = async (historyUid: string): Promise<DeviceInfoHistoryDetail | null> => {
-    return api.device.getDeviceHistory(historyUid).then(async (res) => {
+  const getDeviceHistory = async (historyId: string): Promise<DeviceInfoHistoryDetail | null> => {
+    return api.device.getDeviceHistory(historyId).then(async (res) => {
       if (res.status === 200) {
         return await convertDeviceInfoHistoryDetail(res.data);
       }
@@ -251,11 +251,11 @@ export const useDeviceAPI = () => {
     timestamp: string
   ): Promise<DeviceInfoHistoryDetail | null> => {
     const history = await getDeviceInfoHistory({ deviceId, to: timestamp, limit: 1, offset: 0 });
-    const historyUid = history.items[0]?.historyUid;
-    if (!historyUid) {
+    const historyId = history.items[0]?.historyId;
+    if (!historyId) {
       return null;
     }
-    return getDeviceHistory(historyUid);
+    return getDeviceHistory(historyId);
   };
 
   return { getDevices, getDevice, getDeviceInfoHistory, getDeviceHistory, getDeviceHistoryAtRuntime };
@@ -299,7 +299,7 @@ const convertDeviceResult = async (device: DevicesDeviceInfo): Promise<Device> =
 const convertDeviceInfoHistoryEntry = (
   entry: DevicesDeviceInfoHistoryEntry
 ): DeviceInfoHistoryEntry => ({
-  historyUid: entry.history_uid,
+  historyId: entry.history_id,
   deviceId: entry.device_id,
   calibratedAt: entry.calibrated_at,
   nQubits: entry.n_qubits,

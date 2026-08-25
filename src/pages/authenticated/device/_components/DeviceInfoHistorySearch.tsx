@@ -33,7 +33,7 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
   const [totalCount, setTotalCount] = useState(0);
   const [hasDateRangeError, setHasDateRangeError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [downloadingHistoryUid, setDownloadingHistoryUid] = useState<string>();
+  const [downloadingHistoryId, setDownloadingHistoryId] = useState<string>();
 
   useEffect(() => {
     setParams((currentParams) => {
@@ -118,17 +118,17 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
   };
 
   const handleDownloadHistory = async (entry: DeviceInfoHistoryEntry) => {
-    if (downloadingHistoryUid) return;
-    setDownloadingHistoryUid(entry.historyUid);
+    if (downloadingHistoryId) return;
+    setDownloadingHistoryId(entry.historyId);
     try {
-      const detail = await getDeviceHistory(entry.historyUid);
+      const detail = await getDeviceHistory(entry.historyId);
       if (!detail) return;
       downloadDeviceInfoJson(
         detail.deviceInfo,
         createDeviceInfoJsonFileName(entry.deviceId, entry.calibratedAt)
       );
     } finally {
-      setDownloadingHistoryUid(undefined);
+      setDownloadingHistoryId(undefined);
     }
   };
 
@@ -300,7 +300,7 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
               </tr>
             ) : (
               historyEntries.map((entry) => (
-                <tr key={entry.historyUid}>
+                <tr key={entry.historyId}>
                   <td className={clsx('break-words', 'whitespace-normal', 'text-center')}>
                     <NavLink to={`/device/${entry.deviceId}`} className="text-link">
                       {entry.deviceId}
@@ -308,7 +308,7 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
                   </td>
                   <td className={clsx('break-words', 'whitespace-normal', 'text-center')}>
                     <NavLink
-                      to={`/device/${entry.deviceId}?deviceHistoryUid=${encodeURIComponent(entry.historyUid)}`}
+                      to={`/device/${entry.deviceId}?deviceHistoryId=${encodeURIComponent(entry.historyId)}`}
                       className="text-link"
                     >
                       {DateTimeFormatter(t, i18n, entry.calibratedAt)}
@@ -325,7 +325,7 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
                       size="small"
                       color="secondary"
                       type="button"
-                      disabled={downloadingHistoryUid === entry.historyUid}
+                      disabled={downloadingHistoryId === entry.historyId}
                       aria-label={t('device.detail.history.download_json')}
                       title={t('device.detail.history.download_json')}
                       onClick={() => void handleDownloadHistory(entry)}
