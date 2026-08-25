@@ -1,17 +1,44 @@
+import JSZip from 'jszip';
+
+export type DeviceInfoJsonArchiveEntry = {
+  deviceInfo: string;
+  fileName: string;
+};
+
 export const createDeviceInfoJsonFileName = (deviceId: string, calibratedAt: string): string => {
   const timestamp = calibratedAt.replace(/[:.]/g, '').replace(/\s+/g, '_');
   return `device_info_${deviceId}_${timestamp}.json`;
 };
 
-export const downloadDeviceInfoJson = (deviceInfo: string, fileName: string): void => {
-  let downloadContent = deviceInfo;
-  try {
-    downloadContent = JSON.stringify(JSON.parse(deviceInfo), null, 2);
-  } catch {
-    // Preserve the original payload if it is not valid JSON.
-  }
+export const createDeviceInfoHistoryZipFileName = (createdAt = new Date()): string => {
+  const timestamp = createdAt
+    .toISOString()
+    .replace(/-/g, '')
+    .replace(/:/g, '')
+    .replace(/\./g, '')
+    .replace(/\d{3}Z$/, 'Z');
+  return `device_info_history_${timestamp}.zip`;
+};
 
-  const blob = new Blob([downloadContent], { type: 'application/json' });
+export const formatDeviceInfoJson = (deviceInfo: string): string => {
+  try {
+    return JSON.stringify(JSON.parse(deviceInfo), null, 2);
+  } catch {
+    return deviceInfo;
+  }
+};
+
+export const createDeviceInfoHistoryZip = async (
+  entries: DeviceInfoJsonArchiveEntry[]
+): Promise<Blob> => {
+  const zip = new JSZip();
+  entries.forEach(({ deviceInfo, fileName }) => {
+    zip.file(fileName, formatDeviceInfoJson(deviceInfo));
+  });
+  return zip.generateAsync({ type: 'blob' });
+};
+
+const downloadBlob = (blob: Blob, fileName: string): void => {
   const blobUrl = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = blobUrl;
@@ -20,4 +47,16 @@ export const downloadDeviceInfoJson = (deviceInfo: string, fileName: string): vo
   anchor.click();
   document.body.removeChild(anchor);
   URL.revokeObjectURL(blobUrl);
+};
+
+export const downloadDeviceInfoHistoryZip = async (
+  entries: DeviceInfoJsonArchiveEntry[]
+): Promise<void> => {
+  const blob = await createDeviceInfoHistoryZip(entries);
+  downloadBlob(blob, createDeviceInfoHistoryZipFileName());
+};
+
+export const downloadDeviceInfoJson = (deviceInfo: string, fileName: string): void => {
+  const blob = new Blob([formatDeviceInfoJson(deviceInfo)], { type: 'application/json' });
+  downloadBlob(blob, fileName);
 };

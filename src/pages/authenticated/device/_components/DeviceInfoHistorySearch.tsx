@@ -10,9 +10,12 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
 import { BsDownload } from 'react-icons/bs';
+import { toast } from 'react-toastify';
+import { errorToastConfig } from '@/config/toast';
 import {
   createDeviceInfoJsonFileName,
   downloadDeviceInfoJson,
+  downloadDeviceInfoHistoryZip,
 } from '../_utils/downloadDeviceInfoJson';
 
 type SearchParams = {
@@ -34,6 +37,8 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
   const [hasDateRangeError, setHasDateRangeError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [downloadingHistoryId, setDownloadingHistoryId] = useState<string>();
+  const [selectedHistoryIds, setSelectedHistoryIds] = useState<string[]>([]);
+  const [isBulkDownloading, setIsBulkDownloading] = useState(false);
 
   useEffect(() => {
     setParams((currentParams) => {
@@ -68,10 +73,12 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
       .then((history) => {
         setHistoryEntries(history.items);
         setTotalCount(history.total);
+        setSelectedHistoryIds([]);
       })
       .catch(() => {
         setHistoryEntries([]);
         setTotalCount(0);
+        setSelectedHistoryIds([]);
       })
       .finally(() => setIsLoading(false));
   }, [appliedParams]);
@@ -118,7 +125,7 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
   };
 
   const handleDownloadHistory = async (entry: DeviceInfoHistoryEntry) => {
-    if (downloadingHistoryId) return;
+    if (downloadingHistoryId || isBulkDownloading) return;
     setDownloadingHistoryId(entry.historyId);
     try {
       const detail = await getDeviceHistory(entry.historyId);
@@ -129,6 +136,49 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
       );
     } finally {
       setDownloadingHistoryId(undefined);
+    }
+  };
+
+  const handleHistorySelectionChange = (historyId: string, selected: boolean): void => {
+    setSelectedHistoryIds((current) =>
+      selected ? [...current, historyId] : current.filter((id) => id !== historyId)
+    );
+  };
+
+  const areAllHistoriesSelected =
+    historyEntries.length > 0 &&
+    historyEntries.every((entry) => selectedHistoryIds.includes(entry.historyId));
+
+  const handleAllHistoriesSelectionChange = (selected: boolean): void => {
+    setSelectedHistoryIds(selected ? historyEntries.map((entry) => entry.historyId) : []);
+  };
+
+  const handleDownloadSelectedHistories = async (): Promise<void> => {
+    if (selectedHistoryIds.length === 0 || isBulkDownloading) return;
+    setIsBulkDownloading(true);
+
+    try {
+      const selectedEntries = historyEntries.filter((entry) =>
+        selectedHistoryIds.includes(entry.historyId)
+      );
+      const archiveEntries = await Promise.all(
+        selectedEntries.map(async (entry) => {
+          const detail = await getDeviceHistory(entry.historyId);
+          if (!detail) {
+            throw new Error(`Device history not found: ${entry.historyId}`);
+          }
+          return {
+            deviceInfo: detail.deviceInfo,
+            fileName: createDeviceInfoJsonFileName(entry.deviceId, entry.calibratedAt),
+          };
+        })
+      );
+      await downloadDeviceInfoHistoryZip(archiveEntries);
+    } catch (error) {
+      console.error(error);
+      toast(t('device.detail.history.bulk_download_failed'), errorToastConfig);
+    } finally {
+      setIsBulkDownloading(false);
     }
   };
 
@@ -278,10 +328,34 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
         </div>
       </form>
 
+      <section className={clsx('flex', 'justify-end')}>
+        <Button
+          color={selectedHistoryIds.length === 0 || isBulkDownloading ? 'disabled' : 'secondary'}
+          type="button"
+          disabled={selectedHistoryIds.length === 0 || isBulkDownloading}
+          onClick={() => void handleDownloadSelectedHistories()}
+        >
+          <div className={clsx('flex', 'items-center', 'gap-2')}>
+            <BsDownload />
+            <span>{t('device.detail.history.bulk_download')}</span>
+          </div>
+        </Button>
+      </section>
+
       <div className={clsx('overflow-x-auto')}>
         <table className={clsx('table-auto', 'w-full')}>
           <thead>
             <tr>
+              <th>
+                <input
+                  type="checkbox"
+                  checked={areAllHistoriesSelected}
+                  aria-label={t('device.detail.history.select_all')}
+                  onChange={(event) =>
+                    handleAllHistoriesSelectionChange(event.currentTarget.checked)
+                  }
+                />
+              </th>
               <th>{t('device.detail.history.history_id')}</th>
               <th className={clsx('text-center')}>{t('device.list.table.id')}</th>
               <th className={clsx('text-center')}>{t('device.detail.history.captured_at')}</th>
@@ -293,7 +367,7 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
           <tbody>
             {historyEntries.length === 0 ? (
               <tr>
-                <td colSpan={6} className={clsx('text-center', 'text-secondary-content')}>
+                <td colSpan={7} className={clsx('text-center', 'text-secondary-content')}>
                   {isLoading
                     ? t('device.detail.history.loading')
                     : t('device.detail.history.empty')}
@@ -302,6 +376,18 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
             ) : (
               historyEntries.map((entry) => (
                 <tr key={entry.historyId}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={selectedHistoryIds.includes(entry.historyId)}
+                      aria-label={t('device.detail.history.select_history', {
+                        historyId: entry.historyId,
+                      })}
+                      onChange={(event) =>
+                        handleHistorySelectionChange(entry.historyId, event.currentTarget.checked)
+                      }
+                    />
+                  </td>
                   <td>
                     <NavLink
                       to={`/device/${entry.deviceId}?deviceHistoryId=${encodeURIComponent(entry.historyId)}`}
@@ -334,7 +420,7 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
                       size="small"
                       color="secondary"
                       type="button"
-                      disabled={downloadingHistoryId === entry.historyId}
+                      disabled={isBulkDownloading || downloadingHistoryId === entry.historyId}
                       aria-label={t('device.detail.history.download_json')}
                       title={t('device.detail.history.download_json')}
                       onClick={() => void handleDownloadHistory(entry)}
