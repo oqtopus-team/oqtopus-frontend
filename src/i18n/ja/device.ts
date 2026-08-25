@@ -52,6 +52,7 @@ export default {
     },
     history: {
       header: 'デバイス履歴',
+      history_id: '履歴ID',
       selected_snapshot: '選択中のスナップショット',
       captured_at: 'キャリブレーション日時',
       storage_key: 'ストレージキー',

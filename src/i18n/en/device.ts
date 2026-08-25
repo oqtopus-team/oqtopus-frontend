@@ -52,6 +52,7 @@ export default {
     },
     history: {
       header: 'Device history',
+      history_id: 'History ID',
       selected_snapshot: 'Selected snapshot',
       captured_at: 'Calibrated at',
       storage_key: 'Storage key',

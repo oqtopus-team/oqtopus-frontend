@@ -282,6 +282,7 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
         <table className={clsx('table-auto', 'w-full')}>
           <thead>
             <tr>
+              <th>{t('device.detail.history.history_id')}</th>
               <th className={clsx('text-center')}>{t('device.list.table.id')}</th>
               <th className={clsx('text-center')}>{t('device.detail.history.captured_at')}</th>
               <th className={clsx('text-center')}>{t('device.detail.qubits')}</th>
@@ -292,7 +293,7 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
           <tbody>
             {historyEntries.length === 0 ? (
               <tr>
-                <td colSpan={5} className={clsx('text-center', 'text-secondary-content')}>
+                <td colSpan={6} className={clsx('text-center', 'text-secondary-content')}>
                   {isLoading
                     ? t('device.detail.history.loading')
                     : t('device.detail.history.empty')}
@@ -301,6 +302,14 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
             ) : (
               historyEntries.map((entry) => (
                 <tr key={entry.historyId}>
+                  <td>
+                    <NavLink
+                      to={`/device/${entry.deviceId}?deviceHistoryId=${encodeURIComponent(entry.historyId)}`}
+                      className="text-link"
+                    >
+                      {entry.historyId}
+                    </NavLink>
+                  </td>
                   <td className={clsx('break-words', 'whitespace-normal', 'text-center')}>
                     <NavLink to={`/device/${entry.deviceId}`} className="text-link">
                       {entry.deviceId}
