@@ -60,14 +60,15 @@ describe('AuthProvider', () => {
     mockAuth.currentAuthenticatedUser.mockRejectedValue(new Error('Not authenticated'));
   });
 
-  it('renders children correctly', () => {
+  it('renders children correctly', async () => {
     render(
       <AuthProvider>
         <div data-testid="test-child">Test Child</div>
       </AuthProvider>
     );
 
-    expect(screen.getByTestId('test-child')).toBeInTheDocument();
+    // The driver is code-split (lazy) behind Suspense, so wait for it to mount.
+    expect(await screen.findByTestId('test-child')).toBeInTheDocument();
   });
 
   it('initializes with correct default values', async () => {
