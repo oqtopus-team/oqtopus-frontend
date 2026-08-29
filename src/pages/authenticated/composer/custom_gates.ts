@@ -125,7 +125,7 @@ export function collectAllGatesFromCustomGate(
     if (gateToAdd._tag === '$custom_gate' && 'customTag' in gateParams) {
       gateToAdd.customTag = gateParams.customTag;
     } else if (isParametrizedGate(gateToAdd) && 'rotationAngle' in gateParams) {
-      gateToAdd.rotationAngle === gateParams.rotationAngle;
+      gateToAdd.rotationAngle = gateParams.rotationAngle;
     }
 
     gates.push(gateToAdd);
