@@ -11,6 +11,8 @@
 
 * `Running` (value: `'running'`)
 
+* `Cancelling` (value: `'cancelling'`)
+
 * `Succeeded` (value: `'succeeded'`)
 
 * `Failed` (value: `'failed'`)
