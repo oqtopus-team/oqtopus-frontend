@@ -44,6 +44,7 @@ export default function CustomGate({ targets, customTag, styles }: RenderProps) 
               alignItems: 'center',
               justifyContent: 'center',
               height: cellSize,
+              color: 'white',
             }}
           >
             {r}
@@ -54,6 +55,7 @@ export default function CustomGate({ targets, customTag, styles }: RenderProps) 
         style={{
           paddingRight: '2px',
           fontSize: '0.8rem',
+          color: 'white',
         }}
       >
         {customTag}
