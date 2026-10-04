@@ -24,8 +24,8 @@ export default {
 
   account: {
     externalIdpNote:
-      'Your password is managed by the identity provider (Keycloak). Use the button below to change it.',
-    openPasswordSettings: 'Change password in Keycloak',
+      'Your password is managed by your identity provider. Use the button below to change it.',
+    openPasswordSettings: 'Change password in your identity provider',
     changePassword: 'Change Password',
     currentPassword: 'Current Password',
     newPassword: 'New Password',
@@ -45,8 +45,8 @@ export default {
 
   security: {
     externalIdpNote:
-      'Multi-factor authentication (MFA) is managed by the identity provider (Keycloak). Use the button below to register or reset your authenticator.',
-    openMfaSettings: 'Manage MFA in Keycloak',
+      'Multi-factor authentication (MFA) is managed by your identity provider. Use the button below to register or reset your authenticator.',
+    openMfaSettings: 'Manage MFA in your identity provider',
     mfaStatus: 'Multi-Factor Authentication Status',
     multiFactorAuth: 'Multi-Factor Authentication',
     enabled: 'Enabled',

@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 import { MdExpandLess, MdExpandMore } from 'react-icons/md';
 import { useTranslation } from 'react-i18next';
-import { Auth } from 'aws-amplify';
+import { useAuth } from '@/auth/hook';
 import { useNavigate } from 'react-router';
 import { FaCopy, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { DateTimeFormatter } from '@/pages/authenticated/_components/DateTimeFormatter';
@@ -34,9 +34,9 @@ import ENV from '@/env';
 // In proxy (BFF/OIDC) mode, MFA is managed by the identity provider (Keycloak)
 // account console, not via Cognito in-app.
 const isProxyAuth = ENV.AUTH_MODE === 'proxy';
-const accountConsoleSigningIn = ENV.ACCOUNT_CONSOLE_URL
-  ? `${ENV.ACCOUNT_CONSOLE_URL.replace(/\/$/, '')}/#/security/signing-in`
-  : '';
+// Provider-agnostic: the env holds the full account-console URL (no provider-
+// specific path appended). Empty when unconfigured — the button is then hidden.
+const accountConsoleUrl = ENV.ACCOUNT_CONSOLE_URL || '';
 
 interface SecurityTabProps {
   login_history_enabled: boolean;
@@ -45,6 +45,7 @@ interface SecurityTabProps {
 export function SecurityTab({ login_history_enabled }: SecurityTabProps) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const auth = useAuth();
   const { createApiToken, deleteApiToken, getApiTokenStatus } = useApiTokenAPI();
   const { getCurrentUser } = useUserAPI();
 
@@ -85,8 +86,7 @@ export function SecurityTab({ login_history_enabled }: SecurityTabProps) {
   async function verifyMFAStatus() {
     // Cognito is not configured in proxy mode; MFA state lives in Keycloak.
     if (isProxyAuth) return;
-    const user = await Auth.currentAuthenticatedUser();
-    setMfaData(await Auth.getPreferredMFA(user));
+    setMfaData(await auth.getMfaStatus());
   }
 
   const handleResetMFA = async () => {
@@ -149,17 +149,17 @@ export function SecurityTab({ login_history_enabled }: SecurityTabProps) {
           <h3 className={clsx('text-xl', 'font-semibold', 'mb-4')}>
             {t('settings.security.mfaStatus')}
           </h3>
-          <p className={clsx('text-gray-600', 'mb-4')}>
-            {t('settings.security.externalIdpNote')}
-          </p>
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            onClick={() => window.open(accountConsoleSigningIn, '_blank', 'noopener')}
-          >
-            {t('settings.security.openMfaSettings')}
-          </Button>
+          <p className={clsx('text-gray-600', 'mb-4')}>{t('settings.security.externalIdpNote')}</p>
+          {accountConsoleUrl && (
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              onClick={() => window.open(accountConsoleUrl, '_blank', 'noopener')}
+            >
+              {t('settings.security.openMfaSettings')}
+            </Button>
+          )}
         </div>
       ) : (
         <>

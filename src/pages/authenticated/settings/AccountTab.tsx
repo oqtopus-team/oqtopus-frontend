@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Auth } from 'aws-amplify';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import {
@@ -27,9 +26,9 @@ import {
 // In proxy (BFF/OIDC) mode, password management is delegated to the identity
 // provider's account console rather than handled in-app via Cognito.
 const isProxyAuth = ENV.AUTH_MODE === 'proxy';
-const accountConsoleSigningIn = ENV.ACCOUNT_CONSOLE_URL
-  ? `${ENV.ACCOUNT_CONSOLE_URL.replace(/\/$/, '')}/#/security/signing-in`
-  : '';
+// Provider-agnostic: treat the env as the full account-console URL (no provider-
+// specific path appended). Empty when unconfigured — the button is then hidden.
+const accountConsoleUrl = ENV.ACCOUNT_CONSOLE_URL || '';
 
 interface AccountTabFormData {
   currentPassword: string;
@@ -88,18 +87,15 @@ export function AccountTab({ allowDeletion = false }: AccountTabProps) {
   const handlePasswordSubmit = async (data: AccountTabFormData) => {
     setIsPasswordLoading(true);
     try {
-      const user = await Auth.currentUserPoolUser();
-
-      await Auth.changePassword(user, data.currentPassword, data.newPasswordConfirm);
-
-      toast(t('settings.account.passwordChanged'), successToastConfig);
-      reset(defaultFormValues);
-    } catch (e: any) {
-      if (typeof e === 'object' && 'message' in e) {
-        toast(e.message ?? t('common.errors.default'), errorToastConfig);
+      const res = await auth.changePassword(data.currentPassword, data.newPasswordConfirm);
+      if (res.success) {
+        toast(t('settings.account.passwordChanged'), successToastConfig);
+        reset(defaultFormValues);
       } else {
-        toast(t('common.errors.default'), errorToastConfig);
+        toast(res.message || t('common.errors.default'), errorToastConfig);
       }
+    } catch {
+      toast(t('common.errors.default'), errorToastConfig);
     } finally {
       setIsPasswordLoading(false);
     }
@@ -145,54 +141,56 @@ export function AccountTab({ allowDeletion = false }: AccountTabProps) {
         {isProxyAuth ? (
           <div className={clsx('space-y-4')}>
             <p className={clsx('text-gray-600')}>{t('settings.account.externalIdpNote')}</p>
-            <Button
-              variant="contained"
-              color="primary"
-              size="large"
-              onClick={() => window.open(accountConsoleSigningIn, '_blank', 'noopener')}
-            >
-              {t('settings.account.openPasswordSettings')}
-            </Button>
+            {accountConsoleUrl && (
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                onClick={() => window.open(accountConsoleUrl, '_blank', 'noopener')}
+              >
+                {t('settings.account.openPasswordSettings')}
+              </Button>
+            )}
           </div>
         ) : (
           <form onSubmit={handleSubmit(handlePasswordSubmit)} className={clsx('space-y-4')}>
-          {passwordFields.map((field) => (
-            <TextField
-              key={field.name}
-              {...register(field.name)}
-              autoComplete="off"
-              fullWidth
-              type="password"
-              label={field.label}
-              variant="outlined"
-              required
-              error={Boolean(errors[field.name])}
-              helperText={errors[field.name]?.message}
-              slotProps={{
-                inputLabel: {
-                  shrink: true,
-                  className: '!text-neutral-content [&.Mui-disabled]:!text-neutral-content',
-                },
-                input: {
-                  className: '!text-base-content',
-                },
-                formHelperText: {
-                  className: '!text-neutral-content [&.Mui-disabled]:!text-neutral-content',
-                },
-              }}
-            />
-          ))}
+            {passwordFields.map((field) => (
+              <TextField
+                key={field.name}
+                {...register(field.name)}
+                autoComplete="off"
+                fullWidth
+                type="password"
+                label={field.label}
+                variant="outlined"
+                required
+                error={Boolean(errors[field.name])}
+                helperText={errors[field.name]?.message}
+                slotProps={{
+                  inputLabel: {
+                    shrink: true,
+                    className: '!text-neutral-content [&.Mui-disabled]:!text-neutral-content',
+                  },
+                  input: {
+                    className: '!text-base-content',
+                  },
+                  formHelperText: {
+                    className: '!text-neutral-content [&.Mui-disabled]:!text-neutral-content',
+                  },
+                }}
+              />
+            ))}
 
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            disabled={isPasswordLoading}
-            size="large"
-          >
-            {isPasswordLoading ? t('settings.updating') : t('settings.account.updatePassword')}
-          </Button>
-        </form>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              disabled={isPasswordLoading}
+              size="large"
+            >
+              {isPasswordLoading ? t('settings.updating') : t('settings.account.updatePassword')}
+            </Button>
+          </form>
         )}
       </div>
       {allowDeletion && (
