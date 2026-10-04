@@ -90,6 +90,9 @@ const useProxyAuth = (): UseAuth => {
     confirmMfaReset: notSupported,
     resetMfa: notSupported,
     refreshApiToken: notSupported,
+    changePassword: notSupported,
+    // MFA is managed in the IdP (Keycloak account console) in proxy mode.
+    getMfaStatus: async () => '',
   };
 };
 

@@ -113,10 +113,20 @@ describe('ProxyAuthProvider', () => {
       result.current.signUp('u', 'p'),
       result.current.setUpMfa(),
       result.current.refreshApiToken(),
+      result.current.changePassword('old', 'new'),
     ]) {
       const res = await op;
       expect(res.success).toBe(false);
       expect(res.message).toBe('auth.proxy.operation_delegated_to_idp');
     }
+  });
+
+  it('reports no MFA status (MFA lives in the IdP)', async () => {
+    mockFetch.mockResolvedValue({ ok: false, json: async () => ({}) });
+
+    const { result } = renderProxyAuth();
+    await waitFor(() => expect(result.current.initialized).toBe(true));
+
+    expect(await result.current.getMfaStatus()).toBe('');
   });
 });

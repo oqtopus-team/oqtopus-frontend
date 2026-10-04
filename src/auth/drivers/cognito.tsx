@@ -368,6 +368,26 @@ const useProvideAuth = (): UseAuth => {
     }
   };
 
+  const changePassword = async (currentPassword: string, newPassword: string): Promise<Result> => {
+    try {
+      const user = await Auth.currentUserPoolUser();
+      await Auth.changePassword(user, currentPassword, newPassword);
+      return { success: true, message: '' };
+    } catch (error) {
+      const errorMessage = (error as Error).message ?? t('common.errors.default');
+      return { success: false, message: errorMessage };
+    }
+  };
+
+  const getMfaStatus = async (): Promise<string> => {
+    try {
+      const user = await Auth.currentAuthenticatedUser();
+      return await Auth.getPreferredMFA(user);
+    } catch {
+      return '';
+    }
+  };
+
   return {
     initialized,
     isAuthenticated,
@@ -389,6 +409,8 @@ const useProvideAuth = (): UseAuth => {
     confirmMfaReset,
     resetMfa,
     refreshApiToken,
+    changePassword,
+    getMfaStatus,
   };
 };
 

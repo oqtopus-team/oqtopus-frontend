@@ -16,7 +16,16 @@ export type { UseAuth, Result } from './contract';
 // To add a new backend: create `./drivers/<name>.tsx` exporting a
 // `<Name>AuthProvider` that supplies a `UseAuth` (see ./contract), then add a
 // branch here.
-const AUTH_MODE = import.meta.env.VITE_APP_AUTH_MODE || 'cognito';
+// Unset falls back to `cognito` (back-compat). A non-empty but unknown value is
+// almost always a typo (e.g. `porxy`) that would silently build the Cognito
+// bundle — fail fast at startup instead.
+const RAW_AUTH_MODE = import.meta.env.VITE_APP_AUTH_MODE;
+if (RAW_AUTH_MODE && RAW_AUTH_MODE !== 'proxy' && RAW_AUTH_MODE !== 'cognito') {
+  throw new Error(
+    `Invalid VITE_APP_AUTH_MODE: ${JSON.stringify(RAW_AUTH_MODE)} (expected 'cognito' or 'proxy')`
+  );
+}
+const AUTH_MODE = RAW_AUTH_MODE || 'cognito';
 
 const DriverProvider = lazy(() =>
   AUTH_MODE === 'proxy'

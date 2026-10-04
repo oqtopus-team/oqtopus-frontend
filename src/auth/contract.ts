@@ -31,6 +31,12 @@ export interface UseAuth {
   confirmMfaReset: (access_token: string, code: string) => Promise<Result>;
   resetMfa: (access_token: string, totp_code: string) => Promise<Result>;
   refreshApiToken: () => Promise<Result>;
+  // Change the signed-in user's password. In proxy mode this is delegated to
+  // the IdP's account console (the driver reports it as unsupported).
+  changePassword: (currentPassword: string, newPassword: string) => Promise<Result>;
+  // Preferred MFA status string (e.g. 'SOFTWARE_TOKEN_MFA' / 'NOMFA'). Empty in
+  // proxy mode, where MFA lives in the IdP.
+  getMfaStatus: () => Promise<string>;
 }
 
 export const AuthContext = createContext({} as UseAuth);
