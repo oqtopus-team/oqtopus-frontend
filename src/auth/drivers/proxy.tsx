@@ -66,7 +66,7 @@ const useProxyAuth = (): UseAuth => {
   };
 
   // The proxy injects the Bearer token upstream, so the SPA never handles one.
-  const getCurrentIdToken = async (): Promise<string> => '';
+  const getCurrentAccessToken = async (): Promise<string> => '';
 
   return {
     initialized,
@@ -74,7 +74,7 @@ const useProxyAuth = (): UseAuth => {
     username,
     email,
     qrcode: '',
-    getCurrentIdToken,
+    getCurrentAccessToken,
     signIn,
     signOut,
     // Delegated to the IdP (Keycloak) in proxy mode.

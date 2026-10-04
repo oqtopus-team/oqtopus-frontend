@@ -148,11 +148,11 @@ describe('Auth Functions', () => {
     mockAuth.currentAuthenticatedUser.mockRejectedValue({});
   });
 
-  describe('getCurrentIdToken', () => {
-    it('returns JWT token on success', async () => {
+  describe('getCurrentAccessToken', () => {
+    it('returns the Cognito access token on success', async () => {
       const mockToken = 'mock-jwt-token';
       mockAuth.currentSession.mockResolvedValue({
-        idToken: { jwtToken: mockToken },
+        getAccessToken: () => ({ getJwtToken: () => mockToken }),
       });
 
       const { result } = renderHook(() => useContext(AuthContext), {
@@ -161,7 +161,7 @@ describe('Auth Functions', () => {
 
       await waitFor(() => expect(result.current.initialized).toBe(true));
 
-      const token = await result.current.getCurrentIdToken();
+      const token = await result.current.getCurrentAccessToken();
       expect(token).toBe(mockToken);
     });
 
@@ -174,7 +174,7 @@ describe('Auth Functions', () => {
 
       await waitFor(() => expect(result.current.initialized).toBe(true));
 
-      const token = await result.current.getCurrentIdToken();
+      const token = await result.current.getCurrentAccessToken();
       expect(token).toBe('');
     });
   });

@@ -72,13 +72,13 @@ describe('ProxyAuthProvider', () => {
     expect(result.current.isAuthenticated).toBe(false);
   });
 
-  it('never exposes a token to the SPA (getCurrentIdToken is empty)', async () => {
+  it('never exposes a token to the SPA (getCurrentAccessToken is empty)', async () => {
     mockFetch.mockResolvedValue({ ok: false, json: async () => ({}) });
 
     const { result } = renderProxyAuth();
     await waitFor(() => expect(result.current.initialized).toBe(true));
 
-    expect(await result.current.getCurrentIdToken()).toBe('');
+    expect(await result.current.getCurrentAccessToken()).toBe('');
   });
 
   it('signIn redirects to the proxy start endpoint with a return path', async () => {

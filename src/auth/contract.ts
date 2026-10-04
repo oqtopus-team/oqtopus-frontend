@@ -16,7 +16,7 @@ export interface UseAuth {
   username: string;
   qrcode: string;
   email: string;
-  getCurrentIdToken: () => Promise<string>;
+  getCurrentAccessToken: () => Promise<string>;
   signIn: (username: string, password: string) => Promise<Result>;
   signOut: () => Promise<Result>;
   signUp: (username: string, password: string) => Promise<Result>;

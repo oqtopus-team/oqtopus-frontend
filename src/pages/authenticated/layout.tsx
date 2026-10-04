@@ -16,7 +16,7 @@ export default function AuthenticatedLayout() {
     <RequestLogin>
       <UserAPIProvider
         basePath={ENV.API_ENDPOINT}
-        accessToken={ENV.AUTH_MODE === 'proxy' ? undefined : auth.getCurrentIdToken}
+        accessToken={ENV.AUTH_MODE === 'proxy' ? undefined : auth.getCurrentAccessToken}
       >
         <QulacsSimulatorProvider>
           <div className={clsx('min-h-screen', 'flex', 'flex-col')}>

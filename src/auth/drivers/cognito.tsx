@@ -41,10 +41,10 @@ const useProvideAuth = (): UseAuth => {
       });
   }, []);
 
-  const getCurrentIdToken = async function (): Promise<string> {
+  const getCurrentAccessToken = async function (): Promise<string> {
     return await Auth.currentSession()
-      .then((data: any) => {
-        return data.idToken.jwtToken;
+      .then((session: CognitoUserSession) => {
+        return session.getAccessToken().getJwtToken();
       })
       .catch((error) => {
         console.log(error);
@@ -394,7 +394,7 @@ const useProvideAuth = (): UseAuth => {
     username,
     qrcode,
     email,
-    getCurrentIdToken,
+    getCurrentAccessToken,
     signIn,
     signOut,
     signUp,
