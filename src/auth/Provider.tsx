@@ -12,8 +12,14 @@ export interface UseAuth {
   username: string;
   qrcode: string;
   email: string;
+  // Name of a sign-in challenge currently awaiting a follow-up call (e.g.
+  // 'NEW_PASSWORD_REQUIRED'), or null. Screens that complete a challenge use
+  // this to confirm the pending CognitoUser still exists in this provider
+  // instance -- it is lost on a full reload, unlike router history state.
+  pendingChallenge: string | null;
   getCurrentIdToken: () => Promise<string>;
   signIn: (username: string, password: string) => Promise<Result>;
+  completeNewPassword: (newPassword: string) => Promise<Result>;
   signOut: () => Promise<Result>;
   signUp: (username: string, password: string) => Promise<Result>;
   confirmSignUp: (verificationCode: string) => Promise<Result>;
@@ -48,6 +54,7 @@ const useProvideAuth = (): UseAuth => {
   const [password, setPassword] = useState('');
   const [qrcode, setQRCode] = useState('');
   const [resultUser, setResultUser] = useState({});
+  const [pendingChallenge, setPendingChallenge] = useState<string | null>(null);
   const [email, setEmail] = useState('');
 
   const { t } = useTranslation();
@@ -93,15 +100,75 @@ const useProvideAuth = (): UseAuth => {
       setResultUser(result);
       setUsername(result.username);
       setPassword(result.password);
-      const hasChallenge = Object.prototype.hasOwnProperty.call(result, 'challengeName');
       setIsAuthenticated(false);
       setInitialized(true);
+      // A user provisioned with a temporary password (e.g. after a pool
+      // restore / admin-created account) must set a new password before any
+      // MFA step. This is a distinct challenge from the TOTP one, so surface it
+      // separately and let the login page route to the set-new-password screen.
+      if (result.challengeName === 'NEW_PASSWORD_REQUIRED') {
+        setPendingChallenge('NEW_PASSWORD_REQUIRED');
+        return { success: false, message: 'signin.new_password_required' };
+      }
+      setPendingChallenge(null);
+      const hasChallenge = Object.prototype.hasOwnProperty.call(result, 'challengeName');
       if (!hasChallenge) {
         return { success: false, message: 'signup.confirm.form.mfa_setup_request' };
       }
       return { success: true, message: '' };
     } catch (error) {
+      setPendingChallenge(null);
       const errorMessage = (error as Error).message ?? 'signin.errors.authentication_failed';
+      return {
+        success: false,
+        message: errorMessage,
+      };
+    }
+  };
+
+  // Completes the NEW_PASSWORD_REQUIRED challenge raised by signIn for a user
+  // that still has a temporary password. `resultUser` is the CognitoUser
+  // captured by signIn.
+  //
+  // Auth.completeNewPassword resolves in more than one terminal state: it may
+  // establish the session outright, or return the CognitoUser bearing a further
+  // challenge (SOFTWARE_TOKEN_MFA for an already-enrolled user, MFA_SETUP for a
+  // required-MFA pool). Only when the session is actually established can the
+  // next screen call Auth.currentAuthenticatedUser(), so distinguish the cases
+  // and tell the caller where to go via the message:
+  //   - success, message ''                    -> session established, enroll MFA
+  //   - success, message 'signin.totp_required' -> TOTP challenge, go enter code
+  //   - failure                                 -> unsupported/failed
+  const completeNewPassword = async (newPassword: string): Promise<Result> => {
+    try {
+      const user = await Auth.completeNewPassword(resultUser, newPassword);
+      setResultUser(user);
+      setIsAuthenticated(false);
+      setInitialized(true);
+
+      const nextChallenge: string | undefined = (user as { challengeName?: string })?.challengeName;
+      if (!nextChallenge) {
+        // Session established. The pending challenge is resolved.
+        setPendingChallenge(null);
+        return { success: true, message: '' };
+      }
+      if (nextChallenge === 'SOFTWARE_TOKEN_MFA') {
+        // Already-enrolled user: resultUser now holds this challenge, which the
+        // existing confirm-mfa screen consumes via confirmSignIn.
+        setPendingChallenge(null);
+        return { success: true, message: 'signin.totp_required' };
+      }
+      // MFA_SETUP / SMS_MFA / anything else: there is no challenge-driven
+      // enrollment path here (and an OPTIONAL-MFA pool never raises these). The
+      // NEW password has ALREADY been accepted by Cognito at this point, so this
+      // is not a password-change failure and the challenge is spent -- keeping
+      // the user on the new-password form would be both wrong and unrecoverable.
+      // Return a dedicated result so the caller sends them back to sign in.
+      setPendingChallenge(null);
+      return { success: false, message: 'signin.new_password.additional_mfa_required' };
+    } catch (error) {
+      // Leave pendingChallenge intact so the user can correct and retry.
+      const errorMessage = (error as Error).message ?? 'signin.errors.password_change_failed';
       return {
         success: false,
         message: errorMessage,
@@ -409,8 +476,10 @@ const useProvideAuth = (): UseAuth => {
     username,
     qrcode,
     email,
+    pendingChallenge,
     getCurrentIdToken,
     signIn,
+    completeNewPassword,
     signOut,
     signUp,
     confirmSignUp,

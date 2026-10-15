@@ -25,7 +25,7 @@ export default {
         password_uppercase: '大文字を含めてください',
         password_number: '数字を含めてくださいい',
         password_special: '特殊文字（^$*.11（?-"！@#％＆人>く.L~\'+=）を含めてください。',
-        password_min: '8文字以上で入力してください',
+        password_min: '12文字以上で入力してください',
         confirm_password_enter: '確認用パスワードを入力してください',
         confirm_password_mismatch: 'パスワードが合致しません',
         code_enter: '検証コードを入力してください',

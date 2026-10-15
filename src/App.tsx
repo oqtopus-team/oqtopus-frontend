@@ -7,6 +7,7 @@ import AuthLayout from '@/pages/auth/layout';
 import LoginLayout from '@/pages/auth/login/login/layout';
 import LoginPage from '@/pages/auth/login/login/page';
 import ConfirmMFAPage from '@/pages/auth/login/confirm-mfa/page';
+import NewPasswordPage from '@/pages/auth/login/new-password/page';
 import SignUpPage from '@/pages/auth/signup/signup/page';
 import ConfirmSetupMFAPage from '@/pages/auth/signup/confirm/page';
 import SetupMFAPage from '@/pages/auth/signup/mfa/page';
@@ -47,6 +48,7 @@ export const App: React.FunctionComponent = () => {
                   <Route path="login" element={<LoginPage />} />
                 </Route>
                 <Route path="confirm-mfa" element={<ConfirmMFAPage />} />
+                <Route path="new-password" element={<NewPasswordPage />} />
               </Route>
 
               <Route /* signup flow */>
