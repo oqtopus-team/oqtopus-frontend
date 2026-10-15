@@ -6,7 +6,7 @@ import { Device, DeviceInfoHistoryEntry } from '@/domain/types/Device';
 import DatePicker from 'react-datepicker';
 import { enUS } from 'date-fns/locale';
 import clsx from 'clsx';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
 import { BsDownload } from 'react-icons/bs';
@@ -39,10 +39,14 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
   const [totalCount, setTotalCount] = useState(0);
   const [hasDateRangeError, setHasDateRangeError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadCount, setReloadCount] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [downloadingHistoryId, setDownloadingHistoryId] = useState<string>();
   const [selectedHistoryIds, setSelectedHistoryIds] = useState<string[]>([]);
   const [isBulkDownloading, setIsBulkDownloading] = useState(false);
+  const requestGenerationRef = useRef(0);
+  const isLoadingRef = useRef(false);
 
   useEffect(() => {
     setParams((currentParams) => {
@@ -66,8 +70,11 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
   }, [devices]);
 
   useEffect(() => {
-    let isActive = true;
+    const requestGeneration = requestGenerationRef.current + 1;
+    requestGenerationRef.current = requestGeneration;
+    isLoadingRef.current = true;
     setIsLoading(true);
+    setLoadError(false);
     setHasMore(false);
     getDeviceInfoHistory({
       deviceId: appliedParams.deviceId,
@@ -77,32 +84,40 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
       offset: 0,
     })
       .then((history) => {
-        if (!isActive) return;
+        if (requestGeneration !== requestGenerationRef.current) return;
         setHistoryEntries(history.items);
         setTotalCount(history.total);
         setHasMore(history.items.length < history.total);
         setSelectedHistoryIds([]);
       })
       .catch(() => {
-        if (!isActive) return;
+        if (requestGeneration !== requestGenerationRef.current) return;
         setHistoryEntries([]);
         setTotalCount(0);
         setHasMore(false);
         setSelectedHistoryIds([]);
+        setLoadError(true);
       })
       .finally(() => {
-        if (isActive) setIsLoading(false);
+        if (requestGeneration === requestGenerationRef.current) {
+          isLoadingRef.current = false;
+          setIsLoading(false);
+        }
       });
 
     return () => {
-      isActive = false;
+      if (requestGeneration === requestGenerationRef.current) {
+        requestGenerationRef.current += 1;
+      }
     };
-  }, [appliedParams]);
+  }, [appliedParams, reloadCount]);
 
   const loadMoreHistories = async (): Promise<void> => {
-    if (isLoading || !hasMore) return;
+    if (isLoadingRef.current || loadError || !hasMore) return;
 
+    const requestGeneration = requestGenerationRef.current;
     const offset = historyEntries.length;
+    isLoadingRef.current = true;
     setIsLoading(true);
     try {
       const history = await getDeviceInfoHistory({
@@ -112,13 +127,20 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
         limit: PAGE_SIZE,
         offset,
       });
+      if (requestGeneration !== requestGenerationRef.current) return;
       setHistoryEntries((current) => [...current, ...history.items]);
       setTotalCount(history.total);
       setHasMore(offset + history.items.length < history.total);
     } catch {
-      setHasMore(offset < totalCount);
+      if (requestGeneration === requestGenerationRef.current) {
+        setLoadError(true);
+        setHasMore(false);
+      }
     } finally {
-      setIsLoading(false);
+      if (requestGeneration === requestGenerationRef.current) {
+        isLoadingRef.current = false;
+        setIsLoading(false);
+      }
     }
   };
 
@@ -168,11 +190,14 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
     setDownloadingHistoryId(entry.historyId);
     try {
       const detail = await getDeviceHistory(entry.historyId);
-      if (!detail) return;
+      if (!detail) throw new Error(`Device history not found: ${entry.historyId}`);
       downloadDeviceInfoJson(
         detail.deviceInfo,
         createDeviceInfoJsonFileName(entry.deviceId, entry.calibratedAt)
       );
+    } catch (error) {
+      console.error(error);
+      toast(t('device.detail.history.download_failed'), errorToastConfig);
     } finally {
       setDownloadingHistoryId(undefined);
     }
@@ -251,8 +276,11 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
                 <div className={clsx('grid', 'gap-3')}>
                   <div className={clsx('flex', 'gap-2')}>
                     <div>
-                      <p className="text-xs">{t('device.detail.history.from')}</p>
+                      <label className="text-xs" htmlFor="device-history-from">
+                        {t('device.detail.history.from')}
+                      </label>
                       <DatePicker
+                        id="device-history-from"
                         locale={locales[i18n.language as keyof typeof locales] ?? enUS}
                         className={clsx(
                           ['border', 'rounded'],
@@ -275,8 +303,11 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
                       />
                     </div>
                     <div>
-                      <p className="text-xs">{t('device.detail.history.to')}</p>
+                      <label className="text-xs" htmlFor="device-history-to">
+                        {t('device.detail.history.to')}
+                      </label>
                       <DatePicker
+                        id="device-history-to"
                         locale={locales[i18n.language as keyof typeof locales] ?? enUS}
                         className={clsx(
                           ['border', 'rounded'],
@@ -374,7 +405,7 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
           <table className={clsx('table-auto', 'w-full')}>
             <thead>
               <tr>
-                <th>
+                <th scope="col">
                   <input
                     type="checkbox"
                     checked={areAllHistoriesSelected}
@@ -384,16 +415,26 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
                     }
                   />
                 </th>
-                <th>{t('device.detail.history.history_id')}</th>
-                <th className={clsx('text-center')}>{t('device.list.table.id')}</th>
-                <th className={clsx('text-center')}>{t('device.detail.history.captured_at')}</th>
-                <th className={clsx('text-center')}>{t('device.detail.qubits')}</th>
-                <th className={clsx('text-center')}>{t('device.detail.couplings')}</th>
-                <th className={clsx('text-center')}>{t('device.detail.history.download_json')}</th>
+                <th scope="col">{t('device.detail.history.history_id')}</th>
+                <th scope="col" className={clsx('text-center')}>
+                  {t('device.list.table.id')}
+                </th>
+                <th scope="col" className={clsx('text-center')}>
+                  {t('device.detail.history.captured_at')}
+                </th>
+                <th scope="col" className={clsx('text-center')}>
+                  {t('device.detail.qubits')}
+                </th>
+                <th scope="col" className={clsx('text-center')}>
+                  {t('device.detail.couplings')}
+                </th>
+                <th scope="col" className={clsx('text-center')}>
+                  {t('device.detail.history.download_json')}
+                </th>
               </tr>
             </thead>
             <tbody>
-              {historyEntries.length === 0 ? (
+              {historyEntries.length === 0 && !loadError ? (
                 <tr>
                   <td colSpan={7} className={clsx('text-center', 'text-secondary-content')}>
                     {isLoading
@@ -462,6 +503,29 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
             </tbody>
           </table>
         </InfiniteScroll>
+        {loadError && (
+          <div
+            role="alert"
+            className={clsx(
+              'mt-4',
+              'flex',
+              'items-center',
+              'justify-center',
+              'gap-3',
+              'text-error'
+            )}
+          >
+            <span>{t('device.detail.history.load_failed')}</span>
+            <Button
+              size="small"
+              color="secondary"
+              type="button"
+              onClick={() => setReloadCount((current) => current + 1)}
+            >
+              {t('device.detail.history.retry')}
+            </Button>
+          </div>
+        )}
         {hasMore && (
           <button
             type="button"
