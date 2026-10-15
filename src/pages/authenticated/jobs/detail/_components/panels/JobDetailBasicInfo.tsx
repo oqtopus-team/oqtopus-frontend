@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import React from 'react';
 import clsx from 'clsx';
+import { Link } from 'react-router';
 import { Spacer } from '@/pages/_components/Spacer';
 import { isFinishedStatus } from './utils/StatusHelpers';
 import { DateTimeFormatter } from '../../../../_components/DateTimeFormatter';
@@ -40,6 +41,12 @@ export const JobDetailBasicInfo: React.FC<JobDetailBasicInfoProps> = (
   const { t, i18n } = useTranslation();
 
   const executionTime = isFinishedStatus(job.status) ? job.executionTime.toString() : '';
+  const hasDeviceId = Boolean(job.deviceId && job.deviceId.trim() !== '');
+  const hasRunningAt = Boolean(job.runningAt && !Number.isNaN(Date.parse(job.runningAt)));
+  const runtimeDeviceInfoLink =
+    hasDeviceId && hasRunningAt
+      ? `/device/${job.deviceId}?deviceInfoAt=${encodeURIComponent(job.runningAt)}`
+      : null;
 
   return (
     <>
@@ -75,7 +82,19 @@ export const JobDetailBasicInfo: React.FC<JobDetailBasicInfoProps> = (
           </tr>
           <tr>
             <BoldTh>{t('job.detail.info.device_id')}</BoldTh>
-            <td>{job.deviceId ?? ''}</td>
+            <td>
+              <div className={clsx('flex', 'flex-col', 'items-start', 'gap-1')}>
+                <span>{job.deviceId ?? ''}</span>
+                {runtimeDeviceInfoLink && (
+                  <Link
+                    to={runtimeDeviceInfoLink}
+                    className={clsx('text-sm', 'font-semibold', 'text-primary', 'underline')}
+                  >
+                    {t('job.detail.info.runtime_device_info')}
+                  </Link>
+                )}
+              </div>
+            </td>
           </tr>
           <tr>
             <BoldTh>{t('job.detail.info.shots')}</BoldTh>

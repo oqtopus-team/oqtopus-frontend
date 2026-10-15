@@ -13,7 +13,7 @@ Name | Type | Description | Notes
 **n_qubits** | **number** |  | [optional] [default to undefined]
 **basis_gates** | **Array&lt;string&gt;** |  | [default to undefined]
 **supported_instructions** | **Array&lt;string&gt;** |  | [default to undefined]
-**device_info** | **string** | json format calibration_data and n_nodes etc | [optional] [default to undefined]
+**device_info** | **string** | Presigned URL for downloading device_info. | [optional] [default to undefined]
 **calibrated_at** | **string** | Parameter available only for &#x60;QPU&#x60; devices with available calibration data | [optional] [default to undefined]
 **description** | **string** |  | [default to undefined]
 

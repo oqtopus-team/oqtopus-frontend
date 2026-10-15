@@ -51,7 +51,10 @@ export default function DownloadJobButton({ kind, job, style }: DownloadJobButto
         shots: jobToDownload.shots,
         deviceId: jobToDownload.deviceId ?? '',
         jobType: jobToDownload.jobType as JobTypeType,
-        jobInfo: jobToDownload.input,
+        jobInfo: {
+          ...jobToDownload.input,
+          program: jobToDownload.input.program ?? [],
+        },
         transpilerInfo: jobToDownload.transpilerInfo,
         simulatorInfo: jobToDownload.simulatorInfo,
         mitigationInfo: jobToDownload.mitigationInfo,

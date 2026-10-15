@@ -30,6 +30,10 @@ export const JobListItem = ({
   const { cancelJob, deleteJob } = useJobAPI();
   const [isProcessing, setIsProcessing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const hasRunningAt = Boolean(job.runningAt && !Number.isNaN(Date.parse(job.runningAt)));
+  const deviceDetailLink = hasRunningAt
+    ? `/device/${job.deviceId}?deviceInfoAt=${encodeURIComponent(job.runningAt)}`
+    : `/device/${job.deviceId}`;
 
   const onClickCancel = (): void => {
     // ダブルクリック防止
@@ -92,7 +96,7 @@ export const JobListItem = ({
         <TruncateText text={job.name} limit={job.id.length * 2} />
       </td>
       <td>
-        <NavLink to={`/device/${job.deviceId}`} className="text-link">
+        <NavLink to={deviceDetailLink} className="text-link">
           {job.deviceId}
         </NavLink>
       </td>

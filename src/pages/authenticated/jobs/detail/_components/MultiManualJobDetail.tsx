@@ -46,7 +46,7 @@ export const SuccessViewMultiManual: React.FC<JobWithS3Data> = (job: JobWithS3Da
 
   const options = useMemo(() => {
     try {
-      return job.input.program.map((k, index) => ({
+      return (job.input.program ?? []).map((k, index) => ({
         value: index.toString(),
         tabLabel: `${dividedCountsKeyPre} ${index}`,
         heading: `${dividedCountsHeading} ${index}`,

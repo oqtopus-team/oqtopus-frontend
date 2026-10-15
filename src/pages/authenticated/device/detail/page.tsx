@@ -3,12 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { TopologyInfo } from './_components/TopologyInfo';
 import { Spacer } from '@/pages/_components/Spacer';
 import { useDocumentTitle } from '@/pages/_hooks/title';
-import { useParams } from 'react-router';
+import { useParams, useSearchParams } from 'react-router';
 import { useLayoutEffect, useState } from 'react';
-import { Device } from '@/domain/types/Device';
+import { Device, DeviceInfoHistoryDetail } from '@/domain/types/Device';
 import { useDeviceAPI } from '@/backend/hook';
 import { Loader } from '@/pages/_components/Loader';
 import { DeviceDetailBasicInfo } from './_components/DeviceDetailBasicInfo';
+import { createDeviceInfoJsonFileName } from '../_utils/downloadDeviceInfoJson';
 
 export default function DeviceDetailPage_() {
   const { id } = useParams();
@@ -20,23 +21,54 @@ type Params = { id: string };
 function DeviceDetailPage({ params: { id } }: { params: Params }) {
   const { t } = useTranslation();
   useDocumentTitle(t('device.detail.title'));
-  const { getDevice } = useDeviceAPI();
+  const { getDevice, getDeviceHistory, getDeviceHistoryAtRuntime } = useDeviceAPI();
+  const [searchParams] = useSearchParams();
 
   const [device, setDevice] = useState<Device | null>(null);
+  const [historyDetail, setHistoryDetail] = useState<DeviceInfoHistoryDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSuccess, setIsSuccess] = useState(false);
+  const requestedDeviceHistoryId = searchParams.get('deviceHistoryId') ?? '';
+  const requestedDeviceInfoAt = searchParams.get('deviceInfoAt') ?? '';
+
   useLayoutEffect(() => {
+    let isActive = true;
     setLoading(true);
-    if (id != '') {
-      getDevice(id)
-        .then((device) => setDevice(device))
-        .catch(() => setIsSuccess(false))
-        .finally(() => {
-          setIsSuccess(true);
-          setLoading(false);
-        });
-    }
-  }, [id]);
+    setIsSuccess(false);
+    setDevice(null);
+    setHistoryDetail(null);
+
+    const loadDevice = async (): Promise<void> => {
+      try {
+        if (id === '') return;
+        const nextDevice = await getDevice(id);
+        if (!isActive || nextDevice === null) return;
+
+        let nextHistory: DeviceInfoHistoryDetail | null = null;
+        if (requestedDeviceHistoryId) {
+          nextHistory = await getDeviceHistory(requestedDeviceHistoryId);
+        } else if (requestedDeviceInfoAt) {
+          nextHistory = await getDeviceHistoryAtRuntime(id, requestedDeviceInfoAt);
+        }
+        if (!isActive) return;
+        if ((requestedDeviceHistoryId || requestedDeviceInfoAt) && nextHistory === null) return;
+        if (nextHistory !== null && nextHistory.deviceId !== id) return;
+
+        setDevice(nextDevice);
+        setHistoryDetail(nextHistory);
+        setIsSuccess(true);
+      } catch {
+        if (isActive) setIsSuccess(false);
+      } finally {
+        if (isActive) setLoading(false);
+      }
+    };
+
+    void loadDevice();
+    return () => {
+      isActive = false;
+    };
+  }, [id, requestedDeviceHistoryId, requestedDeviceInfoAt]);
 
   if (loading) {
     return <LoadingView />;
@@ -45,17 +77,31 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
     return <NotFoundView />;
   }
 
-  const hasDeviceInfo = (device.deviceInfo ?? '').trim() !== '';
+  const activeDeviceInfo = historyDetail?.deviceInfo ?? device.deviceInfo;
+  const hasDeviceInfo = (activeDeviceInfo ?? '').trim() !== '';
+  const isHistoryDetail = Boolean(
+    (requestedDeviceHistoryId || requestedDeviceInfoAt) && historyDetail
+  );
+  const historyDownloadFileName = historyDetail
+    ? createDeviceInfoJsonFileName(device.id, historyDetail.calibratedAt)
+    : undefined;
 
   return (
     <>
       <Title />
       <Spacer className="h-6" />
-      <DeviceDetailBasicInfo {...device} />
+      <DeviceDetailBasicInfo
+        {...device}
+        historyDetail={isHistoryDetail ? (historyDetail ?? undefined) : undefined}
+      />
       {hasDeviceInfo && (
         <div>
           <Spacer className="h-6" />
-          <TopologyInfo deviceInfo={device.deviceInfo} />
+          <TopologyInfo
+            deviceInfo={activeDeviceInfo}
+            historyCapturedAt={isHistoryDetail ? historyDetail?.calibratedAt : undefined}
+            downloadFileName={historyDownloadFileName}
+          />
         </div>
       )}
     </>

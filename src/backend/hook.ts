@@ -2,6 +2,9 @@ import { useContext } from 'react';
 import { userApiContext } from './Provider';
 import {
   DevicesDeviceInfo,
+  DevicesDeviceInfoHistoryDetail,
+  DevicesDeviceInfoHistoryEntry,
+  DevicesDeviceInfoHistoryListResponse,
   GetAnnouncementsListOrderEnum,
   JobsJob,
   JobsJobInfo,
@@ -11,7 +14,12 @@ import {
   UsersUpdateUserRequest,
 } from '@/api/generated';
 import { Job, JobS3Data, JobSearchParams } from '@/domain/types/Job';
-import { Device } from '@/domain/types/Device';
+import {
+  Device,
+  DeviceInfoHistoryDetail,
+  DeviceInfoHistoryEntry,
+  DeviceInfoHistoryList,
+} from '@/domain/types/Device';
 import type { RawAxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import JSZip from 'jszip';
@@ -24,12 +32,14 @@ interface AnnouncementsApi {
   order?: GetAnnouncementsListOrderEnum;
 }
 
-async function convertZipBlobToObject(zipBlob: Blob) {
+export async function convertZipBlobToObject(zipBlob: Blob) {
   const zip = await JSZip.loadAsync(zipBlob);
-  const [_, file] = Object.entries(zip.files)[0] ?? []; // we assume we have exactly 1 file inside ZIP
+  const files = Object.values(zip.files).filter((file) => !file.dir);
+  if (files.length !== 1) {
+    throw new Error('ZIP archive must contain exactly one file');
+  }
 
-  if (!file) return;
-
+  const [file] = files;
   const fileContent = await file.async('string');
   return JSON.parse(fileContent);
 }
@@ -217,7 +227,48 @@ export const useDeviceAPI = () => {
     });
   };
 
-  return { getDevices, getDevice };
+  const getDeviceInfoHistory = async (
+    params: {
+      deviceId?: string;
+      from?: string;
+      to?: string;
+      limit?: number;
+      offset?: number;
+    } = {}
+  ): Promise<DeviceInfoHistoryList> => {
+    return api.device
+      .listDeviceHistories(params.deviceId, params.from, params.to, params.limit, params.offset)
+      .then((res) => convertDeviceInfoHistoryList(res.data));
+  };
+
+  const getDeviceHistory = async (historyId: string): Promise<DeviceInfoHistoryDetail | null> => {
+    return api.device.getDeviceHistory(historyId).then(async (res) => {
+      if (res.status === 200) {
+        return await convertDeviceInfoHistoryDetail(res.data);
+      }
+      return null;
+    });
+  };
+
+  const getDeviceHistoryAtRuntime = async (
+    deviceId: string,
+    timestamp: string
+  ): Promise<DeviceInfoHistoryDetail | null> => {
+    const history = await getDeviceInfoHistory({ deviceId, to: timestamp, limit: 1, offset: 0 });
+    const historyId = history.items[0]?.historyId;
+    if (!historyId) {
+      return null;
+    }
+    return getDeviceHistory(historyId);
+  };
+
+  return {
+    getDevices,
+    getDevice,
+    getDeviceInfoHistory,
+    getDeviceHistory,
+    getDeviceHistoryAtRuntime,
+  };
 };
 
 const isDeviceInfoUrl = (deviceInfo: string): boolean => /^https?:\/\//.test(deviceInfo);
@@ -253,6 +304,32 @@ const convertDeviceResult = async (device: DevicesDeviceInfo): Promise<Device> =
   deviceInfo: await retrieveDeviceInfo(device.device_info), // TODO: fix invalid oas schema (nullable: should be false)
   calibratedAt: device.calibrated_at ?? '', // TODO: fix invalid oas schema (nullable: should be false)
   description: device.description,
+});
+
+const convertDeviceInfoHistoryEntry = (
+  entry: DevicesDeviceInfoHistoryEntry
+): DeviceInfoHistoryEntry => ({
+  historyId: entry.history_id,
+  deviceId: entry.device_id,
+  calibratedAt: entry.calibrated_at,
+  nQubits: entry.n_qubits,
+  nCouplings: entry.n_couplings,
+});
+
+const convertDeviceInfoHistoryList = (
+  history: DevicesDeviceInfoHistoryListResponse
+): DeviceInfoHistoryList => ({
+  items: history.items.map(convertDeviceInfoHistoryEntry),
+  total: history.total,
+  limit: history.limit,
+  offset: history.offset,
+});
+
+const convertDeviceInfoHistoryDetail = async (
+  history: DevicesDeviceInfoHistoryDetail
+): Promise<DeviceInfoHistoryDetail> => ({
+  ...convertDeviceInfoHistoryEntry(history),
+  deviceInfo: await retrieveDeviceInfo(history.device_info),
 });
 
 export const useUserAPI = () => {

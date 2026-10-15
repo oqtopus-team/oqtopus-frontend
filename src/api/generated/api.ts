@@ -182,7 +182,7 @@ export interface DevicesDeviceInfo {
    */
   supported_instructions: Array<string>;
   /**
-   * json format calibration_data and n_nodes etc
+   * Presigned URL for downloading device_info.
    * @type {string}
    * @memberof DevicesDeviceInfo
    */
@@ -216,6 +216,117 @@ export const DevicesDeviceInfoStatusEnum = {
 export type DevicesDeviceInfoStatusEnum =
   (typeof DevicesDeviceInfoStatusEnum)[keyof typeof DevicesDeviceInfoStatusEnum];
 
+/**
+ *
+ * @export
+ * @interface DevicesDeviceInfoHistoryDetail
+ */
+export interface DevicesDeviceInfoHistoryDetail {
+  /**
+   * Unique string identifying the device history.
+   * @type {string}
+   * @memberof DevicesDeviceInfoHistoryDetail
+   */
+  history_id: string;
+  /**
+   *
+   * @type {string}
+   * @memberof DevicesDeviceInfoHistoryDetail
+   */
+  device_id: string;
+  /**
+   *
+   * @type {string}
+   * @memberof DevicesDeviceInfoHistoryDetail
+   */
+  calibrated_at: string;
+  /**
+   *
+   * @type {number}
+   * @memberof DevicesDeviceInfoHistoryDetail
+   */
+  n_qubits: number;
+  /**
+   *
+   * @type {number}
+   * @memberof DevicesDeviceInfoHistoryDetail
+   */
+  n_couplings: number;
+  /**
+   * Presigned URL for downloading the historical device_info.zip.
+   * @type {string}
+   * @memberof DevicesDeviceInfoHistoryDetail
+   */
+  device_info: string;
+}
+/**
+ *
+ * @export
+ * @interface DevicesDeviceInfoHistoryEntry
+ */
+export interface DevicesDeviceInfoHistoryEntry {
+  /**
+   * Unique string identifying the device history.
+   * @type {string}
+   * @memberof DevicesDeviceInfoHistoryEntry
+   */
+  history_id: string;
+  /**
+   *
+   * @type {string}
+   * @memberof DevicesDeviceInfoHistoryEntry
+   */
+  device_id: string;
+  /**
+   *
+   * @type {string}
+   * @memberof DevicesDeviceInfoHistoryEntry
+   */
+  calibrated_at: string;
+  /**
+   *
+   * @type {number}
+   * @memberof DevicesDeviceInfoHistoryEntry
+   */
+  n_qubits: number;
+  /**
+   *
+   * @type {number}
+   * @memberof DevicesDeviceInfoHistoryEntry
+   */
+  n_couplings: number;
+}
+/**
+ *
+ * @export
+ * @interface DevicesDeviceInfoHistoryListResponse
+ */
+export interface DevicesDeviceInfoHistoryListResponse {
+  /**
+   *
+   * @type {Array<DevicesDeviceInfoHistoryEntry>}
+   * @memberof DevicesDeviceInfoHistoryListResponse
+   */
+  items: Array<DevicesDeviceInfoHistoryEntry>;
+  /**
+   *
+   * @type {number}
+   * @memberof DevicesDeviceInfoHistoryListResponse
+   */
+  total: number;
+  /**
+   *
+   * @type {number}
+   * @memberof DevicesDeviceInfoHistoryListResponse
+   */
+  limit: number;
+  /**
+   *
+   * @type {number}
+   * @memberof DevicesDeviceInfoHistoryListResponse
+   */
+  offset: number;
+}
 /**
  *
  * @export
@@ -745,17 +856,23 @@ export interface JobsS3SamplingResult {
  */
 export interface JobsS3SubmitJobInfo {
   /**
-   * A list of OPENQASM3 program. For non-multiprogramming jobs, this field is assumed to contain exactly one program. Otherwise, those programs are combined according to the multiprogramming machinery.
+   * A list of OPENQASM3 program. Required for sampling, estimation and multiprogramming jobs. For non-multiprogramming jobs, this field is assumed to contain exactly one program. Otherwise, those programs are combined according to the multiprogramming machinery.
    * @type {Array<string>}
    * @memberof JobsS3SubmitJobInfo
    */
-  program: Array<string>;
+  program?: Array<string>;
   /**
-   *
+   * Estimation operator. Required for estimation jobs.
    * @type {Array<JobsS3OperatorItem>}
    * @memberof JobsS3SubmitJobInfo
    */
   operator?: Array<JobsS3OperatorItem>;
+  /**
+   * SSE user program. Required for SSE jobs.
+   * @type {string}
+   * @memberof JobsS3SubmitJobInfo
+   */
+  sse_program?: string;
 }
 /**
  *
@@ -1013,10 +1130,10 @@ export interface SuccessSuccessResponse {
 export interface UsersGetOneUserResponse {
   /**
    *
-   * @type {number}
+   * @type {string}
    * @memberof UsersGetOneUserResponse
    */
-  id?: number;
+  id?: string;
   /**
    *
    * @type {string}
@@ -1727,6 +1844,120 @@ export const DeviceApiAxiosParamCreator = function (configuration?: Configuratio
       };
     },
     /**
+     * Returns the device history identified by history_id.
+     * @summary Get device history
+     * @param {string} historyId Unique string identifying the device history.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getDeviceHistory: async (
+      historyId: string,
+      options: RawAxiosRequestConfig = {}
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'historyId' is not null or undefined
+      assertParamExists('getDeviceHistory', 'historyId', historyId);
+      const localVarPath = `/device_histories/{history_id}`.replace(
+        `{${'history_id'}}`,
+        encodeURIComponent(String(historyId))
+      );
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      // authentication BearerAuth required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration);
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter);
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
+     * List device history metadata, ordered by calibrated_at and history_id descending. Optionally filter by device_id.
+     * @summary List device histories
+     * @param {string} [deviceId] Device identifier to filter histories.
+     * @param {string} [from] Inclusive lower bound of calibrated_at.
+     * @param {string} [to] Inclusive upper bound of calibrated_at.
+     * @param {number} [limit]
+     * @param {number} [offset]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    listDeviceHistories: async (
+      deviceId?: string,
+      from?: string,
+      to?: string,
+      limit?: number,
+      offset?: number,
+      options: RawAxiosRequestConfig = {}
+    ): Promise<RequestArgs> => {
+      const localVarPath = `/device_histories`;
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+      let baseOptions;
+      if (configuration) {
+        baseOptions = configuration.baseOptions;
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+      const localVarHeaderParameter = {} as any;
+      const localVarQueryParameter = {} as any;
+
+      // authentication BearerAuth required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration);
+
+      if (deviceId !== undefined) {
+        localVarQueryParameter['device_id'] = deviceId;
+      }
+
+      if (from !== undefined) {
+        localVarQueryParameter['from'] =
+          (from as any) instanceof Date ? (from as any).toISOString() : from;
+      }
+
+      if (to !== undefined) {
+        localVarQueryParameter['to'] = (to as any) instanceof Date ? (to as any).toISOString() : to;
+      }
+
+      if (limit !== undefined) {
+        localVarQueryParameter['limit'] = limit;
+      }
+
+      if (offset !== undefined) {
+        localVarQueryParameter['offset'] = offset;
+      }
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter);
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+      localVarRequestOptions.headers = {
+        ...localVarHeaderParameter,
+        ...headersFromBaseOptions,
+        ...options.headers,
+      };
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      };
+    },
+    /**
      * List available devices
      * @summary List available devices
      * @param {*} [options] Override http request option.
@@ -1796,6 +2027,77 @@ export const DeviceApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
+     * Returns the device history identified by history_id.
+     * @summary Get device history
+     * @param {string} historyId Unique string identifying the device history.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getDeviceHistory(
+      historyId: string,
+      options?: RawAxiosRequestConfig
+    ): Promise<
+      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<DevicesDeviceInfoHistoryDetail>
+    > {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getDeviceHistory(
+        historyId,
+        options
+      );
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap['DeviceApi.getDeviceHistory']?.[localVarOperationServerIndex]?.url;
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration
+        )(axios, localVarOperationServerBasePath || basePath);
+    },
+    /**
+     * List device history metadata, ordered by calibrated_at and history_id descending. Optionally filter by device_id.
+     * @summary List device histories
+     * @param {string} [deviceId] Device identifier to filter histories.
+     * @param {string} [from] Inclusive lower bound of calibrated_at.
+     * @param {string} [to] Inclusive upper bound of calibrated_at.
+     * @param {number} [limit]
+     * @param {number} [offset]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async listDeviceHistories(
+      deviceId?: string,
+      from?: string,
+      to?: string,
+      limit?: number,
+      offset?: number,
+      options?: RawAxiosRequestConfig
+    ): Promise<
+      (
+        axios?: AxiosInstance,
+        basePath?: string
+      ) => AxiosPromise<DevicesDeviceInfoHistoryListResponse>
+    > {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.listDeviceHistories(
+        deviceId,
+        from,
+        to,
+        limit,
+        offset,
+        options
+      );
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+      const localVarOperationServerBasePath =
+        operationServerMap['DeviceApi.listDeviceHistories']?.[localVarOperationServerIndex]?.url;
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration
+        )(axios, localVarOperationServerBasePath || basePath);
+    },
+    /**
      * List available devices
      * @summary List available devices
      * @param {*} [options] Override http request option.
@@ -1843,6 +2145,44 @@ export const DeviceApiFactory = function (
       return localVarFp.getDevice(deviceId, options).then((request) => request(axios, basePath));
     },
     /**
+     * Returns the device history identified by history_id.
+     * @summary Get device history
+     * @param {string} historyId Unique string identifying the device history.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getDeviceHistory(
+      historyId: string,
+      options?: RawAxiosRequestConfig
+    ): AxiosPromise<DevicesDeviceInfoHistoryDetail> {
+      return localVarFp
+        .getDeviceHistory(historyId, options)
+        .then((request) => request(axios, basePath));
+    },
+    /**
+     * List device history metadata, ordered by calibrated_at and history_id descending. Optionally filter by device_id.
+     * @summary List device histories
+     * @param {string} [deviceId] Device identifier to filter histories.
+     * @param {string} [from] Inclusive lower bound of calibrated_at.
+     * @param {string} [to] Inclusive upper bound of calibrated_at.
+     * @param {number} [limit]
+     * @param {number} [offset]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    listDeviceHistories(
+      deviceId?: string,
+      from?: string,
+      to?: string,
+      limit?: number,
+      offset?: number,
+      options?: RawAxiosRequestConfig
+    ): AxiosPromise<DevicesDeviceInfoHistoryListResponse> {
+      return localVarFp
+        .listDeviceHistories(deviceId, from, to, limit, offset, options)
+        .then((request) => request(axios, basePath));
+    },
+    /**
      * List available devices
      * @summary List available devices
      * @param {*} [options] Override http request option.
@@ -1872,6 +2212,45 @@ export class DeviceApi extends BaseAPI {
   public getDevice(deviceId: string, options?: RawAxiosRequestConfig) {
     return DeviceApiFp(this.configuration)
       .getDevice(deviceId, options)
+      .then((request) => request(this.axios, this.basePath));
+  }
+
+  /**
+   * Returns the device history identified by history_id.
+   * @summary Get device history
+   * @param {string} historyId Unique string identifying the device history.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof DeviceApi
+   */
+  public getDeviceHistory(historyId: string, options?: RawAxiosRequestConfig) {
+    return DeviceApiFp(this.configuration)
+      .getDeviceHistory(historyId, options)
+      .then((request) => request(this.axios, this.basePath));
+  }
+
+  /**
+   * List device history metadata, ordered by calibrated_at and history_id descending. Optionally filter by device_id.
+   * @summary List device histories
+   * @param {string} [deviceId] Device identifier to filter histories.
+   * @param {string} [from] Inclusive lower bound of calibrated_at.
+   * @param {string} [to] Inclusive upper bound of calibrated_at.
+   * @param {number} [limit]
+   * @param {number} [offset]
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof DeviceApi
+   */
+  public listDeviceHistories(
+    deviceId?: string,
+    from?: string,
+    to?: string,
+    limit?: number,
+    offset?: number,
+    options?: RawAxiosRequestConfig
+  ) {
+    return DeviceApiFp(this.configuration)
+      .listDeviceHistories(deviceId, from, to, limit, offset, options)
       .then((request) => request(this.axios, this.basePath));
   }
 

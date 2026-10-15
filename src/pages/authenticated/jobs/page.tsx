@@ -21,6 +21,8 @@ import { useJobAPI } from '@/backend/hook';
 import { ConfirmModal } from '@/pages/_components/ConfirmModal';
 import { BsTrashFill, BsXCircleFill } from 'react-icons/bs';
 import { list } from 'postcss';
+import { LoadMore } from '@/pages/_components/LoadMore';
+import { ReloadButton } from '@/pages/_components/ReloadButton';
 
 const PAGE_SIZE = 10; // The limit of items to fetch in one request
 
@@ -256,26 +258,7 @@ export default function JobListPage() {
     <div>
       <h2 className={clsx('text-primary', 'text-2xl', 'font-bold', 'flex', 'flex-wrap', 'gap-2')}>
         {t('job.list.title')}
-        <div
-          className={clsx('flex', 'flex-wrap', 'gap-2', 'justify-between', 'items-center')}
-          onClick={() => {
-            getJobsUpToPage(page - 1);
-          }}
-        >
-          <div
-            title={t('job.detail.reload')}
-            className={clsx(
-              'ml-2',
-              'bg-primary',
-              'rounded-md',
-              'overflow-hidden',
-              'p-1',
-              'cursor-pointer'
-            )}
-          >
-            <img src="/static_assets/img/common/reload.svg" alt="Reload Icon" width={16} />
-          </div>
-        </div>
+        <ReloadButton title={t('job.detail.reload')} onClick={() => getJobsUpToPage(page - 1)} />
       </h2>
       <Spacer className="h-8" />
       <div className={clsx('absolute', 'top-8', 'right-8')}>
@@ -313,7 +296,7 @@ export default function JobListPage() {
           <InfiniteScroll
             next={() => getJobsScroll(page)}
             hasMore={hasMore}
-            loader={<Loadmore handleClick={() => getJobsScroll(page)} />}
+            loader={<LoadMore onClick={() => getJobsScroll(page)}>Click to load more...</LoadMore>}
             dataLength={jobs.length}
           >
             <table className={clsx('w-full')}>
@@ -395,26 +378,6 @@ export default function JobListPage() {
     </div>
   );
 }
-
-const Loadmore = (props: { handleClick: () => void }) => {
-  return (
-    <div
-      className={clsx(
-        'flex',
-        'items-center',
-        'justify-center',
-        'w-full',
-        'h-12',
-        'text-sm',
-        'cursor-pointer',
-        'text-info'
-      )}
-      onClick={() => props.handleClick()}
-    >
-      Click to load more...
-    </div>
-  );
-};
 
 const generateSearchParams = (params: JobSearchParams): string => {
   const searchParams = new URLSearchParams();

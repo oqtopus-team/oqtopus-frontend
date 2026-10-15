@@ -12,6 +12,9 @@ docs/ApiTokenApiToken.md
 docs/ApiTokenApiTokenStatus.md
 docs/DeviceApi.md
 docs/DevicesDeviceInfo.md
+docs/DevicesDeviceInfoHistoryDetail.md
+docs/DevicesDeviceInfoHistoryEntry.md
+docs/DevicesDeviceInfoHistoryListResponse.md
 docs/ErrorBadRequest.md
 docs/ErrorForbiddenError.md
 docs/ErrorInternalServerError.md

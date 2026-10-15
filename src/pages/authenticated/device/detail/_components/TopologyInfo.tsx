@@ -9,6 +9,9 @@ import useWindowSize from '@/pages/_hooks/UseWindowSize';
 import 'simplebar-react/dist/simplebar.min.css';
 import { Button } from '@/pages/_components/Button';
 import { Select } from '@/pages/_components/Select';
+import { DateTimeFormatter } from '@/pages/authenticated/_components/DateTimeFormatter';
+import { BsDownload } from 'react-icons/bs';
+import { downloadDeviceInfoJson } from '../../_utils/downloadDeviceInfoJson';
 
 // Types for metric selection
 type QubitMetric = 'readout_error' | 't1' | 't2' | 'single_qubit_gate_error';
@@ -307,6 +310,51 @@ type LinkObject<NodeType = {}, LinkType = {}> = LinkType & {
   [others: string]: any;
 };
 
+type DeviceTopology = {
+  qubits: any[];
+  couplings: any[];
+};
+
+const extractDeviceTopology = (deviceInfo: any): DeviceTopology | null => {
+  const candidates = [
+    deviceInfo,
+    deviceInfo?.device_topology,
+    deviceInfo?.deviceTopology,
+    deviceInfo?.topology,
+  ];
+
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate?.qubits)) {
+      return {
+        qubits: candidate.qubits,
+        couplings: Array.isArray(candidate.couplings) ? candidate.couplings : [],
+      };
+    }
+  }
+
+  return null;
+};
+
+const getFallbackPosition = (index: number, total: number): { x: number; y: number } => {
+  if (total <= 1) {
+    return { x: 0, y: 0 };
+  }
+
+  const angle = (2 * Math.PI * index) / total;
+  return { x: Math.cos(angle), y: Math.sin(angle) };
+};
+
+const getQubitPosition = (qubit: any, index: number, total: number): { x: number; y: number } => {
+  const x = Number(qubit?.position?.x);
+  const y = Number(qubit?.position?.y);
+
+  if (Number.isFinite(x) && Number.isFinite(y)) {
+    return { x, y };
+  }
+
+  return getFallbackPosition(index, total);
+};
+
 const scalePosition = (position: number, scale: number = 50): number => {
   return position * scale;
 };
@@ -326,8 +374,8 @@ const normalizePositions = <NodeType,>(nodes: NodeObject<NodeType>[]): NodeObjec
   }));
 };
 
-const createCouplingMapKey = (control: number, target: number): string => {
-  const [first, second] = [control, target].sort((a, b) => a - b);
+const createCouplingMapKey = (control: string | number, target: string | number): string => {
+  const [first, second] = [control, target].map(String).sort();
   return `${first}-${second}`;
 };
 
@@ -353,8 +401,11 @@ const createNodeData = (
 ): { nodeData: any[]; tempNodeMap: Map<string, object> } => {
   try {
     const tempNodeMap = new Map<string, object>();
-    const nodeData = qubits.map((qubit: any) => {
-      tempNodeMap.set(qubit.id.toString(), qubit);
+    const nodeData = qubits.map((qubit: any, index: number) => {
+      const qubitId = qubit.id ?? index;
+      const position = getQubitPosition(qubit, index, qubits.length);
+
+      tempNodeMap.set(qubitId.toString(), qubit);
       const metricValue = getMetricValue(qubit, selectedMetric);
       const color = getColorForMetric(
         metricValue,
@@ -364,10 +415,10 @@ const createNodeData = (
       );
 
       return {
-        id: qubit.id.toString(),
-        label: `${qubit.id}`,
-        fx: scalePosition(qubit.position.x),
-        fy: scalePosition(qubit.position.y * -1), // multiply by -1 to flip the y-axis
+        id: qubitId.toString(),
+        label: `${qubitId}`,
+        fx: scalePosition(position.x),
+        fy: scalePosition(position.y * -1), // multiply by -1 to flip the y-axis
         color: color,
         metricValue: metricValue,
       };
@@ -386,7 +437,11 @@ const createEdgeData = (
 ): { edgeData: LinkObject[]; tempCouplingMap: Map<string, object> } => {
   try {
     const tempCouplingMap = new Map<string, object>();
-    const edgeData: LinkObject[] = couplings.map((coupling: any) => {
+    const edgeData: LinkObject[] = couplings.flatMap((coupling: any) => {
+      if (coupling.control === undefined || coupling.target === undefined) {
+        return [];
+      }
+
       const key = createCouplingMapKey(coupling.control, coupling.target);
       const id = `${coupling.control}-${coupling.target}`;
       const existingValue = tempCouplingMap.get(key);
@@ -422,8 +477,12 @@ const createEdgeData = (
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 3;
 
-export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ deviceInfo }) => {
-  const { t } = useTranslation();
+export const TopologyInfo: React.FC<{
+  deviceInfo: string | undefined;
+  historyCapturedAt?: string;
+  downloadFileName?: string;
+}> = ({ deviceInfo, historyCapturedAt, downloadFileName = 'device_info.json' }) => {
+  const { t, i18n } = useTranslation();
   const [isDarkTheme, setIsDarkTheme] = useState<boolean>(() => {
     return typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
   });
@@ -477,6 +536,12 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
   const heddingRef = useRef<HTMLDivElement>(null);
 
   const strHoveredInfo = JSON.stringify(hoveredInfo);
+  const activeDeviceInfo = deviceInfo;
+
+  const handleDownloadDeviceInfo = () => {
+    if (!activeDeviceInfo) return;
+    downloadDeviceInfoJson(activeDeviceInfo, downloadFileName);
+  };
 
   useEffect(() => {
     if (typeof document === 'undefined') {
@@ -584,11 +649,11 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
     try {
       const parsedDeviceInfo = (() => {
         try {
-          if (!deviceInfo) {
+          if (!activeDeviceInfo) {
             setIsValidDeviceInfo(false);
             return {};
           }
-          return JSON.parse(deviceInfo);
+          return JSON.parse(activeDeviceInfo);
         } catch (err) {
           setIsValidDeviceInfo(false);
           console.error('Failed to parse device info:', err);
@@ -596,35 +661,49 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
         }
       })();
 
-      if (!parsedDeviceInfo.qubits || !parsedDeviceInfo.couplings) return;
+      const deviceTopology = extractDeviceTopology(parsedDeviceInfo);
+      if (!deviceTopology) {
+        setIsValidDeviceInfo(false);
+        return;
+      }
+
+      setIsValidDeviceInfo(true);
 
       // Store data for median calculation
-      setQubitsData(parsedDeviceInfo.qubits);
-      setCouplingsData(parsedDeviceInfo.couplings);
+      setQubitsData(deviceTopology.qubits);
+      setCouplingsData(deviceTopology.couplings);
 
       // Calculate metric ranges
-      const qubitRange = calculateMetricRange(parsedDeviceInfo.qubits, selectedQubitMetric);
-      const couplingRange = calculateMetricRange(
-        parsedDeviceInfo.couplings,
-        selectedCouplingMetric
-      );
+      const qubitRange = calculateMetricRange(deviceTopology.qubits, selectedQubitMetric);
+      const couplingRange = calculateMetricRange(deviceTopology.couplings, selectedCouplingMetric);
 
       setQubitMetricRange(qubitRange);
       setCouplingMetricRange(couplingRange);
 
       const { nodeData, tempNodeMap } = createNodeData(
-        parsedDeviceInfo.qubits,
+        deviceTopology.qubits,
         selectedQubitMetric,
         qubitRange
       );
       const { edgeData, tempCouplingMap } = createEdgeData(
-        parsedDeviceInfo.couplings,
+        deviceTopology.couplings,
         selectedCouplingMetric,
         couplingRange
       );
 
       if (nodeData.length === 0) {
         setIsValidDeviceInfo(false);
+      } else {
+        const firstNodeId = nodeData[0]?.id as string | number | undefined;
+        if (firstNodeId !== undefined) {
+          const firstNodeInfo =
+            tempNodeMap.get(String(firstNodeId)) ?? tempNodeMap.get(firstNodeId as string);
+          if (firstNodeInfo !== undefined) {
+            setHoveredNodeId(firstNodeId);
+            setHoveredLinkId(null);
+            setStrHoveredInfo(firstNodeInfo);
+          }
+        }
       }
 
       setTopologyData({ nodes: normalizePositions(nodeData), links: edgeData });
@@ -634,7 +713,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
       setIsValidDeviceInfo(false);
       console.error('Failed to update topology data:', err);
     }
-  }, [deviceInfo, selectedQubitMetric, selectedCouplingMetric]);
+  }, [activeDeviceInfo, selectedQubitMetric, selectedCouplingMetric]);
 
   useEffect(() => {
     // Delay to ensure the canvas is rendered
@@ -656,8 +735,8 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
   }
 
   return (
-    <div className={clsx('flex', 'grid', 'grid-cols-[1.3fr_2fr]', 'gap-5')}>
-      <Card className={clsx(['col-start-1', 'col-end-2'])}>
+    <div className={clsx('grid', 'gap-5', 'xl:grid-cols-[minmax(19rem,1.1fr)_minmax(0,2fr)]')}>
+      <Card className={clsx('min-w-0')}>
         <h3 className={clsx('text-primary', 'font-bold')} ref={heddingRef}>
           {t('device.detail.topology_info.property')}
         </h3>
@@ -677,181 +756,225 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
           />
         </div>
       </Card>
-      <Card className={clsx(['col-start-2', 'col-end-3', 'relative'])}>
-        <div style={{ zIndex: 1000, position: 'absolute', bottom: '25px', right: '25px' }}>
-          Zoom: {zoomLevel}x
-        </div>
-        <div
-          style={{
-            marginBottom: '15px',
-            width: '100%',
-            zIndex: 9999,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '10px',
-            alignItems: 'center',
-          }}
-        >
-          {/* Metric Selection Controls */}
-          <div style={{ display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <label style={{ fontSize: '14px', fontWeight: 'bold' }}>
-                {t('device.detail.topology_info.qubit_metric')}:
-              </label>
-              <Select
-                value={selectedQubitMetric}
-                onChange={(e) => setSelectedQubitMetric(e.target.value as QubitMetric)}
-                size="xs"
-                className={clsx('text-base-content', 'bg-base-card')}
-                style={{ minWidth: '180px' }}
-              >
-                {QUBIT_METRICS.map((metric) => (
-                  <option key={metric.value} value={metric.value}>
-                    {metric.label}
-                  </option>
-                ))}
-              </Select>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <label style={{ fontSize: '14px', fontWeight: 'bold' }}>
-                {t('device.detail.topology_info.coupling_metric')}:
-              </label>
-              <Select
-                value={selectedCouplingMetric}
-                onChange={(e) => setSelectedCouplingMetric(e.target.value as CouplingMetric)}
-                size="xs"
-                className={clsx('text-base-content', 'bg-base-card')}
-                style={{ minWidth: '180px' }}
-              >
-                {COUPLING_METRICS.map((metric) => (
-                  <option key={metric.value} value={metric.value}>
-                    {metric.label}
-                  </option>
-                ))}
-              </Select>
+      <Card className={clsx('min-w-0')}>
+        <div className={clsx('flex', 'flex-col', 'gap-5')}>
+          <div>
+            <div className={clsx('flex', 'flex-wrap', 'items-start', 'justify-between', 'gap-3')}>
+              <div>
+                <h3 className={clsx('text-primary', 'font-bold')}>
+                  {t('device.detail.topology_info.header')}
+                </h3>
+                {historyCapturedAt && (
+                  <p className={clsx('mt-2', 'text-sm', 'text-secondary-content')}>
+                    {`${t('device.detail.topology_info.device_info_at')}: ${DateTimeFormatter(
+                      t,
+                      i18n,
+                      historyCapturedAt
+                    )}`}
+                  </p>
+                )}
+              </div>
+              {historyCapturedAt && activeDeviceInfo && (
+                <Button
+                  color="secondary"
+                  size="small"
+                  aria-label={t('device.detail.history.download_json')}
+                  title={t('device.detail.history.download_json')}
+                  onClick={handleDownloadDeviceInfo}
+                >
+                  <BsDownload />
+                </Button>
+              )}
             </div>
           </div>
 
-          {/* Zoom Controls */}
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <Button size="small" onClick={handleFitToView}>
-              {t('device.detail.topology_info.fit_to_view')}
-            </Button>
-            <input
-              type="range"
-              min={MIN_ZOOM}
-              max={MAX_ZOOM}
-              step={0.1}
-              value={zoomLevel}
-              onChange={(e) => {
-                if (fgRef.current && typeof fgRef.current.zoom === 'function') {
-                  fgRef.current.zoom(e.target.value);
-                }
-              }}
-              style={{
-                width: '200px',
-                height: '4px',
-                borderRadius: '2px',
-                outline: 'none',
-                cursor: 'pointer',
-                flex: 1,
-                marginLeft: '10px',
-              }}
-            />
+          <div className={clsx('min-w-0')}>
+            <div
+              className={clsx(
+                'mb-4',
+                'flex',
+                'flex-wrap',
+                'items-center',
+                'justify-between',
+                'gap-4'
+              )}
+            >
+              <div className={clsx('flex', 'flex-wrap', 'gap-4', 'items-center')}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <label
+                    htmlFor="device-topology-qubit-metric"
+                    style={{ fontSize: '14px', fontWeight: 'bold' }}
+                  >
+                    {t('device.detail.topology_info.qubit_metric')}:
+                  </label>
+                  <Select
+                    id="device-topology-qubit-metric"
+                    value={selectedQubitMetric}
+                    onChange={(e) => setSelectedQubitMetric(e.target.value as QubitMetric)}
+                    size="xs"
+                    className={clsx('text-base-content', 'bg-base-card')}
+                    style={{ minWidth: '180px' }}
+                  >
+                    {QUBIT_METRICS.map((metric) => (
+                      <option key={metric.value} value={metric.value}>
+                        {metric.label}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <label
+                    htmlFor="device-topology-coupling-metric"
+                    style={{ fontSize: '14px', fontWeight: 'bold' }}
+                  >
+                    {t('device.detail.topology_info.coupling_metric')}:
+                  </label>
+                  <Select
+                    id="device-topology-coupling-metric"
+                    value={selectedCouplingMetric}
+                    onChange={(e) => setSelectedCouplingMetric(e.target.value as CouplingMetric)}
+                    size="xs"
+                    className={clsx('text-base-content', 'bg-base-card')}
+                    style={{ minWidth: '180px' }}
+                  >
+                    {COUPLING_METRICS.map((metric) => (
+                      <option key={metric.value} value={metric.value}>
+                        {metric.label}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+              </div>
+
+              <div className={clsx('flex', 'items-center', 'gap-3', 'ml-auto')}>
+                <label
+                  htmlFor="device-topology-zoom"
+                  className={clsx('text-sm', 'text-secondary-content')}
+                >
+                  {t('device.detail.topology_info.zoom')}: {zoomLevel}x
+                </label>
+                <Button size="small" onClick={handleFitToView}>
+                  {t('device.detail.topology_info.fit_to_view')}
+                </Button>
+              </div>
+            </div>
+
+            <div className={clsx('mb-4', 'flex', 'items-center', 'gap-3')}>
+              <input
+                id="device-topology-zoom"
+                type="range"
+                min={MIN_ZOOM}
+                max={MAX_ZOOM}
+                step={0.1}
+                value={zoomLevel}
+                onChange={(e) => {
+                  if (fgRef.current && typeof fgRef.current.zoom === 'function') {
+                    fgRef.current.zoom(e.target.value);
+                  }
+                }}
+                style={{
+                  width: '240px',
+                  height: '4px',
+                  borderRadius: '2px',
+                  outline: 'none',
+                  cursor: 'pointer',
+                  flex: 1,
+                }}
+              />
+            </div>
+
+            <div ref={divRef} className={clsx('min-w-0')}>
+              <ForceGraph2D
+                ref={fgRef}
+                backgroundColor={divRef.current?.style?.backgroundColor}
+                graphData={topologyData}
+                nodeCanvasObject={(
+                  node: NodeObject,
+                  ctx: CanvasRenderingContext2D,
+                  globalScale: number
+                ) => {
+                  const radius = 18 / globalScale;
+                  const nodeColor = (node as any).color || '#4887fa';
+                  const labelTextColor = getLabelTextColor(nodeColor);
+
+                  ctx.beginPath();
+                  if (node.x !== undefined && node.y !== undefined) {
+                    ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
+                  }
+                  ctx.fillStyle = nodeColor;
+                  ctx.fill();
+                  ctx.strokeStyle =
+                    node.id === hoveredNodeId ? nodeHoverStrokeColor : nodeStrokeColor;
+                  ctx.lineWidth = node.id === hoveredNodeId ? 4 / globalScale : 3.4 / globalScale;
+                  ctx.stroke();
+
+                  const label = node.label || '';
+                  const fontSize = 16 / globalScale;
+                  ctx.font = `${fontSize}px Arial Bold`;
+                  ctx.textAlign = 'center';
+                  ctx.textBaseline = 'middle';
+                  if (node.x !== undefined && node.y !== undefined) {
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
+                    ctx.shadowBlur = 2 / globalScale;
+                    ctx.fillStyle = labelTextColor;
+                    ctx.fillText(label, node.x, node.y);
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                  }
+                }}
+                linkCanvasObject={(
+                  link: LinkObject,
+                  ctx: CanvasRenderingContext2D,
+                  globalScale: number
+                ) => {
+                  const { source, target } = link;
+                  const startX = (source as NodeObject).x;
+                  const startY = (source as NodeObject).y;
+                  const endX = (target as NodeObject).x;
+                  const endY = (target as NodeObject).y;
+                  const sourceId = (link.source as NodeObject).id;
+                  const targetId = (link.target as NodeObject).id;
+                  const couplingKey = createCouplingMapKey(sourceId as number, targetId as number);
+
+                  if (
+                    startX !== undefined &&
+                    startY !== undefined &&
+                    endX !== undefined &&
+                    endY !== undefined
+                  ) {
+                    const outerStrokeColor = clsx({
+                      [linkHoverStrokeColor]: couplingKey === hoveredLinkId,
+                      transparent: couplingKey !== hoveredLinkId,
+                    });
+
+                    ctx.beginPath();
+                    ctx.moveTo(startX, startY);
+                    ctx.lineTo(endX, endY);
+                    ctx.strokeStyle = outerStrokeColor;
+                    ctx.lineWidth = 16 / globalScale;
+                    ctx.stroke();
+
+                    const innerStrokeColor = (link as any).color || '#4887fa';
+
+                    ctx.beginPath();
+                    ctx.moveTo(startX, startY);
+                    ctx.lineTo(endX, endY);
+                    ctx.strokeStyle = innerStrokeColor;
+                    ctx.lineWidth = 10 / globalScale;
+                    ctx.stroke();
+                  }
+                }}
+                enableNodeDrag={false}
+                onNodeClick={handleHoverNode}
+                onLinkClick={handleHoverLink}
+                height={divSize.height}
+                width={divSize.width}
+                maxZoom={MAX_ZOOM}
+                onZoom={handleZoom}
+                onZoomEnd={handleZoom}
+              />
+            </div>
           </div>
-        </div>
-        <div ref={divRef}>
-          <ForceGraph2D
-            ref={fgRef}
-            backgroundColor={divRef.current?.style?.backgroundColor}
-            graphData={topologyData}
-            nodeCanvasObject={(
-              node: NodeObject,
-              ctx: CanvasRenderingContext2D,
-              globalScale: number
-            ) => {
-              const radius = 18 / globalScale;
-              const nodeColor = (node as any).color || '#4887fa';
-              const labelTextColor = getLabelTextColor(nodeColor);
-
-              ctx.beginPath();
-              if (node.x !== undefined && node.y !== undefined) {
-                ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI, false);
-              }
-              // Use dynamic color from node data, fallback to default blue
-              ctx.fillStyle = nodeColor;
-              ctx.fill();
-              ctx.strokeStyle = node.id === hoveredNodeId ? nodeHoverStrokeColor : nodeStrokeColor;
-              ctx.lineWidth = node.id === hoveredNodeId ? 4 / globalScale : 3.4 / globalScale;
-              ctx.stroke();
-
-              const label = node.label || '';
-              const fontSize = 16 / globalScale;
-              ctx.font = `${fontSize}px Arial Bold`;
-              ctx.textAlign = 'center';
-              ctx.textBaseline = 'middle';
-              if (node.x !== undefined && node.y !== undefined) {
-                ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
-                ctx.shadowBlur = 2 / globalScale;
-                ctx.fillStyle = labelTextColor;
-                ctx.fillText(label, node.x, node.y);
-                ctx.shadowColor = 'transparent';
-                ctx.shadowBlur = 0;
-              }
-            }}
-            linkCanvasObject={(
-              link: LinkObject,
-              ctx: CanvasRenderingContext2D,
-              globalScale: number
-            ) => {
-              const { source, target } = link;
-              const startX = (source as NodeObject).x;
-              const startY = (source as NodeObject).y;
-              const endX = (target as NodeObject).x;
-              const endY = (target as NodeObject).y;
-              const sourceId = (link.source as NodeObject).id;
-              const targetId = (link.target as NodeObject).id;
-              const couplingKey = createCouplingMapKey(sourceId as number, targetId as number);
-
-              if (
-                startX !== undefined &&
-                startY !== undefined &&
-                endX !== undefined &&
-                endY !== undefined
-              ) {
-                // Drawing the outer line
-                const outerStrokeColor = clsx({
-                  [linkHoverStrokeColor]: couplingKey === hoveredLinkId,
-                  transparent: couplingKey !== hoveredLinkId,
-                });
-
-                ctx.beginPath();
-                ctx.moveTo(startX, startY);
-                ctx.lineTo(endX, endY);
-                ctx.strokeStyle = outerStrokeColor;
-                ctx.lineWidth = 16 / globalScale;
-                ctx.stroke();
-
-                // Drawing the inner line
-                const innerStrokeColor = (link as any).color || '#4887fa';
-
-                ctx.beginPath();
-                ctx.moveTo(startX, startY);
-                ctx.lineTo(endX, endY);
-                ctx.strokeStyle = innerStrokeColor;
-                ctx.lineWidth = 10 / globalScale;
-                ctx.stroke();
-              }
-            }}
-            enableNodeDrag={false}
-            onNodeClick={handleHoverNode}
-            onLinkClick={handleHoverLink}
-            height={divSize.height}
-            width={divSize.width}
-            maxZoom={MAX_ZOOM}
-            onZoom={handleZoom}
-            onZoomEnd={handleZoom}
-          />
         </div>
       </Card>
     </div>
