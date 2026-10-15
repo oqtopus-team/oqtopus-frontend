@@ -130,7 +130,9 @@ describe('DeviceInfoHistorySearch', () => {
     );
 
     fireEvent.click(await screen.findByRole('button', { name: 'Click to load more...' }));
-    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'device-b' } });
+    fireEvent.change(screen.getByRole('combobox', { name: 'device.list.table.id' }), {
+      target: { value: 'device-b' },
+    });
     fireEvent.click(screen.getByRole('button', { name: 'job.list.search.button' }));
 
     expect(await screen.findByText('filtered-history')).toBeInTheDocument();
@@ -161,7 +163,9 @@ describe('DeviceInfoHistorySearch', () => {
       screen.getByRole('button', { name: 'device.detail.history.bulk_download' })
     ).toBeEnabled();
 
-    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'device-b' } });
+    fireEvent.change(screen.getByRole('combobox', { name: 'device.list.table.id' }), {
+      target: { value: 'device-b' },
+    });
     fireEvent.click(screen.getByRole('button', { name: 'job.list.search.button' }));
 
     await waitFor(() => expect(screen.queryByText('history-0')).not.toBeInTheDocument());

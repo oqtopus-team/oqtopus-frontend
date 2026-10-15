@@ -49,6 +49,7 @@ export default {
       qubit_metric: 'Qubit Metric',
       coupling_metric: 'Coupling Metric',
       color_scale: 'Color Scale',
+      zoom: 'Zoom',
     },
     history: {
       header: 'Device history',

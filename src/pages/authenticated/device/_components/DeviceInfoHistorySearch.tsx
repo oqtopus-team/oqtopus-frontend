@@ -257,8 +257,11 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
             <div className={clsx('flex', 'flex-1', 'justify-start', 'items-end')}>
               <div className={clsx('grid', 'gap-4', 'min-w-[16rem]', 'max-w-[24rem]', 'flex-1')}>
                 <div className={clsx('grid', 'gap-1')}>
-                  <p className="text-xs">{t('device.list.table.id')}</p>
+                  <label className="text-xs" htmlFor="device-history-device">
+                    {t('device.list.table.id')}
+                  </label>
                   <Select
+                    id="device-history-device"
                     value={params.deviceId ?? ''}
                     onChange={(event) =>
                       setParams({

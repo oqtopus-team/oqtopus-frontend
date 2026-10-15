@@ -49,6 +49,7 @@ export default {
       qubit_metric: '量子ビット',
       coupling_metric: '結合指標',
       color_scale: 'カラースケール',
+      zoom: 'ズーム',
     },
     history: {
       header: 'デバイス履歴',

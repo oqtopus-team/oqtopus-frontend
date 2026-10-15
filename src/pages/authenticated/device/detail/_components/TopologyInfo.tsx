@@ -801,10 +801,14 @@ export const TopologyInfo: React.FC<{
             >
               <div className={clsx('flex', 'flex-wrap', 'gap-4', 'items-center')}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <label style={{ fontSize: '14px', fontWeight: 'bold' }}>
+                  <label
+                    htmlFor="device-topology-qubit-metric"
+                    style={{ fontSize: '14px', fontWeight: 'bold' }}
+                  >
                     {t('device.detail.topology_info.qubit_metric')}:
                   </label>
                   <Select
+                    id="device-topology-qubit-metric"
                     value={selectedQubitMetric}
                     onChange={(e) => setSelectedQubitMetric(e.target.value as QubitMetric)}
                     size="xs"
@@ -819,10 +823,14 @@ export const TopologyInfo: React.FC<{
                   </Select>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <label style={{ fontSize: '14px', fontWeight: 'bold' }}>
+                  <label
+                    htmlFor="device-topology-coupling-metric"
+                    style={{ fontSize: '14px', fontWeight: 'bold' }}
+                  >
                     {t('device.detail.topology_info.coupling_metric')}:
                   </label>
                   <Select
+                    id="device-topology-coupling-metric"
                     value={selectedCouplingMetric}
                     onChange={(e) => setSelectedCouplingMetric(e.target.value as CouplingMetric)}
                     size="xs"
@@ -839,9 +847,12 @@ export const TopologyInfo: React.FC<{
               </div>
 
               <div className={clsx('flex', 'items-center', 'gap-3', 'ml-auto')}>
-                <span className={clsx('text-sm', 'text-secondary-content')}>
-                  Zoom: {zoomLevel}x
-                </span>
+                <label
+                  htmlFor="device-topology-zoom"
+                  className={clsx('text-sm', 'text-secondary-content')}
+                >
+                  {t('device.detail.topology_info.zoom')}: {zoomLevel}x
+                </label>
                 <Button size="small" onClick={handleFitToView}>
                   {t('device.detail.topology_info.fit_to_view')}
                 </Button>
@@ -850,6 +861,7 @@ export const TopologyInfo: React.FC<{
 
             <div className={clsx('mb-4', 'flex', 'items-center', 'gap-3')}>
               <input
+                id="device-topology-zoom"
                 type="range"
                 min={MIN_ZOOM}
                 max={MAX_ZOOM}
