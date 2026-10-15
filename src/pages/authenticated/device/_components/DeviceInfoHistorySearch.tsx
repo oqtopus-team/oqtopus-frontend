@@ -75,6 +75,9 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
     isLoadingRef.current = true;
     setIsLoading(true);
     setLoadError(false);
+    setHistoryEntries([]);
+    setTotalCount(0);
+    setSelectedHistoryIds([]);
     setHasMore(false);
     getDeviceInfoHistory({
       deviceId: appliedParams.deviceId,

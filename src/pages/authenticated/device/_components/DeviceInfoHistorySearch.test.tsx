@@ -140,6 +140,42 @@ describe('DeviceInfoHistorySearch', () => {
     expect(screen.getByText('filtered-history')).toBeInTheDocument();
   });
 
+  it('clears previous results and selections while a new search is loading', async () => {
+    let resolveSearch: (value: ReturnType<typeof createHistoryResponse>) => void = () => {};
+    const pendingSearch = new Promise<ReturnType<typeof createHistoryResponse>>((resolve) => {
+      resolveSearch = resolve;
+    });
+    getDeviceInfoHistory
+      .mockResolvedValueOnce(createHistoryResponse(0, 1, 1))
+      .mockReturnValueOnce(pendingSearch);
+
+    render(
+      <MemoryRouter>
+        <DeviceInfoHistorySearch devices={devices} />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText('history-0')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('checkbox', { name: 'device.detail.history.select_history' }));
+    expect(
+      screen.getByRole('button', { name: 'device.detail.history.bulk_download' })
+    ).toBeEnabled();
+
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'device-b' } });
+    fireEvent.click(screen.getByRole('button', { name: 'job.list.search.button' }));
+
+    await waitFor(() => expect(screen.queryByText('history-0')).not.toBeInTheDocument());
+    expect(
+      screen.getByRole('button', { name: 'device.detail.history.bulk_download' })
+    ).toBeDisabled();
+
+    resolveSearch({
+      ...createHistoryResponse(20, 1, 1),
+      items: [{ ...createHistory(20), historyId: 'filtered-history', deviceId: 'device-b' }],
+    });
+    expect(await screen.findByText('filtered-history')).toBeInTheDocument();
+  });
+
   it('shows an error and retries when loading histories fails', async () => {
     getDeviceInfoHistory
       .mockRejectedValueOnce(new Error('list failed'))
