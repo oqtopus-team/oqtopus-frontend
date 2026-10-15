@@ -225,13 +225,15 @@ export const useDeviceAPI = () => {
     });
   };
 
-  const getDeviceInfoHistory = async (params: {
-    deviceId?: string;
-    from?: string;
-    to?: string;
-    limit?: number;
-    offset?: number;
-  } = {}): Promise<DeviceInfoHistoryList> => {
+  const getDeviceInfoHistory = async (
+    params: {
+      deviceId?: string;
+      from?: string;
+      to?: string;
+      limit?: number;
+      offset?: number;
+    } = {}
+  ): Promise<DeviceInfoHistoryList> => {
     return api.device
       .listDeviceHistories(params.deviceId, params.from, params.to, params.limit, params.offset)
       .then((res) => convertDeviceInfoHistoryList(res.data));
@@ -258,7 +260,13 @@ export const useDeviceAPI = () => {
     return getDeviceHistory(historyId);
   };
 
-  return { getDevices, getDevice, getDeviceInfoHistory, getDeviceHistory, getDeviceHistoryAtRuntime };
+  return {
+    getDevices,
+    getDevice,
+    getDeviceInfoHistory,
+    getDeviceHistory,
+    getDeviceHistoryAtRuntime,
+  };
 };
 
 const isDeviceInfoUrl = (deviceInfo: string): boolean => /^https?:\/\//.test(deviceInfo);
