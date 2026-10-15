@@ -63,4 +63,22 @@ describe('DeviceDetailPage', () => {
     expect(screen.queryByTestId('device-basic-info')).not.toBeInTheDocument();
     expect(screen.queryByTestId('topology-info')).not.toBeInTheDocument();
   });
+
+  it('rejects a history that belongs to another device', async () => {
+    getDevice.mockResolvedValue(device);
+    getDeviceHistory.mockResolvedValue({
+      historyId: 'history-b',
+      deviceId: 'device-b',
+      calibratedAt: '2026-10-15T00:00:00Z',
+      nQubits: 4,
+      nCouplings: 3,
+      deviceInfo: '{"qubits":[]}',
+    });
+
+    renderPage('/device/device-a?deviceHistoryId=history-b');
+
+    expect(await screen.findByText('device.detail.not_found')).toBeInTheDocument();
+    expect(screen.queryByTestId('device-basic-info')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('topology-info')).not.toBeInTheDocument();
+  });
 });

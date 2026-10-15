@@ -52,6 +52,7 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
         }
         if (!isActive) return;
         if ((requestedDeviceHistoryId || requestedDeviceInfoAt) && nextHistory === null) return;
+        if (nextHistory !== null && nextHistory.deviceId !== id) return;
 
         setDevice(nextDevice);
         setHistoryDetail(nextHistory);
