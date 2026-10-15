@@ -32,26 +32,41 @@ function DeviceDetailPage({ params: { id } }: { params: Params }) {
   const requestedDeviceInfoAt = searchParams.get('deviceInfoAt') ?? '';
 
   useLayoutEffect(() => {
+    let isActive = true;
     setLoading(true);
+    setIsSuccess(false);
+    setDevice(null);
     setHistoryDetail(null);
-    if (id != '') {
-      getDevice(id)
-        .then(async (device) => {
-          setDevice(device);
-          if (device && requestedDeviceHistoryId) {
-            const history = await getDeviceHistory(requestedDeviceHistoryId);
-            setHistoryDetail(history);
-          } else if (device && requestedDeviceInfoAt) {
-            const history = await getDeviceHistoryAtRuntime(id, requestedDeviceInfoAt);
-            setHistoryDetail(history);
-          }
-        })
-        .catch(() => setIsSuccess(false))
-        .finally(() => {
-          setIsSuccess(true);
-          setLoading(false);
-        });
-    }
+
+    const loadDevice = async (): Promise<void> => {
+      try {
+        if (id === '') return;
+        const nextDevice = await getDevice(id);
+        if (!isActive || nextDevice === null) return;
+
+        let nextHistory: DeviceInfoHistoryDetail | null = null;
+        if (requestedDeviceHistoryId) {
+          nextHistory = await getDeviceHistory(requestedDeviceHistoryId);
+        } else if (requestedDeviceInfoAt) {
+          nextHistory = await getDeviceHistoryAtRuntime(id, requestedDeviceInfoAt);
+        }
+        if (!isActive) return;
+        if ((requestedDeviceHistoryId || requestedDeviceInfoAt) && nextHistory === null) return;
+
+        setDevice(nextDevice);
+        setHistoryDetail(nextHistory);
+        setIsSuccess(true);
+      } catch {
+        if (isActive) setIsSuccess(false);
+      } finally {
+        if (isActive) setLoading(false);
+      }
+    };
+
+    void loadDevice();
+    return () => {
+      isActive = false;
+    };
   }, [id, requestedDeviceHistoryId, requestedDeviceInfoAt]);
 
   if (loading) {
