@@ -32,12 +32,14 @@ interface AnnouncementsApi {
   order?: GetAnnouncementsListOrderEnum;
 }
 
-async function convertZipBlobToObject(zipBlob: Blob) {
+export async function convertZipBlobToObject(zipBlob: Blob) {
   const zip = await JSZip.loadAsync(zipBlob);
-  const [_, file] = Object.entries(zip.files)[0] ?? []; // we assume we have exactly 1 file inside ZIP
+  const files = Object.values(zip.files).filter((file) => !file.dir);
+  if (files.length !== 1) {
+    throw new Error('ZIP archive must contain exactly one file');
+  }
 
-  if (!file) return;
-
+  const [file] = files;
   const fileContent = await file.async('string');
   return JSON.parse(fileContent);
 }
