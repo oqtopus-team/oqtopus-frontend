@@ -20,7 +20,16 @@ vi.mock('@/pages/authenticated/_components/DateTimeFormatter', () => ({
   locales: {},
 }));
 vi.mock('react-infinite-scroll-component', () => ({
-  default: ({ children }: React.PropsWithChildren) => <div>{children}</div>,
+  default: ({
+    children,
+    hasMore,
+    loader,
+  }: React.PropsWithChildren<{ hasMore: boolean; loader: React.ReactNode }>) => (
+    <div>
+      {children}
+      {hasMore && loader}
+    </div>
+  ),
 }));
 
 const createHistory = (index: number): DeviceInfoHistoryEntry => ({
@@ -196,6 +205,65 @@ describe('DeviceInfoHistorySearch', () => {
 
     expect(await screen.findByText('history-0')).toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('reloads histories when the same search is submitted again', async () => {
+    getDeviceInfoHistory.mockResolvedValue(createHistoryResponse(0, 1, 1));
+
+    render(
+      <MemoryRouter>
+        <DeviceInfoHistorySearch devices={devices} />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => expect(getDeviceInfoHistory).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole('button', { name: 'job.list.search.button' }));
+    await waitFor(() => expect(getDeviceInfoHistory).toHaveBeenCalledTimes(2));
+    fireEvent.click(screen.getByRole('button', { name: 'job.list.search.button' }));
+    await waitFor(() => expect(getDeviceInfoHistory).toHaveBeenCalledTimes(3));
+  });
+
+  it('restores valid search filters from the URL', async () => {
+    getDeviceInfoHistory.mockResolvedValue(createHistoryResponse(0, 1, 1));
+
+    render(
+      <MemoryRouter
+        initialEntries={[
+          '/?deviceId=device-b&from=2026-08-01T00%3A00%3A00Z&to=2026-08-31T23%3A59%3A59Z',
+        ]}
+      >
+        <DeviceInfoHistorySearch devices={devices} />
+      </MemoryRouter>
+    );
+
+    await waitFor(() =>
+      expect(getDeviceInfoHistory).toHaveBeenCalledWith({
+        deviceId: 'device-b',
+        from: '2026-08-01T00:00:00Z',
+        to: '2026-08-31T23:59:59Z',
+        limit: 10,
+        offset: 0,
+      })
+    );
+    expect(screen.getByRole('combobox', { name: 'device.list.table.id' })).toHaveValue('device-b');
+  });
+
+  it('reloads histories when the parent requests a reload', async () => {
+    getDeviceInfoHistory.mockResolvedValue(createHistoryResponse(0, 1, 1));
+
+    const { rerender } = render(
+      <MemoryRouter>
+        <DeviceInfoHistorySearch devices={devices} reloadCount={0} />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => expect(getDeviceInfoHistory).toHaveBeenCalledTimes(1));
+    rerender(
+      <MemoryRouter>
+        <DeviceInfoHistorySearch devices={devices} reloadCount={1} />
+      </MemoryRouter>
+    );
+    await waitFor(() => expect(getDeviceInfoHistory).toHaveBeenCalledTimes(2));
   });
 
   it('notifies the user when downloading one history fails', async () => {

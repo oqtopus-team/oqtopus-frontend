@@ -8,11 +8,15 @@ import { enUS } from 'date-fns/locale';
 import clsx from 'clsx';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { NavLink } from 'react-router';
+import { NavLink, useSearchParams } from 'react-router';
 import { BsDownload } from 'react-icons/bs';
 import { toast } from 'react-toastify';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { errorToastConfig } from '@/config/toast';
+import { Loader } from '@/pages/_components/Loader';
+import { Card } from '@/pages/_components/Card';
+import { Spacer } from '@/pages/_components/Spacer';
+import { LoadMore } from '@/pages/_components/LoadMore';
 import {
   createDeviceInfoJsonFileName,
   downloadDeviceInfoJson,
@@ -30,11 +34,44 @@ type PresetOption = (typeof presetOptions)[number];
 
 const PAGE_SIZE = 10;
 
-export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): React.ReactElement => {
+const isValidDateString = (value: string): boolean => !Number.isNaN(new Date(value).getTime());
+
+const mapUrlSearchParams = (searchParams: URLSearchParams): SearchParams => {
+  const params: SearchParams = {};
+  const deviceId = searchParams.get('deviceId');
+  const from = searchParams.get('from');
+  const to = searchParams.get('to');
+
+  if (deviceId) params.deviceId = deviceId;
+  if (from && isValidDateString(from)) params.from = from;
+  if (to && isValidDateString(to)) params.to = to;
+
+  return params;
+};
+
+const generateSearchParams = (params: SearchParams): string => {
+  const searchParams = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value) searchParams.set(key, value);
+  });
+  searchParams.sort();
+  return searchParams.toString();
+};
+
+export const DeviceInfoHistorySearch = ({
+  devices,
+  reloadCount: externalReloadCount = 0,
+}: {
+  devices: Device[];
+  reloadCount?: number;
+}): React.ReactElement => {
   const { t, i18n } = useTranslation();
   const { getDeviceInfoHistory, getDeviceHistory } = useDeviceAPI();
-  const [params, setParams] = useState<SearchParams>({});
-  const [appliedParams, setAppliedParams] = useState<SearchParams>({});
+  const [urlSearchParams, setUrlSearchParams] = useSearchParams();
+  const [params, setParams] = useState<SearchParams>(() => mapUrlSearchParams(urlSearchParams));
+  const [appliedParams, setAppliedParams] = useState<SearchParams>(() =>
+    mapUrlSearchParams(urlSearchParams)
+  );
   const [historyEntries, setHistoryEntries] = useState<DeviceInfoHistoryEntry[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [hasDateRangeError, setHasDateRangeError] = useState(false);
@@ -49,6 +86,8 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
   const isLoadingRef = useRef(false);
 
   useEffect(() => {
+    if (devices.length === 0) return;
+
     setParams((currentParams) => {
       if (
         currentParams.deviceId === undefined ||
@@ -113,7 +152,7 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
         requestGenerationRef.current += 1;
       }
     };
-  }, [appliedParams, reloadCount]);
+  }, [appliedParams, reloadCount, externalReloadCount]);
 
   const loadMoreHistories = async (): Promise<void> => {
     if (isLoadingRef.current || loadError || !hasMore) return;
@@ -121,6 +160,7 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
     const requestGeneration = requestGenerationRef.current;
     const offset = historyEntries.length;
     isLoadingRef.current = true;
+    setHasMore(false);
     setIsLoading(true);
     try {
       const history = await getDeviceInfoHistory({
@@ -185,7 +225,8 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
     if (!validateDateRange(params.from, params.to)) {
       return;
     }
-    setAppliedParams(params);
+    setUrlSearchParams(generateSearchParams(params));
+    setAppliedParams({ ...params });
   };
 
   const handleDownloadHistory = async (entry: DeviceInfoHistoryEntry) => {
@@ -250,206 +291,207 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
   };
 
   return (
-    <div className={clsx('grid', 'gap-5')}>
-      <form noValidate onSubmit={onSubmit}>
-        <div className={clsx('flex', 'justify-between', 'items-end', 'flex-nowrap', 'gap-6')}>
-          <div className={clsx('flex', 'flex-1', 'flex-col', 'gap-6')}>
-            <div className={clsx('flex', 'flex-1', 'justify-start', 'items-end')}>
-              <div className={clsx('grid', 'gap-4', 'min-w-[16rem]', 'max-w-[24rem]', 'flex-1')}>
-                <div className={clsx('grid', 'gap-1')}>
-                  <label className="text-xs" htmlFor="device-history-device">
-                    {t('device.list.table.id')}
-                  </label>
-                  <Select
-                    id="device-history-device"
-                    value={params.deviceId ?? ''}
-                    onChange={(event) =>
-                      setParams({
-                        ...params,
-                        deviceId: event.currentTarget.value || undefined,
-                      })
-                    }
-                    className={clsx('bg-base-card')}
-                  >
-                    <option value="">{t('device.detail.history.all_devices')}</option>
-                    {devices.map((device) => (
-                      <option key={device.id} value={device.id}>
-                        {device.id}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-                <div className={clsx('grid', 'gap-3')}>
-                  <div className={clsx('flex', 'gap-2')}>
-                    <div>
-                      <label className="text-xs" htmlFor="device-history-from">
-                        {t('device.detail.history.from')}
-                      </label>
-                      <DatePicker
-                        id="device-history-from"
-                        locale={locales[i18n.language as keyof typeof locales] ?? enUS}
-                        className={clsx(
-                          ['border', 'rounded'],
-                          ['py-1.5', 'px-3'],
-                          'text-xs',
-                          'focus:outline-primary',
-                          'max-w-[10rem]',
-                          'bg-base-card',
-                          hasDateRangeError ? ['border-error'] : []
-                        )}
-                        placeholderText={dateFormat}
-                        showTimeSelect
-                        selected={params.from ? new Date(params.from) : undefined}
-                        isClearable
-                        onChange={(fromDate) => {
-                          validateDateRange(fromDate?.toISOString(), params.to);
-                          setParams({ ...params, from: fromDate?.toISOString() });
-                        }}
-                        dateFormat={dateFormat}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs" htmlFor="device-history-to">
-                        {t('device.detail.history.to')}
-                      </label>
-                      <DatePicker
-                        id="device-history-to"
-                        locale={locales[i18n.language as keyof typeof locales] ?? enUS}
-                        className={clsx(
-                          ['border', 'rounded'],
-                          ['py-1.5', 'px-3'],
-                          'text-xs',
-                          'focus:outline-primary',
-                          'max-w-[10rem]',
-                          'bg-base-card',
-                          hasDateRangeError ? ['border-error'] : []
-                        )}
-                        placeholderText={dateFormat}
-                        showTimeSelect
-                        selected={params.to ? new Date(params.to) : undefined}
-                        isClearable
-                        onChange={(toDate) => {
-                          validateDateRange(params.from, toDate?.toISOString());
-                          setParams({ ...params, to: toDate?.toISOString() });
-                        }}
-                        dateFormat={dateFormat}
-                      />
-                    </div>
+    <div className={clsx('max-w-full', 'flex', 'flex-col', 'gap-6')}>
+      <Card className={clsx('overflow-x-auto')}>
+        <form noValidate onSubmit={onSubmit}>
+          <h3 className={clsx('text-primary', 'font-bold')}>{t('job.list.search.head')}</h3>
+          <Spacer className="h-5" />
+          <div className={clsx('flex', 'justify-between', 'items-end', 'flex-nowrap', 'gap-6')}>
+            <div className={clsx('flex', 'flex-1', 'flex-col', 'gap-6')}>
+              <div className={clsx('flex', 'flex-1', 'justify-start', 'items-end')}>
+                <div className={clsx('grid', 'gap-4', 'min-w-[16rem]', 'max-w-[24rem]', 'flex-1')}>
+                  <div className={clsx('grid', 'gap-1')}>
+                    <label className="text-xs" htmlFor="device-history-device">
+                      {t('device.list.table.id')}
+                    </label>
+                    <Select
+                      id="device-history-device"
+                      value={params.deviceId ?? ''}
+                      onChange={(event) =>
+                        setParams({
+                          ...params,
+                          deviceId: event.currentTarget.value || undefined,
+                        })
+                      }
+                      className={clsx('bg-base-card')}
+                    >
+                      <option value="">{t('device.detail.history.all_devices')}</option>
+                      {devices.map((device) => (
+                        <option key={device.id} value={device.id}>
+                          {device.id}
+                        </option>
+                      ))}
+                    </Select>
                   </div>
-                  <div className={clsx('flex', 'flex-wrap', 'gap-2')}>
-                    <Button
-                      size="small"
-                      type="button"
-                      onClick={() => updateDatesWithPreset('today')}
-                    >
-                      {t('device.detail.history.today')}
-                    </Button>
-                    <Button
-                      size="small"
-                      type="button"
-                      onClick={() => updateDatesWithPreset('last7Days')}
-                    >
-                      {t('device.detail.history.last_7_days')}
-                    </Button>
-                    <Button
-                      size="small"
-                      type="button"
-                      onClick={() => updateDatesWithPreset('last30Days')}
-                    >
-                      {t('device.detail.history.last_30_days')}
-                    </Button>
-                    <Button
-                      size="small"
-                      type="button"
-                      onClick={() => {
-                        setHasDateRangeError(false);
-                        setParams({});
-                        setAppliedParams({});
-                      }}
-                    >
-                      {t('device.detail.history.clear_filter')}
-                    </Button>
+                  <div className={clsx('grid', 'gap-3')}>
+                    <div className={clsx('flex', 'gap-2')}>
+                      <div>
+                        <label className="text-xs" htmlFor="device-history-from">
+                          {t('device.detail.history.from')}
+                        </label>
+                        <DatePicker
+                          id="device-history-from"
+                          locale={locales[i18n.language as keyof typeof locales] ?? enUS}
+                          className={clsx(
+                            ['border', 'rounded'],
+                            ['py-1.5', 'px-3'],
+                            'text-xs',
+                            'focus:outline-primary',
+                            'max-w-[10rem]',
+                            'bg-base-card',
+                            hasDateRangeError ? ['border-error'] : []
+                          )}
+                          placeholderText={dateFormat}
+                          showTimeSelect
+                          selected={params.from ? new Date(params.from) : undefined}
+                          isClearable
+                          onChange={(fromDate) => {
+                            validateDateRange(fromDate?.toISOString(), params.to);
+                            setParams({ ...params, from: fromDate?.toISOString() });
+                          }}
+                          dateFormat={dateFormat}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs" htmlFor="device-history-to">
+                          {t('device.detail.history.to')}
+                        </label>
+                        <DatePicker
+                          id="device-history-to"
+                          locale={locales[i18n.language as keyof typeof locales] ?? enUS}
+                          className={clsx(
+                            ['border', 'rounded'],
+                            ['py-1.5', 'px-3'],
+                            'text-xs',
+                            'focus:outline-primary',
+                            'max-w-[10rem]',
+                            'bg-base-card',
+                            hasDateRangeError ? ['border-error'] : []
+                          )}
+                          placeholderText={dateFormat}
+                          showTimeSelect
+                          selected={params.to ? new Date(params.to) : undefined}
+                          isClearable
+                          onChange={(toDate) => {
+                            validateDateRange(params.from, toDate?.toISOString());
+                            setParams({ ...params, to: toDate?.toISOString() });
+                          }}
+                          dateFormat={dateFormat}
+                        />
+                      </div>
+                    </div>
+                    <div className={clsx('flex', 'flex-wrap', 'gap-2')}>
+                      <Button
+                        size="small"
+                        type="button"
+                        onClick={() => updateDatesWithPreset('today')}
+                      >
+                        {t('device.detail.history.today')}
+                      </Button>
+                      <Button
+                        size="small"
+                        type="button"
+                        onClick={() => updateDatesWithPreset('last7Days')}
+                      >
+                        {t('device.detail.history.last_7_days')}
+                      </Button>
+                      <Button
+                        size="small"
+                        type="button"
+                        onClick={() => updateDatesWithPreset('last30Days')}
+                      >
+                        {t('device.detail.history.last_30_days')}
+                      </Button>
+                      <Button
+                        size="small"
+                        type="button"
+                        onClick={() => {
+                          setHasDateRangeError(false);
+                          setParams({});
+                          setAppliedParams({});
+                          setUrlSearchParams('');
+                        }}
+                      >
+                        {t('device.detail.history.clear_filter')}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
+              <div>
+                {hasDateRangeError && (
+                  <p className={clsx('text-xs', 'text-error', 'font-semibold')}>
+                    {t('device.detail.history.invalid_range')}
+                  </p>
+                )}
+              </div>
             </div>
-            <div>
-              {hasDateRangeError && (
-                <p className={clsx('text-xs', 'text-error', 'font-semibold')}>
-                  {t('device.detail.history.invalid_range')}
-                </p>
-              )}
-            </div>
+            <Button color="secondary" type="submit">
+              {t('job.list.search.button')}
+            </Button>
           </div>
-          <Button color="secondary" type="submit">
-            {t('job.list.search.button')}
+        </form>
+      </Card>
+
+      <Card>
+        <section className={clsx('mt-2', 'mb-2', 'flex', 'justify-end')}>
+          <Button
+            color={selectedHistoryIds.length === 0 || isBulkDownloading ? 'disabled' : 'secondary'}
+            type="button"
+            disabled={selectedHistoryIds.length === 0 || isBulkDownloading}
+            onClick={() => void handleDownloadSelectedHistories()}
+          >
+            <div className={clsx('flex', 'items-center', 'gap-2')}>
+              <BsDownload />
+              <span>{t('device.detail.history.bulk_download')}</span>
+            </div>
           </Button>
-        </div>
-      </form>
+        </section>
 
-      <section className={clsx('flex', 'justify-end')}>
-        <Button
-          color={selectedHistoryIds.length === 0 || isBulkDownloading ? 'disabled' : 'secondary'}
-          type="button"
-          disabled={selectedHistoryIds.length === 0 || isBulkDownloading}
-          onClick={() => void handleDownloadSelectedHistories()}
-        >
-          <div className={clsx('flex', 'items-center', 'gap-2')}>
-            <BsDownload />
-            <span>{t('device.detail.history.bulk_download')}</span>
-          </div>
-        </Button>
-      </section>
-
-      <div className={clsx('overflow-x-auto')}>
-        <InfiniteScroll
-          next={() => void loadMoreHistories()}
-          hasMore={hasMore}
-          loader={null}
-          dataLength={historyEntries.length}
-        >
-          <table className={clsx('table-auto', 'w-full')}>
-            <thead>
-              <tr>
-                <th scope="col">
-                  <input
-                    type="checkbox"
-                    checked={areAllHistoriesSelected}
-                    aria-label={t('device.detail.history.select_all')}
-                    onChange={(event) =>
-                      handleAllHistoriesSelectionChange(event.currentTarget.checked)
-                    }
-                  />
-                </th>
-                <th scope="col">{t('device.detail.history.history_id')}</th>
-                <th scope="col" className={clsx('text-center')}>
-                  {t('device.list.table.id')}
-                </th>
-                <th scope="col" className={clsx('text-center')}>
-                  {t('device.detail.history.captured_at')}
-                </th>
-                <th scope="col" className={clsx('text-center')}>
-                  {t('device.detail.qubits')}
-                </th>
-                <th scope="col" className={clsx('text-center')}>
-                  {t('device.detail.couplings')}
-                </th>
-                <th scope="col" className={clsx('text-center')}>
-                  {t('device.detail.history.download_json')}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {historyEntries.length === 0 && !loadError ? (
+        <div className={clsx('overflow-x-auto')}>
+          <InfiniteScroll
+            next={() => void loadMoreHistories()}
+            hasMore={hasMore}
+            loader={
+              <LoadMore onClick={() => void loadMoreHistories()}>
+                {t('device.detail.history.load_more')}
+              </LoadMore>
+            }
+            dataLength={historyEntries.length}
+          >
+            <table className={clsx('table-auto', 'w-full')}>
+              <thead>
                 <tr>
-                  <td colSpan={7} className={clsx('text-center', 'text-secondary-content')}>
-                    {isLoading
-                      ? t('device.detail.history.loading')
-                      : t('device.detail.history.empty')}
-                  </td>
+                  <th scope="col">
+                    <input
+                      type="checkbox"
+                      checked={areAllHistoriesSelected}
+                      aria-label={t('device.detail.history.select_all')}
+                      onChange={(event) =>
+                        handleAllHistoriesSelectionChange(event.currentTarget.checked)
+                      }
+                    />
+                  </th>
+                  <th scope="col">{t('device.detail.history.history_id')}</th>
+                  <th scope="col" className={clsx('text-center')}>
+                    {t('device.list.table.id')}
+                  </th>
+                  <th scope="col" className={clsx('text-center')}>
+                    {t('device.detail.history.captured_at')}
+                  </th>
+                  <th scope="col" className={clsx('text-center')}>
+                    {t('device.detail.qubits')}
+                  </th>
+                  <th scope="col" className={clsx('text-center')}>
+                    {t('device.detail.couplings')}
+                  </th>
+                  <th scope="col" className={clsx('text-center')}>
+                    {t('device.detail.history.download_json')}
+                  </th>
                 </tr>
-              ) : (
-                historyEntries.map((entry) => (
+              </thead>
+              <tbody>
+                {historyEntries.map((entry) => (
                   <tr key={entry.historyId}>
                     <td>
                       <input
@@ -504,54 +546,51 @@ export const DeviceInfoHistorySearch = ({ devices }: { devices: Device[] }): Rea
                       </Button>
                     </td>
                   </tr>
-                ))
+                ))}
+                {!isLoading && historyEntries.length === 0 && !loadError && (
+                  <tr>
+                    <td colSpan={7} className={clsx('text-center', 'text-secondary-content')}>
+                      {t('device.detail.history.empty')}
+                    </td>
+                  </tr>
+                )}
+                {isLoading && (
+                  <tr>
+                    <td colSpan={7} className={clsx('text-center')}>
+                      <div className={clsx('flex', 'justify-center')}>
+                        <Loader />
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </InfiniteScroll>
+          {loadError && (
+            <div
+              role="alert"
+              className={clsx(
+                'mt-4',
+                'flex',
+                'items-center',
+                'justify-center',
+                'gap-3',
+                'text-error'
               )}
-            </tbody>
-          </table>
-        </InfiniteScroll>
-        {loadError && (
-          <div
-            role="alert"
-            className={clsx(
-              'mt-4',
-              'flex',
-              'items-center',
-              'justify-center',
-              'gap-3',
-              'text-error'
-            )}
-          >
-            <span>{t('device.detail.history.load_failed')}</span>
-            <Button
-              size="small"
-              color="secondary"
-              type="button"
-              onClick={() => setReloadCount((current) => current + 1)}
             >
-              {t('device.detail.history.retry')}
-            </Button>
-          </div>
-        )}
-        {hasMore && (
-          <button
-            type="button"
-            disabled={isLoading}
-            className={clsx(
-              'flex',
-              'h-12',
-              'w-full',
-              'items-center',
-              'justify-center',
-              'text-sm',
-              'text-info',
-              !isLoading && 'cursor-pointer'
-            )}
-            onClick={() => void loadMoreHistories()}
-          >
-            {isLoading ? t('device.detail.history.loading') : t('device.detail.history.load_more')}
-          </button>
-        )}
-      </div>
+              <span>{t('device.detail.history.load_failed')}</span>
+              <Button
+                size="small"
+                color="secondary"
+                type="button"
+                onClick={() => setReloadCount((current) => current + 1)}
+              >
+                {t('device.detail.history.retry')}
+              </Button>
+            </div>
+          )}
+        </div>
+      </Card>
     </div>
   );
 };
