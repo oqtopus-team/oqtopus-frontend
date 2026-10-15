@@ -61,7 +61,7 @@ export const SuccessViewSampling: React.FC<JobWithS3Data> = (job: JobWithS3Data)
         </Card>
         {/* QASM */}
         <Card className={clsx(['col-start-1', 'col-end-2'])}>
-          <JobDetailProgram program={job.input.program} maxHeight={nonHistogramPanelHeight} />
+          <JobDetailProgram program={job.input.program ?? []} maxHeight={nonHistogramPanelHeight} />
         </Card>
         {/* Transpiled QASM */}
         <Card className={clsx(['col-start-2', 'col-end-3'])}>

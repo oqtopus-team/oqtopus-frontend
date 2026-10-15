@@ -856,17 +856,23 @@ export interface JobsS3SamplingResult {
  */
 export interface JobsS3SubmitJobInfo {
   /**
-   * A list of OPENQASM3 program. For non-multiprogramming jobs, this field is assumed to contain exactly one program. Otherwise, those programs are combined according to the multiprogramming machinery.
+   * A list of OPENQASM3 program. Required for sampling, estimation and multiprogramming jobs. For non-multiprogramming jobs, this field is assumed to contain exactly one program. Otherwise, those programs are combined according to the multiprogramming machinery.
    * @type {Array<string>}
    * @memberof JobsS3SubmitJobInfo
    */
-  program: Array<string>;
+  program?: Array<string>;
   /**
-   *
+   * Estimation operator. Required for estimation jobs.
    * @type {Array<JobsS3OperatorItem>}
    * @memberof JobsS3SubmitJobInfo
    */
   operator?: Array<JobsS3OperatorItem>;
+  /**
+   * SSE user program. Required for SSE jobs.
+   * @type {string}
+   * @memberof JobsS3SubmitJobInfo
+   */
+  sse_program?: string;
 }
 /**
  *
@@ -1883,7 +1889,7 @@ export const DeviceApiAxiosParamCreator = function (configuration?: Configuratio
       };
     },
     /**
-     * List device history metadata. Optionally filter by device_id.
+     * List device history metadata, ordered by calibrated_at and history_id descending. Optionally filter by device_id.
      * @summary List device histories
      * @param {string} [deviceId] Device identifier to filter histories.
      * @param {string} [from] Inclusive lower bound of calibrated_at.
@@ -2049,7 +2055,7 @@ export const DeviceApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath);
     },
     /**
-     * List device history metadata. Optionally filter by device_id.
+     * List device history metadata, ordered by calibrated_at and history_id descending. Optionally filter by device_id.
      * @summary List device histories
      * @param {string} [deviceId] Device identifier to filter histories.
      * @param {string} [from] Inclusive lower bound of calibrated_at.
@@ -2154,7 +2160,7 @@ export const DeviceApiFactory = function (
         .then((request) => request(axios, basePath));
     },
     /**
-     * List device history metadata. Optionally filter by device_id.
+     * List device history metadata, ordered by calibrated_at and history_id descending. Optionally filter by device_id.
      * @summary List device histories
      * @param {string} [deviceId] Device identifier to filter histories.
      * @param {string} [from] Inclusive lower bound of calibrated_at.
@@ -2224,7 +2230,7 @@ export class DeviceApi extends BaseAPI {
   }
 
   /**
-   * List device history metadata. Optionally filter by device_id.
+   * List device history metadata, ordered by calibrated_at and history_id descending. Optionally filter by device_id.
    * @summary List device histories
    * @param {string} [deviceId] Device identifier to filter histories.
    * @param {string} [from] Inclusive lower bound of calibrated_at.
