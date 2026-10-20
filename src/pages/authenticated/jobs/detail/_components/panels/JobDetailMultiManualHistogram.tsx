@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { Spacer } from '@/pages/_components/Spacer';
 import { Histogram } from './utils/Histogram';
-import { reshapeToHistogramInfo } from './utils/ReshapeToHistogramInfo';
+import { reshapeToHistogramInfo, type HistogramStatistics } from './utils/ReshapeToHistogramInfo';
 
 interface countsProps {
   combinedCircuitKey: string;
@@ -19,6 +19,7 @@ interface HistogramInfo {
   categories: string[];
   data: number[];
   height: number;
+  statistics: HistogramStatistics;
   countsJson?: string;
   circuitTitle?: string;
 }
@@ -70,16 +71,26 @@ export const JobDetailMultiManualHistogram: React.FC<countsProps> = ({
         categories: [],
         data: [],
         height: height,
+        statistics: {
+          totalCount: 0,
+          observedStates: 0,
+          displayedStates: 0,
+          displayedCount: 0,
+          coverage: 0,
+        },
         countsJson: '',
       };
     }
   };
 
-  const histogramInfo = useMemo(() => getHistogramData(), [pullDownKey]);
+  const histogramInfo = useMemo(
+    () => getHistogramData(),
+    [combinedCircuitCountsJson, combinedCircuitKey, dividedCircuitCountsJson, height, pullDownKey]
+  );
 
   return (
-    <>
-      <h3 className={clsx('text-primary', 'font-bold')}>
+    <div className="relative">
+      <h3 className={clsx('pr-10', 'text-primary', 'font-bold')}>
         {heading != null ? heading : 'Histogram'}
       </h3>
       <Spacer className="h-2" />
@@ -94,8 +105,9 @@ export const JobDetailMultiManualHistogram: React.FC<countsProps> = ({
           data={histogramInfo.data}
           height={histogramInfo.height}
           filename={`${jobId}_${histogramInfo.circuitTitle}`}
+          statistics={histogramInfo.statistics}
         />
       )}
-    </>
+    </div>
   );
 };

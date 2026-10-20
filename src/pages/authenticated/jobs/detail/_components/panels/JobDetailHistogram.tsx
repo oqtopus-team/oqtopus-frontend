@@ -45,8 +45,8 @@ export const JobDetailHistogram: React.FC<countsProps> = (counts: countsProps) =
   }
 
   return (
-    <>
-      <h3 className={clsx('text-primary', 'font-bold')}>
+    <div className="relative">
+      <h3 className={clsx('pr-10', 'text-primary', 'font-bold')}>
         <HistogramTitle hasMitigationInfo={hasMitigationInfo}></HistogramTitle>
       </h3>
       <Spacer className="h-2" />
@@ -60,8 +60,9 @@ export const JobDetailHistogram: React.FC<countsProps> = (counts: countsProps) =
           data={histogramInfo.data}
           height={histogramInfo.height}
           filename={counts.jobId}
+          statistics={histogramInfo.statistics}
         ></Histogram>
       )}
-    </>
+    </div>
   );
 };
