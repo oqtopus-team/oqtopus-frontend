@@ -3,19 +3,17 @@ import { formatHistogramCategory, reshapeToHistogramInfo } from './ReshapeToHist
 
 describe('reshapeToHistogramInfo', () => {
   it('displays all observed states at or below the default threshold', () => {
-    const counts = Object.fromEntries(
-      Array.from({ length: 12 }, (_, index) => [`state-${index}`, index + 1])
-    );
+    const counts = { '11': 10, '00': 1, '10': 7, '01': 5 };
 
     const result = reshapeToHistogramInfo({ countsJson: JSON.stringify(counts), height: 320 });
 
-    expect(result.categories).toHaveLength(12);
-    expect(result.categories.slice(0, 3)).toEqual(['state-11', 'state-10', 'state-9']);
+    expect(result.categories).toEqual(['00', '01', '10', '11']);
+    expect(result.data).toEqual([1, 5, 7, 10]);
     expect(result.statistics).toEqual({
-      totalCount: 78,
-      observedStates: 12,
-      displayedStates: 12,
-      displayedCount: 78,
+      totalCount: 23,
+      observedStates: 4,
+      displayedStates: 4,
+      displayedCount: 23,
       coverage: 1,
     });
   });
@@ -27,11 +25,11 @@ describe('reshapeToHistogramInfo', () => {
 
     const result = reshapeToHistogramInfo({ countsJson: JSON.stringify(counts), height: 320 });
 
-    expect(result.categories).toHaveLength(10);
+    expect(result.categories).toHaveLength(20);
     expect(result.categories[0]).toBe('state-20');
-    expect(result.categories[9]).toBe('state-11');
+    expect(result.categories[19]).toBe('state-1');
     expect(result.statistics.observedStates).toBe(21);
-    expect(result.statistics.displayedStates).toBe(10);
+    expect(result.statistics.displayedStates).toBe(20);
   });
 
   it('sorts tied counts by state and filters invalid values', () => {

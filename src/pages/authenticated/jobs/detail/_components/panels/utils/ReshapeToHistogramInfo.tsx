@@ -17,7 +17,7 @@ export interface HistogramDisplayOptions {
 }
 
 export const DEFAULT_FULL_DISPLAY_THRESHOLD = 20;
-export const DEFAULT_TOP_STATES_LIMIT = 10;
+export const DEFAULT_TOP_STATES_LIMIT = DEFAULT_FULL_DISPLAY_THRESHOLD;
 export const DEFAULT_TOOLTIP_LINE_LENGTH = 64;
 
 const normalizeInteger = (value: number | undefined, fallback: number, minimum: number): number => {
@@ -80,22 +80,24 @@ export function reshapeToHistogramInfo(counts: CountsProps, options: HistogramDi
     }
   })();
 
-  const entries = Object.entries(countsObject)
-    .filter((entry): entry is [string, number] => {
-      const value = entry[1];
-      return typeof value === 'number' && Number.isFinite(value) && value > 0;
-    })
-    .sort(([leftState, leftCount], [rightState, rightCount]) => {
-      return rightCount - leftCount || leftState.localeCompare(rightState);
-    });
+  const entries = Object.entries(countsObject).filter((entry): entry is [string, number] => {
+    const value = entry[1];
+    return typeof value === 'number' && Number.isFinite(value) && value > 0;
+  });
   const fullDisplayThreshold = normalizeInteger(
     options.fullDisplayThreshold,
     DEFAULT_FULL_DISPLAY_THRESHOLD,
     0
   );
   const topStatesLimit = normalizeInteger(options.topStatesLimit, DEFAULT_TOP_STATES_LIMIT, 1);
-  const displayLimit = entries.length <= fullDisplayThreshold ? entries.length : topStatesLimit;
-  const displayedEntries = entries.slice(0, displayLimit);
+  const displayedEntries =
+    entries.length <= fullDisplayThreshold
+      ? entries.sort(([leftState], [rightState]) => leftState.localeCompare(rightState))
+      : entries
+          .sort(([leftState, leftCount], [rightState, rightCount]) => {
+            return rightCount - leftCount || leftState.localeCompare(rightState);
+          })
+          .slice(0, topStatesLimit);
   const totalCount = entries.reduce((total, [, count]) => total + count, 0);
   const displayedCount = displayedEntries.reduce((total, [, count]) => total + count, 0);
   const statistics: HistogramStatistics = {
