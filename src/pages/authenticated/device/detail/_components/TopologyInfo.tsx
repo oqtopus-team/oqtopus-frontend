@@ -307,7 +307,30 @@ type LinkObject<NodeType = {}, LinkType = {}> = LinkType & {
   [others: string]: any;
 };
 
-const scalePosition = (position: number, scale: number = 50): number => {
+type SelectionPoint = {
+  x: number;
+  y: number;
+};
+
+type AreaZoomSelection = {
+  start: SelectionPoint;
+  current: SelectionPoint;
+};
+
+const TOPOLOGY_GRID_SPACING = 50;
+const NODE_RADIUS_AT_FULL_SCALE = 18;
+const MIN_LABEL_NODE_GAP_PX = 4;
+const MIN_LABEL_SPACING = NODE_RADIUS_AT_FULL_SCALE * 2 + MIN_LABEL_NODE_GAP_PX;
+
+export const toGraphSize = (sizeAtFullScale: number, globalScale: number): number => {
+  return sizeAtFullScale / Math.max(globalScale, 1);
+};
+
+export const shouldShowNodeLabel = (globalScale: number): boolean => {
+  return TOPOLOGY_GRID_SPACING * globalScale >= MIN_LABEL_SPACING;
+};
+
+const scalePosition = (position: number, scale: number = TOPOLOGY_GRID_SPACING): number => {
   return position * scale;
 };
 
@@ -421,6 +444,36 @@ const createEdgeData = (
 
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 3;
+const AREA_ZOOM_PADDING = 30;
+const AREA_ZOOM_DURATION = 300;
+const MIN_AREA_SELECTION_SIZE = 12;
+
+export const getAreaSelectionRect = (start: SelectionPoint, end: SelectionPoint) => ({
+  left: Math.min(start.x, end.x),
+  top: Math.min(start.y, end.y),
+  width: Math.abs(end.x - start.x),
+  height: Math.abs(end.y - start.y),
+});
+
+export const calculateAreaZoom = (
+  currentZoom: number,
+  viewportWidth: number,
+  viewportHeight: number,
+  selectionWidth: number,
+  selectionHeight: number
+): number => {
+  const availableWidth = Math.max(viewportWidth - AREA_ZOOM_PADDING * 2, 1);
+  const availableHeight = Math.max(viewportHeight - AREA_ZOOM_PADDING * 2, 1);
+  const zoomMultiplier = Math.max(
+    1,
+    Math.min(availableWidth / selectionWidth, availableHeight / selectionHeight)
+  );
+
+  return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, currentZoom * zoomMultiplier));
+};
+
+export const hasAreaZoomModifier = (event: Pick<MouseEvent, 'ctrlKey' | 'metaKey'>): boolean =>
+  event.ctrlKey || event.metaKey;
 
 export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ deviceInfo }) => {
   const { t } = useTranslation();
@@ -462,6 +515,10 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
   // ForceGraph2D not exporting ref types
   const fgRef = useRef<any>(null);
   const [zoomLevel, setZoomLevel] = useState<string>('1.00');
+  const [isAreaZoomEnabled, setIsAreaZoomEnabled] = useState(false);
+  const [isAreaZoomModifierPressed, setIsAreaZoomModifierPressed] = useState(false);
+  const [areaZoomSelection, setAreaZoomSelection] = useState<AreaZoomSelection | null>(null);
+  const areaZoomStartRef = useRef<SelectionPoint | null>(null);
 
   const [divSize, setDivSize] = useState<{ width: number; height: number }>({
     width: 0,
@@ -477,6 +534,9 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
   const heddingRef = useRef<HTMLDivElement>(null);
 
   const strHoveredInfo = JSON.stringify(hoveredInfo);
+  const areaSelectionRect = areaZoomSelection
+    ? getAreaSelectionRect(areaZoomSelection.start, areaZoomSelection.current)
+    : null;
 
   useEffect(() => {
     if (typeof document === 'undefined') {
@@ -491,6 +551,34 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
     observer.observe(root, { attributes: true, attributeFilter: ['class'] });
 
     return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Control' || event.key === 'Meta') {
+        setIsAreaZoomModifierPressed(true);
+      }
+      if (event.key === 'Escape') {
+        areaZoomStartRef.current = null;
+        setAreaZoomSelection(null);
+        setIsAreaZoomEnabled(false);
+      }
+    };
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (event.key === 'Control' || event.key === 'Meta') {
+        setIsAreaZoomModifierPressed(false);
+      }
+    };
+    const handleBlur = () => setIsAreaZoomModifierPressed(false);
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener('blur', handleBlur);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('blur', handleBlur);
+    };
   }, []);
 
   const handleZoom = useCallback(() => {
@@ -538,9 +626,81 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
   };
 
   const handleFitToView = () => {
+    areaZoomStartRef.current = null;
+    setAreaZoomSelection(null);
+    setIsAreaZoomEnabled(false);
     if (fgRef.current) {
       fgRef.current.zoomToFit(300, 30);
     }
+  };
+
+  const getPointerPosition = (event: React.PointerEvent<HTMLDivElement>): SelectionPoint => {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    return {
+      x: Math.max(0, Math.min(bounds.width, event.clientX - bounds.left)),
+      y: Math.max(0, Math.min(bounds.height, event.clientY - bounds.top)),
+    };
+  };
+
+  const handleAreaZoomPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0 || (!isAreaZoomEnabled && !hasAreaZoomModifier(event))) {
+      return;
+    }
+    const start = getPointerPosition(event);
+    areaZoomStartRef.current = start;
+    setAreaZoomSelection({ start, current: start });
+    event.currentTarget.setPointerCapture(event.pointerId);
+    event.preventDefault();
+  };
+
+  const handleAreaZoomPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const start = areaZoomStartRef.current;
+    if (!start) {
+      return;
+    }
+    setAreaZoomSelection({ start, current: getPointerPosition(event) });
+  };
+
+  const handleAreaZoomPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+    const start = areaZoomStartRef.current;
+    if (!start) {
+      return;
+    }
+
+    const end = getPointerPosition(event);
+    const selection = getAreaSelectionRect(start, end);
+    const viewport = event.currentTarget.getBoundingClientRect();
+    areaZoomStartRef.current = null;
+    setAreaZoomSelection(null);
+    event.currentTarget.releasePointerCapture(event.pointerId);
+
+    if (
+      selection.width < MIN_AREA_SELECTION_SIZE ||
+      selection.height < MIN_AREA_SELECTION_SIZE ||
+      !fgRef.current
+    ) {
+      return;
+    }
+
+    const center = fgRef.current.screen2GraphCoords(
+      selection.left + selection.width / 2,
+      selection.top + selection.height / 2
+    );
+    const targetZoom = calculateAreaZoom(
+      fgRef.current.zoom(),
+      viewport.width,
+      viewport.height,
+      selection.width,
+      selection.height
+    );
+    fgRef.current.centerAt(center.x, center.y, AREA_ZOOM_DURATION);
+    fgRef.current.zoom(targetZoom, AREA_ZOOM_DURATION);
+    setIsAreaZoomEnabled(false);
+  };
+
+  const handleAreaZoomPointerCancel = () => {
+    areaZoomStartRef.current = null;
+    setAreaZoomSelection(null);
   };
 
   useEffect(() => {
@@ -733,10 +893,36 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
           </div>
 
           {/* Zoom Controls */}
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Button size="small" onClick={handleFitToView}>
               {t('device.detail.topology_info.fit_to_view')}
             </Button>
+            <div className="group relative">
+              <Button
+                size="small"
+                color={isAreaZoomEnabled ? 'secondary' : 'default'}
+                aria-pressed={isAreaZoomEnabled}
+                aria-describedby="area-zoom-hint"
+                onClick={() => {
+                  areaZoomStartRef.current = null;
+                  setAreaZoomSelection(null);
+                  setIsAreaZoomEnabled((enabled) => !enabled);
+                }}
+              >
+                {t(
+                  isAreaZoomEnabled
+                    ? 'device.detail.topology_info.area_zoom_active'
+                    : 'device.detail.topology_info.area_zoom'
+                )}
+              </Button>
+              <div
+                id="area-zoom-hint"
+                role="tooltip"
+                className="pointer-events-none absolute left-1/2 top-full z-50 mt-1 w-max max-w-72 -translate-x-1/2 rounded bg-base-content px-2 py-1 text-xs font-normal text-base-100 opacity-0 shadow transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
+              >
+                {t('device.detail.topology_info.area_zoom_hint')}
+              </div>
+            </div>
             <input
               type="range"
               min={MIN_ZOOM}
@@ -755,12 +941,21 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
                 outline: 'none',
                 cursor: 'pointer',
                 flex: 1,
-                marginLeft: '10px',
               }}
             />
           </div>
         </div>
-        <div ref={divRef}>
+        <div
+          ref={divRef}
+          className={clsx(
+            'relative',
+            (isAreaZoomEnabled || isAreaZoomModifierPressed) && 'cursor-crosshair'
+          )}
+          onPointerDown={handleAreaZoomPointerDown}
+          onPointerMove={handleAreaZoomPointerMove}
+          onPointerUp={handleAreaZoomPointerUp}
+          onPointerCancel={handleAreaZoomPointerCancel}
+        >
           <ForceGraph2D
             ref={fgRef}
             backgroundColor={divRef.current?.style?.backgroundColor}
@@ -770,7 +965,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
               ctx: CanvasRenderingContext2D,
               globalScale: number
             ) => {
-              const radius = 18 / globalScale;
+              const radius = toGraphSize(NODE_RADIUS_AT_FULL_SCALE, globalScale);
               const nodeColor = (node as any).color || '#4887fa';
               const labelTextColor = getLabelTextColor(nodeColor);
 
@@ -782,17 +977,21 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
               ctx.fillStyle = nodeColor;
               ctx.fill();
               ctx.strokeStyle = node.id === hoveredNodeId ? nodeHoverStrokeColor : nodeStrokeColor;
-              ctx.lineWidth = node.id === hoveredNodeId ? 4 / globalScale : 3.4 / globalScale;
+              ctx.lineWidth = toGraphSize(node.id === hoveredNodeId ? 4 : 3.4, globalScale);
               ctx.stroke();
 
               const label = node.label || '';
-              const fontSize = 16 / globalScale;
+              const fontSize = toGraphSize(16, globalScale);
               ctx.font = `${fontSize}px Arial Bold`;
               ctx.textAlign = 'center';
               ctx.textBaseline = 'middle';
-              if (node.x !== undefined && node.y !== undefined) {
+              if (
+                node.x !== undefined &&
+                node.y !== undefined &&
+                shouldShowNodeLabel(globalScale)
+              ) {
                 ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
-                ctx.shadowBlur = 2 / globalScale;
+                ctx.shadowBlur = toGraphSize(2, globalScale);
                 ctx.fillStyle = labelTextColor;
                 ctx.fillText(label, node.x, node.y);
                 ctx.shadowColor = 'transparent';
@@ -829,7 +1028,7 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
                 ctx.moveTo(startX, startY);
                 ctx.lineTo(endX, endY);
                 ctx.strokeStyle = outerStrokeColor;
-                ctx.lineWidth = 16 / globalScale;
+                ctx.lineWidth = toGraphSize(16, globalScale);
                 ctx.stroke();
 
                 // Drawing the inner line
@@ -839,11 +1038,13 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
                 ctx.moveTo(startX, startY);
                 ctx.lineTo(endX, endY);
                 ctx.strokeStyle = innerStrokeColor;
-                ctx.lineWidth = 10 / globalScale;
+                ctx.lineWidth = toGraphSize(10, globalScale);
                 ctx.stroke();
               }
             }}
             enableNodeDrag={false}
+            enablePanInteraction={(event) => !isAreaZoomEnabled && !hasAreaZoomModifier(event)}
+            enablePointerInteraction={!isAreaZoomEnabled && !isAreaZoomModifierPressed}
             onNodeClick={handleHoverNode}
             onLinkClick={handleHoverLink}
             height={divSize.height}
@@ -852,6 +1053,18 @@ export const TopologyInfo: React.FC<{ deviceInfo: string | undefined }> = ({ dev
             onZoom={handleZoom}
             onZoomEnd={handleZoom}
           />
+          {(isAreaZoomEnabled || isAreaZoomModifierPressed) && (
+            <div
+              className="absolute inset-0 z-20 cursor-crosshair touch-none"
+              aria-label={t('device.detail.topology_info.area_zoom_active')}
+            />
+          )}
+          {areaSelectionRect && (
+            <div
+              className="pointer-events-none absolute z-30 border-2 border-dashed border-primary bg-primary/20"
+              style={areaSelectionRect}
+            />
+          )}
         </div>
       </Card>
     </div>
