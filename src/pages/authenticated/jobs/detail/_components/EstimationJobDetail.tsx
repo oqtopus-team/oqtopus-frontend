@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { JobDetailBasicInfo } from './panels/JobDetailBasicInfo';
 import { JobDetailMitigationInfo } from './panels/JobDetailMitigationInfo';
 import { JobDetailResult } from './panels/JobDetailResult';
+import { JobDetailMitigationDetails } from './panels/JobDetailMitigationDetails';
 import { JobDetailExpectation } from './panels/JobDetailExpectation';
 import useWindowSize from '@/pages/_hooks/UseWindowSize';
 import { JobDetailTranspileResult } from './panels/JobDetailTranspileResult';
@@ -71,6 +72,12 @@ export const SuccessViewEstimation: React.FC<JobWithS3Data> = (job: JobWithS3Dat
         {job.transpileResult && (
           <Card className={clsx(['col-start-2', 'col-end-3'])}>
             <JobDetailTranspileResult transpileResult={job.transpileResult} />
+          </Card>
+        )}
+        {/* Error Mitigation Details */}
+        {job.result?.mitigation_details && (
+          <Card className={clsx(['col-start-1', 'col-end-2'])}>
+            <JobDetailMitigationDetails result={job.result} maxHeight={nonHistogramPanelHeight} />
           </Card>
         )}
       </div>
