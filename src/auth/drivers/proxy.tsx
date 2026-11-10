@@ -74,10 +74,14 @@ const useProxyAuth = (): UseAuth => {
     username,
     email,
     qrcode: '',
+    // No sign-in challenges in proxy mode (the IdP owns the login flow), so the
+    // set-new-password screen is never reached.
+    pendingChallenge: null,
     getCurrentAccessToken,
     signIn,
     signOut,
     // Delegated to the IdP (Keycloak) in proxy mode.
+    completeNewPassword: notSupported,
     signUp: notSupported,
     confirmSignUp: notSupported,
     forgotPassword: notSupported,

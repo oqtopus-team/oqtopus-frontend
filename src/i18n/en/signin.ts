@@ -22,6 +22,30 @@ export default {
     button: 'Send',
     api_token_reissued: 'API token has been reissued.',
   },
+  new_password: {
+    title: 'Set a new password',
+    description:
+      'Your account is using a temporary password. Please set a new password to continue.',
+    form: {
+      password: 'New password',
+      password_explanation:
+        'Use at least 12 characters, including uppercase and lowercase letters, a number, and a symbol.',
+      confirm_password: 'New password (confirm)',
+      error_message: {
+        password_enter: 'Please enter your password',
+        password_lowercase: 'Please include a lowercase letter',
+        password_uppercase: 'Please include an uppercase letter',
+        password_number: 'Please include a number',
+        password_special: 'Please include a symbol',
+        password_min: 'Please enter at least 12 characters',
+        confirm_password_enter: 'Please enter your confirmation password',
+        confirm_password_mismatch: 'Passwords do not match',
+      },
+    },
+    button: 'Set password',
+    additional_mfa_required:
+      'Your password has been changed. An additional authentication step is required, so please sign in again.',
+  },
   errors: {
     authentication_failed: 'Authentication failed',
     logout_failed: 'Logout failed',

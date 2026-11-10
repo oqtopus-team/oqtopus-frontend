@@ -16,8 +16,17 @@ export interface UseAuth {
   username: string;
   qrcode: string;
   email: string;
+  // Name of a sign-in challenge currently awaiting a follow-up call (e.g.
+  // 'NEW_PASSWORD_REQUIRED'), or null. Screens that complete a challenge use
+  // this to confirm the pending user still exists in this provider instance --
+  // it is lost on a full reload, unlike router history state. Drivers that have
+  // no such challenge (proxy) keep it null, so that screen is never reached.
+  pendingChallenge: string | null;
   getCurrentAccessToken: () => Promise<string>;
   signIn: (username: string, password: string) => Promise<Result>;
+  // Complete the NEW_PASSWORD_REQUIRED challenge for a temporary-password user.
+  // Delegated to the IdP (unsupported) in proxy mode.
+  completeNewPassword: (newPassword: string) => Promise<Result>;
   signOut: () => Promise<Result>;
   signUp: (username: string, password: string) => Promise<Result>;
   confirmSignUp: (verificationCode: string) => Promise<Result>;
