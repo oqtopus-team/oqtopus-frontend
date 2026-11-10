@@ -32,6 +32,17 @@
   th {
     @apply text-xs;
   }
+
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']),
+  textarea,
+  select {
+    @apply bg-base-card text-base-content;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-neutral-content;
+  }
 }
 
 @layer components {

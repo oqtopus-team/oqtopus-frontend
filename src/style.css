@@ -1,4 +1,6 @@
 :root {
+    color-scheme: light;
+
     /* Primitive colors */
     --primary: 72 135 250;
     --primary-content: 255 255 255;
@@ -50,6 +52,8 @@
 }
 
 .dark {
+    color-scheme: dark;
+
     /* Primitive colors */
     --primary: 91 155 255;
     --primary-content: 10 10 10;
