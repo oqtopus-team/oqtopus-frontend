@@ -14,7 +14,6 @@ vi.mock('aws-amplify', () => ({
     currentAuthenticatedUser: vi.fn(),
     currentSession: vi.fn(),
     signIn: vi.fn(),
-    completeNewPassword: vi.fn(),
     signOut: vi.fn(),
     forgotPassword: vi.fn(),
     forgotPasswordSubmit: vi.fn(),
@@ -22,6 +21,7 @@ vi.mock('aws-amplify', () => ({
     verifyTotpToken: vi.fn(),
     setPreferredMFA: vi.fn(),
     confirmSignIn: vi.fn(),
+    completeNewPassword: vi.fn(),
   },
 }));
 
@@ -44,7 +44,6 @@ const mockAuth = Auth as unknown as {
   currentAuthenticatedUser: Mock;
   currentSession: Mock;
   signIn: Mock;
-  completeNewPassword: Mock;
   signOut: Mock;
   forgotPassword: Mock;
   forgotPasswordSubmit: Mock;
@@ -52,6 +51,7 @@ const mockAuth = Auth as unknown as {
   verifyTotpToken: Mock;
   setPreferredMFA: Mock;
   confirmSignIn: Mock;
+  completeNewPassword: Mock;
 };
 
 const mockFetch = fetch as Mock;
@@ -62,14 +62,15 @@ describe('AuthProvider', () => {
     mockAuth.currentAuthenticatedUser.mockRejectedValue(new Error('Not authenticated'));
   });
 
-  it('renders children correctly', () => {
+  it('renders children correctly', async () => {
     render(
       <AuthProvider>
         <div data-testid="test-child">Test Child</div>
       </AuthProvider>
     );
 
-    expect(screen.getByTestId('test-child')).toBeInTheDocument();
+    // The driver is code-split (lazy) behind Suspense, so wait for it to mount.
+    expect(await screen.findByTestId('test-child')).toBeInTheDocument();
   });
 
   it('initializes with correct default values', async () => {
@@ -149,11 +150,11 @@ describe('Auth Functions', () => {
     mockAuth.currentAuthenticatedUser.mockRejectedValue({});
   });
 
-  describe('getCurrentIdToken', () => {
-    it('returns JWT token on success', async () => {
+  describe('getCurrentAccessToken', () => {
+    it('returns the Cognito access token on success', async () => {
       const mockToken = 'mock-jwt-token';
       mockAuth.currentSession.mockResolvedValue({
-        idToken: { jwtToken: mockToken },
+        getAccessToken: () => ({ getJwtToken: () => mockToken }),
       });
 
       const { result } = renderHook(() => useContext(AuthContext), {
@@ -162,7 +163,7 @@ describe('Auth Functions', () => {
 
       await waitFor(() => expect(result.current.initialized).toBe(true));
 
-      const token = await result.current.getCurrentIdToken();
+      const token = await result.current.getCurrentAccessToken();
       expect(token).toBe(mockToken);
     });
 
@@ -175,7 +176,7 @@ describe('Auth Functions', () => {
 
       await waitFor(() => expect(result.current.initialized).toBe(true));
 
-      const token = await result.current.getCurrentIdToken();
+      const token = await result.current.getCurrentAccessToken();
       expect(token).toBe('');
     });
   });
@@ -246,95 +247,90 @@ describe('Auth Functions', () => {
       const { result } = renderHook(() => useContext(AuthContext), {
         wrapper: TestWrapper,
       });
-
       await waitFor(() => expect(result.current.initialized).toBe(true));
 
-      let response: { success: boolean; message: string } | undefined;
+      let response;
       await act(async () => {
-        response = await result.current.signIn('testuser', 'temp-pass');
+        response = await result.current.signIn('testuser', 'temppass');
       });
 
+      // Must NOT be treated as a successful sign-in (which would route to
+      // /confirm-mfa and strand a temporary-password user).
       expect(response).toEqual({ success: false, message: 'signin.new_password_required' });
       expect(result.current.pendingChallenge).toBe('NEW_PASSWORD_REQUIRED');
     });
   });
 
   describe('completeNewPassword', () => {
-    it('carries the pending CognitoUser from signIn and clears the challenge once the session is established', async () => {
-      // Drive the real pending state first: signIn stashes this CognitoUser and
-      // sets pendingChallenge, then completeNewPassword must consume that same
-      // user and clear the challenge. Starting from null (as a bare call would)
-      // would let a removed setPendingChallenge(null) pass unnoticed.
-      const challengeUser = { username: 'testuser', challengeName: 'NEW_PASSWORD_REQUIRED' };
-      mockAuth.signIn.mockResolvedValue(challengeUser);
-      // No challengeName on the resolved user => sign-in is complete.
-      mockAuth.completeNewPassword.mockResolvedValue({ username: 'testuser' });
+    // signIn with NEW_PASSWORD_REQUIRED captures the CognitoUser and sets
+    // pendingChallenge; completeNewPassword then consumes that same user.
+    const challengeUser = { username: 'testuser', challengeName: 'NEW_PASSWORD_REQUIRED' };
 
+    const signInThenHook = async () => {
+      mockAuth.signIn.mockResolvedValue(challengeUser);
       const { result } = renderHook(() => useContext(AuthContext), {
         wrapper: TestWrapper,
       });
       await waitFor(() => expect(result.current.initialized).toBe(true));
-
       await act(async () => {
-        await result.current.signIn('testuser', 'temp-pass');
+        await result.current.signIn('testuser', 'temppass');
       });
       expect(result.current.pendingChallenge).toBe('NEW_PASSWORD_REQUIRED');
+      return result;
+    };
 
-      let response: { success: boolean; message: string } | undefined;
+    it('establishes the session and clears the pending challenge on success', async () => {
+      mockAuth.completeNewPassword.mockResolvedValue({ username: 'testuser' });
+      const result = await signInThenHook();
+
+      let response;
       await act(async () => {
         response = await result.current.completeNewPassword('NewPassw0rd!');
       });
 
-      // The exact CognitoUser captured by signIn is what gets completed.
       expect(mockAuth.completeNewPassword).toHaveBeenCalledWith(challengeUser, 'NewPassw0rd!');
       expect(response).toEqual({ success: true, message: '' });
       expect(result.current.pendingChallenge).toBeNull();
     });
 
-    it('routes to TOTP entry when a SOFTWARE_TOKEN_MFA challenge follows', async () => {
-      mockAuth.completeNewPassword.mockResolvedValue({
-        username: 'testuser',
-        challengeName: 'SOFTWARE_TOKEN_MFA',
+    it('routes an already-enrolled user to the TOTP challenge', async () => {
+      mockAuth.completeNewPassword.mockResolvedValue({ challengeName: 'SOFTWARE_TOKEN_MFA' });
+      const result = await signInThenHook();
+
+      let response;
+      await act(async () => {
+        response = await result.current.completeNewPassword('NewPassw0rd!');
       });
 
-      const { result } = renderHook(() => useContext(AuthContext), {
-        wrapper: TestWrapper,
-      });
-      await waitFor(() => expect(result.current.initialized).toBe(true));
-
-      const response = await result.current.completeNewPassword('NewPassw0rd!');
       expect(response).toEqual({ success: true, message: 'signin.totp_required' });
+      expect(result.current.pendingChallenge).toBeNull();
     });
 
-    it('reports the dedicated "sign in again" result on an unsupported follow-up challenge (e.g. MFA_SETUP)', async () => {
-      // The password is already accepted at this point, so this is not a
-      // password-change failure -- the caller routes back to /login.
-      mockAuth.completeNewPassword.mockResolvedValue({
-        username: 'testuser',
-        challengeName: 'MFA_SETUP',
+    it('reports an unsupported extra challenge and spends the pending challenge', async () => {
+      mockAuth.completeNewPassword.mockResolvedValue({ challengeName: 'MFA_SETUP' });
+      const result = await signInThenHook();
+
+      let response;
+      await act(async () => {
+        response = await result.current.completeNewPassword('NewPassw0rd!');
       });
 
-      const { result } = renderHook(() => useContext(AuthContext), {
-        wrapper: TestWrapper,
-      });
-      await waitFor(() => expect(result.current.initialized).toBe(true));
-
-      const response = await result.current.completeNewPassword('NewPassw0rd!');
       expect(response).toEqual({
         success: false,
         message: 'signin.new_password.additional_mfa_required',
       });
+      expect(result.current.pendingChallenge).toBeNull();
     });
 
     it('returns the error message when completeNewPassword rejects', async () => {
       mockAuth.completeNewPassword.mockRejectedValue(new Error('Password does not conform'));
+      const result = await signInThenHook();
 
-      const { result } = renderHook(() => useContext(AuthContext), {
-        wrapper: TestWrapper,
+      let response;
+      await act(async () => {
+        response = await result.current.completeNewPassword('weak');
       });
-      await waitFor(() => expect(result.current.initialized).toBe(true));
 
-      const response = await result.current.completeNewPassword('weak');
       expect(response).toEqual({ success: false, message: 'Password does not conform' });
     });
   });
