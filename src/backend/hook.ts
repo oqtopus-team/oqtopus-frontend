@@ -34,6 +34,15 @@ async function convertZipBlobToObject(zipBlob: Blob) {
   return JSON.parse(fileContent);
 }
 
+async function convertZipBlobToString(zipBlob: Blob) {
+  const zip = await JSZip.loadAsync(zipBlob);
+  const [_, file] = Object.entries(zip.files)[0] ?? []; // we assume we have exactly 1 file inside ZIP
+
+  if (!file) return;
+
+  return file.async('string');
+}
+
 export const useJobAPI = () => {
   const api = useContext(userApiContext);
 
@@ -87,7 +96,7 @@ export const useJobAPI = () => {
     if (combined_program) {
       jobS3Data.combinedProgram = await axios
         .get(combined_program, { responseType: 'blob' })
-        .then((r) => convertZipBlobToObject(r.data));
+        .then((r) => convertZipBlobToString(r.data));
     }
 
     return jobS3Data;

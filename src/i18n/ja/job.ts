@@ -87,6 +87,16 @@ export default {
     },
     histogram: {
       nodata: 'データが存在しません',
+      frequency: '出現回数',
+      total_count: '総カウント数',
+      observed_states: '観測状態数',
+      displayed_states: '表示状態数',
+      displayed_coverage: '表示範囲のカバー率',
+      top_states_note: 'カウント数の上位{{count}}件を表示しています。',
+      download_chart: 'チャートをダウンロード',
+      download_csv: 'CSVをダウンロード',
+      download_svg: 'SVGをダウンロード',
+      download_png: 'PNGをダウンロード',
     },
     transpiler_info: {
       nodata: 'データが存在しません',

@@ -50,7 +50,8 @@ export default function NewPasswordPage() {
   // This screen is only valid while signIn's NEW_PASSWORD_REQUIRED challenge is
   // pending in the auth provider (which holds the CognitoUser that
   // completeNewPassword needs). On a full reload the provider re-mounts and that
-  // pending user is gone, so redirect to login rather than fail on submit.
+  // pending user is gone, so redirect to login rather than fail on submit. In
+  // proxy mode pendingChallenge is always null, so this screen is never usable.
   // Checked once on mount: later clearing of pendingChallenge (on success) must
   // not retrigger this and race the success navigation.
   useLayoutEffect(() => {

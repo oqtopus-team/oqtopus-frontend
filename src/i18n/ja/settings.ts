@@ -23,6 +23,9 @@ export default {
   },
 
   account: {
+    externalIdpNote:
+      'パスワードは認証プロバイダで管理されています。下のボタンから変更してください。',
+    openPasswordSettings: '認証プロバイダでパスワードを変更',
     changePassword: 'パスワード変更',
     currentPassword: '現在のパスワード',
     newPassword: '新しいパスワード',
@@ -39,6 +42,9 @@ export default {
   },
 
   security: {
+    externalIdpNote:
+      '多要素認証（MFA）は認証プロバイダで管理されています。下のボタンから認証アプリの登録・再設定ができます。',
+    openMfaSettings: '認証プロバイダで MFA を管理',
     mfaStatus: '多要素認証ステータス',
     multiFactorAuth: '多要素認証',
     enabled: '有効',
