@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { JobDetailBasicInfo } from './panels/JobDetailBasicInfo';
 import { JobDetailProgram } from './panels/JobDetailProgram';
 import { JobDetailResult } from './panels/JobDetailResult';
+import { JobDetailMitigationDetails } from './panels/JobDetailMitigationDetails';
 import { JobDetailTranspiledProgram } from './panels/JobDetailTranspiledProgram';
 import { JobDetailHistogram } from './panels/JobDetailHistogram';
 import { JobDetailMitigationInfo } from './panels/JobDetailMitigationInfo';
@@ -78,6 +79,12 @@ export const SuccessViewSampling: React.FC<JobWithS3Data> = (job: JobWithS3Data)
         {job.transpileResult && (
           <Card className={clsx(['col-start-2', 'col-end-3'])}>
             <JobDetailTranspileResult transpileResult={job.transpileResult} />
+          </Card>
+        )}
+        {/* Error Mitigation Details */}
+        {job.result?.mitigation_details && (
+          <Card className={clsx(['col-start-1', 'col-end-2'])}>
+            <JobDetailMitigationDetails result={job.result} maxHeight={nonHistogramPanelHeight} />
           </Card>
         )}
       </div>

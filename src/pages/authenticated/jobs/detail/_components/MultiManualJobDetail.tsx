@@ -9,6 +9,7 @@ import { JobDetailTranspiledProgram } from './panels/JobDetailTranspiledProgram'
 import { JobDetailTranspilerInfo } from './panels/JobDetailTranspilerInfo';
 import useWindowSize from '@/pages/_hooks/UseWindowSize';
 import { JobDetailMitigationInfo } from './panels/JobDetailMitigationInfo';
+import { JobDetailMitigationDetails } from './panels/JobDetailMitigationDetails';
 import { JobDetailMultiManualHistogram } from './panels/JobDetailMultiManualHistogram';
 import { JobDetailMultiManualTabs } from './panels/JobDetailMultiManualTabs';
 import { JobDetailTranspileResult } from './panels/JobDetailTranspileResult';
@@ -154,6 +155,12 @@ export const SuccessViewMultiManual: React.FC<JobWithS3Data> = (job: JobWithS3Da
               transpileResult={job.transpileResult}
               heading="Transpile Result (Combined)"
             />
+          </Card>
+        )}
+        {/* Error Mitigation Details */}
+        {job.result?.mitigation_details && (
+          <Card className={clsx(['col-start-1', 'col-end-2'])}>
+            <JobDetailMitigationDetails result={job.result} maxHeight={nonHistogramPanelHeight} />
           </Card>
         )}
       </div>
