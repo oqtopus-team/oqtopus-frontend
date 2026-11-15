@@ -87,6 +87,16 @@ export default {
     },
     histogram: {
       nodata: 'Data does not exist.',
+      frequency: 'Frequency',
+      total_count: 'Total count',
+      observed_states: 'Observed states',
+      displayed_states: 'Displayed states',
+      displayed_coverage: 'Displayed coverage',
+      top_states_note: 'Showing the top {{count}} states by count.',
+      download_chart: 'Download chart',
+      download_csv: 'Download CSV',
+      download_svg: 'Download SVG',
+      download_png: 'Download PNG',
     },
     transpiler_info: {
       nodata: 'Data does not exist.',
