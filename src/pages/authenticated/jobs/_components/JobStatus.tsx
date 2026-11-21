@@ -6,6 +6,7 @@ const JobStatusColor = {
   submitted: 'text-status-job-submitted',
   ready: 'text-status-job-ready',
   running: 'text-status-job-running',
+  cancelling: 'text-status-job-running',
   succeeded: 'text-status-job-succeeded',
   failed: 'text-status-job-failed',
   cancelled: 'text-status-job-cancelled',

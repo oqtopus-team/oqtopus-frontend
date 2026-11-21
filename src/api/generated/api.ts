@@ -515,6 +515,7 @@ export const JobsJobStatus = {
   Submitted: 'submitted',
   Ready: 'ready',
   Running: 'running',
+  Cancelling: 'cancelling',
   Succeeded: 'succeeded',
   Failed: 'failed',
   Cancelled: 'cancelled',
